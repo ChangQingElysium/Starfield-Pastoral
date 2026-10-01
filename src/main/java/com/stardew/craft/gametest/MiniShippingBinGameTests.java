@@ -1,5 +1,6 @@
 package com.stardew.craft.gametest;
 
+import com.stardew.craft.port.PortItemStacks;
 import com.mojang.authlib.GameProfile;
 import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.blockentity.MiniShippingBinBlockEntity;
@@ -12,7 +13,6 @@ import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
-import com.stardew.craft.port.net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.item.ItemStack;
@@ -57,8 +57,8 @@ public final class MiniShippingBinGameTests {
         bin.account(alice.getUUID()).setItem(8, new ItemStack(ModItems.PARSNIP.get(), 3));
         bin.account(bob.getUUID()).setItem(2, new ItemStack(ModItems.PARSNIP.get(), 7));
         h.assertTrue(!bin.isEmpty(), "Chest movement protection cannot see stored shipments");
-        CompoundTag saved = bin.saveWithoutMetadata(h.getLevel().registryAccess());
-        bin.loadWithComponents(saved, h.getLevel().registryAccess());
+        CompoundTag saved = bin.saveWithoutMetadata();
+        bin.load(saved);
         h.assertTrue(bin.account(alice.getUUID()).getItem(0).isEmpty()
                 && bin.account(alice.getUUID()).getItem(8).getCount() == 3, "Reload changed slot positions");
         h.assertTrue(bin.account(bob.getUUID()).getItem(2).getCount() == 7, "Reload mixed owners");
@@ -80,10 +80,9 @@ public final class MiniShippingBinGameTests {
     }
     private static ServerPlayer player(GameTestHelper h) {
         var player = new ServerPlayer(h.getLevel().getServer(), h.getLevel(),
-                new GameProfile(UUID.randomUUID(), "Mini Shipper"), ClientInformation.createDefault());
+                new GameProfile(UUID.randomUUID(), "Mini Shipper"));
         player.connection = new net.minecraft.server.network.ServerGamePacketListenerImpl(h.getLevel().getServer(),
-                new net.minecraft.network.Connection(net.minecraft.network.protocol.PacketFlow.SERVERBOUND), player,
-                com.stardew.craft.port.net.minecraft.server.network.CommonListenerCookie.createInitial(player.getGameProfile(), false)) {
+                new net.minecraft.network.Connection(net.minecraft.network.protocol.PacketFlow.SERVERBOUND), player) {
             @Override public void send(net.minecraft.network.protocol.Packet<?> packet) { }
         };
         PlayerDataManager.getPlayerData(player);
@@ -96,7 +95,7 @@ public final class MiniShippingBinGameTests {
             var data = (CompoundTag) entry;
             if (!data.getUUID("Player").equals(player.getUUID())) continue;
             for (Tag item : data.getList("Items", 10)) {
-                count += ItemStack.parse(h.getLevel().registryAccess(), ((CompoundTag)item).getCompound("Stack")).orElseThrow().getCount();
+                count += PortItemStacks.parse(h.getLevel().registryAccess(), ((CompoundTag)item).getCompound("Stack")).orElseThrow().getCount();
             }
         }
         h.assertTrue(count == expected, "Wrong owner or duplicate settlement: expected " + expected + ", got " + count);

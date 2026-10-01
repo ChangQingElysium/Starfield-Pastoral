@@ -29,16 +29,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PastureGrassBlock extends BushBlock {
-    public static final MapCodec<PastureGrassBlock> CODEC = simpleCodec(PastureGrassBlock::new);
     public static final int VISUAL_VARIANT_COUNT = 4;
     public static final IntegerProperty VARIANT = IntegerProperty.create("variant", 0, VISUAL_VARIANT_COUNT - 1);
     /** SDV Grass.numberOfWeeds: clump density stored in one farm tile. */
     public static final IntegerProperty CLUMPS = IntegerProperty.create("clumps", 1, 4);
-
-    @Override
-    protected MapCodec<? extends BushBlock> codec() {
-        return CODEC;
-    }
 
     @SuppressWarnings("null")
     public PastureGrassBlock(Properties properties) {
@@ -77,7 +71,7 @@ public class PastureGrassBlock extends BushBlock {
     }
 
     @Override
-    protected void onPlace(
+    public void onPlace(
             BlockState state,
             Level level,
             BlockPos pos,
@@ -94,7 +88,7 @@ public class PastureGrassBlock extends BushBlock {
     }
 
     @Override
-    protected void onRemove(
+    public void onRemove(
             BlockState state,
             Level level,
             BlockPos pos,
@@ -113,7 +107,7 @@ public class PastureGrassBlock extends BushBlock {
 
     @SuppressWarnings("null")
     @Override
-    protected void randomTick(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") ServerLevel level, @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") RandomSource random) {
+    public void randomTick(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") ServerLevel level, @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") RandomSource random) {
         // Standard-farm grass survives winter and all growth is settled once per
         // Stardew day. Minecraft random ticks deliberately do nothing so chunk
         // loading and randomTickSpeed cannot change the simulation rate.
@@ -259,7 +253,7 @@ public class PastureGrassBlock extends BushBlock {
 
     @SuppressWarnings("null")
     @Override
-    protected boolean canSurvive(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") LevelReader level, @SuppressWarnings("null") BlockPos pos) {
+    public boolean canSurvive(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") LevelReader level, @SuppressWarnings("null") BlockPos pos) {
         BlockPos below = pos.below();
         return mayPlaceOn(level.getBlockState(below), level, below);
     }

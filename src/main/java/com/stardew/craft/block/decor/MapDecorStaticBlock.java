@@ -37,9 +37,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import com.stardew.craft.port.PortBlockInteraction;
 
 @SuppressWarnings("null")
-public class MapDecorStaticBlock extends Block {
+public class MapDecorStaticBlock extends Block implements PortBlockInteraction {
     private static final ThreadLocal<Integer> DROP_SUPPRESSION_DEPTH = ThreadLocal.withInitial(() -> 0);
 
     public static void runWithDropsSuppressed(Runnable action) {
@@ -446,8 +447,15 @@ public class MapDecorStaticBlock extends Block {
         return mainState.setValue(PART, Part.EXTENSION);
     }
 
+    // PORT(1.20.1): replay the 1.21 useItemOn/useWithoutItem dispatch.
     @Override
-    protected InteractionResult useWithoutItem(@Nonnull BlockState state, @Nonnull Level level,
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player,
+            InteractionHand hand, BlockHitResult hit) {
+        return PortBlockInteraction.dispatch(this, state, level, pos, player, hand, hit);
+    }
+
+    @Override
+    public InteractionResult useWithoutItem(@Nonnull BlockState state, @Nonnull Level level,
                                                @Nonnull BlockPos pos, @Nonnull Player player,
                                                @Nonnull BlockHitResult hit) {
         if (state.getValue(PART) == Part.EXTENSION) {
@@ -458,11 +466,11 @@ public class MapDecorStaticBlock extends Block {
             BlockHitResult mainHit = new BlockHitResult(hit.getLocation(), hit.getDirection(), mainPos, hit.isInside());
             return useWithoutItem(level.getBlockState(mainPos), level, mainPos, player, mainHit);
         }
-        return super.useWithoutItem(state, level, pos, player, hit);
+        return PortBlockInteraction.super.useWithoutItem(state, level, pos, player, hit);
     }
 
     @Override
-    protected ItemInteractionResult useItemOn(@Nonnull ItemStack stack, @Nonnull BlockState state,
+    public ItemInteractionResult useItemOn(@Nonnull ItemStack stack, @Nonnull BlockState state,
                                               @Nonnull Level level, @Nonnull BlockPos pos,
                                               @Nonnull Player player, @Nonnull InteractionHand hand,
                                               @Nonnull BlockHitResult hit) {
@@ -474,11 +482,11 @@ public class MapDecorStaticBlock extends Block {
             BlockHitResult mainHit = new BlockHitResult(hit.getLocation(), hit.getDirection(), mainPos, hit.isInside());
             return useItemOn(stack, level.getBlockState(mainPos), level, mainPos, player, hand, mainHit);
         }
-        return super.useItemOn(stack, state, level, pos, player, hand, hit);
+        return PortBlockInteraction.super.useItemOn(stack, state, level, pos, player, hand, hit);
     }
 
     @Override
-    protected List<ItemStack> getDrops(@Nonnull BlockState state, @Nonnull LootParams.Builder params) {
+    public List<ItemStack> getDrops(@Nonnull BlockState state, @Nonnull LootParams.Builder params) {
         if (state.getValue(PART) == Part.EXTENSION) {
             return List.of();
         }
@@ -490,12 +498,12 @@ public class MapDecorStaticBlock extends Block {
      * 默认的 canBeReplaced 对非完整碰撞箱方块返回 true，导致水流能冲掉家具。
      */
     @Override
-    protected boolean canBeReplaced(@Nonnull BlockState state, @Nonnull net.minecraft.world.level.material.Fluid fluid) {
+    public boolean canBeReplaced(@Nonnull BlockState state, @Nonnull net.minecraft.world.level.material.Fluid fluid) {
         return false;
     }
 
     @Override
-    protected boolean canSurvive(@Nonnull BlockState state, @Nonnull LevelReader level, @Nonnull BlockPos pos) {
+    public boolean canSurvive(@Nonnull BlockState state, @Nonnull LevelReader level, @Nonnull BlockPos pos) {
         if (state.getValue(PART) == Part.MAIN) {
             return true;
         }
@@ -503,7 +511,7 @@ public class MapDecorStaticBlock extends Block {
     }
 
     @Override
-    protected BlockState updateShape(@Nonnull BlockState state,
+    public BlockState updateShape(@Nonnull BlockState state,
                                      @Nonnull net.minecraft.core.Direction direction,
                                      @Nonnull BlockState neighborState,
                                      @Nonnull net.minecraft.world.level.LevelAccessor level,
@@ -544,7 +552,7 @@ public class MapDecorStaticBlock extends Block {
     }
 
     @Override
-    public BlockState playerWillDestroy(@Nonnull Level level,
+    public void playerWillDestroy(@Nonnull Level level,
                                         @Nonnull BlockPos pos,
                                         @Nonnull BlockState state,
                                         @Nonnull net.minecraft.world.entity.player.Player player) {
@@ -569,10 +577,10 @@ public class MapDecorStaticBlock extends Block {
                         level.setBlock(target, Blocks.AIR.defaultBlockState(), 35);
                     }
                 }
-                return state;
+                return;
             }
         }
-        return super.playerWillDestroy(level, pos, state, player);
+        super.playerWillDestroy(level, pos, state, player);
     }
 
     /** Stateful furniture may own its single packed drop in MAIN.onRemove instead. */

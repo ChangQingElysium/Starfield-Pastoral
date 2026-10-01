@@ -39,8 +39,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModContainer;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
-import net.minecraftforge.fml.common.Mod;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.common.MinecraftForge;
@@ -52,7 +51,7 @@ import net.minecraftforge.client.event.RegisterColorHandlersEvent;
 import java.util.List;
 
 // This class will not load on dedicated servers. Accessing client side code from here is safe.
-@Mod(value = StardewCraft.MODID, dist = Dist.CLIENT)
+// PORT(1.20.1): constructed from StardewCraft via DistExecutor (Forge allows a single @Mod class per mod id).
 // You can use EventBusSubscriber to automatically register all static methods in the class annotated with @SubscribeEvent
 @EventBusSubscriber(modid = StardewCraft.MODID, value = Dist.CLIENT)
 public class StardewCraftClient {
@@ -63,7 +62,8 @@ public class StardewCraftClient {
     private static final int STARDEW_LEAF_WINTER = 0xEDF7FF;
 
     public StardewCraftClient(IEventBus modEventBus, ModContainer container) {
-        container.registerExtensionPoint(IConfigScreenFactory.class,
+        // PORT(1.20.1): Forge's ConfigScreenHandler extension point, registered for the mod being constructed.
+        IConfigScreenFactory.register(
                 (minecraft, parent) -> new com.stardew.craft.client.gui.StardewSettingsScreen(parent));
         // Weapon shader registration — client only (moved from StardewCraft main class)
     MinecraftForge.EVENT_BUS.register(TVScreenOverlayRenderer.class);
@@ -486,7 +486,7 @@ public class StardewCraftClient {
                 return 0xFFFFFFFF;
             }
             return resolveSeasonalGrassColor(level, pos);
-        }, Blocks.SHORT_GRASS, Blocks.FERN, Blocks.TALL_GRASS, Blocks.LARGE_FERN,
+        }, Blocks.GRASS, Blocks.FERN, Blocks.TALL_GRASS, Blocks.LARGE_FERN,
                 ModBlocks.PASTURE_GRASS.get(), ModBlocks.BLUE_PASTURE_GRASS.get());
 
         event.register((state, level, pos, tintIndex) -> {

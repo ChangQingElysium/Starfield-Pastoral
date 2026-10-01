@@ -20,7 +20,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import com.stardew.craft.port.net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import org.joml.Matrix4f;
@@ -105,7 +105,7 @@ public final class ReadingBookClientEffect {
         Camera renderCamera = event.getCamera();
         Vec3 camera = renderCamera.getPosition();
         MultiBufferSource.BufferSource buffer = minecraft.renderBuffers().bufferSource();
-        float partial = event.getPartialTick().getGameTimeDeltaPartialTick(false);
+        float partial = event.getPartialTick();
 
         renderBooks(minecraft, poseStack, buffer, camera, renderCamera.getYRot(), partial);
         renderExplosions(minecraft, poseStack, buffer, camera, renderCamera.getYRot(), partial);

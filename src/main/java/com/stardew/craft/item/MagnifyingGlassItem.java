@@ -53,8 +53,7 @@ public final class MagnifyingGlassItem extends Item implements IStardewItem {
     }
 
     @Override
-    public boolean canBeHurtBy(@Nonnull ItemStack stack,
-                               @Nonnull net.minecraft.world.damagesource.DamageSource source) {
+    public boolean canBeHurtBy(@Nonnull net.minecraft.world.damagesource.DamageSource source) {
         return false;
     }
 
@@ -77,8 +76,10 @@ public final class MagnifyingGlassItem extends Item implements IStardewItem {
     }
 
     @Override
-    public void appendHoverText(@Nonnull ItemStack stack, @Nonnull TooltipContext context,
-                                @Nonnull List<Component> tooltipComponents, @Nonnull TooltipFlag tooltipFlag) {
+    public void appendHoverText(@Nonnull ItemStack stack,
+                                @javax.annotation.Nullable Level level,
+                                @Nonnull List<Component> tooltipComponents,
+                                @Nonnull TooltipFlag tooltipFlag) {
         tooltipComponents.add(Component.translatable("stardewcraft.item.magnifying_glass.tooltip.flavor")
                 .withStyle(Style.EMPTY.withColor(TextColor.fromRgb(0x69B6C3))));
         tooltipComponents.add(Component.translatable("stardewcraft.item.magnifying_glass.tooltip.granted")

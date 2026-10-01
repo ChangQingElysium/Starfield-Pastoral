@@ -120,9 +120,9 @@ public abstract class StardewMonsterEntity extends Monster {
     /** Server-only hook after an accepted death; clients use the vanilla death event. */
     protected void onFinalDeath(DamageSource source) {}
     public void onAcceptedContact(net.minecraft.server.level.ServerPlayer player) {}
-    @Override protected void defineSynchedData(SynchedEntityData.Builder builder) {
-        super.defineSynchedData(builder);
-        builder.define(ACTION, 0); builder.define(ACTION_START, 0L); builder.define(ACTION_SEQUENCE, 0);
+    @Override protected void defineSynchedData() {
+        super.defineSynchedData();
+        this.entityData.define(ACTION, 0); this.entityData.define(ACTION_START, 0L); this.entityData.define(ACTION_SEQUENCE, 0);
     }
     public final int phase() { return entityData.get(ACTION); }
     public final int actionSequence() { return entityData.get(ACTION_SEQUENCE); }

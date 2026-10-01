@@ -14,8 +14,8 @@ import com.stardew.craft.port.net.minecraft.world.item.component.ItemAttributeMo
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.core.BlockPos;
-import com.stardew.craft.port.net.neoforged.neoforge.common.ItemAbilities;
-import com.stardew.craft.port.net.neoforged.neoforge.common.ItemAbility;
+import net.minecraftforge.common.ToolActions;
+import net.minecraftforge.common.ToolAction;
 
 import java.util.List;
 
@@ -51,11 +51,14 @@ public class StardewClubItem extends Item implements IStardewItem, IStardewWeapo
 
     @SuppressWarnings({"null", "deprecation"})
     @Override
-    public ItemAttributeModifiers getDefaultAttributeModifiers() {
+    // PORT(1.20.1): items expose default attribute modifiers per slot instead of a default component.
+    public com.google.common.collect.Multimap<net.minecraft.world.entity.ai.attributes.Attribute,
+            net.minecraft.world.entity.ai.attributes.AttributeModifier> getDefaultAttributeModifiers(
+            net.minecraft.world.entity.EquipmentSlot slot) {
         if (weaponData == null) {
-            return super.getDefaultAttributeModifiers();
+            return super.getDefaultAttributeModifiers(slot);
         }
-        return WeaponItemSupport.createAttributeModifiers(weaponId, weaponData);
+        return WeaponItemSupport.createAttributeModifiers(weaponId, weaponData).portModifiers(slot);
     }
 
     @Override
@@ -74,8 +77,8 @@ public class StardewClubItem extends Item implements IStardewItem, IStardewWeapo
     }
 
     @Override
-    public boolean canPerformAction(@SuppressWarnings("null") ItemStack stack, @SuppressWarnings("null") ItemAbility ability) {
-        return ItemAbilities.DEFAULT_SWORD_ACTIONS.contains(ability);
+    public boolean canPerformAction(@SuppressWarnings("null") ItemStack stack, @SuppressWarnings("null") ToolAction ability) {
+        return ToolActions.DEFAULT_SWORD_ACTIONS.contains(ability);
     }
 
     @Override
@@ -110,7 +113,7 @@ public class StardewClubItem extends Item implements IStardewItem, IStardewWeapo
     }
 
     @Override
-    public void appendHoverText(@SuppressWarnings("null") ItemStack stack, @SuppressWarnings("null") Item.TooltipContext context, @SuppressWarnings("null") List<Component> tooltipComponents, @SuppressWarnings("null") TooltipFlag tooltipFlag) {
+    public void appendHoverText(@SuppressWarnings("null") ItemStack stack, @javax.annotation.Nullable Level level, @SuppressWarnings("null") List<Component> tooltipComponents, @SuppressWarnings("null") TooltipFlag tooltipFlag) {
         if (weaponData != null) {
             ensureWeaponStats(stack);
             boolean expanded = net.minecraft.client.gui.screens.Screen.hasShiftDown();
@@ -137,7 +140,7 @@ public class StardewClubItem extends Item implements IStardewItem, IStardewWeapo
     }
 
     @Override
-    public int getUseDuration(@SuppressWarnings("null") ItemStack stack, @SuppressWarnings("null") LivingEntity entity) {
+    public int getUseDuration(@SuppressWarnings("null") ItemStack stack) {
         return CHARGE_TICKS;
     }
 

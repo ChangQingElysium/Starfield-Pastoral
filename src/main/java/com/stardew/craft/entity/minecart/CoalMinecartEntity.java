@@ -42,7 +42,7 @@ public final class CoalMinecartEntity extends Entity {
 
     public boolean isLoaded() { return entityData.get(LOADED); }
     public void setLoaded(boolean loaded) { entityData.set(LOADED, loaded); }
-    @Override protected void defineSynchedData(SynchedEntityData.Builder builder) { builder.define(LOADED, true); }
+    @Override protected void defineSynchedData() { this.entityData.define(LOADED, true); }
     @Override protected void readAdditionalSaveData(CompoundTag tag) {
         setLoaded(!tag.contains("Loaded") || tag.getBoolean("Loaded"));
         setYRot(Math.round(getYRot() / 90.0F) * 90.0F);

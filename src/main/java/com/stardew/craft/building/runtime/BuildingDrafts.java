@@ -1,5 +1,6 @@
 package com.stardew.craft.building.runtime;
 
+import com.stardew.craft.port.PortItemData;
 import net.minecraft.core.HolderLookup;
 import com.stardew.craft.port.net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
@@ -13,20 +14,20 @@ import java.util.*;
 /** The physical document identifies one durable draft, including across copies and transfers. */
 public final class BuildingDrafts extends SavedData {
     private final Map<UUID,CompoundTag> drafts=new HashMap<>();
-    public static BuildingDrafts get(MinecraftServer server){return server.overworld().getDataStorage().computeIfAbsent(new Factory<>(BuildingDrafts::new,BuildingDrafts::load),"stardew_building_drafts");}
+    public static BuildingDrafts get(MinecraftServer server){return server.overworld().getDataStorage().computeIfAbsent(com.stardew.craft.port.PortSavedData.loader(new Factory<>(BuildingDrafts::new,BuildingDrafts::load)), com.stardew.craft.port.PortSavedData.constructor(new Factory<>(BuildingDrafts::new,BuildingDrafts::load)),"stardew_building_drafts");}
     public static UUID id(ItemStack stack){var tag=BuildingBlueprintItem.draft(stack);return tag.hasUUID("DraftId")?tag.getUUID("DraftId"):BuildingBlueprintItem.permit(stack)!=null?BuildingBlueprintItem.permit(stack):tag.hasUUID("MoveBuilding")?tag.getUUID("MoveBuilding"):null;}
     public void apply(ItemStack stack){
         var id=id(stack); if(id==null)return;
         var root=BuildingBlueprintItem.draft(stack);var saved=drafts.get(id);
         root.remove("DraftAnchor");root.remove("DraftDimension");root.remove("DraftFacing");
         if(saved!=null)root.merge(saved.copy());
-        stack.set(DataComponents.CUSTOM_DATA,CustomData.of(root));
+        PortItemData.set(stack, DataComponents.CUSTOM_DATA,CustomData.of(root));
     }
     public void write(ItemStack stack){
         var root=BuildingBlueprintItem.draft(stack);var id=id(stack);if(id==null)id=UUID.randomUUID();root.putUUID("DraftId",id);
         var saved=new CompoundTag();saved.putString("DraftFacing",BuildingBlueprintItem.facing(stack).getName());
         if(root.contains("DraftAnchor")){saved.putLong("DraftAnchor",root.getLong("DraftAnchor"));saved.putString("DraftDimension",root.getString("DraftDimension"));}
-        drafts.put(id,saved);stack.set(DataComponents.CUSTOM_DATA,CustomData.of(root));setDirty();
+        drafts.put(id,saved);PortItemData.set(stack, DataComponents.CUSTOM_DATA,CustomData.of(root));setDirty();
     }
     public void consume(ItemStack stack){var id=id(stack);if(id!=null){drafts.remove(id);setDirty();}}
     public void synchronize(ServerPlayer player){
@@ -61,6 +62,6 @@ public final class BuildingDrafts extends SavedData {
         var tag=new CompoundTag();tag.putString("Dimension",player.level().dimension().location().toString());tag.put("Pins",rows);
         com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player,new com.stardew.craft.network.payload.BuildingPinnedPreviewsPayload(tag));
     }
-    @Override public CompoundTag save(CompoundTag tag,HolderLookup.Provider registries){var all=new CompoundTag();drafts.forEach((id,value)->all.put(id.toString(),value.copy()));tag.put("Drafts",all);return tag;}
+    @Override public CompoundTag save(CompoundTag tag){ net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();var all=new CompoundTag();drafts.forEach((id,value)->all.put(id.toString(),value.copy()));tag.put("Drafts",all);return tag;}
     public static BuildingDrafts load(CompoundTag tag,HolderLookup.Provider registries){var result=new BuildingDrafts();var all=tag.getCompound("Drafts");for(var key:all.getAllKeys())result.drafts.put(UUID.fromString(key),all.getCompound(key).copy());return result;}
 }

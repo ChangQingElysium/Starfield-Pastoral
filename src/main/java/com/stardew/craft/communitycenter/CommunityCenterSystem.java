@@ -11,7 +11,7 @@ import com.stardew.craft.interior.PlayerInteriorAllocator;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import com.stardew.craft.port.net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import com.stardew.craft.port.net.neoforged.neoforge.event.tick.ServerTickEvent;

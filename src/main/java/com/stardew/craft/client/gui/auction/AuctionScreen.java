@@ -248,7 +248,7 @@ abstract class AuctionScreen extends Screen {
     @Override public boolean mouseReleased(double x, double y, int button) {
         draggingScroll = false; return super.mouseReleased(x, y, button);
     }
-    @Override public boolean mouseScrolled(double x, double y, double sx, double sy) {
+    @Override public boolean mouseScrolled(double x, double y, double sy) {
         if (x >= left && x < left + panelW && y >= bodyTop && y < bodyBottom) {
             setScroll(scroll - (int) Math.signum(sy) * (line + 12)); return true;
         }

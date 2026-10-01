@@ -18,7 +18,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.client.extensions.common.IClientBlockExtensions;
 import com.stardew.craft.port.net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
@@ -59,7 +59,7 @@ public final class SupplyCrateEffects {
                 @Override public boolean addDestroyEffects(BlockState state, Level level, BlockPos pos, ParticleEngine engine) {
                     if (!(level instanceof ClientLevel client)) return true;
                     ensureLevel(client);
-                    double tick = client.getGameTime() + Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(false);
+                    double tick = client.getGameTime() + com.stardew.craft.port.net.minecraft.client.DeltaTracker.client().getGameTimeDeltaPartialTick(false);
                     double waterline = client.getFluidState(pos.below()).getHeight(client, pos.below()) - 1;
                     if (BURSTS.size() >= 128) BURSTS.removeFirst();
                     BURSTS.add(new Burst(state, pos.immutable(), tick, waterline, LevelRenderer.getLightColor(client, pos)));
@@ -74,7 +74,7 @@ public final class SupplyCrateEffects {
         var mc = Minecraft.getInstance();
         ensureLevel(mc.level);
         if (mc.level == null || BURSTS.isEmpty()) return;
-        double now = mc.level.getGameTime() + event.getPartialTick().getGameTimeDeltaPartialTick(false);
+        double now = mc.level.getGameTime() + event.getPartialTick();
         BURSTS.removeIf(b -> now - b.tick >= 13 || now < b.tick);
         var camera = event.getCamera().getPosition();
         var pose = event.getPoseStack();

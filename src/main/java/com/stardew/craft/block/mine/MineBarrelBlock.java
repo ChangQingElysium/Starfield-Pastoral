@@ -67,15 +67,15 @@ public class MineBarrelBlock extends com.stardew.craft.block.decor.MapDecorStati
         return state == null ? null : state.setValue(MineBuildingTheme.PROPERTY, MineBuildingTheme.forPlacement(context));
     }
 
-    @Override public ItemStack getCloneItemStack(net.minecraft.world.level.LevelReader level, BlockPos pos, BlockState state) {
+    @Override public ItemStack getCloneItemStack(net.minecraft.world.level.BlockGetter level, BlockPos pos, BlockState state) {
         return MineBuildingTheme.picked(this, state);
     }
 
-    @Override protected java.util.List<ItemStack> getDrops(BlockState state, net.minecraft.world.level.storage.loot.LootParams.Builder params) {
+    @Override public java.util.List<ItemStack> getDrops(BlockState state, net.minecraft.world.level.storage.loot.LootParams.Builder params) {
         return java.util.List.of();
     }
 
-    @Override public BlockState playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
+    @Override public void playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
         if (level instanceof ServerLevel server) {
             BlockPos main = findMainPos(level, pos, state);
             if (main != null) {
@@ -85,11 +85,11 @@ public class MineBarrelBlock extends com.stardew.craft.block.decor.MapDecorStati
                         player instanceof net.minecraft.server.level.ServerPlayer sp ? sp : null, false));
                 if (state.getValue(PART) == Part.EXTENSION) {
                     runWithDropsSuppressed(() -> level.removeBlock(main, false));
-                    return state;
+                    return;
                 }
             }
         }
-        return super.playerWillDestroy(level, pos, state, player);
+        super.playerWillDestroy(level, pos, state, player);
     }
 
     @Override public void onRemove(BlockState state, Level level, BlockPos pos, BlockState next, boolean moving) {
@@ -109,17 +109,17 @@ public class MineBarrelBlock extends com.stardew.craft.block.decor.MapDecorStati
         runWithDropsSuppressed(() -> super.onRemove(state, level, pos, next, moving));
     }
 
-    @Override protected BlockState updateShape(BlockState state, net.minecraft.core.Direction direction, BlockState neighbor,
+    @Override public BlockState updateShape(BlockState state, net.minecraft.core.Direction direction, BlockState neighbor,
             net.minecraft.world.level.LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
         level.scheduleTick(pos, this, 1); return state;
     }
 
-    @Override protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState old, boolean moving) {
+    @Override public void onPlace(BlockState state, Level level, BlockPos pos, BlockState old, boolean moving) {
         super.onPlace(state, level, pos, old, moving);
         if (!level.isClientSide) level.scheduleTick(pos, this, 1);
     }
 
-    @Override protected void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+    @Override public void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
         if (!super.canSurvive(state, level, pos)) runWithDropsSuppressed(() -> level.removeBlock(pos, false));
     }
 

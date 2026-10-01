@@ -1878,10 +1878,13 @@ public final class InteriorSubspaceManager {
 
         static InteriorSubspaceSavedData get(ServerLevel level) {
             return level.getDataStorage().computeIfAbsent(
-                new SavedData.Factory<>(
+                com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(
                     InteriorSubspaceSavedData::new,
                     InteriorSubspaceSavedData::load
-                ),
+                )), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(
+                    InteriorSubspaceSavedData::new,
+                    InteriorSubspaceSavedData::load
+                )),
                 DATA_NAME
             );
         }

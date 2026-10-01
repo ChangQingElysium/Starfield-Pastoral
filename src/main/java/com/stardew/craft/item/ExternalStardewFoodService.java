@@ -16,7 +16,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
 
 import java.util.ArrayDeque;

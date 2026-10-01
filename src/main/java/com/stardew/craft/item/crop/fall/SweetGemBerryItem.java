@@ -1,5 +1,6 @@
 package com.stardew.craft.item.crop.fall;
 
+import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.item.IStardewItem;
 import com.stardew.craft.item.quality.QualityHelper;
 import net.minecraft.ChatFormatting;
@@ -20,10 +21,10 @@ public class SweetGemBerryItem extends Item implements IStardewItem {
         int quality = QualityHelper.getQuality(stack);
         Component baseName = Component.translatable(this.getDescriptionId(stack)).withStyle(ChatFormatting.WHITE);
 
-        var customData = stack.getOrDefault(com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_MODEL_DATA,
+        var customData = PortItemData.getOrDefault(stack, com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_MODEL_DATA,
                 com.stardew.craft.port.net.minecraft.world.item.component.CustomModelData.DEFAULT);
         if (quality != QualityHelper.NORMAL && customData.equals(com.stardew.craft.port.net.minecraft.world.item.component.CustomModelData.DEFAULT)) {
-            stack.set(com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_MODEL_DATA,
+            PortItemData.set(stack, com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_MODEL_DATA,
                     new com.stardew.craft.port.net.minecraft.world.item.component.CustomModelData(quality));
         }
 

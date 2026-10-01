@@ -77,7 +77,7 @@ public class FishSplashState extends SavedData {
 
 	@Override
 	@SuppressWarnings("null")
-	public CompoundTag save(@SuppressWarnings("null") CompoundTag tag, @SuppressWarnings("null") HolderLookup.Provider provider) {
+	public CompoundTag save(@SuppressWarnings("null") CompoundTag tag) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
 		ListTag list = new ListTag();
 		for (Map.Entry<String, Entry> e : byLocationKey.entrySet()) {
 			CompoundTag c = new CompoundTag();
@@ -107,7 +107,7 @@ public class FishSplashState extends SavedData {
 
 	public static FishSplashState get(ServerLevel level) {
 		return level.getDataStorage().computeIfAbsent(
-				new SavedData.Factory<>(FishSplashState::new, FishSplashState::load),
+				com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(FishSplashState::new, FishSplashState::load)), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(FishSplashState::new, FishSplashState::load)),
 				DATA_NAME);
 	}
 

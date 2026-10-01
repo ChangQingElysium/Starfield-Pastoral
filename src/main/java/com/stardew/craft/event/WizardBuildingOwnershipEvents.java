@@ -6,7 +6,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import com.stardew.craft.port.net.neoforged.neoforge.common.util.TriState;
 import com.stardew.craft.port.net.neoforged.neoforge.event.entity.player.ItemEntityPickupEvent;
 

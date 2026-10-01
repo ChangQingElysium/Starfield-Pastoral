@@ -1,5 +1,7 @@
 package com.stardew.craft.pet;
 
+import com.stardew.craft.port.PortEntities;
+import com.stardew.craft.port.PortItemStacks;
 import com.stardew.craft.core.ModDimensions;
 import com.stardew.craft.farm.FarmInstanceRegistry;
 import com.stardew.craft.item.ModItems;
@@ -54,7 +56,7 @@ public final class PetManagement {
     }
     private static void showBowl(ServerPlayer player, BlockPos pos, UUID reply) {
         var record = PetBowlBuildings.ensure(player.serverLevel(), pos);
-        if (record == null || !PetService.manages(player, record.farmId()) || !player.canInteractWithBlock(pos, 1)
+        if (record == null || !PetService.manages(player, record.farmId()) || !PortEntities.canInteractWithBlock(player, pos, 1)
                 || !com.stardew.craft.building.runtime.BuildingService.canManage(player, record)) return;
         var occupant = PetWorldData.get(player.server).occupant(pos);
         show(player, "bowl", occupant == null ? null : occupant.id, reply, record);
@@ -115,7 +117,7 @@ public final class PetManagement {
         var record = PetBowlBuildings.ensure(player.serverLevel(), session.bowl());
         var buildings = com.stardew.craft.building.runtime.BuildingWorldData.get(player.server);
         boolean valid = record != null && record.revision() == session.revision() && record.farmId().equals(session.farm())
-                && player.canInteractWithBlock(session.bowl(), 1) && com.stardew.craft.building.runtime.BuildingService.canManage(player, record)
+                && PortEntities.canInteractWithBlock(player, session.bowl(), 1) && com.stardew.craft.building.runtime.BuildingService.canManage(player, record)
                 && buildings.transfer(record.id()) == null && !com.stardew.craft.building.runtime.BuildingRemovalJournal.get(player.server).contains(record.id());
         if (!valid) { PetService.message(player, "expired"); closeBowl(player, request.nonce()); return; }
         if (request.action().equals("bowl_initial") && PetInitialAdoption.needed(player)) { show(player, "initial", null, request.nonce()); return; }
@@ -181,7 +183,7 @@ public final class PetManagement {
         if (request.action().equals("remove")) {
             if (!session.kind().equals("remove") || !pet.id.equals(session.removal()) || !player.getMainHandItem().is(ModItems.BUTTERFLY_POWDER.get())
                     || player.level().dimension() != ModDimensions.STARDEW_VALLEY || pet.position == null || player.position().distanceToSqr(pet.position) > 64) return "expired";
-            ItemStack hat = ItemStack.parseOptional(player.registryAccess(), pet.hat);
+            ItemStack hat = PortItemStacks.parseOptional(player.registryAccess(), pet.hat);
             var departing = player.serverLevel().getEntity(pet.id);
             if (departing instanceof PetEntity entity) entity.feedback.content();
             player.serverLevel().playSound(null, BlockPos.containing(pet.position), com.stardew.craft.sound.ModSounds.FIREBALL.get(), net.minecraft.sounds.SoundSource.PLAYERS, .7f, 1);
@@ -201,7 +203,7 @@ public final class PetManagement {
                 if (bowl == null || !bowl.farm().equals(pet.farm) || occupant != null && !occupant.id.equals(pet.id)) return "bowl_occupied";
                 pet.bowl = bowl.position();
             }
-            case "unhat" -> { var hat = ItemStack.parseOptional(player.registryAccess(), pet.hat); pet.hat = new CompoundTag(); if (!hat.isEmpty() && !player.getInventory().add(hat)) player.drop(hat, false); }
+            case "unhat" -> { var hat = PortItemStacks.parseOptional(player.registryAccess(), pet.hat); pet.hat = new CompoundTag(); if (!hat.isEmpty() && !player.getInventory().add(hat)) player.drop(hat, false); }
             default -> { return "expired"; }
         }
         data.setDirty(); var level = player.server.getLevel(ModDimensions.STARDEW_VALLEY);

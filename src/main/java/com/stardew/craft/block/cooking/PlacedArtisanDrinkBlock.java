@@ -46,7 +46,7 @@ public final class PlacedArtisanDrinkBlock extends CookingPlacedFoodBlock {
     }
 
     @Override
-    protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+    public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return bottleShapes.get(state.getValue(FACING));
     }
 
@@ -58,7 +58,7 @@ public final class PlacedArtisanDrinkBlock extends CookingPlacedFoodBlock {
     }
 
     @Override
-    protected List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
+    public List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
         if (params.getOptionalParameter(LootContextParams.BLOCK_ENTITY) instanceof CookingPlacedFoodBlockEntity food
                 && !food.getStoredFood().isEmpty()) {
             return List.of(food.getStoredFood());
@@ -67,7 +67,7 @@ public final class PlacedArtisanDrinkBlock extends CookingPlacedFoodBlock {
     }
 
     @Override
-    public ItemStack getCloneItemStack(BlockState state, HitResult target, LevelReader level, BlockPos pos, Player player) {
+    public ItemStack getCloneItemStack(BlockState state, HitResult target, BlockGetter level, BlockPos pos, Player player) {
         if (level.getBlockEntity(pos) instanceof CookingPlacedFoodBlockEntity food
                 && !food.getStoredFood().isEmpty()) {
             return food.getStoredFood();

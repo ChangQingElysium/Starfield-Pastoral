@@ -6,7 +6,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import net.minecraftforge.client.event.ModelEvent;
 
 @SuppressWarnings("removal")
@@ -16,9 +16,10 @@ public final class ModClientModels {
 
     @SubscribeEvent
     public static void onRegisterGeometryLoaders(ModelEvent.RegisterGeometryLoaders event) {
-        event.register(new ResourceLocation(StardewCraft.MODID, "crop_geometry"),
+        // PORT(1.20.1): Forge takes the loader path and prefixes the active mod namespace (stardewcraft).
+        event.register("crop_geometry",
             com.stardew.craft.client.model.CropModelGeometry.LOADER);
-        event.register(new ResourceLocation(StardewCraft.MODID, "geometry"),
+        event.register("geometry",
             com.stardew.craft.client.model.ImportedModelGeometry.LOADER);
     }
 

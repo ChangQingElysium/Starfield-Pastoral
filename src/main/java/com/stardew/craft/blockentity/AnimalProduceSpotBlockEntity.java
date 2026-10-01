@@ -1,5 +1,6 @@
 package com.stardew.craft.blockentity;
 
+import com.stardew.craft.port.PortItemStacks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -89,13 +90,13 @@ public class AnimalProduceSpotBlockEntity extends BlockEntity {
     }
 
     @Override
-    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
-        return saveWithoutMetadata(registries);
+    public CompoundTag getUpdateTag() { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        return saveWithoutMetadata();
     }
 
     @Override
-    public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider registries) {
-        loadAdditional(tag, registries);
+    public void handleUpdateTag(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        load(tag);
     }
 
     @Override
@@ -104,10 +105,10 @@ public class AnimalProduceSpotBlockEntity extends BlockEntity {
     }
 
     @Override
-    protected void saveAdditional(@Nonnull CompoundTag tag, @Nonnull HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
+    protected void saveAdditional(@Nonnull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        super.saveAdditional(tag);
         if (!produceStack.isEmpty()) {
-            tag.put("produceStack", produceStack.save(registries));
+            tag.put("produceStack", PortItemStacks.save(produceStack, registries));
         }
         tag.putLong("animalId", animalId);
         tag.putString("buildingId", buildingId);
@@ -117,9 +118,9 @@ public class AnimalProduceSpotBlockEntity extends BlockEntity {
     }
 
     @Override
-    protected void loadAdditional(@Nonnull CompoundTag tag, @Nonnull HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
-        produceStack = tag.contains("produceStack") ? ItemStack.parse(registries, tag.getCompound("produceStack")).orElse(ItemStack.EMPTY) : ItemStack.EMPTY;
+    public void load(@Nonnull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        super.load(tag);
+        produceStack = tag.contains("produceStack") ? PortItemStacks.parse(registries, tag.getCompound("produceStack")).orElse(ItemStack.EMPTY) : ItemStack.EMPTY;
         animalId = tag.contains("animalId") ? tag.getLong("animalId") : -1L;
         buildingId = tag.contains("buildingId") ? tag.getString("buildingId") : "";
         produceLedgerEntryId = tag.contains("produceLedgerEntryId")

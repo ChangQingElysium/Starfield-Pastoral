@@ -1,5 +1,6 @@
 package com.stardew.craft.blockentity;
 
+import com.stardew.craft.port.PortItemStacks;
 import com.stardew.craft.block.utility.StoneChestBlock;
 import com.stardew.craft.block.utility.WoodenChestColorPalette;
 import com.stardew.craft.menu.StoneChestMenu;
@@ -159,7 +160,7 @@ public class StoneChestBlockEntity extends net.minecraft.world.level.block.entit
 
         if (slot >= SLOT_COUNT && !stack.isEmpty()) {
             ItemStack previous = items.get(slot);
-            if (!ItemStack.isSameItemSameComponents(previous, stack) || stack.getCount() > previous.getCount()) return;
+            if (!ItemStack.isSameItemSameTags(previous, stack) || stack.getCount() > previous.getCount()) return;
         }
 
         if (stack.isEmpty()) {
@@ -257,8 +258,8 @@ public class StoneChestBlockEntity extends net.minecraft.world.level.block.entit
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
+    protected void saveAdditional(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        super.saveAdditional(tag);
 
         ListTag list = new ListTag();
         for (int i = 0; i < items.size(); i++) {
@@ -268,7 +269,7 @@ public class StoneChestBlockEntity extends net.minecraft.world.level.block.entit
             }
             CompoundTag entry = new CompoundTag();
             entry.putInt("Slot", i);
-            entry.put("Stack", stack.save(registries));
+            entry.put("Stack", PortItemStacks.save(stack, registries));
             list.add(entry);
         }
         tag.put(TAG_ITEMS, list);
@@ -276,8 +277,8 @@ public class StoneChestBlockEntity extends net.minecraft.world.level.block.entit
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
+    public void load(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        super.load(tag);
 
         for (int i = 0; i < items.size(); i++) {
             items.set(i, ItemStack.EMPTY);
@@ -291,7 +292,7 @@ public class StoneChestBlockEntity extends net.minecraft.world.level.block.entit
                 if (slot < 0 || slot >= items.size()) {
                     continue;
                 }
-                ItemStack parsed = ItemStack.parse(registries, entry.getCompound("Stack")).orElse(ItemStack.EMPTY);
+                ItemStack parsed = PortItemStacks.parse(registries, entry.getCompound("Stack")).orElse(ItemStack.EMPTY);
                 items.set(slot, parsed);
             }
         }
@@ -310,9 +311,9 @@ public class StoneChestBlockEntity extends net.minecraft.world.level.block.entit
     }
 
     @Override
-    public CompoundTag getUpdateTag(net.minecraft.core.HolderLookup.Provider registries) {
-        CompoundTag tag = super.getUpdateTag(registries);
-        saveAdditional(tag, registries);
+    public CompoundTag getUpdateTag() { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        CompoundTag tag = super.getUpdateTag();
+        saveAdditional(tag);
         return tag;
     }
 

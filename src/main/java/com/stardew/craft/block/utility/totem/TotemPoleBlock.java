@@ -75,7 +75,7 @@ public class TotemPoleBlock extends MapUtilityStaticBlock implements EntityBlock
 
     @SuppressWarnings("null")
     @Override
-    protected List<ItemStack> getDrops(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") LootParams.Builder params) {
+    public List<ItemStack> getDrops(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") LootParams.Builder params) {
         if (state.getValue(PART) == Part.EXTENSION) {
             return List.of();
         }
@@ -148,7 +148,7 @@ public class TotemPoleBlock extends MapUtilityStaticBlock implements EntityBlock
 
     @SuppressWarnings("null")
     @Override
-    protected ItemInteractionResult useItemOn(
+    public ItemInteractionResult useItemOn(
             @SuppressWarnings("null") ItemStack stack,
             @SuppressWarnings("null") BlockState state,
             @SuppressWarnings("null") Level level,
@@ -162,7 +162,7 @@ public class TotemPoleBlock extends MapUtilityStaticBlock implements EntityBlock
 
     @SuppressWarnings("null")
     @Override
-    protected InteractionResult useWithoutItem(
+    public InteractionResult useWithoutItem(
             @SuppressWarnings("null") BlockState state,
             @SuppressWarnings("null") Level level,
             @SuppressWarnings("null") BlockPos pos,

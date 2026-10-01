@@ -1,5 +1,6 @@
 package com.stardew.craft.pet;
 
+import com.stardew.craft.port.PortItemStacks;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.*;
 import net.minecraft.server.level.ServerLevel;
@@ -43,8 +44,8 @@ public final class PetEntity extends PathfinderMob {
         };
     }
     public static AttributeSupplier.Builder attributes() { return Mob.createMobAttributes().add(Attributes.MAX_HEALTH, 10).add(Attributes.MOVEMENT_SPEED, .2).add(Attributes.STEP_HEIGHT, 1).add(Attributes.FOLLOW_RANGE, 16); }
-    @Override protected void defineSynchedData(SynchedEntityData.Builder builder) {
-        super.defineSynchedData(builder); builder.define(VARIANT, "stardewcraft:cat0"); builder.define(CLIP, "idle"); builder.define(START, 0L); builder.define(HAT, ItemStack.EMPTY);
+    @Override protected void defineSynchedData() {
+        super.defineSynchedData(); this.entityData.define(VARIANT, "stardewcraft:cat0"); this.entityData.define(CLIP, "idle"); this.entityData.define(START, 0L); this.entityData.define(HAT, ItemStack.EMPTY);
     }
     public PetVariant variant() { return PetVariant.fromSaved(entityData.get(VARIANT)); }
     public String clip() { return entityData.get(CLIP); }
@@ -54,9 +55,14 @@ public final class PetEntity extends PathfinderMob {
     public void play(String clip) { entityData.set(CLIP, clip); entityData.set(START, level().getGameTime()); if (clip.equals("walk")) feedback.restartWalk(); }
     public void refresh(PetRecord record) {
         entityData.set(VARIANT, record.variant.id()); setCustomName(Component.literal(record.name));
-        entityData.set(HAT, ItemStack.parseOptional(level().registryAccess(), record.hat));
+        entityData.set(HAT, PortItemStacks.parseOptional(level().registryAccess(), record.hat));
     }
-    @Override public EntityDimensions getDefaultDimensions(Pose pose) {
+    // PORT(1.20.1): 1.21 LivingEntity#getDimensions is sleeping ? SLEEPING_DIMENSIONS : getDefaultDimensions(pose)
+    // (times the 1.20.5+ scale attribute, always 1 here); 1.20.1 only has getDimensions.
+    @Override public net.minecraft.world.entity.EntityDimensions getDimensions(net.minecraft.world.entity.Pose pose) {
+        return pose == net.minecraft.world.entity.Pose.SLEEPING ? SLEEPING_DIMENSIONS : getDefaultDimensions(pose);
+    }
+    public EntityDimensions getDefaultDimensions(Pose pose) {
         var variant = variant();
         return variant.available() ? EntityDimensions.scalable(variant.species().width(), variant.species().height()) : EntityDimensions.scalable(.6f, .9f);
     }
@@ -66,8 +72,9 @@ public final class PetEntity extends PathfinderMob {
     @Override public boolean hurt(DamageSource source, float amount) { return false; }
     @Override public void kill() { /* Pets are removed only by the confirmed Butterfly Powder action. */ }
     @Override public void die(DamageSource source) { }
-    @Override public boolean canBeLeashed() { return false; }
-    @Override public boolean canUsePortal(boolean allowPassengers) { return false; }
+    @Override public boolean canBeLeashed(Player player) { return false; }
+    // PORT(1.20.1): 1.21 canUsePortal(boolean) gates portals the way 1.20.1 canChangeDimensions() does.
+    @Override public boolean canChangeDimensions() { return false; }
     @Override protected boolean canRide(Entity entity) { return false; }
     @Override public boolean isPushable() { return false; }
     @Override protected void doPush(Entity other) { }

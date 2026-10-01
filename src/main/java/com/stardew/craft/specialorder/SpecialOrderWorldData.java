@@ -31,7 +31,7 @@ public final class SpecialOrderWorldData extends SavedData {
     public static SpecialOrderWorldData get(ServerLevel level) {
         ServerLevel overworld = level.getServer().getLevel(Level.OVERWORLD);
         ServerLevel storageLevel = overworld == null ? level : overworld;
-        return storageLevel.getDataStorage().computeIfAbsent(factory(), DATA_NAME);
+        return storageLevel.getDataStorage().computeIfAbsent(com.stardew.craft.port.PortSavedData.loader(factory()), com.stardew.craft.port.PortSavedData.constructor(factory()), DATA_NAME);
     }
 
     public List<SpecialOrderInstance> available() { return available; }
@@ -46,7 +46,7 @@ public final class SpecialOrderWorldData extends SavedData {
 
     @Override
     @Nonnull
-    public CompoundTag save(@Nonnull CompoundTag tag, @Nonnull HolderLookup.Provider registries) {
+    public CompoundTag save(@Nonnull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
         ListTag availableList = new ListTag();
         for (SpecialOrderInstance order : available) {
             availableList.add(order.save());
@@ -113,7 +113,7 @@ public final class SpecialOrderWorldData extends SavedData {
         return data;
     }
 
-    public static SavedData.Factory<SpecialOrderWorldData> factory() {
-        return new SavedData.Factory<>(SpecialOrderWorldData::new, SpecialOrderWorldData::load);
+    public static com.stardew.craft.port.PortSavedData.Factory<SpecialOrderWorldData> factory() {
+        return new com.stardew.craft.port.PortSavedData.Factory<>(SpecialOrderWorldData::new, SpecialOrderWorldData::load);
     }
 }

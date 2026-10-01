@@ -1,5 +1,6 @@
 package com.stardew.craft.blockentity;
 
+import com.stardew.craft.port.PortItemStacks;
 import com.stardew.craft.block.farm.MushroomBoxBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -141,28 +142,28 @@ public class MushroomBoxBlockEntity extends BlockEntity implements UtilityAutoma
 
     @SuppressWarnings("null")
     @Override
-    public CompoundTag getUpdateTag(@Nonnull HolderLookup.Provider registries) {
-        CompoundTag tag = super.getUpdateTag(registries);
-        saveAdditional(tag, registries);
+    public CompoundTag getUpdateTag() { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        CompoundTag tag = super.getUpdateTag();
+        saveAdditional(tag);
         return tag;
     }
 
     @SuppressWarnings("null")
     @Override
-    protected void saveAdditional(@Nonnull CompoundTag tag, @Nonnull HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
+    protected void saveAdditional(@Nonnull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        super.saveAdditional(tag);
         if (!product.isEmpty()) {
-            tag.put(TAG_PRODUCT, product.save(registries));
+            tag.put(TAG_PRODUCT, PortItemStacks.save(product, registries));
         }
         tag.putBoolean(TAG_READY, ready);
     }
 
     @SuppressWarnings("null")
     @Override
-    protected void loadAdditional(@Nonnull CompoundTag tag, @Nonnull HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
+    public void load(@Nonnull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        super.load(tag);
         if (tag.contains(TAG_PRODUCT)) {
-            product = ItemStack.parse(registries, tag.getCompound(TAG_PRODUCT)).orElse(ItemStack.EMPTY);
+            product = PortItemStacks.parse(registries, tag.getCompound(TAG_PRODUCT)).orElse(ItemStack.EMPTY);
         } else {
             product = ItemStack.EMPTY;
         }

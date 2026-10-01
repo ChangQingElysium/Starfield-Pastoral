@@ -99,7 +99,7 @@ public abstract class GiantCropBlock extends Block {
     }
 
     @Override
-    protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+    public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         String model = staticModelId();
         if (model == null) return super.getShape(state, level, pos, context);
         BlockPos main = findMainPos(level, pos, state);
@@ -125,7 +125,7 @@ public abstract class GiantCropBlock extends Block {
     }
 
     @Override
-    protected VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+    public VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return getShape(state, level, pos, context);
     }
 
@@ -177,7 +177,7 @@ public abstract class GiantCropBlock extends Block {
     }
 
     @Override
-    protected void tick(BlockState state, ServerLevel level, BlockPos pos, net.minecraft.util.RandomSource random) {
+    public void tick(BlockState state, ServerLevel level, BlockPos pos, net.minecraft.util.RandomSource random) {
         if (state.getValue(PART) == Part.MAIN) restoreUpperFootprint(level, pos);
     }
 
@@ -190,7 +190,7 @@ public abstract class GiantCropBlock extends Block {
 
     @Override
     @SuppressWarnings("deprecation")
-    protected boolean canSurvive(@Nonnull BlockState state, @Nonnull LevelReader level, @Nonnull BlockPos pos) {
+    public boolean canSurvive(@Nonnull BlockState state, @Nonnull LevelReader level, @Nonnull BlockPos pos) {
         if (state.getValue(PART) == Part.MAIN) {
             return true;
         }
@@ -199,7 +199,7 @@ public abstract class GiantCropBlock extends Block {
 
     @Override
     @SuppressWarnings({ "deprecation", "null" })
-    protected BlockState updateShape(@Nonnull BlockState state,
+    public BlockState updateShape(@Nonnull BlockState state,
                                      @Nonnull net.minecraft.core.Direction direction,
                                      @Nonnull BlockState neighborState,
                                      @Nonnull net.minecraft.world.level.LevelAccessor level,
@@ -212,7 +212,7 @@ public abstract class GiantCropBlock extends Block {
 
     @SuppressWarnings("null")
     @Override
-    public BlockState playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
+    public void playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
         if (!level.isClientSide()) {
             BlockPos mainPos = findMainPos(level, pos, state);
             if (mainPos != null && level instanceof ServerLevel serverLevel) {
@@ -246,7 +246,7 @@ public abstract class GiantCropBlock extends Block {
                 for (BlockPos p : owned) level.setBlock(p, Blocks.AIR.defaultBlockState(), 3);
             }
         }
-        return super.playerWillDestroy(level, pos, state, player);
+        super.playerWillDestroy(level, pos, state, player);
     }
 
 }

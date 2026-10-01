@@ -1,5 +1,6 @@
 package com.stardew.craft.item.totem;
 
+import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.block.utility.totem.TotemPoleBlock;
 import com.stardew.craft.block.utility.totem.TotemType;
 import com.stardew.craft.blockentity.TotemPoleBlockEntity;
@@ -84,21 +85,21 @@ public class TeleportTotemItem extends Item implements IStardewItem {
 
     /** 将此图腾绑定到指定图腾柱 */
     public static void bindToPole(ItemStack stack, int poleId, String poleName, TotemType type) {
-        CompoundTag tag = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
+        CompoundTag tag = PortItemData.getOrDefault(stack, DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
         tag.putInt(TAG_BOUND_ID, poleId);
         tag.putString(TAG_BOUND_NAME, poleName);
-        stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+        PortItemData.set(stack, DataComponents.CUSTOM_DATA, CustomData.of(tag));
     }
 
     public static int getBoundPoleId(ItemStack stack) {
-        CustomData data = stack.get(DataComponents.CUSTOM_DATA);
+        CustomData data = PortItemData.get(stack, DataComponents.CUSTOM_DATA);
         if (data == null) return -1;
         CompoundTag tag = data.copyTag();
         return tag.contains(TAG_BOUND_ID) ? tag.getInt(TAG_BOUND_ID) : -1;
     }
 
     public static String getBoundPoleName(ItemStack stack) {
-        CustomData data = stack.get(DataComponents.CUSTOM_DATA);
+        CustomData data = PortItemData.get(stack, DataComponents.CUSTOM_DATA);
         if (data == null) return "";
         return data.copyTag().getString(TAG_BOUND_NAME);
     }
@@ -372,8 +373,10 @@ public class TeleportTotemItem extends Item implements IStardewItem {
 
     @SuppressWarnings("null")
     @Override
-    public void appendHoverText(@Nonnull ItemStack stack, @Nonnull TooltipContext context,
-                                @Nonnull List<Component> tooltipComponents, @Nonnull TooltipFlag flag) {
+    public void appendHoverText(@Nonnull ItemStack stack,
+                                @javax.annotation.Nullable Level level,
+                                @Nonnull List<Component> tooltipComponents,
+                                @Nonnull TooltipFlag flag) {
         int boundId = getBoundPoleId(stack);
         if (boundId >= 0) {
             String boundName = getBoundPoleName(stack);

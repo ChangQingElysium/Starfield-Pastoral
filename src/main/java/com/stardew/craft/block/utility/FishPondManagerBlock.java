@@ -17,10 +17,11 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
+import com.stardew.craft.port.PortBlockInteraction;
 
 
 @SuppressWarnings("null")
-public class FishPondManagerBlock extends BuildingManagerModelBlock {
+public class FishPondManagerBlock extends BuildingManagerModelBlock implements PortBlockInteraction {
 
     public FishPondManagerBlock(Properties properties) {
         super(properties, "stardewcraft:block/fish_pond_manager");
@@ -51,8 +52,15 @@ public class FishPondManagerBlock extends BuildingManagerModelBlock {
         return java.util.List.of(new ItemStack(ModBlocks.FISH_POND_MANAGER.get()));
     }
 
+    // PORT(1.20.1): replay the 1.21 useItemOn/useWithoutItem dispatch.
     @Override
-    protected ItemInteractionResult useItemOn(ItemStack stack,
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player,
+            InteractionHand hand, BlockHitResult hit) {
+        return PortBlockInteraction.dispatch(this, state, level, pos, player, hand, hit);
+    }
+
+    @Override
+    public ItemInteractionResult useItemOn(ItemStack stack,
                                               BlockState state,
                                               Level level,
                                               BlockPos pos,
@@ -63,7 +71,7 @@ public class FishPondManagerBlock extends BuildingManagerModelBlock {
     }
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState state,
+    public InteractionResult useWithoutItem(BlockState state,
                                                Level level,
                                                BlockPos pos,
                                                Player player,

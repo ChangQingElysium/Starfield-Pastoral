@@ -16,7 +16,7 @@ import net.minecraft.world.phys.BlockHitResult;
 
 public final class RuntimeSiloManagerBlock extends ResidenceManagerBlock {
     public RuntimeSiloManagerBlock(Properties properties) { super(properties, "stardewcraft:block/silo_manager"); }
-    @Override protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    @Override public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         if (!stack.is(ModItems.HAY.get())) return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         if (player instanceof ServerPlayer serverPlayer && level instanceof ServerLevel server) {
             var home = FarmFeed.home(server, pos);

@@ -188,7 +188,7 @@ final class SteelFalchionLineExecutionState
                 ) <= speedRadius * speedRadius) {
             speedTriggered = true;
             player.addEffect(new MobEffectInstance(
-                    ModMobEffects.SPEED,
+                    ModMobEffects.SPEED.get(),
                     SteelFalchionExecutionSupport.SPEED_DURATION_TICKS,
                     SteelFalchionExecutionSupport.LINE_SPEED_AMPLIFIER,
                     false,

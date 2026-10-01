@@ -43,9 +43,9 @@ public class StrawberryItem extends Item implements IStardewItem {
 
         var customModelDataType = Objects.requireNonNull(com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_MODEL_DATA, "CUSTOM_MODEL_DATA");
         var defaultData = Objects.requireNonNull(com.stardew.craft.port.net.minecraft.world.item.component.CustomModelData.DEFAULT, "DEFAULT_MODEL_DATA");
-        var customData = safeStack.getOrDefault(customModelDataType, defaultData);
+        var customData = com.stardew.craft.port.PortItemData.getOrDefault(safeStack, customModelDataType, defaultData);
         if (quality != QualityHelper.NORMAL && customData.equals(defaultData)) {
-            safeStack.set(customModelDataType,
+            com.stardew.craft.port.PortItemData.set(safeStack, customModelDataType,
                     new com.stardew.craft.port.net.minecraft.world.item.component.CustomModelData(quality));
         }
 

@@ -28,8 +28,10 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.world.InteractionHand;
+import com.stardew.craft.port.PortBlockInteraction;
 
-public class FruitTreeBlock extends Block implements EntityBlock {
+public class FruitTreeBlock extends Block implements EntityBlock, PortBlockInteraction {
     private static final VoxelShape TRUNK_SHAPE = Block.box(3.0, 0.0, 3.0, 13.0, 16.0, 13.0);
     private static boolean removingWholeTree;
 
@@ -60,7 +62,7 @@ public class FruitTreeBlock extends Block implements EntityBlock {
     }
 
     @Override
-    protected boolean canSurvive(@Nonnull BlockState state, @Nonnull LevelReader level, @Nonnull BlockPos pos) {
+    public boolean canSurvive(@Nonnull BlockState state, @Nonnull LevelReader level, @Nonnull BlockPos pos) {
         return FruitTreeRules.isValidGround(level.getBlockState(pos.below()));
     }
 
@@ -70,8 +72,15 @@ public class FruitTreeBlock extends Block implements EntityBlock {
         return new FruitTreeBlockEntity(pos, state);
     }
 
+    // PORT(1.20.1): replay the 1.21 useItemOn/useWithoutItem dispatch.
     @Override
-    protected InteractionResult useWithoutItem(@Nonnull BlockState state, @Nonnull Level level, @Nonnull BlockPos pos,
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player,
+            InteractionHand hand, BlockHitResult hit) {
+        return PortBlockInteraction.dispatch(this, state, level, pos, player, hand, hit);
+    }
+
+    @Override
+    public InteractionResult useWithoutItem(@Nonnull BlockState state, @Nonnull Level level, @Nonnull BlockPos pos,
                                                @Nonnull Player player, @Nonnull BlockHitResult hit) {
         return useRootWithoutItem(state, level, pos, player, hit);
     }
@@ -86,15 +95,15 @@ public class FruitTreeBlock extends Block implements EntityBlock {
     }
 
     @Override
-    public BlockState playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
+    public void playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
         if (!level.isClientSide()) {
             fellTree(level, pos, player);
         }
-        return super.playerWillDestroy(level, pos, state, player);
+        super.playerWillDestroy(level, pos, state, player);
     }
 
     @Override
-    protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean movedByPiston) {
+    public void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean movedByPiston) {
         super.onPlace(state, level, pos, oldState, movedByPiston);
         if (!level.isClientSide() && !state.is(oldState.getBlock()) && level instanceof ServerLevel serverLevel) {
             placeExtensions(serverLevel, pos);
@@ -103,7 +112,7 @@ public class FruitTreeBlock extends Block implements EntityBlock {
     }
 
     @Override
-    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
+    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
         if (!level.isClientSide() && !state.is(newState.getBlock()) && level instanceof ServerLevel serverLevel) {
             removeExtensions(serverLevel, pos);
             FruitTreeGrowthManager.get(serverLevel).removeMatureTree(serverLevel, pos);

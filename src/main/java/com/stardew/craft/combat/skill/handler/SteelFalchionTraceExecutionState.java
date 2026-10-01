@@ -89,7 +89,7 @@ final class SteelFalchionTraceExecutionState
                 new SteelFalchionTracePayload(true, durationTicks)
         );
         player.addEffect(new MobEffectInstance(
-                ModMobEffects.SPEED,
+                ModMobEffects.SPEED.get(),
                 durationTicks,
                 SteelFalchionExecutionSupport.TRACE_SPEED_AMPLIFIER,
                 false,

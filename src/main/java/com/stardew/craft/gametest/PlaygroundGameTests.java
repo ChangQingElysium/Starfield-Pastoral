@@ -1,5 +1,6 @@
 package com.stardew.craft.gametest;
 
+import com.stardew.craft.port.PortGameTests;
 import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.block.decor.PlaygroundBlock;
 import net.minecraft.core.BlockPos;
@@ -47,7 +48,7 @@ public final class PlaygroundGameTests {
     }
     @GameTest(templateNamespace="stardewcraft_playground",template="ring_utilities",timeoutTicks=200)
     public static void rotationCollisionClimbingAndSingleDrop(GameTestHelper h) {
-        var main=prepare(h);var level=h.getLevel();var player=h.makeMockPlayer(GameType.SURVIVAL);
+        var main=prepare(h);var level=h.getLevel();var player=PortGameTests.makeMockPlayer(h, GameType.SURVIVAL);
         for(var block:blocks())for(var facing:Direction.Plane.HORIZONTAL){
             player.setPos(Vec3.atBottomCenterOf(main.offset(8,0,8)));player.setYRot(facing.getOpposite().toYRot());
             var ctx=context(player,main,block);
@@ -82,7 +83,7 @@ public final class PlaygroundGameTests {
     }
     @GameTest(templateNamespace="stardewcraft_playground",template="ring_utilities",timeoutTicks=200)
     public static void blockedAndUnsupportedPlacementAreAtomic(GameTestHelper h) {
-        var main=prepare(h);var level=h.getLevel();var player=h.makeMockPlayer(GameType.SURVIVAL);
+        var main=prepare(h);var level=h.getLevel();var player=PortGameTests.makeMockPlayer(h, GameType.SURVIVAL);
         player.setPos(Vec3.atBottomCenterOf(main.offset(8,0,8)));
         for(var block:blocks())for(var facing:Direction.Plane.HORIZONTAL){
             player.setYRot(facing.getOpposite().toYRot());

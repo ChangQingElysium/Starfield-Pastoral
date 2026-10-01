@@ -25,7 +25,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlac
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import net.minecraftforge.event.server.ServerStoppingEvent;
 import com.stardew.craft.port.net.neoforged.neoforge.event.tick.LevelTickEvent;
 import com.stardew.craft.port.net.neoforged.neoforge.event.tick.PlayerTickEvent;
@@ -212,7 +212,7 @@ public final class FarmCaveRuntime {
             BlockState expected=legacyArchitecture.get(p);
             if(expected!=null && state.is(expected.getBlock()))continue;
             var be=level.getBlockEntity(at);
-            pending.put(p.immutable(),new Content(p.immutable(),state,be==null?null:be.saveWithFullMetadata(level.registryAccess())));
+            pending.put(p.immutable(),new Content(p.immutable(),state,be==null?null:be.saveWithFullMetadata()));
         }
         List<Move> moves=new ArrayList<>();Set<BlockPos> used=new HashSet<>();
         FarmInstance ownerFarm=farm(e.farmId);
@@ -255,7 +255,7 @@ public final class FarmCaveRuntime {
             BlockPos to=origin.offset(m.local);var be=level.getBlockEntity(to);
             if(be==null)throw new IllegalStateException("Missing migrated block entity at "+to);
             CompoundTag nbt=m.content.nbt.copy();nbt.putInt("x",to.getX());nbt.putInt("y",to.getY());nbt.putInt("z",to.getZ());
-            be.loadWithComponents(nbt,level.registryAccess());be.setChanged();level.sendBlockUpdated(to,m.content.state,m.content.state,Block.UPDATE_CLIENTS);
+            be.load(nbt);be.setChanged();level.sendBlockUpdated(to,m.content.state,m.content.state,Block.UPDATE_CLIENTS);
         }
     }
     public static void facilities(ServerLevel level,FarmInstance farm) {

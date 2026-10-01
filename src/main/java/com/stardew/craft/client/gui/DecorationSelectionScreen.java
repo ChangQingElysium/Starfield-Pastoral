@@ -90,7 +90,8 @@ public class DecorationSelectionScreen extends Screen {
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollY) {
+        double scrollX = 0.0D; // PORT(1.20.1): no horizontal scroll before 1.20.2
         if (scrollY > 0) {
             scrollRow -= 1;
             capScroll();
@@ -100,7 +101,7 @@ public class DecorationSelectionScreen extends Screen {
             capScroll();
             return true;
         }
-        return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
+        return super.mouseScrolled(mouseX, mouseY, scrollY);
     }
 
     @Override

@@ -1195,7 +1195,7 @@ public class AnimalWorldData extends SavedData {
 
     @Override
     @SuppressWarnings("null")
-    public CompoundTag save(@Nonnull CompoundTag tag, @Nonnull net.minecraft.core.HolderLookup.Provider provider) {
+    public CompoundTag save(@Nonnull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
         tag.putInt(
                 AnimalWorldDataMigrations.VERSION_FIELD,
                 AnimalWorldDataMigrations.CURRENT_VERSION);
@@ -1465,7 +1465,7 @@ public class AnimalWorldData extends SavedData {
     public static AnimalWorldData get(ServerLevel level) {
         ServerLevel overworld = level.getServer().overworld();
         return overworld.getDataStorage().computeIfAbsent(
-            new SavedData.Factory<>(AnimalWorldData::new, AnimalWorldData::load),
+            com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(AnimalWorldData::new, AnimalWorldData::load)), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(AnimalWorldData::new, AnimalWorldData::load)),
             DATA_NAME
         );
     }

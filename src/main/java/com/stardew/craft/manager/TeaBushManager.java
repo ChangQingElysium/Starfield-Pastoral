@@ -270,7 +270,7 @@ public final class TeaBushManager extends SavedData {
 
     public static TeaBushManager get(ServerLevel level) {
         return level.getServer().overworld().getDataStorage().computeIfAbsent(
-                new SavedData.Factory<>(TeaBushManager::new, TeaBushManager::load),
+                com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(TeaBushManager::new, TeaBushManager::load)), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(TeaBushManager::new, TeaBushManager::load)),
                 DATA_NAME);
     }
 

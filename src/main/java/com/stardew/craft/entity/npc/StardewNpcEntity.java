@@ -24,7 +24,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.LookControl;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import com.stardew.craft.port.net.minecraft.world.level.pathfinder.PathType;
+import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.util.Mth;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
@@ -85,13 +85,13 @@ public class StardewNpcEntity extends PathfinderMob implements GeoEntity {
         this.setNoGravity(false);
         // Keep AI loop enabled so MC navigation/pathfinder can run.
         this.setNoAi(false);
-        this.setPathfindingMalus(PathType.WATER, -1.0F);
-        this.setPathfindingMalus(PathType.WATER_BORDER, -1.0F);
-        this.setPathfindingMalus(PathType.LAVA, -1.0F);
-        this.setPathfindingMalus(PathType.DAMAGE_FIRE, -1.0F);
-        this.setPathfindingMalus(PathType.DANGER_FIRE, -1.0F);
-        this.setPathfindingMalus(PathType.DAMAGE_OTHER, -1.0F);
-        this.setPathfindingMalus(PathType.DANGER_OTHER, -1.0F);
+        this.setPathfindingMalus(BlockPathTypes.WATER, -1.0F);
+        this.setPathfindingMalus(BlockPathTypes.WATER_BORDER, -1.0F);
+        this.setPathfindingMalus(BlockPathTypes.LAVA, -1.0F);
+        this.setPathfindingMalus(BlockPathTypes.DAMAGE_FIRE, -1.0F);
+        this.setPathfindingMalus(BlockPathTypes.DANGER_FIRE, -1.0F);
+        this.setPathfindingMalus(BlockPathTypes.DAMAGE_OTHER, -1.0F);
+        this.setPathfindingMalus(BlockPathTypes.DANGER_OTHER, -1.0F);
         // Replace the default LookControl with one that yields to our facing state machine.
         // Vanilla LookControl.tick() sets yHeadRot every tick, fighting our smooth rotation.
         this.lookControl = new NpcLookControl(this);
@@ -136,16 +136,16 @@ public class StardewNpcEntity extends PathfinderMob implements GeoEntity {
     }
 
     @Override
-    protected void defineSynchedData(SynchedEntityData.Builder builder) {
-        super.defineSynchedData(builder);
-        builder.define(DATA_MOTION_PROFILE,new CompoundTag());
-        builder.define(DATA_NPC_ID, "");
-        builder.define(DATA_IS_WALKING, false);
-        builder.define(DATA_HAS_WALK_ANIMATION, false);
-        builder.define(DATA_ATTENTION, new CompoundTag());
-        builder.define(DATA_GUITAR_START, -1L);
-        builder.define(DATA_NATIVE_ACTIVITY, "");
-        builder.define(DATA_SCHEDULE_ACTIVITY, new CompoundTag());
+    protected void defineSynchedData() {
+        super.defineSynchedData();
+        this.entityData.define(DATA_MOTION_PROFILE,new CompoundTag());
+        this.entityData.define(DATA_NPC_ID, "");
+        this.entityData.define(DATA_IS_WALKING, false);
+        this.entityData.define(DATA_HAS_WALK_ANIMATION, false);
+        this.entityData.define(DATA_ATTENTION, new CompoundTag());
+        this.entityData.define(DATA_GUITAR_START, -1L);
+        this.entityData.define(DATA_NATIVE_ACTIVITY, "");
+        this.entityData.define(DATA_SCHEDULE_ACTIVITY, new CompoundTag());
     }
 
     @Override
@@ -179,7 +179,7 @@ public class StardewNpcEntity extends PathfinderMob implements GeoEntity {
     }
 
     @Override
-    public boolean canBeLeashed() {
+    public boolean canBeLeashed(Player player) {
         return false;
     }
 
@@ -623,12 +623,22 @@ public class StardewNpcEntity extends PathfinderMob implements GeoEntity {
 
     public boolean usesNativeAttention() { return entityData.get(DATA_MOTION_PROFILE).getBoolean("attention"); }
 
-    @Override
+    // PORT(1.20.1): 1.21 LivingEntity#getDimensions is sleeping ? SLEEPING_DIMENSIONS : getDefaultDimensions(pose)
+    // (times the 1.20.5+ scale attribute, always 1 here); 1.20.1 only has getDimensions.
+    @Override public net.minecraft.world.entity.EntityDimensions getDimensions(net.minecraft.world.entity.Pose pose) {
+        return pose == net.minecraft.world.entity.Pose.SLEEPING ? SLEEPING_DIMENSIONS : getDefaultDimensions(pose);
+    }
     public net.minecraft.world.entity.EntityDimensions getDefaultDimensions(net.minecraft.world.entity.Pose pose) {
         var profile=entityData.get(DATA_MOTION_PROFILE);
-        return profile.isEmpty() ? super.getDefaultDimensions(pose)
-                : net.minecraft.world.entity.EntityDimensions.scalable(profile.getFloat("width"),profile.getFloat("height"))
-                    .withEyeHeight(profile.getFloat("eye"));
+        return profile.isEmpty() ? super.getDimensions(pose)
+                : net.minecraft.world.entity.EntityDimensions.scalable(profile.getFloat("width"),profile.getFloat("height"));
+    }
+
+    // PORT(1.20.1): 1.20.5+ EntityDimensions#withEyeHeight carried the profile eye height; 1.20.1 asks the entity.
+    @Override
+    protected float getStandingEyeHeight(net.minecraft.world.entity.Pose pose, net.minecraft.world.entity.EntityDimensions dimensions) {
+        var profile=entityData.get(DATA_MOTION_PROFILE);
+        return profile.isEmpty() ? super.getStandingEyeHeight(pose, dimensions) : profile.getFloat("eye");
     }
 
     @Override

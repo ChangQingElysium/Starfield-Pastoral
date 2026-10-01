@@ -1,5 +1,6 @@
 package com.stardew.craft.combat;
 
+import com.stardew.craft.port.PortItemData;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -162,7 +163,7 @@ public final class WeaponForgeData {
             return empty();
         }
 
-        CustomData data = stack.get(DataComponents.CUSTOM_DATA);
+        CustomData data = PortItemData.get(stack, DataComponents.CUSTOM_DATA);
         if (data == null) {
             return empty();
         }
@@ -206,11 +207,11 @@ public final class WeaponForgeData {
         if (stack == null || stack.isEmpty()) {
             return;
         }
-        CustomData data = stack.get(DataComponents.CUSTOM_DATA);
+        CustomData data = PortItemData.get(stack, DataComponents.CUSTOM_DATA);
         CompoundTag root = data != null ? data.copyTag() : new CompoundTag();
         if (!root.contains(TAG_STARDEW_FORGE, Tag.TAG_COMPOUND)) {
             root.put(TAG_STARDEW_FORGE, toTag(empty()));
-            stack.set(DataComponents.CUSTOM_DATA, CustomData.of(root));
+            PortItemData.set(stack, DataComponents.CUSTOM_DATA, CustomData.of(root));
         }
         syncAppearanceModelData(stack, read(stack).appearanceWeaponId());
     }
@@ -219,10 +220,10 @@ public final class WeaponForgeData {
         if (stack == null || stack.isEmpty()) {
             return;
         }
-        CustomData data = stack.get(DataComponents.CUSTOM_DATA);
+        CustomData data = PortItemData.get(stack, DataComponents.CUSTOM_DATA);
         CompoundTag root = data != null ? data.copyTag() : new CompoundTag();
         root.put(TAG_STARDEW_FORGE, toTag(state));
-        stack.set(DataComponents.CUSTOM_DATA, CustomData.of(root));
+        PortItemData.set(stack, DataComponents.CUSTOM_DATA, CustomData.of(root));
         syncAppearanceModelData(stack, state.appearanceWeaponId());
     }
 
@@ -230,13 +231,13 @@ public final class WeaponForgeData {
         if (stack == null || stack.isEmpty()) {
             return;
         }
-        CustomData data = stack.get(DataComponents.CUSTOM_DATA);
+        CustomData data = PortItemData.get(stack, DataComponents.CUSTOM_DATA);
         if (data == null) {
             return;
         }
         CompoundTag root = data.copyTag();
         root.remove(TAG_STARDEW_FORGE);
-        stack.set(DataComponents.CUSTOM_DATA, CustomData.of(root));
+        PortItemData.set(stack, DataComponents.CUSTOM_DATA, CustomData.of(root));
         syncAppearanceModelData(stack, "");
     }
 
@@ -254,7 +255,7 @@ public final class WeaponForgeData {
         if (appearanceWeaponId != null && !appearanceWeaponId.isEmpty()) {
             int modelData = appearanceCustomModelData(appearanceWeaponId);
             if (modelData != 0) {
-                stack.set(DataComponents.CUSTOM_MODEL_DATA, new CustomModelData(modelData));
+                PortItemData.set(stack, DataComponents.CUSTOM_MODEL_DATA, new CustomModelData(modelData));
             } else {
                 clearAppearanceModelData(stack);
             }
@@ -265,9 +266,9 @@ public final class WeaponForgeData {
     }
 
     private static void clearAppearanceModelData(ItemStack stack) {
-        CustomModelData modelData = stack.get(DataComponents.CUSTOM_MODEL_DATA);
+        CustomModelData modelData = PortItemData.get(stack, DataComponents.CUSTOM_MODEL_DATA);
         if (modelData != null && isAppearanceCustomModelData(modelData.value())) {
-            stack.remove(DataComponents.CUSTOM_MODEL_DATA);
+            PortItemData.remove(stack, DataComponents.CUSTOM_MODEL_DATA);
         }
     }
 

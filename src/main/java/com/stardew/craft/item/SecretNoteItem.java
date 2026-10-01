@@ -1,5 +1,6 @@
 package com.stardew.craft.item;
 
+import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.secretnote.SecretNoteService;
 import com.stardew.craft.secretnote.SecretNoteRegistry;
 import com.stardew.craft.port.net.minecraft.core.component.DataComponents;
@@ -48,22 +49,22 @@ public final class SecretNoteItem extends Item implements IStardewItem {
                 || displayNumber < FIRST_DISPLAY_NOTE || displayNumber > LAST_DISPLAY_NOTE) {
             return;
         }
-        var tag = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
+        var tag = PortItemData.getOrDefault(stack, DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
         tag.putInt(TAG_DISPLAY_NUMBER, displayNumber);
-        stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+        PortItemData.set(stack, DataComponents.CUSTOM_DATA, CustomData.of(tag));
         // CreativeModeTab uses component identity when deduplicating entries. Keep a
         // dedicated marker too, matching SpecificBaitItem's established variant path.
-        stack.set(DataComponents.CUSTOM_MODEL_DATA,
+        PortItemData.set(stack, DataComponents.CUSTOM_MODEL_DATA,
                 new CustomModelData(CREATIVE_VARIANT_MODEL_BASE + displayNumber));
     }
 
     public static int getBoundDisplayNumber(ItemStack stack) {
-        var tag = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
+        var tag = PortItemData.getOrDefault(stack, DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
         int displayNumber = tag.contains(TAG_DISPLAY_NUMBER) ? tag.getInt(TAG_DISPLAY_NUMBER) : -1;
         if (displayNumber >= FIRST_DISPLAY_NOTE && displayNumber <= LAST_DISPLAY_NOTE) {
             return displayNumber;
         }
-        CustomModelData marker = stack.getOrDefault(DataComponents.CUSTOM_MODEL_DATA, CustomModelData.DEFAULT);
+        CustomModelData marker = PortItemData.getOrDefault(stack, DataComponents.CUSTOM_MODEL_DATA, CustomModelData.DEFAULT);
         for (int candidate = FIRST_DISPLAY_NOTE; candidate <= LAST_DISPLAY_NOTE; candidate++) {
             if (marker.equals(new CustomModelData(CREATIVE_VARIANT_MODEL_BASE + candidate))) {
                 return candidate;

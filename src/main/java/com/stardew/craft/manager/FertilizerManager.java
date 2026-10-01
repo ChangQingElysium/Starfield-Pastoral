@@ -46,10 +46,13 @@ public class FertilizerManager extends SavedData {
                 .overworld()
                 .getDataStorage()
                 .computeIfAbsent(
-                        new SavedData.Factory<>(
+                        com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(
                                 FertilizerManager::new,
                                 FertilizerManager::load
-                        ),
+                        )), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(
+                                FertilizerManager::new,
+                                FertilizerManager::load
+                        )),
                         DATA_NAME
                 );
     }
@@ -260,7 +263,7 @@ public class FertilizerManager extends SavedData {
 
     @SuppressWarnings("null")
     @Override
-    public CompoundTag save(@SuppressWarnings("null") CompoundTag tag, @SuppressWarnings("null") net.minecraft.core.HolderLookup.Provider provider) {
+    public CompoundTag save(@SuppressWarnings("null") CompoundTag tag) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
         ListTag listTag = new ListTag();
         
         List<Map.Entry<GlobalPos, FertilizerType>> entries =

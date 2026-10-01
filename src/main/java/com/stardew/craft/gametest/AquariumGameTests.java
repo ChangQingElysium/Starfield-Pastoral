@@ -1,5 +1,7 @@
 package com.stardew.craft.gametest;
 
+import com.stardew.craft.port.PortGameTests;
+import com.stardew.craft.port.PortItemData;
 import com.google.gson.JsonParser;
 import com.stardew.craft.aquarium.AquariumMotion;
 import com.stardew.craft.aquarium.AquariumRules;
@@ -43,7 +45,7 @@ public final class AquariumGameTests {
         return h.absolutePos(new BlockPos(7,1,7));
     }
     private static Player player(GameTestHelper h, BlockPos pos, Direction facing, ItemStack stack) {
-        var p=h.makeMockPlayer(GameType.SURVIVAL);p.setPos(Vec3.atBottomCenterOf(pos.offset(5,0,5)));
+        var p=PortGameTests.makeMockPlayer(h, GameType.SURVIVAL);p.setPos(Vec3.atBottomCenterOf(pos.offset(5,0,5)));
         p.setYRot(facing.getOpposite().toYRot());p.setItemInHand(InteractionHand.MAIN_HAND,stack);return p;
     }
     private static BlockPlaceContext context(Player p,BlockPos pos) {
@@ -89,10 +91,10 @@ public final class AquariumGameTests {
         for(int i=0;i<3;i++)h.assertTrue(tank.insert(new ItemStack(hatItem))==6+i,"Hat rejected despite wearer");
         h.assertTrue(tank.insert(object("715"))<0,"Fourth ground creature accepted");
         var mirror=new AquariumBlockEntity(pos,tank.getBlockState());
-        mirror.onDataPacket(null,tank.getUpdatePacket(),h.getLevel().registryAccess());
+        mirror.onDataPacket(null,tank.getUpdatePacket());
         for(int i=0;i<9;i++) {
             var removed=tank.removeItem(i,1);h.assertTrue(!removed.isEmpty(),"Lost stored item");
-            mirror.onDataPacket(null,tank.getUpdatePacket(),h.getLevel().registryAccess());
+            mirror.onDataPacket(null,tank.getUpdatePacket());
             for(int j=0;j<AquariumRules.SIZE;j++)h.assertTrue(ItemStack.matches(tank.getItem(j),mirror.getItem(j)),"Ghost fish/hat in live snapshot");
         }
         h.assertTrue(tank.isEmpty()&&mirror.isEmpty(),"Last removal did not clear tank");h.succeed();
@@ -101,7 +103,7 @@ public final class AquariumGameTests {
     public static void menuTransfersOnePerSlotAndSharesAuthoritativeContents(GameTestHelper h) {
         var pos=prepare(h);var tank=place(h,pos,Direction.NORTH,new ItemStack(ModItems.LARGE_FISH_TANK.get()));
         var p=player(h,pos,Direction.NORTH,ItemStack.EMPTY);
-        var fish=object("145").copyWithCount(20);fish.set(DataComponents.CUSTOM_NAME,Component.literal("Named catch"));
+        var fish=object("145").copyWithCount(20);PortItemData.set(fish, DataComponents.CUSTOM_NAME,Component.literal("Named catch"));
         p.getInventory().setItem(9,fish);
         var a=new AquariumMenu(1,p.getInventory(),tank);var b=new AquariumMenu(2,p.getInventory(),tank);
         // The native quick-move loop repeats once per empty slot; two viewers share the same cap.
@@ -118,7 +120,7 @@ public final class AquariumGameTests {
     public static void packedContentsSurviveMainAndExtensionBreakAtEveryFacing(GameTestHelper h) {
         for(Direction direction:new Direction[]{Direction.NORTH,Direction.EAST,Direction.SOUTH,Direction.WEST})for(boolean extension:new boolean[]{false,true}) {
             var pos=prepare(h);var tank=place(h,pos,direction,new ItemStack(ModItems.LARGE_FISH_TANK.get()));
-            var fish=object("145");fish.set(DataComponents.CUSTOM_NAME,Component.literal("Keep this fish"));
+            var fish=object("145");PortItemData.set(fish, DataComponents.CUSTOM_NAME,Component.literal("Keep this fish"));
             com.stardew.craft.item.quality.QualityHelper.setQuality(fish,3);
             tank.insert(fish);tank.insert(object("152"));long seed=tank.layoutSeed();
             BlockPos broken=extension?pos.above():pos;
@@ -157,7 +159,7 @@ public final class AquariumGameTests {
         for(GameType mode:new GameType[]{GameType.SURVIVAL,GameType.CREATIVE})for(boolean filled:new boolean[]{false,true})for(boolean extension:new boolean[]{false,true}) {
             var pos=prepare(h);var tank=place(h,pos,Direction.NORTH,new ItemStack(ModItems.LARGE_FISH_TANK.get()));
             if(filled)tank.insert(object("145"));
-            var p=h.makeMockPlayer(mode);mode.updatePlayerAbilities(p.getAbilities());
+            var p=PortGameTests.makeMockPlayer(h, mode);mode.updatePlayerAbilities(p.getAbilities());
             var broken=extension?pos.above():pos;var state=h.getLevel().getBlockState(broken);
             state.getBlock().playerWillDestroy(h.getLevel(),broken,state,p);
             h.getLevel().destroyBlock(broken,mode!=GameType.CREATIVE);

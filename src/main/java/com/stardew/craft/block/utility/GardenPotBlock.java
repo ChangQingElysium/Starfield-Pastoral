@@ -38,9 +38,10 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import com.stardew.craft.port.PortBlockInteraction;
 
 /** Stardew Valley's Garden Pot, with Minecraft crop and automation adapters. */
-public final class GardenPotBlock extends FarmBlock implements EntityBlock {
+public final class GardenPotBlock extends FarmBlock implements EntityBlock, PortBlockInteraction {
     private static final VoxelShape POT_SHAPE = Block.box(0.5D, 0.0D, 0.5D, 15.5D, 11.0D, 15.5D);
     private static boolean seasonRuleRegistered;
 
@@ -85,22 +86,22 @@ public final class GardenPotBlock extends FarmBlock implements EntityBlock {
     }
 
     @Override
-    protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+    public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return POT_SHAPE;
     }
 
     @Override
-    protected VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+    public VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return POT_SHAPE;
     }
 
     @Override
-    protected boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
+    public boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
         return true;
     }
 
     @Override
-    protected void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+    public void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
         // A Garden Pot is a permanent container and must never decay into dirt.
     }
 
@@ -110,12 +111,12 @@ public final class GardenPotBlock extends FarmBlock implements EntityBlock {
     }
 
     @Override
-    protected List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
+    public List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
         return List.of(new ItemStack(ModBlocks.GARDEN_POT.get()));
     }
 
     @Override
-    public BlockState playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
+    public void playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
         if (!level.isClientSide) {
             BlockPos cropPos = pos.above();
             if (isSupportedPlant(level.getBlockState(cropPos))) {
@@ -125,7 +126,7 @@ public final class GardenPotBlock extends FarmBlock implements EntityBlock {
                 pot.clearStoredOutputs();
             }
         }
-        return super.playerWillDestroy(level, pos, state, player);
+        super.playerWillDestroy(level, pos, state, player);
     }
 
     @Override
@@ -160,14 +161,21 @@ public final class GardenPotBlock extends FarmBlock implements EntityBlock {
     }
 
     @Override
-    protected void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+    public void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
         if (level.isRainingAt(pos.above()) && state.getValue(MOISTURE) < 7) {
             level.setBlock(pos, state.setValue(MOISTURE, 7), Block.UPDATE_ALL);
         }
     }
 
+    // PORT(1.20.1): replay the 1.21 useItemOn/useWithoutItem dispatch.
     @Override
-    protected ItemInteractionResult useItemOn(
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player,
+            InteractionHand hand, BlockHitResult hit) {
+        return PortBlockInteraction.dispatch(this, state, level, pos, player, hand, hit);
+    }
+
+    @Override
+    public ItemInteractionResult useItemOn(
             ItemStack stack, BlockState state, Level level, BlockPos pos,
             Player player, InteractionHand hand, BlockHitResult hit) {
         if (level.getBlockEntity(pos) instanceof GardenPotBlockEntity pot) {
@@ -194,7 +202,7 @@ public final class GardenPotBlock extends FarmBlock implements EntityBlock {
     }
 
     @Override
-    protected InteractionResult useWithoutItem(
+    public InteractionResult useWithoutItem(
             BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         if (level.isClientSide) {
             return InteractionResult.SUCCESS;
@@ -214,7 +222,7 @@ public final class GardenPotBlock extends FarmBlock implements EntityBlock {
     }
 
     @Override
-    protected void onRemove(
+    public void onRemove(
             BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
         if (!state.is(newState.getBlock()) && !movedByPiston) {
             if (!level.isClientSide) {

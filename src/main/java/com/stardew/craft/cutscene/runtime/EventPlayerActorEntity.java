@@ -66,9 +66,9 @@ public class EventPlayerActorEntity extends Mob {
     }
 
     @Override
-    protected void defineSynchedData(@javax.annotation.Nonnull SynchedEntityData.Builder builder) {
-        super.defineSynchedData(builder);
-        builder.define(DATA_IS_WALKING, false);
+    protected void defineSynchedData() {
+        super.defineSynchedData();
+        this.entityData.define(DATA_IS_WALKING, false);
     }
 
     public boolean isWalking() {
@@ -158,7 +158,7 @@ public class EventPlayerActorEntity extends Mob {
     public boolean canBeCollidedWith() { return false; }
 
     @Override
-    public boolean canBeLeashed() { return false; }
+    public boolean canBeLeashed(net.minecraft.world.entity.player.Player player) { return false; }
 
     @Override
     public Component getName() {

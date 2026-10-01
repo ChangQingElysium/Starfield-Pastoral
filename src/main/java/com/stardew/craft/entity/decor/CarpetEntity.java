@@ -46,8 +46,8 @@ public final class CarpetEntity extends Entity {
     }
 
     @Override
-    protected void defineSynchedData(SynchedEntityData.Builder builder) {
-        builder.define(DATA_CARPET_STATE, Blocks.AIR.defaultBlockState());
+    protected void defineSynchedData() {
+        this.entityData.define(DATA_CARPET_STATE, Blocks.AIR.defaultBlockState());
     }
 
     public BlockState getCarpetState() {

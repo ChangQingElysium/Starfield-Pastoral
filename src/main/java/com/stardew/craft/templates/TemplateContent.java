@@ -1,5 +1,6 @@
 package com.stardew.craft.templates;
 
+import com.stardew.craft.port.PortBlockProperties;
 import com.stardew.craft.StardewCraft;
 
 import java.util.Collections;
@@ -122,7 +123,7 @@ public final class TemplateContent {
             default -> null;
         };
         if (reference != null) {
-            return Block.Properties.ofFullCopy(reference);
+            return PortBlockProperties.ofFullCopy(reference);
         }
         Block.Properties properties = Block.Properties.of()
                 .mapColor(MapColor.WOOD)

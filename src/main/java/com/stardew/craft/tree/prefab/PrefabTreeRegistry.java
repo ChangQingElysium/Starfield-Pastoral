@@ -33,7 +33,7 @@ public final class PrefabTreeRegistry extends SavedData {
 	@SuppressWarnings("null")
 	public static PrefabTreeRegistry get(ServerLevel level) {
 		return level.getDataStorage().computeIfAbsent(
-				new SavedData.Factory<>(PrefabTreeRegistry::new, PrefabTreeRegistry::load, null),
+				com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(PrefabTreeRegistry::new, PrefabTreeRegistry::load, null)), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(PrefabTreeRegistry::new, PrefabTreeRegistry::load, null)),
 				DATA_NAME);
 	}
 
@@ -88,7 +88,7 @@ public final class PrefabTreeRegistry extends SavedData {
 
 	@SuppressWarnings("null")
 	@Override
-	public CompoundTag save(@SuppressWarnings("null") CompoundTag tag, @SuppressWarnings("null") HolderLookup.Provider provider) {
+	public CompoundTag save(@SuppressWarnings("null") CompoundTag tag) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
 		ListTag list = new ListTag();
 		for (PrefabTreeInstance instance : byRoot.values()) {
 			CompoundTag t = new CompoundTag();

@@ -1,5 +1,6 @@
 package com.stardew.craft.item.tool;
 
+import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.item.IStardewItem;
 import com.stardew.craft.item.ModItems;
 import com.stardew.craft.enchantment.StardewEnchantments;
@@ -37,8 +38,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import com.stardew.craft.port.net.neoforged.neoforge.common.ItemAbility;
-import com.stardew.craft.port.net.neoforged.neoforge.common.ItemAbilities;
+import net.minecraftforge.common.ToolAction;
+import net.minecraftforge.common.ToolActions;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -88,9 +89,9 @@ public class HoeItem extends Item implements IStardewItem {
     }
 
     @Override
-    public boolean canPerformAction(@SuppressWarnings("null") ItemStack stack, @SuppressWarnings("null") ItemAbility ability) {
+    public boolean canPerformAction(@SuppressWarnings("null") ItemStack stack, @SuppressWarnings("null") ToolAction ability) {
         // 关键：让方块的 getToolModifiedState(ctx, HOE_TILL, ...) 能识别这是“锄头能力”。
-        return ItemAbilities.DEFAULT_HOE_ACTIONS.contains(ability);
+        return ToolActions.DEFAULT_HOE_ACTIONS.contains(ability);
     }
 
     @Override
@@ -117,7 +118,7 @@ public class HoeItem extends Item implements IStardewItem {
     // ================= 使用逻辑（按水壶风格） =================
 
     @Override
-    public int getUseDuration(@SuppressWarnings("null") ItemStack stack, @SuppressWarnings("null") LivingEntity entity) {
+    public int getUseDuration(@SuppressWarnings("null") ItemStack stack) {
         return 72000;
     }
 
@@ -208,7 +209,7 @@ public class HoeItem extends Item implements IStardewItem {
             return;
         }
 
-        int usedTicks = getUseDuration(stack, livingEntity) - remainingUseDuration;
+        int usedTicks = getUseDuration(stack) - remainingUseDuration;
 
         // 与喷壶保持一致：每级蓄力播放提示音
         int ticksPerLevel = StardewEnchantments.has(stack, StardewEnchantments.SWIFT) ? 10 : 15;
@@ -230,7 +231,7 @@ public class HoeItem extends Item implements IStardewItem {
             return;
         }
 
-        int activeTicks = stack.getUseDuration(entity) - timeCharged;
+        int activeTicks = stack.getUseDuration() - timeCharged;
         // 点按：强制当作 0 级（不算“蓄力锄”）
         int chargeLevel;
         if (activeTicks < TAP_THRESHOLD_TICKS) {
@@ -347,7 +348,7 @@ public class HoeItem extends Item implements IStardewItem {
 
     private static CompoundTag getCustomTag(ItemStack stack) {
         @SuppressWarnings("null")
-        CustomData data = stack.get(DataComponents.CUSTOM_DATA);
+        CustomData data = PortItemData.get(stack, DataComponents.CUSTOM_DATA);
         if (data == null) {
             return new CompoundTag();
         }
@@ -357,10 +358,10 @@ public class HoeItem extends Item implements IStardewItem {
     @SuppressWarnings("null")
     private static void setCustomTag(ItemStack stack, CompoundTag tag) {
         if (tag.isEmpty()) {
-            stack.remove(DataComponents.CUSTOM_DATA);
+            PortItemData.remove(stack, DataComponents.CUSTOM_DATA);
             return;
         }
-        stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+        PortItemData.set(stack, DataComponents.CUSTOM_DATA, CustomData.of(tag));
     }
 
     private void applyCooldown(Player player) {
@@ -515,7 +516,7 @@ public class HoeItem extends Item implements IStardewItem {
         UseOnContext ctx = new UseOnContext(player, hand, hit);
 
         @SuppressWarnings("null")
-        BlockState modified = state.getToolModifiedState(ctx, ItemAbilities.HOE_TILL, false);
+        BlockState modified = state.getToolModifiedState(ctx, ToolActions.HOE_TILL, false);
         return modified != null && modified != state;
     }
 
@@ -543,7 +544,7 @@ public class HoeItem extends Item implements IStardewItem {
         UseOnContext ctx = new UseOnContext(player, hand, hit);
 
         @SuppressWarnings("null")
-        BlockState modified = state.getToolModifiedState(ctx, ItemAbilities.HOE_TILL, false);
+        BlockState modified = state.getToolModifiedState(ctx, ToolActions.HOE_TILL, false);
         if (modified == null || modified == state) {
             return false;
         }
@@ -613,7 +614,7 @@ public class HoeItem extends Item implements IStardewItem {
 
     @SuppressWarnings("null")
     private static InteractionHand resolveHand(Player player, ItemStack stack) {
-        if (ItemStack.isSameItemSameComponents(player.getOffhandItem(), stack)) {
+        if (ItemStack.isSameItemSameTags(player.getOffhandItem(), stack)) {
             return InteractionHand.OFF_HAND;
         }
         return InteractionHand.MAIN_HAND;
@@ -621,7 +622,7 @@ public class HoeItem extends Item implements IStardewItem {
 
     @SuppressWarnings("null")
     @Override
-    public void appendHoverText(@SuppressWarnings("null") ItemStack stack, @SuppressWarnings("null") TooltipContext context, @SuppressWarnings("null") List<Component> tooltipComponents, @SuppressWarnings("null") TooltipFlag tooltipFlag) {
-        super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
+    public void appendHoverText(@SuppressWarnings("null") ItemStack stack, @javax.annotation.Nullable Level level, @SuppressWarnings("null") List<Component> tooltipComponents, @SuppressWarnings("null") TooltipFlag tooltipFlag) {
+        super.appendHoverText(stack, level, tooltipComponents, tooltipFlag);
     }
 }

@@ -1,5 +1,6 @@
 package com.stardew.craft.gametest;
 
+import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.block.crop.BlueJazzCropBlock;
 import com.stardew.craft.block.crop.StardewCropBlock;
@@ -79,7 +80,7 @@ public final class BlueJazzCropGameTests {
                 level.setBlock(pos.above(), mature.setValue(BlueJazzCropBlock.HALF, DoubleBlockHalf.UPPER), 2);
                 var harvest = crop.tryHarvestByJunimo(level, pos, mature, 0, stack -> {});
                 helper.assertTrue(harvest.is(ModItems.BLUE_JAZZ.get()) && harvest.getCount() == 1, "Wrong harvest color=" + i + " stack=" + harvest + " state=" + level.getBlockState(pos));
-                var data = harvest.get(DataComponents.CUSTOM_DATA);
+                var data = PortItemData.get(harvest, DataComponents.CUSTOM_DATA);
                 helper.assertTrue(data != null && data.copyTag().getInt("FlowerColor") == i, "Harvest color changed");
                 helper.assertTrue(level.getBlockState(pos).isAir() && level.getBlockState(pos.above()).isAir(),
                         "Harvest left a carrier");

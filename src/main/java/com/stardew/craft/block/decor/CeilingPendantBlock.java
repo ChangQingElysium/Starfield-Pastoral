@@ -27,7 +27,7 @@ public final class CeilingPendantBlock extends MapDecorStaticBlock {
     }
 
     @Override
-    protected boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
+    public boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
         if (!super.canSurvive(state, level, pos)) return false;
         BlockPos main = state.getValue(PART) == Part.MAIN ? pos : findMainPos(level, pos, state);
         return main != null && Block.canSupportCenter(level, main.above(), Direction.DOWN);

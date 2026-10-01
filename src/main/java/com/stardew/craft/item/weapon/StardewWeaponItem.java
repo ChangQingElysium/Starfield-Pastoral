@@ -84,14 +84,17 @@ public class StardewWeaponItem extends SwordItem
 
     @SuppressWarnings("null")
     @Override
-    public ItemAttributeModifiers getDefaultAttributeModifiers() {
+    // PORT(1.20.1): items expose default attribute modifiers per slot instead of a default component.
+    public com.google.common.collect.Multimap<net.minecraft.world.entity.ai.attributes.Attribute,
+            net.minecraft.world.entity.ai.attributes.AttributeModifier> getDefaultAttributeModifiers(
+            net.minecraft.world.entity.EquipmentSlot slot) {
         if (weaponData == null) {
-            return super.getDefaultAttributeModifiers();
+            return super.getDefaultAttributeModifiers(slot);
         }
         return WeaponItemSupport.createAttributeModifiers(
                 weaponId,
                 weaponData
-        );
+        ).portModifiers(slot);
     }
 
     @Override
@@ -148,12 +151,10 @@ public class StardewWeaponItem extends SwordItem
     }
 
     @Override
-    public void appendHoverText(
-            @SuppressWarnings("null") ItemStack stack,
-            @SuppressWarnings("null") TooltipContext context,
+    public void appendHoverText(@SuppressWarnings("null") ItemStack stack,
+            @javax.annotation.Nullable Level level,
             @SuppressWarnings("null") List<Component> tooltipComponents,
-            @SuppressWarnings("null") TooltipFlag tooltipFlag
-    ) {
+            @SuppressWarnings("null") TooltipFlag tooltipFlag) {
         if (weaponData != null) {
             ensureWeaponStats(stack);
             boolean expanded =
@@ -248,9 +249,11 @@ public class StardewWeaponItem extends SwordItem
             return attackDamage;
         }
 
+        // PORT(1.20.1): 1.20.5+ getIncorrectBlocksForDrops() == INCORRECT_FOR_IRON_TOOL; 1.20.1 ranks unsorted tiers by
+        // mining level, and iron's is 2.
         @Override
-        public TagKey<Block> getIncorrectBlocksForDrops() {
-            return BlockTags.INCORRECT_FOR_IRON_TOOL;
+        public int getLevel() {
+            return 2;
         }
 
         @Override

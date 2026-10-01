@@ -3,12 +3,15 @@ package com.stardew.craft.mixin;
 import com.llamalad7.mixinextras.injector.WrapWithCondition;
 import com.stardew.craft.time.StardewTimePauseService;
 import net.minecraft.server.level.ServerLevel;
-import com.stardew.craft.port.net.minecraft.world.TickRateManager;
+import net.minecraft.world.entity.raid.Raids;
+import net.minecraft.world.level.border.WorldBorder;
+import net.minecraft.world.level.dimension.end.EndDragonFight;
+import net.minecraft.world.ticks.LevelTicks;
+import java.util.function.BiConsumer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.entity.EntityTickList;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
 
 import java.util.function.Consumer;
 
@@ -20,15 +23,50 @@ import java.util.function.Consumer;
 @SuppressWarnings("deprecation") // EntityTickList is the vanilla 1.21.1 entity-tick call site.
 public abstract class ServerLevelStardewPauseMixin {
 
-    @Redirect(
-        method = "tick",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/world/TickRateManager;runsNormally()Z"
-        )
-    )
-    private boolean stardewcraft$freezeTimedSimulation(TickRateManager tickRateManager) {
-        return !stardewcraft$isPaused() && tickRateManager.runsNormally();
+    // PORT(1.20.1): 1.21 gates world border, weather, time, scheduled block/fluid ticks, raids, block events and
+    // the dragon fight behind one TickRateManager#runsNormally() call, which this mixin redirected. 1.20.1 has no
+    // tick rate manager, so each of those calls is wrapped with the same pause condition.
+    @WrapWithCondition(method = "tick", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/level/border/WorldBorder;tick()V"))
+    private boolean stardewcraft$freezeWorldBorder(WorldBorder border) {
+        return !stardewcraft$isPaused();
+    }
+
+    @WrapWithCondition(method = "tick", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/server/level/ServerLevel;advanceWeatherCycle()V"))
+    private boolean stardewcraft$freezeWeather(ServerLevel level) {
+        return !stardewcraft$isPaused();
+    }
+
+    @WrapWithCondition(method = "tick", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/server/level/ServerLevel;tickTime()V"))
+    private boolean stardewcraft$freezeTime(ServerLevel level) {
+        return !stardewcraft$isPaused();
+    }
+
+    @WrapWithCondition(method = "tick", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/ticks/LevelTicks;tick(JILjava/util/function/BiConsumer;)V"))
+    private boolean stardewcraft$freezeScheduledTicks(LevelTicks<?> ticks, long gameTime, int maxTicks,
+            BiConsumer<?, ?> ticker) {
+        return !stardewcraft$isPaused();
+    }
+
+    @WrapWithCondition(method = "tick", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/entity/raid/Raids;tick()V"))
+    private boolean stardewcraft$freezeRaids(Raids raids) {
+        return !stardewcraft$isPaused();
+    }
+
+    @WrapWithCondition(method = "tick", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/server/level/ServerLevel;runBlockEvents()V"))
+    private boolean stardewcraft$freezeBlockEvents(ServerLevel level) {
+        return !stardewcraft$isPaused();
+    }
+
+    @WrapWithCondition(method = "tick", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/level/dimension/end/EndDragonFight;tick()V"))
+    private boolean stardewcraft$freezeDragonFight(EndDragonFight fight) {
+        return !stardewcraft$isPaused();
     }
 
     @WrapWithCondition(

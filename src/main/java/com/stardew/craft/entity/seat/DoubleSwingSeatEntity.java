@@ -1,5 +1,6 @@
 package com.stardew.craft.entity.seat;
 
+import com.stardew.craft.port.PortEntities;
 import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.block.decor.DoubleSwingBlock;
 import com.stardew.craft.block.decor.DoubleSwingMotion;
@@ -30,8 +31,8 @@ public final class DoubleSwingSeatEntity extends Entity implements AnimatedDecor
     public DoubleSwingSeatEntity(EntityType<? extends DoubleSwingSeatEntity> type, Level level) {
         super(type, level); noPhysics = true; blocksBuilding = false;
     }
-    @Override protected void defineSynchedData(SynchedEntityData.Builder builder) {
-        builder.define(MAIN, BlockPos.ZERO); builder.define(SLOT, 0); builder.define(FACING, Direction.NORTH); builder.define(FROZEN, false);
+    @Override protected void defineSynchedData() {
+        this.entityData.define(MAIN, BlockPos.ZERO); this.entityData.define(SLOT, 0); this.entityData.define(FACING, Direction.NORTH); this.entityData.define(FROZEN, false);
     }
     public BlockPos mainPos() { return entityData.get(MAIN); }
     public int slot() { return entityData.get(SLOT); }
@@ -46,7 +47,7 @@ public final class DoubleSwingSeatEntity extends Entity implements AnimatedDecor
         return DoubleSwingMotion.angle(slot(), DoubleSwingMotion.seconds(level().getGameTime(), partialTick), entityData.get(FROZEN));
     }
     private void updatePosition() {
-        setPos(riderFeet(0).add(0, Player.DEFAULT_VEHICLE_ATTACHMENT.y, 0));
+        setPos(riderFeet(0).add(0, PortEntities.PLAYER_VEHICLE_ATTACHMENT.y, 0));
     }
     @Override public void tick() {
         super.tick();
@@ -60,7 +61,11 @@ public final class DoubleSwingSeatEntity extends Entity implements AnimatedDecor
         }
         updatePosition();
     }
-    @Override public Vec3 getPassengerRidingPosition(Entity passenger) { return position(); }
+    // PORT(1.20.1): 1.20.1 has no getPassengerRidingPosition; replay the 1.21 positionRider with it.
+    @Override protected void positionRider(Entity passenger, Entity.MoveFunction callback) {
+        if (hasPassenger(passenger)) com.stardew.craft.port.PortEntities.positionRider(passenger, getPassengerRidingPosition(passenger), callback);
+    }
+    public Vec3 getPassengerRidingPosition(Entity passenger) { return position(); }
     @Override protected boolean canAddPassenger(Entity passenger) { return !isVehicle(); }
     @Override public boolean shouldRiderSit() { return true; }
     @Override public boolean shouldBeSaved() { return false; }

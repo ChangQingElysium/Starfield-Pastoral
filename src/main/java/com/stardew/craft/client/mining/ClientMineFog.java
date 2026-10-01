@@ -5,7 +5,7 @@ import com.stardew.craft.mining.OrdinaryMineRuntime;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import net.minecraftforge.client.event.*;
 
 /** Soft 3D counterpart to the source swarm overlay; local to the receiving player's floor. */

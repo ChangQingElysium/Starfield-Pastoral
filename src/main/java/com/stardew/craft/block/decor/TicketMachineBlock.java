@@ -17,7 +17,7 @@ public final class TicketMachineBlock extends MapDecorStaticBlock {
     }
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos,
+    public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos,
                                                Player player, BlockHitResult hit) {
         if (findMainPos(level, pos, state) == null) return InteractionResult.PASS;
         if (player instanceof ServerPlayer serverPlayer) {

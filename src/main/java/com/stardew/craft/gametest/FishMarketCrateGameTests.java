@@ -1,5 +1,7 @@
 package com.stardew.craft.gametest;
 
+import com.stardew.craft.port.PortGameTests;
+import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.blockentity.FishMarketCrateBlockEntity;
 import com.stardew.craft.item.ModItems;
@@ -24,6 +26,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.gametest.GameTestHolder;
 import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import com.stardew.craft.port.PortBlockInteraction;
 
 @GameTestHolder("stardewcraft_fish_market")
 @PrefixGameTestTemplate(false)
@@ -39,7 +42,7 @@ public final class FishMarketCrateGameTests {
                 new BlockHitResult(Vec3.atBottomCenterOf(main),Direction.UP,main.below(),false)));
     }
     private static Player place(GameTestHelper h, BlockPos main, Direction facing, GameType mode) {
-        var player=h.makeMockPlayer(mode);mode.updatePlayerAbilities(player.getAbilities());
+        var player=PortGameTests.makeMockPlayer(h, mode);mode.updatePlayerAbilities(player.getAbilities());
         player.setPos(Vec3.atBottomCenterOf(main.offset(4,0,4)));
         player.setYRot(facing.getOpposite().toYRot());var context=context(player,main);
         h.assertTrue(((BlockItem)context.getItemInHand().getItem()).place(context).consumesAction(),"Placement failed "+facing);
@@ -55,7 +58,7 @@ public final class FishMarketCrateGameTests {
     }
     private static ItemStack fish() {
         var fish=new ItemStack(ModItems.SALMON.get(),8);QualityHelper.setQuality(fish,3);
-        fish.set(DataComponents.CUSTOM_NAME,Component.literal("Trophy salmon"));return fish;
+        PortItemData.set(fish, DataComponents.CUSTOM_NAME,Component.literal("Trophy salmon"));return fish;
     }
     @GameTest(templateNamespace="stardewcraft_fish_market",template="empty")
     public static void livePacketsClearRemovedFishAndReplaceEverySlot(GameTestHelper h) {
@@ -68,7 +71,7 @@ public final class FishMarketCrateGameTests {
             for(int slot=0;slot<3;slot++) {
                 var stack=new ItemStack((cycle+slot)%2==0?ModItems.SALMON.get():ModItems.TUNA.get());
                 QualityHelper.setQuality(stack,(cycle+slot)%4);
-                stack.set(DataComponents.CUSTOM_NAME,Component.literal("Catch "+cycle+" / "+slot));
+                PortItemData.set(stack, DataComponents.CUSTOM_NAME,Component.literal("Catch "+cycle+" / "+slot));
                 server.insert(slot,stack);
                 assertPacketMatches(h,server,client,"insert "+cycle+" / "+slot);
             }
@@ -78,7 +81,7 @@ public final class FishMarketCrateGameTests {
             }
             // Chunk entry uses a different callback; verify both full snapshot paths.
             var reloaded=new FishMarketCrateBlockEntity(main,server.getBlockState());
-            reloaded.handleUpdateTag(server.getUpdateTag(level.registryAccess()),level.registryAccess());
+            reloaded.handleUpdateTag(server.getUpdateTag());
             for(int slot=0;slot<3;slot++) h.assertTrue(reloaded.fish(slot).isEmpty(),"Chunk snapshot retained a fish");
         }
         h.succeed();
@@ -86,7 +89,7 @@ public final class FishMarketCrateGameTests {
     private static void assertPacketMatches(GameTestHelper h, FishMarketCrateBlockEntity server,
                                            FishMarketCrateBlockEntity client, String step) {
         // Match ClientPacketListener's live update entry point, including an empty tag.
-        client.onDataPacket(null,server.getUpdatePacket(),h.getLevel().registryAccess());
+        client.onDataPacket(null,server.getUpdatePacket());
         for(int slot=0;slot<3;slot++) h.assertTrue(ItemStack.matches(server.fish(slot),client.fish(slot)),
                 "Client display differs from stored fish after "+step+", slot "+slot);
     }
@@ -98,7 +101,7 @@ public final class FishMarketCrateGameTests {
             var held=fish();var expected=held.copyWithCount(1);player.setItemInHand(InteractionHand.MAIN_HAND,held);
             for(int slot=0;slot<3;slot++) {
                 var hit=hit(main,facing,slot);
-                level.getBlockState(hit.getBlockPos()).useItemOn(held,level,player,InteractionHand.MAIN_HAND,hit);
+                PortBlockInteraction.stateUseItemOn(level.getBlockState(hit.getBlockPos()), held,level,player,InteractionHand.MAIN_HAND,hit);
             }
             h.assertTrue(held.getCount()==5,"Wrong insertion count");
             for(int slot=0;slot<3;slot++)h.assertTrue(ItemStack.matches(expected,crate.fish(slot)),"Wrong fish in slot");
@@ -106,18 +109,18 @@ public final class FishMarketCrateGameTests {
                 var hand=slot==0?ItemStack.EMPTY:new ItemStack(slot==1?net.minecraft.world.item.Items.STONE:ModItems.TUNA.get(),5);
                 player.setItemInHand(InteractionHand.MAIN_HAND,hand);
                 var hit=hit(main,facing,slot);
-                if(hand.isEmpty())level.getBlockState(hit.getBlockPos()).useWithoutItem(level,player,hit);
-                else level.getBlockState(hit.getBlockPos()).useItemOn(hand,level,player,InteractionHand.MAIN_HAND,hit);
+                if(hand.isEmpty())PortBlockInteraction.stateUseWithoutItem(level.getBlockState(hit.getBlockPos()), level,player,hit);
+                else PortBlockInteraction.stateUseItemOn(level.getBlockState(hit.getBlockPos()), hand,level,player,InteractionHand.MAIN_HAND,hit);
                 h.assertTrue(crate.fish(slot).isEmpty(),"Occupied slot must take even while holding an item");
                 if(slot==0)h.assertTrue(ItemStack.matches(expected,player.getMainHandItem()),"Empty hand did not receive fish");
                 else h.assertTrue(player.getMainHandItem()==hand&&hand.getCount()==5,"Held item was overwritten or consumed");
             }
-            h.assertTrue(player.getInventory().items.stream().filter(v->ItemStack.isSameItemSameComponents(v,expected))
+            h.assertTrue(player.getInventory().items.stream().filter(v->ItemStack.isSameItemSameTags(v,expected))
                     .mapToInt(ItemStack::getCount).sum()==2,"Held-item pickups did not preserve both catches");
             // An empty region neither searches other regions nor triggers the held item's action.
             crate.insert(2,expected);player.setItemInHand(InteractionHand.MAIN_HAND,new ItemStack(net.minecraft.world.item.Items.STONE));
             var emptyHit=hit(main,facing,0);
-            level.getBlockState(emptyHit.getBlockPos()).useItemOn(player.getMainHandItem(),level,player,InteractionHand.MAIN_HAND,emptyHit);
+            PortBlockInteraction.stateUseItemOn(level.getBlockState(emptyHit.getBlockPos()), player.getMainHandItem(),level,player,InteractionHand.MAIN_HAND,emptyHit);
             h.assertTrue(ItemStack.matches(expected,crate.fish(2)),"Clicking empty slot took a different fish");
             level.destroyBlock(main,true);
         }
@@ -131,13 +134,13 @@ public final class FishMarketCrateGameTests {
         mode.updatePlayerAbilities(player.getAbilities());crate.insert(1,expected);
         for(int i=0;i<player.getInventory().items.size();i++)player.getInventory().items.set(i,new ItemStack(net.minecraft.world.item.Items.STONE,64));
         var hit=hit(main,Direction.NORTH,1);
-        level.getBlockState(hit.getBlockPos()).useItemOn(player.getMainHandItem(),level,player,InteractionHand.MAIN_HAND,hit);
+        PortBlockInteraction.stateUseItemOn(level.getBlockState(hit.getBlockPos()), player.getMainHandItem(),level,player,InteractionHand.MAIN_HAND,hit);
         h.assertTrue(crate.fish(1).isEmpty()&&player.getMainHandItem().is(net.minecraft.world.item.Items.STONE),"Full inventory did not take safely");
         var drops=level.getEntitiesOfClass(ItemEntity.class,new AABB(main).inflate(8));
         h.assertTrue(drops.size()==1&&ItemStack.matches(expected,drops.getFirst().getItem()),"Full inventory lost or duplicated catch");
         // A second empty-handed player cannot obtain the removed catch.
-        var other=h.makeMockPlayer(GameType.SURVIVAL);other.setItemInHand(InteractionHand.MAIN_HAND,ItemStack.EMPTY);
-        level.getBlockState(hit.getBlockPos()).useWithoutItem(level,other,hit);
+        var other=PortGameTests.makeMockPlayer(h, GameType.SURVIVAL);other.setItemInHand(InteractionHand.MAIN_HAND,ItemStack.EMPTY);
+        PortBlockInteraction.stateUseWithoutItem(level.getBlockState(hit.getBlockPos()), level,other,hit);
         h.assertTrue(other.getMainHandItem().isEmpty(),"Second pickup duplicated catch");
         drops.forEach(ItemEntity::discard);
         }
@@ -156,14 +159,14 @@ public final class FishMarketCrateGameTests {
             h.assertTrue(level.isEmptyBlock(main)&&level.isEmptyBlock(other),"Orphaned half");
             var drops=level.getEntitiesOfClass(ItemEntity.class,new AABB(main).inflate(4));
             int furniture=drops.stream().filter(e->e.getItem().is(ModItems.FISH_MARKET_CRATE.get())).mapToInt(e->e.getItem().getCount()).sum();
-            int fish=drops.stream().filter(e->ItemStack.isSameItemSameComponents(fish(),e.getItem())).mapToInt(e->e.getItem().getCount()).sum();
+            int fish=drops.stream().filter(e->ItemStack.isSameItemSameTags(fish(),e.getItem())).mapToInt(e->e.getItem().getCount()).sum();
             h.assertTrue(furniture==(creative?0:1)&&fish==3,"Incorrect or duplicate drops: furniture="+furniture+", fish="+fish);
         }
         h.succeed();
     }
     @GameTest(templateNamespace="stardewcraft_fish_market",template="empty")
     public static void blockedOrUnsupportedSecondCellDoesNotConsumeFurniture(GameTestHelper h) {
-        var main=prepare(h);var level=h.getLevel();var player=h.makeMockPlayer(GameType.SURVIVAL);
+        var main=prepare(h);var level=h.getLevel();var player=PortGameTests.makeMockPlayer(h, GameType.SURVIVAL);
         player.setPos(Vec3.atBottomCenterOf(main.offset(4,0,4)));
         for(var facing:Direction.Plane.HORIZONTAL){
             player.setYRot(facing.getOpposite().toYRot());var other=main.relative(facing.getClockWise());

@@ -30,7 +30,7 @@ public class TVBlock extends MapDecorStaticBlock {
     @SuppressWarnings("null")
     @Override
     @Nonnull
-    protected InteractionResult useWithoutItem(@Nonnull BlockState state, @Nonnull Level level,
+    public InteractionResult useWithoutItem(@Nonnull BlockState state, @Nonnull Level level,
                                                 @Nonnull BlockPos pos, @Nonnull Player player,
                                                 @Nonnull BlockHitResult hitResult) {
         if (level.isClientSide) {

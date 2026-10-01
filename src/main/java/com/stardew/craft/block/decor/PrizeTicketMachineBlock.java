@@ -22,7 +22,7 @@ public class PrizeTicketMachineBlock extends MapDecorStaticBlock {
     }
 
     @Override
-    protected InteractionResult useWithoutItem(@Nonnull BlockState state, @Nonnull Level level,
+    public InteractionResult useWithoutItem(@Nonnull BlockState state, @Nonnull Level level,
             @Nonnull BlockPos pos, @Nonnull Player player, @Nonnull BlockHitResult hit) {
         BlockPos mainPos = findMainPos(level, pos, state);
         if (mainPos == null) {

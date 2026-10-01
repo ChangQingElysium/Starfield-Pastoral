@@ -3,7 +3,7 @@ package com.stardew.craft.event;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.block.ModBlocks;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import net.minecraftforge.event.level.BlockEvent;
 
 @SuppressWarnings("removal")

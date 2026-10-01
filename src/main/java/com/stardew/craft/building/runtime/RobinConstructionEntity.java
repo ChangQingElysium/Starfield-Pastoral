@@ -28,7 +28,7 @@ public final class RobinConstructionEntity extends Entity {
     }
     public void bind(UUID buildingId) { this.buildingId = buildingId; }
     public UUID buildingId() { return buildingId; }
-    @Override protected void defineSynchedData(SynchedEntityData.Builder builder) { builder.define(HIGH, false); builder.define(WORKING,true); builder.define(SWING,0); }
+    @Override protected void defineSynchedData() { this.entityData.define(HIGH, false); this.entityData.define(WORKING,true); this.entityData.define(SWING,0); }
     @Override protected void readAdditionalSaveData(CompoundTag tag) { buildingId = tag.hasUUID("Building") ? tag.getUUID("Building") : null; }
     @Override protected void addAdditionalSaveData(CompoundTag tag) { if (buildingId != null) tag.putUUID("Building", buildingId); }
     @Override public net.minecraft.world.phys.Vec3 getLightProbePosition(float partialTick) {

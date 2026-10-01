@@ -384,7 +384,7 @@ public class WorkbenchScreen extends Screen {
 
     private void tooltip(GuiGraphics g, WorkbenchEntry e, int mx, int my) {
         var item = stack(e.itemId());
-        List<Component> lines = new ArrayList<>(item.getTooltipLines(Item.TooltipContext.EMPTY, minecraft.player,
+        List<Component> lines = new ArrayList<>(item.getTooltipLines(minecraft.player,
                 net.minecraft.world.item.TooltipFlag.Default.NORMAL));
         lines.add(tr("recipe_cost", stack(new ResourceLocation(e.inputItemId(type))).getHoverName(), e.cost(), e.outputCount()));
         lines.add(tr("in_stock", stack(new ResourceLocation(e.inputItemId(type))).getHoverName(),
@@ -404,7 +404,8 @@ public class WorkbenchScreen extends Screen {
     }
 
     @Override
-    public boolean mouseScrolled(double x, double y, double horizontal, double vertical) {
+    public boolean mouseScrolled(double x, double y, double vertical) {
+        double horizontal = 0.0D; // PORT(1.20.1): no horizontal scroll before 1.20.2
         if (vertical == 0) return false;
         if (inside(x, y, layout.gridX(), layout.gridY(), layout.gridWidth(), layout.gridHeight())) {
             turnPage(vertical > 0 ? -1 : 1);
@@ -414,7 +415,7 @@ public class WorkbenchScreen extends Screen {
             shiftCategories(vertical > 0 ? -1 : 1);
             return true;
         }
-        return super.mouseScrolled(x, y, horizontal, vertical);
+        return super.mouseScrolled(x, y, vertical);
     }
 
     @Override

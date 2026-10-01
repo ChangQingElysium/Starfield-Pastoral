@@ -34,7 +34,7 @@ public final class FarmCaveData extends SavedData {
     }
     public static FarmCaveData get(ServerLevel level) {
         return level.getServer().overworld().getDataStorage().computeIfAbsent(
-                new Factory<>(FarmCaveData::new,FarmCaveData::load),"stardew_farm_caves");
+                com.stardew.craft.port.PortSavedData.loader(new Factory<>(FarmCaveData::new,FarmCaveData::load)), com.stardew.craft.port.PortSavedData.constructor(new Factory<>(FarmCaveData::new,FarmCaveData::load)),"stardew_farm_caves");
     }
     public Entry find(UUID id) { return entries.get(id); }
     public Collection<Entry> entries() { return Collections.unmodifiableCollection(entries.values()); }
@@ -61,7 +61,7 @@ public final class FarmCaveData extends SavedData {
         }
         return data;
     }
-    @Override public CompoundTag save(CompoundTag tag,HolderLookup.Provider provider) {
+    @Override public CompoundTag save(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
         tag.putInt("NextSlot",nextSlot);ListTag list=new ListTag();
         for(Entry e:entries.values()) {
             CompoundTag t=new CompoundTag();t.putUUID("Farm",e.farmId);t.putLong("Origin",e.origin.asLong());

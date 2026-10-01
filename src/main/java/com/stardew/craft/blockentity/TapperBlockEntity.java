@@ -1,5 +1,6 @@
 package com.stardew.craft.blockentity;
 
+import com.stardew.craft.port.PortItemStacks;
 import com.stardew.craft.production.MachineProductionData;
 import com.stardew.craft.api.v1.internal.tree.StardewTreeRuntimeRegistry;
 import com.stardew.craft.api.v1.tree.StardewTreeRuntimeAdapter;
@@ -275,10 +276,10 @@ public class TapperBlockEntity extends TimedProductionBlockEntity {
 
 	@SuppressWarnings("null")
 	@Override
-	protected void saveAdditional(@SuppressWarnings("null") CompoundTag tag, @SuppressWarnings("null") net.minecraft.core.HolderLookup.Provider registries) {
-		super.saveAdditional(tag, registries);
+	protected void saveAdditional(@SuppressWarnings("null") CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+		super.saveAdditional(tag);
 		if (!product.isEmpty()) {
-			tag.put("product", product.save(registries));
+			tag.put("product", PortItemStacks.save(product, registries));
 		}
 		if (treeId != null && !treeId.isBlank()) {
 			tag.putString("treeId", treeId);
@@ -289,18 +290,18 @@ public class TapperBlockEntity extends TimedProductionBlockEntity {
 
 	@SuppressWarnings("null")
 	@Override
-	protected void loadAdditional(@SuppressWarnings("null") CompoundTag tag, @SuppressWarnings("null") net.minecraft.core.HolderLookup.Provider registries) {
-		super.loadAdditional(tag, registries);
-		product = tag.contains("product") ? ItemStack.parse(registries, tag.getCompound("product")).orElse(ItemStack.EMPTY) : ItemStack.EMPTY;
+	public void load(@SuppressWarnings("null") CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+		super.load(tag);
+		product = tag.contains("product") ? PortItemStacks.parse(registries, tag.getCompound("product")).orElse(ItemStack.EMPTY) : ItemStack.EMPTY;
 		treeId = tag.contains("treeId") ? tag.getString("treeId") : null;
 		readyAtAbsMinute = tag.getLong("readyAtAbsMinute");
 		ready = tag.getBoolean("ready");
 	}
 
 	@Override
-	public CompoundTag getUpdateTag(@SuppressWarnings("null") net.minecraft.core.HolderLookup.Provider registries) {
+	public CompoundTag getUpdateTag() { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
 		CompoundTag tag = new CompoundTag();
-		saveAdditional(tag, registries);
+		saveAdditional(tag);
 		return tag;
 	}
 

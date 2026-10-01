@@ -1,5 +1,6 @@
 package com.stardew.craft.block.decor;
 
+import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.aquarium.AquariumRules;
 import com.stardew.craft.blockentity.AquariumBlockEntity;
 import com.stardew.craft.sound.ModSounds;
@@ -45,13 +46,13 @@ public final class LargeFishTankBlock extends MapDecorStaticBlock implements Ent
     @Override public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return state.getValue(PART) == Part.MAIN ? new AquariumBlockEntity(pos, state) : null;
     }
-    @Override protected ItemInteractionResult useItemOn(ItemStack held, BlockState state, Level level, BlockPos pos,
+    @Override public ItemInteractionResult useItemOn(ItemStack held, BlockState state, Level level, BlockPos pos,
             Player player, InteractionHand hand, BlockHitResult hit) {
         if (hand != InteractionHand.MAIN_HAND) return ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION;
         interact(held, state, level, pos, player);
         return ItemInteractionResult.sidedSuccess(level.isClientSide);
     }
-    @Override protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+    @Override public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         interact(ItemStack.EMPTY, state, level, pos, player);
         return InteractionResult.sidedSuccess(level.isClientSide);
     }
@@ -61,7 +62,7 @@ public final class LargeFishTankBlock extends MapDecorStaticBlock implements Ent
         if (main == null || !(level.getBlockEntity(main) instanceof AquariumBlockEntity tank)) return;
         if (!player.isShiftKeyDown() && AquariumRules.kind(held) != AquariumRules.Kind.INVALID) {
             if (tank.insert(held) >= 0) {
-                held.consume(1, player);
+                com.stardew.craft.port.PortItemStacks.consume(held, 1, player);
                 level.playSound(null, main, ModSounds.DROP_ITEM_IN_WATER.get(), SoundSource.BLOCKS, .65f, 1);
             } else player.displayClientMessage(Component.translatable("stardewcraft.aquarium.full"), true);
         } else player.openMenu(tank);
@@ -70,19 +71,19 @@ public final class LargeFishTankBlock extends MapDecorStaticBlock implements Ent
         var stack = new ItemStack(this);
         if (!tank.isEmpty()) {
             // BlockItem restores these components on placement; no custom packet or item-ID conversion.
-            var data = tank.saveCustomOnly(tank.getLevel().registryAccess());
+            var data = tank.saveWithoutMetadata();
             data.putString("id", "stardewcraft:large_fish_tank");
-            stack.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(data));
+            PortItemData.set(stack, DataComponents.BLOCK_ENTITY_DATA, CustomData.of(data));
         }
         return stack;
     }
-    @Override protected List<ItemStack> getDrops(BlockState state, LootParams.Builder params) { return List.of(); }
+    @Override public List<ItemStack> getDrops(BlockState state, LootParams.Builder params) { return List.of(); }
     @Override protected ItemStack extensionRemovalDrop(Level level, BlockPos mainPos) { return ItemStack.EMPTY; }
-    @Override public BlockState playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
+    @Override public void playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
         BlockPos main = findMainPos(level, pos, state);
         if (main != null && level.getBlockEntity(main) instanceof AquariumBlockEntity tank)
             tank.discardEmptyOnRemoval = player.isCreative();
-        return super.playerWillDestroy(level, pos, state, player);
+        super.playerWillDestroy(level, pos, state, player);
     }
     @Override public void onRemove(BlockState state, Level level, BlockPos pos, BlockState next, boolean moving) {
         if (!state.is(next.getBlock()) && !level.isClientSide && !dropsSuppressed()

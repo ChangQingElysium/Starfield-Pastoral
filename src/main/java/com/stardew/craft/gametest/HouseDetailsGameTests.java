@@ -137,7 +137,7 @@ public final class HouseDetailsGameTests {
             var entity=(TemplateBlockEntity)level.getBlockEntity(p);
             h.assertTrue(entity.effectiveFillMaterial().is(ModBlocks.PALE_BLUE_WINDOW_GLASS.get()),"Default glass was not updated");
             entity.setMaterial(ModBlocks.BLUE_GRAY_TIMBER.get().defaultBlockState());entity.setFillMaterial(Blocks.RED_STAINED_GLASS.defaultBlockState());
-            var copied=new ItemStack(block);entity.saveToItem(copied,level.registryAccess());
+            var copied=new ItemStack(block);entity.saveToItem(copied);
             var data=TemplateBlockEntity.itemMaterials(copied);
             h.assertTrue(data.get(TemplateBlockEntity.FILL_MATERIAL_PROPERTY).is(Blocks.RED_STAINED_GLASS),"Copied window lost its custom pane");
             entity.setFillMaterial(null);h.assertTrue(entity.effectiveFillMaterial().is(ModBlocks.PALE_BLUE_WINDOW_GLASS.get()),"Clearing pane failed to restore built-in glass");

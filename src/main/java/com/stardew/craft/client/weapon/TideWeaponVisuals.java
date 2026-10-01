@@ -16,7 +16,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import com.stardew.craft.port.net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import static com.stardew.craft.client.weapon.MeleeWeaponVisuals.*;
@@ -52,7 +52,7 @@ public final class TideWeaponVisuals {
         if (BURSTS.size() >= 48) BURSTS.removeFirst();
         List<Segment> boundary = new ArrayList<>();
         // The existing AOE is a box. Trace its actual square footprint instead of promising a circular range.
-        if (p.phase() == Phase.ANCHOR && Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()) {
+        if (p.phase() == Phase.ANCHOR && Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()) {
             double radius = com.stardew.craft.entity.projectile.TideAnchorProjectileEntity.AOE_RADIUS;
             Vec3[] corners = {new Vec3(-radius, 0, -radius), new Vec3(radius, 0, -radius),
                     new Vec3(radius, 0, radius), new Vec3(-radius, 0, radius)};
@@ -75,7 +75,7 @@ public final class TideWeaponVisuals {
                 SoundSource.PLAYERS, p.phase() == Phase.ANCHOR ? 0.65f : 0.4f, p.phase() == Phase.ANCHOR ? 0.8f : 1.0f, false);
         if (p.phase() == Phase.ANCHOR) mc.level.playLocalSound(point.x, point.y, point.z,
                 SoundEvents.FISHING_BOBBER_SPLASH, SoundSource.PLAYERS, 0.65f, 0.8f, false);
-        if (!Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()) return;
+        if (!Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()) return;
         for (int i = 0; i < (p.phase() == Phase.ANCHOR ? 16 : 6); i++) {
             double angle = i * Math.PI * 2 / 16;
             mc.level.addParticle(ParticleTypes.SPLASH, point.x, point.y + 0.15, point.z,
@@ -99,8 +99,8 @@ public final class TideWeaponVisuals {
     @SubscribeEvent public static void render(RenderLevelStageEvent event) {
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_PARTICLES) return;
         var mc = Minecraft.getInstance(); ensureLevel(mc.level);
-        if (mc.level == null || BURSTS.isEmpty() || !Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()) return;
-        double now = mc.level.getGameTime() + event.getPartialTick().getGameTimeDeltaPartialTick(false);
+        if (mc.level == null || BURSTS.isEmpty() || !Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()) return;
+        double now = mc.level.getGameTime() + event.getPartialTick();
         Vec3 camera = event.getCamera().getPosition(); var stack = event.getPoseStack();
         stack.pushPose(); stack.translate(-camera.x, -camera.y, -camera.z);
         var matrix = stack.last().pose(); var buffers = mc.renderBuffers().bufferSource();

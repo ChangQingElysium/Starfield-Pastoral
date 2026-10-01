@@ -1,5 +1,6 @@
 package com.stardew.craft.gametest;
 
+import com.stardew.craft.port.PortItemData;
 import com.mojang.authlib.GameProfile;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.block.ModBlocks;
@@ -12,7 +13,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
-import com.stardew.craft.port.net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
@@ -29,7 +29,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SnowyDirtBlock;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import com.stardew.craft.port.net.neoforged.neoforge.common.ItemAbilities;
+import net.minecraftforge.common.ToolActions;
 import net.minecraftforge.gametest.GameTestHolder;
 import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
@@ -91,18 +91,18 @@ public final class TerrainGrassGameTests {
         var player = player(level);
         player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.IRON_HOE));
         var context = context(player, pos);
-        var tilled = state.getToolModifiedState(context, ItemAbilities.HOE_TILL, true);
+        var tilled = state.getToolModifiedState(context, ToolActions.HOE_TILL, true);
         helper.assertTrue(grassBlock == ModBlocks.DIRT.get()
                         ? tilled != null && tilled.is(ModBlocks.FARMLAND.get()) : tilled == null,
                 "Only authored dirt should become authored farmland");
         player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.IRON_SHOVEL));
-        var path = state.getToolModifiedState(context(player, pos), ItemAbilities.SHOVEL_FLATTEN, true);
+        var path = state.getToolModifiedState(context(player, pos), ToolActions.SHOVEL_FLATTEN, true);
         helper.assertTrue(grassBlock == ModBlocks.DIRT.get()
                         ? path != null && path.is(Blocks.DIRT_PATH) : path == null,
                 "Permanent grass must not become a path; authored dirt must still allow paths");
         level.setBlock(pos.above(), Blocks.STONE.defaultBlockState(), 3);
         player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.IRON_HOE));
-        helper.assertTrue(state.getToolModifiedState(context(player, pos), ItemAbilities.HOE_TILL, true) == null,
+        helper.assertTrue(state.getToolModifiedState(context(player, pos), ToolActions.HOE_TILL, true) == null,
                 "Covered grass incorrectly allowed tilling");
         helper.succeed();
     }
@@ -345,7 +345,7 @@ public final class TerrainGrassGameTests {
                 var source = block.defaultBlockState().setValue(property, variant);
                 var ordinary = new ItemStack(block);
                 var fixed = com.stardew.craft.block.terrain.TerrainVariants.fixedCopy(ordinary, source);
-                helper.assertTrue(!ordinary.has(com.stardew.craft.port.net.minecraft.core.component.DataComponents.BLOCK_STATE),
+                helper.assertTrue(!PortItemData.has(ordinary, com.stardew.craft.port.net.minecraft.core.component.DataComponents.BLOCK_STATE),
                         "Ctrl-copy mutated the normal random-placement item");
                 player.setItemInHand(InteractionHand.MAIN_HAND, fixed);
                 for (int repeat = 0; repeat < 5; repeat++) {
@@ -395,14 +395,14 @@ public final class TerrainGrassGameTests {
             for (int i = 0; i < 10000; i++) seen.add(block.getStateForPlacement(placement).getValue(terrainProperty));
             helper.assertTrue(seen.equals(java.util.Set.copyOf(terrainProperty.getPossibleValues())),
                     "Ordinary placement cannot reach every terrain variant");
-            helper.assertTrue(!ordinary.has(com.stardew.craft.port.net.minecraft.core.component.DataComponents.BLOCK_STATE),
+            helper.assertTrue(!PortItemData.has(ordinary, com.stardew.craft.port.net.minecraft.core.component.DataComponents.BLOCK_STATE),
                     "Random placement permanently fixed the remaining stack");
         }
         helper.succeed();
     }
 
     private static ServerPlayer player(ServerLevel level) {
-        return new ServerPlayer(level.getServer(), level, new GameProfile(UUID.randomUUID(), "Grass test"), ClientInformation.createDefault());
+        return new ServerPlayer(level.getServer(), level, new GameProfile(UUID.randomUUID(), "Grass test"));
     }
 
     private static UseOnContext context(ServerPlayer player, BlockPos pos) {

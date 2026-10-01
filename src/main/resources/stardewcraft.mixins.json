@@ -15,10 +15,10 @@
     "GrassBlockBehaviorMixin",
     "SpreadingSnowyDirtBlockMixin",
     "EatBlockGoalTerrainSoilMixin",
-    "DataComponentsMixin",
     "ContainerMixin",
     "InventoryMaxStackMixin",
-    "ItemStackCodecCountRangeMixin",
+    "ItemStackLargeCountMixin",
+    "FriendlyByteBufLargeItemCountMixin",
     "ItemStackStardewFoodContextMixin",
     "PlayerStardewFoodMixin",
     "PlayerRingLightMixin",
@@ -36,7 +36,16 @@
     "ServerLevelSkeletonHorseTrapMixin",
     "DoorBlockMasteryCollisionMixin",
     "FarmBuildingProtectionMixin",
-    "FlowingFluidStardewBlockProtectionMixin"
+    "FlowingFluidStardewBlockProtectionMixin",
+    "PortLivingEntityDamageMixin",
+    "PortPlayerDamageMixin",
+    "PortServerLevelEntityTickMixin",
+    "PortBlockDropsMixin",
+    "PortServerPlayerGameModeXpMixin",
+    "PortPlayerSweepEventMixin",
+    "PortServerPlayerSleepMixin",
+    "PortEnchantedItemTriggerMixin",
+    "PortLivingEntityEffectSourceMixin"
   ],
   "client": [
     "TownDoorCameraMixin",
@@ -125,7 +134,13 @@
     "FishingKeyboardInputMixin",
     "FishingPlayerRendererMixin",
     "FishingWorldRenderMixin",
-    "FishingArmorLayerMixin"
+    "FishingArmorLayerMixin",
+    "PortClientLevelEntityTickMixin",
+    "PortItemRenderPropertiesAccessor",
+    "PortBlockRenderPropertiesAccessor",
+    "PortFluidTypeRenderPropertiesAccessor",
+    "PortMobEffectRenderPropertiesAccessor",
+    "PortModelBakeryStandaloneMixin"
   ],
   "injectors": {
     "defaultRequire": 1

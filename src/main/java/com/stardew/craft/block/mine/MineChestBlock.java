@@ -1,5 +1,6 @@
 package com.stardew.craft.block.mine;
 
+import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.blockentity.MineChestBlockEntity;
 import com.stardew.craft.block.shape.ModelVoxelShapeCache;
 import net.minecraft.core.BlockPos;
@@ -26,13 +27,15 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 import javax.annotation.Nullable;
+import net.minecraft.world.InteractionHand;
+import com.stardew.craft.port.PortBlockInteraction;
 
 /**
  * 矿井宝箱方块 — 不可破坏，右键打开 per-player 独立库存。
  * 原生箱体／箱盖模型，客户端沿后铰轴连续开合。
  */
 @SuppressWarnings("null")
-public class MineChestBlock extends Block implements EntityBlock {
+public class MineChestBlock extends Block implements EntityBlock, PortBlockInteraction {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final BooleanProperty SPECIAL = BooleanProperty.create("special");
     public static final BooleanProperty OPEN = BlockStateProperties.OPEN;
@@ -57,17 +60,18 @@ public class MineChestBlock extends Block implements EntityBlock {
 
     @Override
     public BlockState getStateForPlacement(net.minecraft.world.item.context.BlockPlaceContext context) {
-        var saved = context.getItemInHand().getOrDefault(com.stardew.craft.port.net.minecraft.core.component.DataComponents.BLOCK_STATE,
+        var saved = PortItemData.getOrDefault(context.getItemInHand(), com.stardew.craft.port.net.minecraft.core.component.DataComponents.BLOCK_STATE,
                 com.stardew.craft.port.net.minecraft.world.item.component.BlockItemStateProperties.EMPTY);
         return defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite())
                 .setValue(SPECIAL, Boolean.TRUE.equals(saved.get(SPECIAL)));
     }
 
     @Override
-    public net.minecraft.world.item.ItemStack getCloneItemStack(net.minecraft.world.level.LevelReader level,
-            BlockPos pos, BlockState state) {
+    public net.minecraft.world.item.ItemStack getCloneItemStack(BlockGetter level,
+            BlockPos pos,
+            BlockState state) {
         var stack = new net.minecraft.world.item.ItemStack(this);
-        stack.set(com.stardew.craft.port.net.minecraft.core.component.DataComponents.BLOCK_STATE,
+        PortItemData.set(stack, com.stardew.craft.port.net.minecraft.core.component.DataComponents.BLOCK_STATE,
                 com.stardew.craft.port.net.minecraft.world.item.component.BlockItemStateProperties.EMPTY.with(SPECIAL, state));
         return stack;
     }
@@ -111,8 +115,15 @@ public class MineChestBlock extends Block implements EntityBlock {
         return state.setValue(FACING, mirror.mirror(state.getValue(FACING)));
     }
 
+    // PORT(1.20.1): replay the 1.21 useItemOn/useWithoutItem dispatch.
     @Override
-    protected InteractionResult useWithoutItem(BlockState state,
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player,
+            InteractionHand hand, BlockHitResult hit) {
+        return PortBlockInteraction.dispatch(this, state, level, pos, player, hand, hit);
+    }
+
+    @Override
+    public InteractionResult useWithoutItem(BlockState state,
                                                Level level,
                                                BlockPos pos,
                                                Player player,

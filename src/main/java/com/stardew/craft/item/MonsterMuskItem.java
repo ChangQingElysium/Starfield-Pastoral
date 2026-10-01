@@ -67,7 +67,7 @@ public class MonsterMuskItem extends SimpleStardewItem {
         if (player.isRemoved()) {
             return;
         }
-        player.addEffect(new MobEffectInstance(ModMobEffects.MONSTER_MUSK, DURATION_TICKS, 0, false, true, true));
+        player.addEffect(new MobEffectInstance(ModMobEffects.MONSTER_MUSK.get(), DURATION_TICKS, 0, false, true, true));
         level.playSound(null, player.blockPosition(), ModSounds.CROAK.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
     }
 }

@@ -17,7 +17,7 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import com.stardew.craft.port.net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import static com.stardew.craft.client.weapon.MeleeWeaponVisuals.*;
@@ -87,15 +87,15 @@ public final class PirateSilverVisuals{
                     ||player.distanceToSqr(mc.player)>32*32||!(player.getMainHandItem().getItem() instanceof IStardewWeapon weapon)||!"silver_saber".equals(weapon.getWeaponId())
                     ||(player==mc.player&&!DashMovementClientState.isActive(player))){it.remove();continue;}
             Vec3 current=player.position().add(0,.65,0);
-            if(Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()&&PirateSilverGeometry.validSegment(dash.previous,current)
+            if(Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()&&PirateSilverGeometry.validSegment(dash.previous,current)
                     &&level.clip(new ClipContext(dash.previous,current,ClipContext.Block.COLLIDER,ClipContext.Fluid.NONE,player)).getType()==HitResult.Type.MISS)addWake(dash.previous,current,now);
             e.setValue(new Dash(dash.actor,dash.start,current));
         }
     }
     @SubscribeEvent public static void render(RenderLevelStageEvent event){
         if(event.getStage()!=RenderLevelStageEvent.Stage.AFTER_PARTICLES)return;ensureLevel();var mc=Minecraft.getInstance();
-        if(level==null||!Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean())return;
-        float partial=event.getPartialTick().getGameTimeDeltaPartialTick(false);Vec3 camera=event.getCamera().getPosition();
+        if(level==null||!Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get())return;
+        float partial=event.getPartialTick();Vec3 camera=event.getCamera().getPosition();
         var buffers=mc.renderBuffers().bufferSource();var out=buffers.getBuffer(WeaponEffectRenderTypes.MOLTEN_GLOW);var pose=event.getPoseStack().last().pose();
         for(Anchor a:ANCHORS.values())for(Vec3[] path:a.paths)if(path[0].distanceToSqr(camera)<32*32){
             Vec3[] local=Arrays.stream(path).map(p->p.subtract(camera)).toArray(Vec3[]::new);

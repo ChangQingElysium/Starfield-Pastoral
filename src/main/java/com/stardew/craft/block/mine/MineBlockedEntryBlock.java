@@ -32,7 +32,7 @@ public final class MineBlockedEntryBlock extends MapDecorStaticBlock {
         return state == null ? null : state.setValue(MineBuildingTheme.PROPERTY, MineBuildingTheme.forPlacement(context));
     }
 
-    @Override public net.minecraft.world.item.ItemStack getCloneItemStack(net.minecraft.world.level.LevelReader level, BlockPos pos, BlockState state) {
+    @Override public net.minecraft.world.item.ItemStack getCloneItemStack(net.minecraft.world.level.BlockGetter level, BlockPos pos, BlockState state) {
         return MineBuildingTheme.picked(this, state);
     }
 
@@ -44,7 +44,7 @@ public final class MineBlockedEntryBlock extends MapDecorStaticBlock {
 
     // Permanent mine architecture must not inherit furniture self-drops. Structure
     // replacement can remove an extension first, even with UPDATE_SUPPRESS_DROPS.
-    @Override protected List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
+    @Override public List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
         return List.of();
     }
 
@@ -52,18 +52,18 @@ public final class MineBlockedEntryBlock extends MapDecorStaticBlock {
         return ItemStack.EMPTY;
     }
 
-    @Override protected BlockState updateShape(BlockState state, net.minecraft.core.Direction direction, BlockState neighbor,
+    @Override public BlockState updateShape(BlockState state, net.minecraft.core.Direction direction, BlockState neighbor,
             net.minecraft.world.level.LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
         level.scheduleTick(pos, this, 1);
         return state;
     }
 
-    @Override protected void onPlace(BlockState state, net.minecraft.world.level.Level level, BlockPos pos, BlockState old, boolean moving) {
+    @Override public void onPlace(BlockState state, net.minecraft.world.level.Level level, BlockPos pos, BlockState old, boolean moving) {
         super.onPlace(state, level, pos, old, moving);
         if (!level.isClientSide) level.scheduleTick(pos, this, 1);
     }
 
-    @Override protected void tick(BlockState state, net.minecraft.server.level.ServerLevel level, BlockPos pos, net.minecraft.util.RandomSource random) {
+    @Override public void tick(BlockState state, net.minecraft.server.level.ServerLevel level, BlockPos pos, net.minecraft.util.RandomSource random) {
         if (!super.canSurvive(state, level, pos)) runWithDropsSuppressed(() -> level.removeBlock(pos, false));
     }
 }

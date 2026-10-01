@@ -37,7 +37,7 @@ public class LightningRodRegistry extends SavedData {
 
     public static LightningRodRegistry get(ServerLevel level) {
         return level.getDataStorage().computeIfAbsent(
-            new SavedData.Factory<>(LightningRodRegistry::new, LightningRodRegistry::load),
+            com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(LightningRodRegistry::new, LightningRodRegistry::load)), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(LightningRodRegistry::new, LightningRodRegistry::load)),
             DATA_NAME);
     }
 
@@ -61,7 +61,7 @@ public class LightningRodRegistry extends SavedData {
 
     @Nonnull
     @Override
-    public CompoundTag save(@Nonnull CompoundTag tag, @Nonnull HolderLookup.Provider registries) {
+    public CompoundTag save(@Nonnull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
         tag.put(TAG_RODS, writePositions(rods));
         tag.put(TAG_PENDING, writePositions(pending));
         return tag;

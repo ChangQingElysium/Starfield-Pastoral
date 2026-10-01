@@ -83,7 +83,7 @@ public final class BlacksmithToolDecorBlock extends MapDecorStaticBlock {
         BlockPos wall = main.above().relative(facing.getOpposite());
         return level.getBlockState(wall).isFaceSturdy(level, wall, facing);
     }
-    @Override protected boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
+    @Override public boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
         if (!super.canSurvive(state, level, pos)) return false;
         BlockPos main = findMainPos(level, pos, state);
         return main != null && supported(level, main, state.getValue(FACING));

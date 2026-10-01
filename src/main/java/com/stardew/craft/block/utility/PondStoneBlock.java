@@ -58,14 +58,14 @@ public class PondStoneBlock extends Block {
     }
 
     @Override
-    protected BlockState updateShape(BlockState state, Direction direction, BlockState neighbor,
+    public BlockState updateShape(BlockState state, Direction direction, BlockState neighbor,
                                      LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
         return direction.getAxis().isHorizontal()
                 ? state.setValue(connection(direction), neighbor.getBlock() instanceof PondStoneBlock) : state;
     }
 
     @Override
-    protected BlockState rotate(BlockState state, Rotation rotation) {
+    public BlockState rotate(BlockState state, Rotation rotation) {
         BlockState rotated = state;
         for (Direction direction : Direction.Plane.HORIZONTAL) {
             rotated = rotated.setValue(connection(rotation.rotate(direction)), state.getValue(connection(direction)));
@@ -74,7 +74,7 @@ public class PondStoneBlock extends Block {
     }
 
     @Override
-    protected BlockState mirror(BlockState state, Mirror mirror) {
+    public BlockState mirror(BlockState state, Mirror mirror) {
         BlockState mirrored = state;
         for (Direction direction : Direction.Plane.HORIZONTAL) {
             mirrored = mirrored.setValue(connection(mirror.mirror(direction)), state.getValue(connection(direction)));
@@ -83,12 +83,12 @@ public class PondStoneBlock extends Block {
     }
 
     @Override
-    protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+    public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return SHAPE;
     }
 
     @Override
-    protected boolean canBeReplaced(BlockState state, Fluid fluid) {
+    public boolean canBeReplaced(BlockState state, Fluid fluid) {
         return false;
     }
 }

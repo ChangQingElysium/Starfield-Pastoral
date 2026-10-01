@@ -16,17 +16,25 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
+import com.stardew.craft.port.PortBlockInteraction;
 
 @SuppressWarnings("null")
-public class MiniForgeBlock extends HorizontalMasteryBlock {
+public class MiniForgeBlock extends HorizontalMasteryBlock implements PortBlockInteraction {
     private static final Component TITLE = Component.translatable("container.stardewcraft.mini_forge");
 
     public MiniForgeBlock(Properties properties) {
         super(properties, "stardewcraft:block/mastery/mini_forge", Direction.SOUTH);
     }
 
+    // PORT(1.20.1): replay the 1.21 useItemOn/useWithoutItem dispatch.
     @Override
-    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player,
+            InteractionHand hand, BlockHitResult hit) {
+        return PortBlockInteraction.dispatch(this, state, level, pos, player, hand, hit);
+    }
+
+    @Override
+    public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
             Player player, InteractionHand hand, BlockHitResult hit) {
         if (level.isClientSide) {
             return ItemInteractionResult.sidedSuccess(true);
@@ -36,7 +44,7 @@ public class MiniForgeBlock extends HorizontalMasteryBlock {
     }
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+    public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         if (level.isClientSide) {
             return InteractionResult.SUCCESS;
         }

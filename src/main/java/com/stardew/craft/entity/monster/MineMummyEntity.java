@@ -30,7 +30,7 @@ public final class MineMummyEntity extends StardewMonsterEntity {
  @Override protected void registerGoals(){}
  @Override protected ResourceLocation definitionId(){return new ResourceLocation("stardewcraft:mummy");}
  @Override protected void configureSpawn(MonsterDefinition d,MonsterSpawnContext c){var base=MonsterStatResolver.base(d,c,random);setInitialHealth(base.initialHealth());replaceCombatStats(base.combat());contactDamage=Math.round(base.combat().getDamage());}
- @Override protected void defineSynchedData(SynchedEntityData.Builder b){super.defineSynchedData(b);b.define(MOVING,false);b.define(REMAINING,0);b.define(HIT,-100L);}
+ @Override protected void defineSynchedData(){super.defineSynchedData();this.entityData.define(MOVING,false);this.entityData.define(REMAINING,0);this.entityData.define(HIT,-100L);}
  public boolean moving(){return entityData.get(MOVING);}public boolean collapsed(){return phase()==MummyLifecycle.CRUMBLE||phase()==MummyLifecycle.DOWNED;}
  public int reviveRemaining(){return entityData.get(REMAINING);}public double hitTime(float p){return (level().getGameTime()-entityData.get(HIT)+p)/20.;}
  public void stunFor(int milliseconds){stunMilliseconds=Math.max(stunMilliseconds,milliseconds);}
@@ -59,7 +59,7 @@ public final class MineMummyEntity extends StardewMonsterEntity {
   }
   super.setHealth(value);
  }
- private boolean valid(Player p){return p.isAlive()&&!p.isCreative()&&!p.isSpectator()&&!p.hasEffect(com.stardew.craft.effect.ModMobEffects.AVOID_MONSTERS)&&(monsterState().context().generation()==null||com.stardew.craft.mining.OrdinaryMineRuntime.floorAt(p.blockPosition())==monsterState().context().floor());}
+ private boolean valid(Player p){return p.isAlive()&&!p.isCreative()&&!p.isSpectator()&&!p.hasEffect(com.stardew.craft.effect.ModMobEffects.AVOID_MONSTERS.get())&&(monsterState().context().generation()==null||com.stardew.craft.mining.OrdinaryMineRuntime.floorAt(p.blockPosition())==monsterState().context().floor());}
  @Override protected void customServerAiStep(){
   if(!initialized())initialize(MonsterSpawnContext.capture((ServerLevel)level(),MonsterSpawnContext.Source.WORLD,121));
   if(lifecycle.tick(50)){startAction(lifecycle.phase(),true);if(lifecycle.phase()==MummyLifecycle.REVIVE){monsterState().life(MonsterState.Life.ALIVE);damage(contactDamage);playSound(ModSounds.SKELETON_DIE.get(),1,1);}refreshDimensions();}

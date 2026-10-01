@@ -417,11 +417,8 @@ public abstract class TimedProductionBlockEntity extends BlockEntity implements 
     }
 
     @Override
-    protected void saveAdditional(
-            CompoundTag tag,
-            HolderLookup.Provider registries
-    ) {
-        super.saveAdditional(tag, registries);
+    protected void saveAdditional(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        super.saveAdditional(tag);
         tag.putString("stardewcraftCycleKind",
                 cycleKind.name());
         tag.putBoolean("stardewcraftCycleAutomation",
@@ -429,11 +426,8 @@ public abstract class TimedProductionBlockEntity extends BlockEntity implements 
     }
 
     @Override
-    protected void loadAdditional(
-            CompoundTag tag,
-            HolderLookup.Provider registries
-    ) {
-        super.loadAdditional(tag, registries);
+    public void load(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        super.load(tag);
         cycleKind = defaultCycleKind();
         if (tag.contains("stardewcraftCycleKind")) {
             try {

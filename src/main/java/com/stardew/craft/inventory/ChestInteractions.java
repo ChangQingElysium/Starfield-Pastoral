@@ -21,7 +21,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import net.minecraftforge.event.level.BlockEvent;
 import java.util.ArrayList;
 
@@ -68,19 +68,19 @@ public final class ChestInteractions {
         for (int i = 0; i < source.getContainerSize(); i++) if (!source.getItem(i).isEmpty()) content.add(source.getItem(i).copy());
         if (content.size() > target.getContainerSize()) { message(player, "stardewcraft.chest.swap_full"); return ItemInteractionResult.CONSUME; }
         var oldEntity = (BlockEntity) source;
-        var saved = oldEntity.saveWithoutMetadata(level.registryAccess());
+        var saved = oldEntity.saveWithoutMetadata();
         int color = source.getColorSelection();
         // isMoving suppresses onRemove inventory drops; rollback restores the complete old entity data.
         if (!level.setBlock(pos, newState, Block.UPDATE_ALL | Block.UPDATE_MOVE_BY_PISTON)) return ItemInteractionResult.CONSUME;
         if (!(level.getBlockEntity(pos) instanceof ChestStorage placed)) {
             level.setBlock(pos, oldState, Block.UPDATE_ALL | Block.UPDATE_MOVE_BY_PISTON);
             var restored = level.getBlockEntity(pos);
-            if (restored != null) restored.loadWithComponents(saved, level.registryAccess());
+            if (restored != null) restored.load(saved);
             return ItemInteractionResult.CONSUME;
         }
         // Preserve addon block-entity data, then repack to the new capacity without discarding sparse slots.
         saved.remove("items");
-        ((BlockEntity) placed).loadWithComponents(saved, level.registryAccess());
+        ((BlockEntity) placed).load(saved);
         for (int i = 0; i < content.size(); i++) placed.setItem(i, content.get(i));
         placed.setColorSelection(color);
         if (!player.isCreative()) stack.shrink(1);
@@ -106,11 +106,11 @@ public final class ChestInteractions {
                     || !level.getBlockState(destination.below()).isFaceSturdy(level, destination.below(), Direction.UP)) continue;
             var state = level.getBlockState(event.getPos());
             if (!level.noCollision(null, state.getCollisionShape(level, destination).bounds().move(destination))) continue;
-            var data = ((BlockEntity) chest).saveWithoutMetadata(level.registryAccess());
+            var data = ((BlockEntity) chest).saveWithoutMetadata();
             if (!level.setBlock(destination, state, Block.UPDATE_ALL)) continue;
             var replacement = level.getBlockEntity(destination);
             if (!(replacement instanceof ChestStorage)) { level.removeBlock(destination, false); continue; }
-            replacement.loadWithComponents(data, level.registryAccess());
+            replacement.load(data);
             replacement.setChanged();
             level.setBlock(event.getPos(), net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL | Block.UPDATE_MOVE_BY_PISTON);
             level.sendBlockUpdated(destination, state, state, Block.UPDATE_ALL);

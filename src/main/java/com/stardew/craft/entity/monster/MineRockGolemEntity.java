@@ -63,15 +63,20 @@ public final class MineRockGolemEntity extends StardewMonsterEntity {
         double health=c.floor()>80?2.5:c.floor()>40?1.75:1,damage=c.floor()>80?2:c.floor()>40?1.5:1;
         setInitialHealth((int)(r.initialHealth()*health));replaceCombatStats(MonsterStats.builder().damage((int)(base.getDamage()*damage)).resilience(base.getResilience()).missChance(base.getMissChance()).experience(base.getExperience()).build());movement.face(2);
     }
-    @Override protected void defineSynchedData(SynchedEntityData.Builder b){super.defineSynchedData(b);b.define(MOVING,false);b.define(RISE,0F);b.define(HIT,-100L);}
-    @Override public EntityDimensions getDefaultDimensions(Pose pose){return EntityDimensions.scalable(WIDTH,isFarmGolem()?FARM_HEIGHT:1.15F+(HEIGHT-1.15F)*entityData.get(RISE));}
+    @Override protected void defineSynchedData(){super.defineSynchedData();this.entityData.define(MOVING,false);this.entityData.define(RISE,0F);this.entityData.define(HIT,-100L);}
+    // PORT(1.20.1): 1.21 LivingEntity#getDimensions is sleeping ? SLEEPING_DIMENSIONS : getDefaultDimensions(pose)
+    // (times the 1.20.5+ scale attribute, always 1 here); 1.20.1 only has getDimensions.
+    @Override public net.minecraft.world.entity.EntityDimensions getDimensions(net.minecraft.world.entity.Pose pose) {
+        return pose == net.minecraft.world.entity.Pose.SLEEPING ? SLEEPING_DIMENSIONS : getDefaultDimensions(pose);
+    }
+    public EntityDimensions getDefaultDimensions(Pose pose){return EntityDimensions.scalable(WIDTH,isFarmGolem()?FARM_HEIGHT:1.15F+(HEIGHT-1.15F)*entityData.get(RISE));}
     @Override public void onSyncedDataUpdated(EntityDataAccessor<?> key){super.onSyncedDataUpdated(key);if(RISE.equals(key))refreshDimensions();}
     public boolean moving(){return entityData.get(MOVING);}
     public double riseProgress(float p){return Math.min(1,entityData.get(RISE)+(phase()==1?p/12.:0));}
     public double hitTime(float p){return (level().getGameTime()-entityData.get(HIT)+p)/20.;}
     public RockGolemAwakening awakening(){return waking;}
     public void stunFor(int milliseconds){stunMilliseconds=Math.max(stunMilliseconds,milliseconds);}
-    private boolean valid(Player p){return p.isAlive()&&!p.isCreative()&&!p.isSpectator()&&!p.hasEffect(ModMobEffects.AVOID_MONSTERS)&&(monsterState().context().generation()==null||OrdinaryMineRuntime.floorAt(p.blockPosition())==monsterState().context().floor());}
+    private boolean valid(Player p){return p.isAlive()&&!p.isCreative()&&!p.isSpectator()&&!p.hasEffect(ModMobEffects.AVOID_MONSTERS.get())&&(monsterState().context().generation()==null||OrdinaryMineRuntime.floorAt(p.blockPosition())==monsterState().context().floor());}
     @Override protected void customServerAiStep(){
         if(!initialized())initialize(MonsterSpawnContext.capture((ServerLevel)level(),MonsterSpawnContext.Source.WORLD,1));var target=level().getNearestPlayer(getX(),getY(),getZ(),64,e->e instanceof Player p&&valid(p));setTarget(target);double x=getX(),z=getZ();
         for(int i=0;i<3;i++){

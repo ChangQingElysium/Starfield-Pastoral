@@ -20,7 +20,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import com.stardew.craft.port.net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 

@@ -3676,8 +3676,7 @@ public class ModItems {
 
     private static DeferredItem<Item> registerCasinoFirework(String id, int color) {
         return ITEMS.register(id, () -> new CasinoFireworkItem(
-                new Item.Properties().stacksTo(64).component(
-                        com.stardew.craft.port.net.minecraft.core.component.DataComponents.FIREWORKS,
+                new Item.Properties().stacksTo(64),
                         new com.stardew.craft.port.net.minecraft.world.item.component.Fireworks(
                                 1,
                                 java.util.List.of(new com.stardew.craft.port.net.minecraft.world.item.component.FireworkExplosion(
@@ -3685,7 +3684,7 @@ public class ModItems {
                                         new it.unimi.dsi.fastutil.ints.IntArrayList(new int[]{color}),
                                         new it.unimi.dsi.fastutil.ints.IntArrayList(),
                                         false,
-                                        false))))));
+                                        false)))));
     }
 
     // ── 装饰：农场常用 (Farm Common Decor) ──────────────────────────

@@ -69,8 +69,7 @@ public final class NpcRuntimeGameTests {
     public static void serverRejectsForgedAndReplayedAnswers(GameTestHelper helper) {
         var level=helper.getLevel();
         var player=new net.minecraft.server.level.ServerPlayer(level.getServer(),level,
-                new com.mojang.authlib.GameProfile(UUID.randomUUID(),"NpcQuestionTest"),
-                com.stardew.craft.port.net.minecraft.server.level.ClientInformation.createDefault());
+                new com.mojang.authlib.GameProfile(UUID.randomUUID(),"NpcQuestionTest"));
         NpcQuestionAuthority.open(player,"abigail","stardewcraft.npc.abigail.fall_sun");
         helper.assertTrue(NpcQuestionAuthority.consume(player,"abigail","27",99999,"Sun_27")==null,"Forged friendship delta accepted");
         helper.assertTrue(NpcQuestionAuthority.consume(player,"wizard","27",10,"Sun_27")==null,"Cross-NPC answer accepted");

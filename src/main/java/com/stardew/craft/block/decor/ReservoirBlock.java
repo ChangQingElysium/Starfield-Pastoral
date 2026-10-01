@@ -29,7 +29,7 @@ public class ReservoirBlock extends MapDecorStaticBlock {
 
     @Override
     @SuppressWarnings("null")
-    protected @Nonnull ItemInteractionResult useItemOn(@Nonnull ItemStack stack, @Nonnull BlockState state,
+    public @Nonnull ItemInteractionResult useItemOn(@Nonnull ItemStack stack, @Nonnull BlockState state,
             @Nonnull Level level, @Nonnull BlockPos pos, @Nonnull Player player, @Nonnull InteractionHand hand,
             @Nonnull BlockHitResult hitResult) {
 

@@ -13,7 +13,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import com.stardew.craft.port.net.neoforged.neoforge.event.tick.LevelTickEvent;
 
 /** Verified empty location beside FishShop.3's ship in the shipped v1.3.7 map. Never replaces a player's block. */
@@ -30,7 +30,7 @@ public final class BobberMachineInstaller extends SavedData {
     public BobberMachineInstaller() {}
     public static BobberMachineInstaller get(ServerLevel level){
         return level.getDataStorage().computeIfAbsent(
-                new SavedData.Factory<>(BobberMachineInstaller::new,BobberMachineInstaller::load),DATA_NAME);
+                com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(BobberMachineInstaller::new,BobberMachineInstaller::load)), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(BobberMachineInstaller::new,BobberMachineInstaller::load)),DATA_NAME);
     }
     public void resetForMigration(){
         completed=false;
@@ -38,7 +38,7 @@ public final class BobberMachineInstaller extends SavedData {
         setDirty();
     }
     public static BobberMachineInstaller load(CompoundTag tag,HolderLookup.Provider registries){var data=new BobberMachineInstaller();data.completed=tag.getBoolean("Completed");data.placementVersion=tag.getInt("PlacementVersion");return data;}
-    @Override public CompoundTag save(CompoundTag tag,HolderLookup.Provider registries){tag.putBoolean("Completed",completed);tag.putInt("PlacementVersion",placementVersion);return tag;}
+    @Override public CompoundTag save(CompoundTag tag){ net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();tag.putBoolean("Completed",completed);tag.putInt("PlacementVersion",placementVersion);return tag;}
     public static boolean canInstall(BlockGetter level){
         return level.getBlockState(POSITION).isAir()&&level.getBlockState(POSITION.above()).isAir()
                 &&BuiltInRegistries.BLOCK.getKey(level.getBlockState(POSITION.below()).getBlock()).toString().equals("stardewcraft:flooring_block");

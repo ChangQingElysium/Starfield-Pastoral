@@ -52,7 +52,7 @@ public final class PlacedFoodPlacement {
         if (!level.isClientSide) {
             if (!level.setBlock(pos, state, 3)) return InteractionResult.FAIL;
             block.setPlacedBy(level, pos, state, player, context.getItemInHand());
-            context.getItemInHand().consume(1, player);
+            com.stardew.craft.port.PortItemStacks.consume(context.getItemInHand(), 1, player);
             level.playSound(null, pos, block instanceof PlacedFishBlock ? ModSounds.DWOP.get() : SoundEvents.ITEM_FRAME_ADD_ITEM,
                     SoundSource.BLOCKS, .7F, 1F);
             level.gameEvent(GameEvent.BLOCK_PLACE, pos, GameEvent.Context.of(player, state));

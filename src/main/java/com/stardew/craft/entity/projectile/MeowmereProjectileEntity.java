@@ -1,5 +1,6 @@
 package com.stardew.craft.entity.projectile;
 
+import com.stardew.craft.port.PortItemStacks;
 import com.stardew.craft.combat.skill.HitCooldownDamageSource;
 import com.stardew.craft.combat.skill.SkillContext;
 import com.stardew.craft.combat.skill.WeaponDamageSnapshot;
@@ -113,8 +114,8 @@ public class MeowmereProjectileEntity extends ThrowableProjectile {
 
     @SuppressWarnings("null")
     @Override
-    protected void defineSynchedData(@SuppressWarnings("null") SynchedEntityData.Builder builder) {
-        builder.define(BOUNCES, 0);
+    protected void defineSynchedData() {
+        this.entityData.define(BOUNCES, 0);
     }
 
     public void setDamage(float damage) {
@@ -331,7 +332,7 @@ public class MeowmereProjectileEntity extends ThrowableProjectile {
             return;
         }
         tag.putString("ReleaseWeaponId", snapshot.weaponId().toString());
-        tag.put("ReleaseWeapon", weapon.saveOptional(registries));
+        tag.put("ReleaseWeapon", PortItemStacks.saveOptional(weapon, registries));
     }
 
     static WeaponDamageSnapshot readReleaseWeaponSnapshot(
@@ -346,7 +347,7 @@ public class MeowmereProjectileEntity extends ThrowableProjectile {
         if (weaponId == null) {
             return null;
         }
-        ItemStack weapon = ItemStack.parseOptional(
+        ItemStack weapon = PortItemStacks.parseOptional(
                 registries,
                 tag.getCompound("ReleaseWeapon")
         );
@@ -403,7 +404,7 @@ public class MeowmereProjectileEntity extends ThrowableProjectile {
     // 渲染需要这些
     @SuppressWarnings("null")
     @Override
-    public Packet<ClientGamePacketListener> getAddEntityPacket(@SuppressWarnings("null") net.minecraft.server.level.ServerEntity serverEntity) {
-        return super.getAddEntityPacket(serverEntity); // ThrowableProjectile处理了基础的同步
+    public Packet<ClientGamePacketListener> getAddEntityPacket() {
+        return super.getAddEntityPacket(); // ThrowableProjectile处理了基础的同步
     }
 }

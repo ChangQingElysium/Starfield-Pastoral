@@ -24,7 +24,7 @@ public final class EvolvedAuraEffectClient {
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_ENTITIES) {
             return;
         }
-        if (!Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()) {
+        if (!Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()) {
             return;
         }
 
@@ -45,7 +45,7 @@ public final class EvolvedAuraEffectClient {
         RenderType runeType = WeaponEffectRenderTypes.MOLTEN_GLOW;
         RenderType coreType = WeaponEffectRenderTypes.MOLTEN_GLOW;
 
-        float age = player.tickCount + event.getPartialTick().getGameTimeDeltaPartialTick(false);
+        float age = player.tickCount + event.getPartialTick();
         float pulse = 0.85f + 0.15f * (float) Math.sin(age * 0.2f);
         float radius = 1.1f * pulse;
 

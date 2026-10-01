@@ -242,7 +242,7 @@ public final class FestivalMapOverlayManager {
         if (!normalized.contains("id", Tag.TAG_STRING)) {
             return;
         }
-        BlockEntity blockEntity = BlockEntity.loadStatic(pos, level.getBlockState(pos), normalized, level.registryAccess());
+        BlockEntity blockEntity = BlockEntity.loadStatic(pos, level.getBlockState(pos), normalized);
         if (blockEntity != null) {
             level.setBlockEntity(blockEntity);
             blockEntity.setChanged();

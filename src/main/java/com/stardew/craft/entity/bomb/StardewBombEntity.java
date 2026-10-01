@@ -75,9 +75,9 @@ public class StardewBombEntity extends Entity {
     /* ── 初始化 ─────────────────────────────────────────── */
 
     @Override
-    protected void defineSynchedData(SynchedEntityData.Builder builder) {
-        builder.define(DATA_BOMB_TYPE, 0);
-        builder.define(DATA_FUSE, 48);
+    protected void defineSynchedData() {
+        this.entityData.define(DATA_BOMB_TYPE, 0);
+        this.entityData.define(DATA_FUSE, 48);
     }
 
     public void setBombType(BombType type) {
@@ -304,7 +304,7 @@ public class StardewBombEntity extends Entity {
                     new net.minecraft.world.phys.BlockHitResult(Vec3.atBottomCenterOf(pos.above()),
                             net.minecraft.core.Direction.UP, pos, false));
             BlockState tilled = state.getToolModifiedState(context,
-                    com.stardew.craft.port.net.neoforged.neoforge.common.ItemAbilities.HOE_TILL, false);
+                    net.minecraftforge.common.ToolActions.HOE_TILL, false);
             if (tilled == null || !(tilled.getBlock() instanceof net.minecraft.world.level.block.FarmBlock)) continue;
             if (level.isRainingAt(pos.above())) {
                 tilled = tilled.setValue(net.minecraft.world.level.block.FarmBlock.MOISTURE, 7);
@@ -516,7 +516,7 @@ public class StardewBombEntity extends Entity {
             );
 
             if (entity instanceof Player) {
-                if (entity.hasEffect(ModMobEffects.DWARF_STATUE_3)) {
+                if (entity.hasEffect(ModMobEffects.DWARF_STATUE_3.get())) {
                     continue;
                 }
                 entity.hurt(source, radius * 3);

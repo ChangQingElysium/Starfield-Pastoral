@@ -28,8 +28,10 @@ public final class BuildingUpgradePermitItem extends com.stardew.craft.item.Simp
                 && record.tier() == targetTier - 1 && record.phase() == BuildingRecord.Phase.READY
                 && data.transfer(record.id()) == null && BuildingService.canManage(player, record));
     }
-    @Override public void appendHoverText(net.minecraft.world.item.ItemStack stack, TooltipContext context,
-            java.util.List<net.minecraft.network.chat.Component> lines, net.minecraft.world.item.TooltipFlag flag) {
+    @Override public void appendHoverText(net.minecraft.world.item.ItemStack stack,
+            @javax.annotation.Nullable net.minecraft.world.level.Level level,
+            java.util.List<net.minecraft.network.chat.Component> lines,
+            net.minecraft.world.item.TooltipFlag flag) {
         lines.add(net.minecraft.network.chat.Component.translatable("building.stardewcraft.upgrade_hint").withStyle(net.minecraft.ChatFormatting.GRAY));
     }
     @Override public InteractionResult useOn(UseOnContext context) {

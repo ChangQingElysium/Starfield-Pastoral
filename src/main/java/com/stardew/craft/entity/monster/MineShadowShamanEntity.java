@@ -39,12 +39,12 @@ public final class MineShadowShamanEntity extends StardewMonsterEntity {
         if(points>=1250)stats=MonsterStats.builder().damage(0).resilience(stats.getResilience()).missChance(stats.getMissChance()).experience(stats.getExperience()).build();
         replaceCombatStats(stats);movement.face(2);
     }
-    @Override protected void defineSynchedData(SynchedEntityData.Builder b){super.defineSynchedData(b);b.define(MOVING,false);b.define(CASTING,false);b.define(HIT,-100L);b.define(CAST,-100L);b.define(RELEASE,-100L);}
+    @Override protected void defineSynchedData(){super.defineSynchedData();this.entityData.define(MOVING,false);this.entityData.define(CASTING,false);this.entityData.define(HIT,-100L);this.entityData.define(CAST,-100L);this.entityData.define(RELEASE,-100L);}
     public boolean moving(){return entityData.get(MOVING);}public boolean casting(){return entityData.get(CASTING);}
     private double time(EntityDataAccessor<Long> key,float p){return (level().getGameTime()-entityData.get(key)+p)/20.;}
     public double hitTime(float p){return time(HIT,p);}public double castTime(float p){return time(CAST,p);}public double releaseTime(float p){return time(RELEASE,p);}
     public void stunFor(int milliseconds){stunMilliseconds=Math.max(stunMilliseconds,milliseconds);}
-    private boolean valid(Player p){return p.isAlive()&&!p.isCreative()&&!p.isSpectator()&&!p.hasEffect(ModMobEffects.AVOID_MONSTERS)&&(monsterState().context().generation()==null||OrdinaryMineRuntime.floorAt(p.blockPosition())==monsterState().context().floor());}
+    private boolean valid(Player p){return p.isAlive()&&!p.isCreative()&&!p.isSpectator()&&!p.hasEffect(ModMobEffects.AVOID_MONSTERS.get())&&(monsterState().context().generation()==null||OrdinaryMineRuntime.floorAt(p.blockPosition())==monsterState().context().floor());}
     private boolean peripheral(Player p){return switch(movement.facing()){case 0->p.getZ()<getZ()+.5;case 1->p.getX()>getX()-.5;case 2->p.getZ()>getZ()-.5;default->p.getX()<getX()+.5;};}
     @Override protected void customServerAiStep(){
         if(!initialized())initialize(MonsterSpawnContext.capture((ServerLevel)level(),MonsterSpawnContext.Source.WORLD,1));

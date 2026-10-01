@@ -68,7 +68,7 @@ public final class TreeBlessingSkillHandler implements RuntimeWeaponSkillHandler
 
         instance.registerCommittedEffect(() -> {
             context.player().addEffect(new MobEffectInstance(
-                    ModMobEffects.SHELTER,
+                    ModMobEffects.SHELTER.get(),
                     SHELTER_DURATION_TICKS,
                     SHELTER_AMPLIFIER,
                     false,

@@ -36,11 +36,11 @@ public final class GardenPlanterBlock extends Block {
         registerDefaultState(state);
     }
 
+    // PORT(1.20.1): NeoForge TriState TRUE -> true; DEFAULT -> Forge's default soil rules (plant's mayPlaceOn first).
     @Override
-    public com.stardew.craft.port.net.neoforged.neoforge.common.util.TriState canSustainPlant(BlockState state, BlockGetter level,
-            BlockPos soilPosition, Direction facing, BlockState plant) {
-        return facing == Direction.UP ? com.stardew.craft.port.net.neoforged.neoforge.common.util.TriState.TRUE
-                : com.stardew.craft.port.net.neoforged.neoforge.common.util.TriState.DEFAULT;
+    public boolean canSustainPlant(BlockState state, BlockGetter level,
+            BlockPos soilPosition, Direction facing, net.minecraftforge.common.IPlantable plant) {
+        return facing == Direction.UP || super.canSustainPlant(state, level, soilPosition, facing, plant);
     }
 
     /** Both halves of tall flowers sink together to the open soil surface. */
@@ -75,7 +75,7 @@ public final class GardenPlanterBlock extends Block {
     }
 
     @Override
-    protected BlockState updateShape(BlockState state, Direction direction, BlockState neighbor,
+    public BlockState updateShape(BlockState state, Direction direction, BlockState neighbor,
                                      LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
         return connectedState(state, level, pos);
     }
@@ -94,13 +94,13 @@ public final class GardenPlanterBlock extends Block {
     }
 
     @Override
-    protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean moved) {
+    public void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean moved) {
         super.onPlace(state, level, pos, oldState, moved);
         if (!oldState.is(this)) refreshAround(level, pos);
     }
 
     @Override
-    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean moved) {
+    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean moved) {
         super.onRemove(state, level, pos, newState, moved);
         if (!newState.is(this)) refreshAround(level, pos);
     }
@@ -116,7 +116,7 @@ public final class GardenPlanterBlock extends Block {
     }
 
     @Override
-    protected boolean isPathfindable(BlockState state, PathComputationType type) { return false; }
+    public boolean isPathfindable(BlockState state, BlockGetter level, BlockPos pos, PathComputationType type) { return false; }
 
     @Override
     public BlockState rotate(BlockState state, Rotation rotation) { return transform(state, rotation::rotate); }

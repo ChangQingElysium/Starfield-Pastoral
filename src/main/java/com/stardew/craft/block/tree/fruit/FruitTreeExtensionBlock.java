@@ -17,8 +17,10 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 import javax.annotation.Nonnull;
+import net.minecraft.world.InteractionHand;
+import com.stardew.craft.port.PortBlockInteraction;
 
-public class FruitTreeExtensionBlock extends Block {
+public class FruitTreeExtensionBlock extends Block implements PortBlockInteraction {
     private final FruitTreeType type;
 
     public FruitTreeExtensionBlock(FruitTreeType type, Properties properties) {
@@ -31,7 +33,7 @@ public class FruitTreeExtensionBlock extends Block {
     }
 
     @Override
-    protected RenderShape getRenderShape(@Nonnull BlockState state) {
+    public RenderShape getRenderShape(@Nonnull BlockState state) {
         return RenderShape.INVISIBLE;
     }
 
@@ -65,8 +67,15 @@ public class FruitTreeExtensionBlock extends Block {
         return super.getDestroyProgress(state, player, level, pos);
     }
 
+    // PORT(1.20.1): replay the 1.21 useItemOn/useWithoutItem dispatch.
     @Override
-    protected InteractionResult useWithoutItem(@Nonnull BlockState state, @Nonnull Level level, @Nonnull BlockPos pos,
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player,
+            InteractionHand hand, BlockHitResult hit) {
+        return PortBlockInteraction.dispatch(this, state, level, pos, player, hand, hit);
+    }
+
+    @Override
+    public InteractionResult useWithoutItem(@Nonnull BlockState state, @Nonnull Level level, @Nonnull BlockPos pos,
                                                @Nonnull Player player, @Nonnull BlockHitResult hit) {
         BlockPos root = FruitTreeBlock.findRoot(level, pos);
         if (root == null) {
@@ -80,19 +89,20 @@ public class FruitTreeExtensionBlock extends Block {
     }
 
     @Override
-    public BlockState playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
+    public void playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
         if (!level.isClientSide()) {
             BlockPos root = FruitTreeBlock.findRoot(level, pos);
             if (root != null) {
                 FruitTreeBlock.fellTree(level, root, player);
             }
         }
-        return super.playerWillDestroy(level, pos, state, player);
+        super.playerWillDestroy(level, pos, state, player);
     }
 
     @Override
-    public ItemStack getCloneItemStack(@Nonnull LevelReader level, @Nonnull BlockPos pos, @Nonnull BlockState state) {
-        BlockPos root = FruitTreeBlock.findRoot(level, pos);
+    public ItemStack getCloneItemStack(@Nonnull BlockGetter level, @Nonnull BlockPos pos, @Nonnull BlockState state) {
+        // PORT(1.20.1): the clone hook takes a BlockGetter; pick-block always passes the (LevelReader) level.
+        BlockPos root = level instanceof net.minecraft.world.level.LevelReader reader ? FruitTreeBlock.findRoot(reader, pos) : null;
         if (root != null) {
             return level.getBlockState(root).getBlock().asItem().getDefaultInstance();
         }

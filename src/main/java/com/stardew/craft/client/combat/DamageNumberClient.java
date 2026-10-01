@@ -89,7 +89,7 @@ public final class DamageNumberClient {
         RenderSystem.enableDepthTest();
 
         for (DamageNumber dn : ACTIVE) {
-            float partial = event.getPartialTick().getGameTimeDeltaPartialTick(false);
+            float partial = event.getPartialTick();
             float age = dn.age + partial;
             float t = age / dn.lifetime;
             if (t < 0 || t > 1) continue;

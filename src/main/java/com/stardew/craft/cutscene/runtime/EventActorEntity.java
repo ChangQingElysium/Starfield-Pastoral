@@ -58,11 +58,11 @@ public class EventActorEntity extends Mob implements GeoEntity {
     }
 
     @Override
-    protected void defineSynchedData(@javax.annotation.Nonnull SynchedEntityData.Builder builder) {
-        super.defineSynchedData(builder);
-        builder.define(DATA_NPC_ID, "");
-        builder.define(DATA_IS_WALKING, false);
-        builder.define(DATA_GUITAR, new CompoundTag());
+    protected void defineSynchedData() {
+        super.defineSynchedData();
+        this.entityData.define(DATA_NPC_ID, "");
+        this.entityData.define(DATA_IS_WALKING, false);
+        this.entityData.define(DATA_GUITAR, new CompoundTag());
     }
 
     public String getNpcId() {
@@ -239,7 +239,7 @@ public class EventActorEntity extends Mob implements GeoEntity {
     public boolean canBeCollidedWith() { return false; }
 
     @Override
-    public boolean canBeLeashed() { return false; }
+    public boolean canBeLeashed(net.minecraft.world.entity.player.Player player) { return false; }
 
     @Override
     public Component getName() {

@@ -1,5 +1,6 @@
 package com.stardew.craft.gametest;
 
+import com.stardew.craft.port.PortGameTests;
 import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.entity.bomb.BombBlastPattern;
 import com.stardew.craft.entity.bomb.StardewBombEntity;
@@ -74,7 +75,7 @@ public final class BombPlaneGameTests {
     @GameTest(templateNamespace = "stardewcraft_bombs", template = "ring_utilities")
     public static void halfStairsFollowClickSideFacingAndUpsideDownPlacement(GameTestHelper helper) {
         var level = helper.getLevel();
-        var player = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
+        var player = PortGameTests.makeMockPlayer(helper, net.minecraft.world.level.GameType.SURVIVAL);
         var block = com.stardew.craft.templates.TemplateContent.TEMPLATE_BLOCKS
                 .get(com.stardew.craft.templates.TemplateShape.HALF_STAIRS).get();
         BlockPos pos = helper.absolutePos(new BlockPos(4, 3, 4));

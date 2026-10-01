@@ -1,5 +1,6 @@
 package com.stardew.craft.animal.runtime;
 
+import com.stardew.craft.port.PortItemStacks;
 import com.mojang.authlib.GameProfile;
 import com.stardew.craft.animal.model.*;
 import com.stardew.craft.block.ModBlocks;
@@ -148,7 +149,7 @@ public final class LegacyLivestockMigrationGameTests {
             fixture.level.setBlock(position, ModBlocks.ANIMAL_PRODUCE_SPOT.get().defaultBlockState(), 3);
             spot = (AnimalProduceSpotBlockEntity) fixture.level.getBlockEntity(position);
             spot.setAnimalId(fixture.animalId); spot.setBuildingId(fixture.homeId); spot.setProduceStack(new ItemStack(ModItems.EGG_WHITE.get()));
-            var oldSpot = spot.saveWithFullMetadata(fixture.level.registryAccess());
+            var oldSpot = spot.saveWithFullMetadata();
             LegacyLivestockMigration.migrateProductSpot(fixture.level, spot);
             long count = data.eggs().stream().filter(p -> p.animal().equals(id)).count();
             var path = fixture.level.getServer().getWorldPath(net.minecraft.world.level.storage.LevelResource.ROOT).resolve("data/stardew_livestock.dat");
@@ -158,7 +159,7 @@ public final class LegacyLivestockMigrationGameTests {
                 h.assertTrue(saved.eggs().stream().anyMatch(p -> p.animal().equals(id)), "Old floor block retired before its product reached disk");
             } catch (java.io.IOException exception) { throw new IllegalStateException(exception); }
             fixture.level.setBlock(position, ModBlocks.ANIMAL_PRODUCE_SPOT.get().defaultBlockState(), 3);
-            spot = (AnimalProduceSpotBlockEntity) fixture.level.getBlockEntity(position); spot.loadWithComponents(oldSpot, fixture.level.registryAccess());
+            spot = (AnimalProduceSpotBlockEntity) fixture.level.getBlockEntity(position); spot.load(oldSpot);
             LegacyLivestockMigration.migrateProductSpot(fixture.level, spot);
             h.assertTrue(data.eggs().stream().filter(p -> p.animal().equals(id)).count() == count && count == 1, "Pre-ledger spot duplicated across reload");
             data.remove(id);
@@ -209,20 +210,20 @@ public final class LegacyLivestockMigrationGameTests {
             var position = fixture.manager.west(3);
             fixture.level.setBlock(position, ModBlocks.INCUBATOR.get().defaultBlockState(), 3);
             var incubator = (IncubatorBlockEntity) fixture.level.getBlockEntity(position);
-            var raw = new CompoundTag(); raw.put("input", new ItemStack(ModItems.OSTRICH_EGG.get()).save(fixture.level.registryAccess()));
+            var raw = new CompoundTag(); raw.put("input", PortItemStacks.save(new ItemStack(ModItems.OSTRICH_EGG.get()), fixture.level.registryAccess()));
             long oldMinute = (fixture.day - 1L) * 1260 + Math.max(0, StardewTimeManager.get().getCurrentTime() - 360);
             raw.putLong("readyAtAbsMinute", oldMinute + 500); raw.putBoolean("ready", false);
-            incubator.loadWithComponents(raw, fixture.level.registryAccess());
+            incubator.load(raw);
             var player = FakePlayerFactory.get(fixture.level, new GameProfile(fixture.owner, "LegacyKeeper")); player.moveTo(position.getCenter());
             h.assertTrue(incubator.hasInput() && incubator.getRemainingAbsMinutes() == 500, "Legacy input cleared or old clock misread");
             h.assertTrue(incubator.claimReadyAnimal(player, "Early") == IncubatorBlockEntity.ClaimResult.NOT_READY, "Unfinished egg hatched early");
             h.assertTrue(incubator.getRemainingAbsMinutes() == 500, "Clock conversion restarted/shortened incubation");
-            raw.putBoolean("ready", true); incubator.loadWithComponents(raw, fixture.level.registryAccess());
+            raw.putBoolean("ready", true); incubator.load(raw);
             var result = incubator.claimReadyAnimal(player, "Legacy hatch");
             h.assertTrue(result == IncubatorBlockEntity.ClaimResult.SUCCESS, "Ready legacy egg not claimable: " + result);
             var data = LivestockWorldData.get(fixture.level.getServer());
             var baby = data.all().stream().filter(a -> a.name().equals("Legacy hatch")).findFirst().orElseThrow();
-            data.remove(baby.id()); incubator.loadWithComponents(raw, fixture.level.registryAccess());
+            data.remove(baby.id()); incubator.load(raw);
             h.assertTrue(incubator.claimReadyAnimal(player, "Duplicate") == IncubatorBlockEntity.ClaimResult.SUCCESS && !incubator.hasInput(), "Old incubation receipt not recovered");
             h.assertTrue(data.find(baby.id()) == null, "Sold hatchling resurrected from old incubator NBT");
         }

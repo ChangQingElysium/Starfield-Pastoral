@@ -1,5 +1,6 @@
 package com.stardew.craft.client.model.terrain;
 
+import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.block.terrain.TerrainSoils;
@@ -34,7 +35,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import net.minecraftforge.client.ChunkRenderTypeSet;
 import net.minecraftforge.client.event.ModelEvent;
 import net.minecraftforge.client.model.BakedModelWrapper;
@@ -98,7 +99,8 @@ public final class GrassTransitionModels {
 
     @SubscribeEvent
     public static void wrapTargets(ModelEvent.ModifyBakingResult event) {
-        Map<ModelResourceLocation, BakedModel> models = event.getModels();
+        // PORT(1.20.1): Forge keys baked models by ResourceLocation (ModelResourceLocation is a subclass).
+        Map<ResourceLocation, BakedModel> models = event.getModels();
         TerrainFarmlandQuads[][][][] fertilizers = {FertilizedSoilModels.bake(models), FertilizedSoilModels.bakeSandy(models), FertilizedSoilModels.bakeInfertile(models)};
         ConnectedTopQuads connections = new ConnectedTopQuads();
         BakedModel[][][] overlays = new BakedModel[4][2][256];
@@ -304,7 +306,7 @@ public final class GrassTransitionModels {
                 @Override
                 public BakedModel resolve(BakedModel model, ItemStack stack, @Nullable ClientLevel level,
                         @Nullable LivingEntity entity, int seed) {
-                    Integer variant = property == null ? null : stack.getOrDefault(DataComponents.BLOCK_STATE,
+                    Integer variant = property == null ? null : PortItemData.getOrDefault(stack, DataComponents.BLOCK_STATE,
                             BlockItemStateProperties.EMPTY).get(property);
                     return surfaces[TerrainSeasonTextures.currentTextureSet()][variant == null ? 0 : variant];
                 }

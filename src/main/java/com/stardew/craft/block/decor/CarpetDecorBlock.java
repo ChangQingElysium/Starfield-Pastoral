@@ -30,7 +30,7 @@ public class CarpetDecorBlock extends MapDecorStaticBlock {
 
     /** Existing block-based rugs are converted lazily the first time furniture is placed on them. */
     @Override
-    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
+    public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
                                                Player player, InteractionHand hand, BlockHitResult hit) {
         if (stack.getItem() instanceof BlockItem blockItem
                 && !(blockItem.getBlock() instanceof CarpetDecorBlock)) {
@@ -41,7 +41,7 @@ public class CarpetDecorBlock extends MapDecorStaticBlock {
     }
 
     @Override
-    protected boolean canBeReplaced(BlockState state, BlockPlaceContext context) {
+    public boolean canBeReplaced(BlockState state, BlockPlaceContext context) {
         return context.getItemInHand().getItem() instanceof BlockItem blockItem
                 && !(blockItem.getBlock() instanceof CarpetDecorBlock);
     }

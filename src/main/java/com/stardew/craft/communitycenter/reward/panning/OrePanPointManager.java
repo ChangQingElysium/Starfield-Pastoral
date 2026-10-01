@@ -187,7 +187,7 @@ public final class OrePanPointManager extends SavedData {
         ServerLevel persistent = level.getServer().overworld();
         if (persistent == null) persistent = level;
         return persistent.getDataStorage().computeIfAbsent(
-            new SavedData.Factory<>(OrePanPointManager::new, OrePanPointManager::load),
+            com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(OrePanPointManager::new, OrePanPointManager::load)), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(OrePanPointManager::new, OrePanPointManager::load)),
             DATA_NAME);
     }
 

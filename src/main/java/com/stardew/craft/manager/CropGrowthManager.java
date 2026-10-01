@@ -501,7 +501,7 @@ public class CropGrowthManager extends SavedData {
 
     @SuppressWarnings("null")
     @Override
-    public CompoundTag save(@SuppressWarnings("null") CompoundTag tag, @SuppressWarnings("null") net.minecraft.core.HolderLookup.Provider provider) {
+    public CompoundTag save(@SuppressWarnings("null") CompoundTag tag) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
         ListTag list = new ListTag();
         for (GlobalPos pos : cropPositions) {
             // GlobalPos 没有内置codec直接转tag的方法比较方便，我们手动存一下或者用NbtUtils存BlockPos
@@ -577,11 +577,15 @@ public class CropGrowthManager extends SavedData {
         // 数据保存在主世界(Overworld)的存储中，全局共享
         ServerLevel overworld = level.getServer().overworld();
         return overworld.getDataStorage().computeIfAbsent(
-                new SavedData.Factory<>(
+                com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(
                         CropGrowthManager::new,
                         CropGrowthManager::load,
                         null
-                ),
+                )), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(
+                        CropGrowthManager::new,
+                        CropGrowthManager::load,
+                        null
+                )),
                 DATA_NAME
         );
     }

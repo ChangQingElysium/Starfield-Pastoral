@@ -1,5 +1,6 @@
 package com.stardew.craft.gametest;
 
+import com.stardew.craft.port.PortItemData;
 import com.mojang.authlib.GameProfile;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.block.ModBlocks;
@@ -17,7 +18,6 @@ import com.stardew.craft.port.net.minecraft.core.component.DataComponents;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.NbtOps;
-import com.stardew.craft.port.net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
@@ -45,14 +45,14 @@ public final class CliffGameTests {
         var level = helper.getLevel();
         var pos = helper.absolutePos(new BlockPos(8,3,8));
         var block = ModBlocks.CLIFF.get();
-        var player = new ServerPlayer(level.getServer(),level,new GameProfile(UUID.randomUUID(),"Cliff test"),ClientInformation.createDefault());
+        var player = new ServerPlayer(level.getServer(),level,new GameProfile(UUID.randomUUID(),"Cliff test"));
         player.getAbilities().instabuild = true;
         level.setBlock(pos.above(),Blocks.AIR.defaultBlockState(),2);
         for (int variant = 0; variant < 6; variant++) {
             var state = block.defaultBlockState().setValue(TerrainVariants.CLIFF,variant);
             var ordinary = new ItemStack(block);
             var fixed = TerrainVariants.fixedCopy(ordinary,state);
-            helper.assertTrue(!ordinary.has(DataComponents.BLOCK_STATE),"Fixed-copy modified ordinary stack");
+            helper.assertTrue(!PortItemData.has(ordinary, DataComponents.BLOCK_STATE),"Fixed-copy modified ordinary stack");
             player.setItemInHand(InteractionHand.MAIN_HAND,fixed);
             for (int repeat = 0; repeat < 5; repeat++) {
                 level.setBlock(pos,Blocks.AIR.defaultBlockState(),2);

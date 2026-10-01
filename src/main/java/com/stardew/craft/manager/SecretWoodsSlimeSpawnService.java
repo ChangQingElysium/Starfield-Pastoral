@@ -40,7 +40,7 @@ public final class SecretWoodsSlimeSpawnService {
 
         int absoluteDay = StardewTimeManager.get().getAbsoluteDay();
         SecretWoodsSlimeData data = level.getDataStorage().computeIfAbsent(
-                SecretWoodsSlimeData.factory(), DATA_ID);
+                com.stardew.craft.port.PortSavedData.loader(SecretWoodsSlimeData.factory()), com.stardew.craft.port.PortSavedData.constructor(SecretWoodsSlimeData.factory()), DATA_ID);
         if (data.lastSpawnedDay() == absoluteDay) {
             return;
         }
@@ -117,8 +117,8 @@ public final class SecretWoodsSlimeSpawnService {
             this.lastSpawnedDay = lastSpawnedDay;
         }
 
-        static SavedData.Factory<SecretWoodsSlimeData> factory() {
-            return new SavedData.Factory<>(
+        static com.stardew.craft.port.PortSavedData.Factory<SecretWoodsSlimeData> factory() {
+            return new com.stardew.craft.port.PortSavedData.Factory<>(
                     () -> new SecretWoodsSlimeData(0),
                     SecretWoodsSlimeData::load);
         }
@@ -139,7 +139,7 @@ public final class SecretWoodsSlimeSpawnService {
         }
 
         @Override
-        public CompoundTag save(@Nonnull CompoundTag tag, @Nonnull HolderLookup.Provider registries) {
+        public CompoundTag save(@Nonnull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
             tag.putInt("LastSpawnedDay", lastSpawnedDay);
             return tag;
         }

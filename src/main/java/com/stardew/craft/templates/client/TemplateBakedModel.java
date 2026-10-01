@@ -1,5 +1,6 @@
 package com.stardew.craft.templates.client;
 
+import com.stardew.craft.port.PortItemData;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.stardew.craft.templates.TemplateBlockEntity;
 import com.stardew.craft.templates.TemplateMaterials;
@@ -69,7 +70,7 @@ final class TemplateBakedModel extends BakedModelWrapper<BakedModel> implements 
 
     @Override
     public List<BakedModel> getRenderPasses(ItemStack stack, boolean fabulous) {
-        if (stack.has(com.stardew.craft.port.net.minecraft.core.component.DataComponents.BLOCK_ENTITY_DATA)) {
+        if (PortItemData.has(stack, com.stardew.craft.port.net.minecraft.core.component.DataComponents.BLOCK_ENTITY_DATA)) {
             ModelData data = TemplateBlockEntity.itemMaterials(stack);
             CacheKey key = new CacheKey(material(data), fillMaterial(data), null, null, 0, 0, 15, 0, usesStudy(data), null);
             return List.of(itemPassCache.computeIfAbsent(key, ignored -> {

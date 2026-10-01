@@ -227,7 +227,7 @@ public class GilGoalsScreen extends Screen {
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollY) {
         scrollOffset = Math.max(0, Math.min(maxScroll, scrollOffset - (int)(scrollY * 16)));
         return true;
     }

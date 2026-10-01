@@ -10,7 +10,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import org.joml.Matrix4f;
 import static com.stardew.craft.client.weapon.MeleeWeaponVisuals.*;
@@ -35,9 +35,9 @@ public final class SacredWeaponVisuals {
     @SubscribeEvent public static void render(RenderLevelStageEvent event) {
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_PARTICLES) return;
         var mc = Minecraft.getInstance();
-        if (mc.level == null || !Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()) return;
+        if (mc.level == null || !Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()) return;
         var stack = event.getPoseStack(); var camera = event.getCamera().getPosition();
-        float partial = event.getPartialTick().getGameTimeDeltaPartialTick(false);
+        float partial = event.getPartialTick();
         var buffers = mc.renderBuffers().bufferSource();
         stack.pushPose(); stack.translate(-camera.x, -camera.y, -camera.z);
         var out = buffers.getBuffer(WeaponEffectRenderTypes.MOLTEN_GLOW);

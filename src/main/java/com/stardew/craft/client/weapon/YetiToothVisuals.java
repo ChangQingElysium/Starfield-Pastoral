@@ -16,7 +16,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import com.stardew.craft.port.net.neoforged.neoforge.event.tick.EntityTickEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import static com.stardew.craft.client.weapon.WeaponGlowGeometry.*;
@@ -47,7 +47,7 @@ public final class YetiToothVisuals {
         Minecraft mc = Minecraft.getInstance();
         ensureLevel(mc.level);
         if (mc.level == null || mc.player == null || mc.isPaused()
-                || !Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean() || spine.distanceToSqr(mc.player) > 32 * 32) return;
+                || !Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get() || spine.distanceToSqr(mc.player) > 32 * 32) return;
         Vec3 previous = LAST.get(spine.getId());
         if (previous != null && previous.distanceToSqr(spine.position()) < 0.4 * 0.4) return;
         LAST.put(spine.getId(), spine.position());
@@ -63,10 +63,10 @@ public final class YetiToothVisuals {
         Minecraft mc = Minecraft.getInstance();
         ensureLevel(mc.level);
         if (mc.level == null) return;
-        double now = mc.level.getGameTime() + event.getPartialTick().getGameTimeDeltaPartialTick(false);
+        double now = mc.level.getGameTime() + event.getPartialTick();
         RIDGES.removeIf(ridge -> now - ridge.tick >= 9);
         LAST.keySet().removeIf(id -> mc.level.getEntity(id) == null);
-        if (RIDGES.isEmpty() || !Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()) return;
+        if (RIDGES.isEmpty() || !Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()) return;
         var stack = event.getPoseStack();
         var camera = event.getCamera().getPosition();
         stack.pushPose(); stack.translate(-camera.x, -camera.y, -camera.z);

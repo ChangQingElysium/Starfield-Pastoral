@@ -18,7 +18,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import com.stardew.craft.port.net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import static com.stardew.craft.client.weapon.MeleeWeaponVisuals.*;
@@ -76,7 +76,7 @@ public final class GroveWeaponVisuals {
         if (mc.level.getEntity(p.casterId()) instanceof LivingEntity caster && mc.player != null && caster.distanceToSqr(mc.player) <= 32 * 32) {
             mc.level.playLocalSound(caster.getX(), caster.getY() + 0.8, caster.getZ(), SoundEvents.EXPERIENCE_ORB_PICKUP,
                     SoundSource.PLAYERS, 0.09f, p.empowered() ? 1.4f : 1.15f, false);
-            if (Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()) for (int i = 0; i < 2; i++)
+            if (Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()) for (int i = 0; i < 2; i++)
                 mc.level.addParticle(ParticleTypes.END_ROD, caster.getX() + (i - 1) * 0.25,
                         caster.getY() + 0.5 + i * 0.14, caster.getZ(), 0, 0.025, 0);
         }
@@ -93,8 +93,8 @@ public final class GroveWeaponVisuals {
     @SubscribeEvent public static void render(RenderLevelStageEvent event) {
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_PARTICLES) return;
         var mc = Minecraft.getInstance(); ensureLevel(mc.level);
-        if (mc.level == null || !Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()) return;
-        float partial = event.getPartialTick().getGameTimeDeltaPartialTick(false);
+        if (mc.level == null || !Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()) return;
+        float partial = event.getPartialTick();
         double now = mc.level.getGameTime() + partial;
         var stack = event.getPoseStack(); var camera = event.getCamera().getPosition();
         var buffers = mc.renderBuffers().bufferSource();

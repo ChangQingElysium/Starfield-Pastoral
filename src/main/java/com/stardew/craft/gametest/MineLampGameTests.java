@@ -1,5 +1,6 @@
 package com.stardew.craft.gametest;
 
+import com.stardew.craft.port.PortItemData;
 import com.mojang.authlib.GameProfile;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.block.ModBlocks;
@@ -11,7 +12,6 @@ import net.minecraft.core.Direction;
 import com.stardew.craft.port.net.minecraft.core.component.DataComponents;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
-import com.stardew.craft.port.net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.BlockItem;
@@ -34,14 +34,14 @@ public final class MineLampGameTests {
     public static void themesSurvivePlacementPickingDropsAndSaving(GameTestHelper helper) {
         var level=helper.getLevel();var block=(MineLampBlock)ModBlocks.MINE_LAMP.get();
         BlockPos pos=helper.absolutePos(new BlockPos(8,3,8));
-        var player=new ServerPlayer(level.getServer(),level,new GameProfile(UUID.randomUUID(),"Lamp test"),ClientInformation.createDefault());
+        var player=new ServerPlayer(level.getServer(),level,new GameProfile(UUID.randomUUID(),"Lamp test"));
         player.getAbilities().instabuild=true;
         // All four supports are present: clicked face must win even when the player looks elsewhere.
         for(Direction face:Direction.Plane.HORIZONTAL) level.setBlock(pos.relative(face),Blocks.STONE.defaultBlockState(),3);
         for(var theme:MineLampBlock.Theme.values()) for(Direction face:Direction.Plane.HORIZONTAL) {
             level.removeBlock(pos,false);
             var stack=new ItemStack(block);
-            stack.set(DataComponents.BLOCK_STATE,BlockItemStateProperties.EMPTY.with(MineLampBlock.THEME,theme));
+            PortItemData.set(stack, DataComponents.BLOCK_STATE,BlockItemStateProperties.EMPTY.with(MineLampBlock.THEME,theme));
             player.setItemInHand(InteractionHand.MAIN_HAND,stack);
             var context=new BlockPlaceContext(player,InteractionHand.MAIN_HAND,stack,new BlockHitResult(Vec3.atCenterOf(pos),face,pos,false));
             helper.assertTrue(((BlockItem)stack.getItem()).place(context).consumesAction(),"Lamp placement failed");
@@ -52,8 +52,8 @@ public final class MineLampGameTests {
             helper.assertTrue(MineLampItem.theme(block.getCloneItemStack(level,pos,state))==theme,"Picking lost theme");
             var entity=level.getBlockEntity(pos);
             helper.assertTrue(entity instanceof MineLampBlockEntity,"Lamp not available for source discovery");
-            var saved=entity.saveWithFullMetadata(level.registryAccess());
-            helper.assertTrue(BlockEntity.loadStatic(pos,state,saved,level.registryAccess()) instanceof MineLampBlockEntity,"Light source lost after loading");
+            var saved=entity.saveWithFullMetadata();
+            helper.assertTrue(BlockEntity.loadStatic(pos,state,saved) instanceof MineLampBlockEntity,"Light source lost after loading");
             var drops=Block.getDrops(state,level,pos,entity);
             helper.assertTrue(drops.size()==1 && MineLampItem.theme(drops.getFirst())==theme,"Loot lost theme");
             level.setBlock(pos,state.setValue(MineLampBlock.LIT,false),3);

@@ -38,7 +38,7 @@ public final class SmartRoofTemplateBlock extends RoofTemplateBlock {
     }
 
     @Override
-    protected BlockState updateShape(BlockState state, Direction direction, BlockState neighborState,
+    public BlockState updateShape(BlockState state, Direction direction, BlockState neighborState,
                                      LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
         return withShape(state, level, pos);
     }

@@ -9,7 +9,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.storage.EntityStorage;
-import com.stardew.craft.port.net.minecraft.world.level.chunk.storage.SimpleRegionStorage;
+import net.minecraft.world.level.chunk.storage.IOWorker;
 import net.minecraft.world.level.entity.ChunkEntities;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -25,7 +25,8 @@ import java.util.function.Function;
 @Mixin(EntityStorage.class)
 public abstract class ManagedAnimalEntityLoadMixin {
     @Shadow @Final private ServerLevel level;
-    @Shadow @Final private SimpleRegionStorage simpleRegionStorage;
+    // PORT(1.20.1): 1.20.5+ SimpleRegionStorage wraps the IOWorker that 1.20.1 EntityStorage holds directly.
+    @Shadow @Final private IOWorker worker;
 
     @Redirect(
         method = "loadEntities",
@@ -48,7 +49,7 @@ public abstract class ManagedAnimalEntityLoadMixin {
                 if (result.changed()) {
                     chunkTag.put("Entities", result.sanitized());
                     AnimalEntityRecoveryState.markRecovering(level, pos);
-                    simpleRegionStorage.write(pos, chunkTag.copy()).whenComplete((ignored, error) -> {
+                    worker.store(pos, chunkTag.copy()).whenComplete((ignored, error) -> {
                         if (error != null) {
                             StardewCraft.LOGGER.error(
                                 "[ANIMAL_RECOVERY] Failed to persist repaired entity chunk {} in {}",

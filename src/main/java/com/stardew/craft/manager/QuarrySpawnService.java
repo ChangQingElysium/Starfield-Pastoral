@@ -83,7 +83,7 @@ public final class QuarrySpawnService {
     public static void resetInitialSpawn(ServerLevel level) {
         if (!level.dimension().equals(com.stardew.craft.core.ModDimensions.STARDEW_VALLEY)) return;
         QuarryInitData data = level.getDataStorage().computeIfAbsent(
-                QuarryInitData.factory(), INIT_DATA_ID);
+                com.stardew.craft.port.PortSavedData.loader(QuarryInitData.factory()), com.stardew.craft.port.PortSavedData.constructor(QuarryInitData.factory()), INIT_DATA_ID);
         data.resetForMigration();
     }
 
@@ -92,7 +92,7 @@ public final class QuarrySpawnService {
         if (!level.dimension().equals(com.stardew.craft.core.ModDimensions.STARDEW_VALLEY)) return;
 
         QuarryInitData data = level.getDataStorage().computeIfAbsent(
-                QuarryInitData.factory(), INIT_DATA_ID);
+                com.stardew.craft.port.PortSavedData.loader(QuarryInitData.factory()), com.stardew.craft.port.PortSavedData.constructor(QuarryInitData.factory()), INIT_DATA_ID);
         if (data.isInitialized()) return;
 
         int attempts = initialAttempts(year);
@@ -241,13 +241,13 @@ public final class QuarrySpawnService {
 
         @Override
         @Nonnull
-        public CompoundTag save(@Nonnull CompoundTag tag, @Nonnull HolderLookup.Provider registries) {
+        public CompoundTag save(@Nonnull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
             tag.putInt("InitializedVersion", initializedVersion);
             return tag;
         }
 
-        public static SavedData.Factory<QuarryInitData> factory() {
-            return new SavedData.Factory<>(QuarryInitData::new, (tag, provider) -> new QuarryInitData(tag));
+        public static com.stardew.craft.port.PortSavedData.Factory<QuarryInitData> factory() {
+            return new com.stardew.craft.port.PortSavedData.Factory<>(QuarryInitData::new, (tag, provider) -> new QuarryInitData(tag));
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.stardew.craft.blockentity;
 
+import com.stardew.craft.port.PortItemStacks;
 import com.stardew.craft.economy.sell.ProfessionSellPriceService;
 import com.stardew.craft.economy.sell.SellSource;
 import com.stardew.craft.menu.MiniShippingBinMenu;
@@ -122,8 +123,8 @@ public final class MiniShippingBinBlockEntity extends WoodenChestBlockEntity {
         accounts.clear();
         setChanged();
     }
-    @Override protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
+    @Override protected void saveAdditional(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        super.saveAdditional(tag);
         ListTag saved = new ListTag();
         accounts.forEach((owner, inventory) -> {
             if (inventory.isEmpty()) return;
@@ -135,7 +136,7 @@ public final class MiniShippingBinBlockEntity extends WoodenChestBlockEntity {
                 if (inventory.getItem(slot).isEmpty()) continue;
                 CompoundTag item = new CompoundTag();
                 item.putInt("Slot", slot);
-                item.put("Stack", inventory.getItem(slot).save(registries));
+                item.put("Stack", PortItemStacks.save(inventory.getItem(slot), registries));
                 items.add(item);
             }
             entry.put("Items", items);
@@ -143,8 +144,8 @@ public final class MiniShippingBinBlockEntity extends WoodenChestBlockEntity {
         });
         tag.put("ShippingAccounts", saved);
     }
-    @Override protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
+    @Override public void load(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        super.load(tag);
         accounts.clear();
         ListTag saved = tag.getList("ShippingAccounts", 10);
         for (int i = 0; i < saved.size(); i++) {
@@ -156,13 +157,13 @@ public final class MiniShippingBinBlockEntity extends WoodenChestBlockEntity {
                 CompoundTag item = items.getCompound(j);
                 int slot = item.getInt("Slot");
                 if (slot >= 0 && slot < 9) inventory.setItem(slot,
-                        ItemStack.parse(registries, item.getCompound("Stack")).orElse(ItemStack.EMPTY));
+                        PortItemStacks.parse(registries, item.getCompound("Stack")).orElse(ItemStack.EMPTY));
             }
             inventory.day = entry.getInt("Day");
             accounts.put(entry.getUUID("Owner"), inventory);
         }
     }
-    @Override public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+    @Override public CompoundTag getUpdateTag() { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
         // Menu slot synchronization is private to its viewer; other players only need OPEN.
         return new CompoundTag();
     }

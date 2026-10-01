@@ -1,5 +1,6 @@
 package com.stardew.craft.blockentity;
 
+import com.stardew.craft.port.PortItemStacks;
 import com.stardew.craft.time.StardewTimeManager;
 import com.stardew.craft.book.BookPowerEffects;
 import com.stardew.craft.core.ModTags;
@@ -475,13 +476,13 @@ public class CrabPotBlockEntity extends BlockEntity implements UtilityAutomation
 
 	@SuppressWarnings("null")
 	@Override
-	protected void saveAdditional(@SuppressWarnings("null") CompoundTag tag, @SuppressWarnings("null") net.minecraft.core.HolderLookup.Provider registries) {
-		super.saveAdditional(tag, registries);
+	protected void saveAdditional(@SuppressWarnings("null") CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+		super.saveAdditional(tag);
 		if (!bait.isEmpty()) {
-			tag.put(TAG_BAIT, bait.save(registries));
+			tag.put(TAG_BAIT, PortItemStacks.save(bait, registries));
 		}
 		if (!product.isEmpty()) {
-			tag.put(TAG_PRODUCT, product.save(registries));
+			tag.put(TAG_PRODUCT, PortItemStacks.save(product, registries));
 		}
 		tag.putBoolean(TAG_READY, ready);
 		tag.putInt(TAG_LAST_CHECK_DAY, lastCheckDay);
@@ -492,13 +493,13 @@ public class CrabPotBlockEntity extends BlockEntity implements UtilityAutomation
 
 	@SuppressWarnings("null")
 	@Override
-	protected void loadAdditional(@SuppressWarnings("null") CompoundTag tag, @SuppressWarnings("null") net.minecraft.core.HolderLookup.Provider registries) {
-		super.loadAdditional(tag, registries);
+	public void load(@SuppressWarnings("null") CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+		super.load(tag);
 		bait = tag.contains(TAG_BAIT) 
-			? ItemStack.parse(registries, tag.getCompound(TAG_BAIT)).orElse(ItemStack.EMPTY) 
+			? PortItemStacks.parse(registries, tag.getCompound(TAG_BAIT)).orElse(ItemStack.EMPTY) 
 			: ItemStack.EMPTY;
 		product = tag.contains(TAG_PRODUCT) 
-			? ItemStack.parse(registries, tag.getCompound(TAG_PRODUCT)).orElse(ItemStack.EMPTY) 
+			? PortItemStacks.parse(registries, tag.getCompound(TAG_PRODUCT)).orElse(ItemStack.EMPTY) 
 			: ItemStack.EMPTY;
 		ready = tag.getBoolean(TAG_READY);
 		lastCheckDay = tag.getInt(TAG_LAST_CHECK_DAY);
@@ -506,9 +507,9 @@ public class CrabPotBlockEntity extends BlockEntity implements UtilityAutomation
 	}
 
 	@Override
-	public CompoundTag getUpdateTag(@SuppressWarnings("null") net.minecraft.core.HolderLookup.Provider registries) {
+	public CompoundTag getUpdateTag() { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
 		CompoundTag tag = new CompoundTag();
-		saveAdditional(tag, registries);
+		saveAdditional(tag);
 		return tag;
 	}
 

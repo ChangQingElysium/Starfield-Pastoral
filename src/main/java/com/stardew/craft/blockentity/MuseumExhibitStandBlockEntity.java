@@ -104,21 +104,21 @@ public class MuseumExhibitStandBlockEntity extends BlockEntity {
     }
 
     @Override
-    protected void saveAdditional(@Nonnull CompoundTag tag, @Nonnull net.minecraft.core.HolderLookup.Provider provider) {
-        super.saveAdditional(tag, provider);
+    protected void saveAdditional(@Nonnull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
+        super.saveAdditional(tag);
         // No longer save displayItem to NBT — data lives in MuseumDonationData per player
     }
 
     @Override
-    protected void loadAdditional(@Nonnull CompoundTag tag, @Nonnull net.minecraft.core.HolderLookup.Provider provider) {
-        super.loadAdditional(tag, provider);
+    public void load(@Nonnull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
+        super.load(tag);
         // Display item is authoritative server-side in MuseumDonationData and synced to the
         // client via MuseumStandSyncPacket → ClientMuseumStandCache. Do not touch displayItem
         // here; vanilla block update packets would otherwise clobber the cache-hydrated state.
     }
 
     @Override
-    public CompoundTag getUpdateTag(@Nonnull net.minecraft.core.HolderLookup.Provider provider) {
+    public CompoundTag getUpdateTag() { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
         // Return empty tag — stand content is synced per-player via custom packet
         return new CompoundTag();
     }

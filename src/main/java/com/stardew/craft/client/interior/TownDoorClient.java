@@ -189,7 +189,7 @@ public final class TownDoorClient {
         Minecraft mc = Minecraft.getInstance();
         if (doors.isEmpty() || mc.player == null || mc.level == null
                 || !mc.level.dimension().equals(ModDimensions.STARDEW_VALLEY)) return false;
-        Vec3 eye = mc.player.getEyePosition(mc.getTimer().getGameTimeDeltaPartialTick(true));
+        Vec3 eye = mc.player.getEyePosition(com.stardew.craft.port.net.minecraft.client.DeltaTracker.client().getGameTimeDeltaPartialTick(true));
         for (TownDoorNetwork.DoorState door : doors) {
             if (!door.open()) continue;
             for (int side = 0; side < 2; side++) {
@@ -228,7 +228,7 @@ public final class TownDoorClient {
         Minecraft mc = Minecraft.getInstance();
         if (doors.isEmpty() || mc.player == null || mc.options.getCameraType().isFirstPerson()
                 || mc.getCameraEntity() != mc.player) return camera;
-        Vec3 eye = mc.player.getEyePosition(mc.getTimer().getGameTimeDeltaPartialTick(true));
+        Vec3 eye = mc.player.getEyePosition(com.stardew.craft.port.net.minecraft.client.DeltaTracker.client().getGameTimeDeltaPartialTick(true));
         CameraCrossing portal = nearestCameraCrossing(eye, camera);
         return portal == null ? camera : camera.add(portal.door().connection().translation(portal.entering()));
     }

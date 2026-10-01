@@ -27,9 +27,11 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import net.minecraft.world.InteractionHand;
+import com.stardew.craft.port.PortBlockInteraction;
 
 @SuppressWarnings("null")
-public class SofaBlock extends Block {
+public class SofaBlock extends Block implements PortBlockInteraction {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final BooleanProperty LEFT_CONNECTED = BooleanProperty.create("left_connected");
     public static final BooleanProperty RIGHT_CONNECTED = BooleanProperty.create("right_connected");
@@ -101,7 +103,7 @@ public class SofaBlock extends Block {
     }
 
     @Override
-    protected BlockState updateShape(BlockState state,
+    public BlockState updateShape(BlockState state,
                                      Direction direction,
                                      BlockState neighborState,
                                      LevelAccessor level,
@@ -120,8 +122,15 @@ public class SofaBlock extends Block {
         return state.setValue(FACING, mirror.mirror(state.getValue(FACING)));
     }
 
+    // PORT(1.20.1): replay the 1.21 useItemOn/useWithoutItem dispatch.
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player,
+            InteractionHand hand, BlockHitResult hit) {
+        return PortBlockInteraction.dispatch(this, state, level, pos, player, hand, hit);
+    }
+
+    @Override
+    public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         if (player.isShiftKeyDown()) {
             return InteractionResult.PASS;
         }

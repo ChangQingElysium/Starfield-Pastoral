@@ -29,9 +29,9 @@ public final class MinePepperRexEntity extends StardewMonsterEntity {
  @Override protected void registerGoals(){}
  @Override protected ResourceLocation definitionId(){return new ResourceLocation("stardewcraft:pepper_rex");}
  @Override protected void configureSpawn(MonsterDefinition d,MonsterSpawnContext c){var r=MonsterStatResolver.base(d,c,random);setInitialHealth(r.initialHealth());replaceCombatStats(r.combat());behavior.initialize(random);movement.face(2);}
- @Override protected void defineSynchedData(SynchedEntityData.Builder b){super.defineSynchedData(b);b.define(MOVING,false);b.define(HIT,-100L);}
+ @Override protected void defineSynchedData(){super.defineSynchedData();this.entityData.define(MOVING,false);this.entityData.define(HIT,-100L);}
  public boolean moving(){return entityData.get(MOVING);}public double hitTime(float p){return (level().getGameTime()-entityData.get(HIT)+p)/20.;}public PepperRexBehavior behavior(){return behavior;}public void stunFor(int ms){stunMilliseconds=Math.max(stunMilliseconds,ms);}
- private boolean valid(Player p){return p.isAlive()&&!p.isCreative()&&!p.isSpectator()&&!p.hasEffect(ModMobEffects.AVOID_MONSTERS)&&(monsterState().context().generation()==null||OrdinaryMineRuntime.floorAt(p.blockPosition())==monsterState().context().floor());}
+ private boolean valid(Player p){return p.isAlive()&&!p.isCreative()&&!p.isSpectator()&&!p.hasEffect(ModMobEffects.AVOID_MONSTERS.get())&&(monsterState().context().generation()==null||OrdinaryMineRuntime.floorAt(p.blockPosition())==monsterState().context().floor());}
  private boolean near(Player p,int r){return p!=null&&MineMonsterSight.sees(this,p,r);}
  @Override protected void customServerAiStep(){
   if(!initialized())initialize(MonsterSpawnContext.capture((ServerLevel)level(),MonsterSpawnContext.Source.WORLD,1));setTarget(level().getNearestPlayer(getX(),getY(),getZ(),64,e->e instanceof Player p&&valid(p)));var target=getTarget() instanceof Player p?p:null;double x=getX(),z=getZ();

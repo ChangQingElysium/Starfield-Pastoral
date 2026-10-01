@@ -9,16 +9,10 @@ import net.minecraft.world.level.block.state.StateDefinition;
 
 /** Ordinary grass has spring decorations; dark grass retains its original state space. */
 public final class VariedTerrainGrassBlock extends TerrainGrassBlock {
-    public static final MapCodec<GrassBlock> CODEC = simpleCodec(VariedTerrainGrassBlock::new);
 
     public VariedTerrainGrassBlock(Properties properties) {
         super(properties);
         registerDefaultState(defaultBlockState().setValue(TerrainVariants.GRASS, 0));
-    }
-
-    @Override
-    public MapCodec<GrassBlock> codec() {
-        return CODEC;
     }
 
     @Override

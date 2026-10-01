@@ -30,9 +30,12 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.player.Player;
+import com.stardew.craft.port.PortBlockInteraction;
 
 @SuppressWarnings("null")
-public class MapDecorWallSwitchBlock extends Block {
+public class MapDecorWallSwitchBlock extends Block implements PortBlockInteraction {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final BooleanProperty ON = BooleanProperty.create("on");
     private static final VoxelShape FALLBACK_SHAPE = Block.box(0.0, 0.0, 15.0, 16.0, 16.0, 16.0);
@@ -68,7 +71,7 @@ public class MapDecorWallSwitchBlock extends Block {
     }
 
     @Override
-    protected BlockState updateShape(@Nonnull BlockState state,
+    public BlockState updateShape(@Nonnull BlockState state,
                                      @Nonnull Direction direction,
                                      @Nonnull BlockState neighborState,
                                      @Nonnull LevelAccessor level,
@@ -81,7 +84,7 @@ public class MapDecorWallSwitchBlock extends Block {
     }
 
     @Override
-    protected boolean canSurvive(@Nonnull BlockState state, @Nonnull LevelReader level, @Nonnull BlockPos pos) {
+    public boolean canSurvive(@Nonnull BlockState state, @Nonnull LevelReader level, @Nonnull BlockPos pos) {
         Direction supportDir = state.getValue(FACING).getOpposite();
         BlockPos supportPos = pos.relative(supportDir);
         BlockState support = level.getBlockState(supportPos);
@@ -89,7 +92,7 @@ public class MapDecorWallSwitchBlock extends Block {
     }
 
     @Override
-    protected boolean canBeReplaced(@Nonnull BlockState state, @Nonnull Fluid fluid) {
+    public boolean canBeReplaced(@Nonnull BlockState state, @Nonnull Fluid fluid) {
         return false;
     }
 
@@ -103,8 +106,15 @@ public class MapDecorWallSwitchBlock extends Block {
         return resolveShape(state);
     }
 
+    // PORT(1.20.1): replay the 1.21 useItemOn/useWithoutItem dispatch.
     @Override
-    protected InteractionResult useWithoutItem(@Nonnull BlockState state,
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player,
+            InteractionHand hand, BlockHitResult hit) {
+        return PortBlockInteraction.dispatch(this, state, level, pos, player, hand, hit);
+    }
+
+    @Override
+    public InteractionResult useWithoutItem(@Nonnull BlockState state,
                                                @Nonnull Level level,
                                                @Nonnull BlockPos pos,
                                                @Nonnull net.minecraft.world.entity.player.Player player,
@@ -117,7 +127,7 @@ public class MapDecorWallSwitchBlock extends Block {
     }
 
     @Override
-    protected com.stardew.craft.port.net.minecraft.world.ItemInteractionResult useItemOn(@Nonnull ItemStack stack,
+    public com.stardew.craft.port.net.minecraft.world.ItemInteractionResult useItemOn(@Nonnull ItemStack stack,
                                                                   @Nonnull BlockState state,
                                                                   @Nonnull Level level,
                                                                   @Nonnull BlockPos pos,

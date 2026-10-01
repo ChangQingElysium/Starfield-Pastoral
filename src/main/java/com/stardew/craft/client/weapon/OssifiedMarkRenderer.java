@@ -30,7 +30,7 @@ public final class OssifiedMarkRenderer {
         }
 
         Minecraft mc = Minecraft.getInstance();
-        if (mc.level == null || !com.stardew.craft.Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()) {
+        if (mc.level == null || !com.stardew.craft.Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()) {
             return;
         }
 
@@ -56,7 +56,7 @@ public final class OssifiedMarkRenderer {
                 continue;
             }
 
-            float partial = event.getPartialTick().getGameTimeDeltaPartialTick(false);
+            float partial = event.getPartialTick();
             var bounds = entity.getBoundingBox().move(entity.getPosition(partial).subtract(entity.position()));
             Vec3 center = bounds.getCenter();
             Vec3 pos = bounds.clip(camPos, center).orElse(center).add(camPos.subtract(center).normalize().scale(0.04));

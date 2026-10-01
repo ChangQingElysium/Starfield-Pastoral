@@ -421,10 +421,13 @@ public class TreeGrowthManager extends SavedData {
 	public static TreeGrowthManager get(ServerLevel level) {
 		ServerLevel overworld = level.getServer().overworld();
 		return overworld.getDataStorage().computeIfAbsent(
-			new SavedData.Factory<>(
+			com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(
 				TreeGrowthManager::new,
 				TreeGrowthManager::load
-			),
+			)), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(
+				TreeGrowthManager::new,
+				TreeGrowthManager::load
+			)),
 			DATA_NAME
 		);
 	}

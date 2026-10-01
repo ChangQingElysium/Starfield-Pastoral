@@ -1,5 +1,6 @@
 package com.stardew.craft.gametest;
 
+import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.block.decor.MapDecorStaticBlock;
 import com.stardew.craft.block.mine.*;
@@ -91,7 +92,7 @@ public final class MineAssetThemeGameTests {
                     h.assertTrue(s.getValue(MineBuildingTheme.PROPERTY)==theme,"An extension reverted to earth");
                     h.assertTrue(pos.equals(block.findMainPos(level,cell,s)),"Theme changed the anchor lookup");
                     var item=block.getCloneItemStack(level,cell,s);
-                    h.assertTrue(item.getOrDefault(DataComponents.BLOCK_STATE,BlockItemStateProperties.EMPTY).get(MineBuildingTheme.PROPERTY)==theme,"Pick lost theme");
+                    h.assertTrue(PortItemData.getOrDefault(item, DataComponents.BLOCK_STATE,BlockItemStateProperties.EMPTY).get(MineBuildingTheme.PROPERTY)==theme,"Pick lost theme");
                     if(block instanceof ElevatorBlock && s.getValue(ElevatorBlock.SECTION)==3) {
                         h.assertTrue(s.getCollisionShape(level,cell).isEmpty(),"Elevator call switch became collidable");
                     }
@@ -162,7 +163,7 @@ public final class MineAssetThemeGameTests {
                     h.assertTrue(state.getValue(MineBuildingTheme.PROPERTY)==root.getValue(MineBuildingTheme.PROPERTY),"Support material changed across parts");
                     h.assertTrue(state.getShape(level,p).bounds().move(0,tier,0).equals(root.getShape(level,pos).bounds()),"Support outline differs across parts");
                     var pick=block.getCloneItemStack(level,p,state);
-                    h.assertTrue(pick.get(DataComponents.BLOCK_STATE).get(MineBuildingTheme.PROPERTY)==root.getValue(MineBuildingTheme.PROPERTY),"Support pick lost material");
+                    h.assertTrue(PortItemData.get(pick, DataComponents.BLOCK_STATE).get(MineBuildingTheme.PROPERTY)==root.getValue(MineBuildingTheme.PROPERTY),"Support pick lost material");
                 }
             }
             h.succeed();

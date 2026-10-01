@@ -1,5 +1,6 @@
 package com.stardew.craft.gametest;
 
+import com.stardew.craft.port.PortGameTests;
 import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.block.decor.MapDecorStaticBlock;
 import com.stardew.craft.time.StardewTimeManager;
@@ -31,7 +32,7 @@ public final class OldTireGameTests {
         var level = h.getLevel(); var pos = h.absolutePos(new BlockPos(10, 1, 10));
         for (var at : BlockPos.betweenClosed(pos.offset(-2, -1, -2), pos.offset(2, 2, 2)))
             level.setBlock(at, at.getY() == pos.getY() - 1 ? Blocks.STONE.defaultBlockState() : Blocks.AIR.defaultBlockState(), 3);
-        var block = ModBlocks.OLD_TIRE.get(); var player = h.makeMockPlayer(GameType.SURVIVAL);
+        var block = ModBlocks.OLD_TIRE.get(); var player = PortGameTests.makeMockPlayer(h, GameType.SURVIVAL);
         player.setPos(Vec3.atCenterOf(pos.offset(3, 0, 3)));
         var time = StardewTimeManager.get(); int previous = time.getCurrentSeason();
         try {

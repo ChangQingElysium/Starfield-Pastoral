@@ -1,5 +1,6 @@
 package com.stardew.craft.gametest;
 
+import com.stardew.craft.port.PortItemData;
 import com.mojang.authlib.GameProfile;
 import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.block.mine.MineExitBlock;
@@ -13,7 +14,6 @@ import net.minecraft.core.Direction;
 import com.stardew.craft.port.net.minecraft.core.component.DataComponents;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
-import com.stardew.craft.port.net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.BlockItem;
@@ -37,7 +37,7 @@ public final class MineEntranceThemeGameTests {
         var exit = (MineExitBlock) ModBlocks.MINE_EXIT.get();
         var entrance = (MineLadderBlock) ModBlocks.MINE_LADDER.get();
         var player = new ServerPlayer(level.getServer(), level,
-                new GameProfile(UUID.randomUUID(), "Entrance test"), ClientInformation.createDefault());
+                new GameProfile(UUID.randomUUID(), "Entrance test"));
         player.getAbilities().instabuild = true;
         BlockPos pos = helper.absolutePos(new BlockPos(8, 2, 8));
         level.setBlock(pos.below(), Blocks.STONE.defaultBlockState(), 3);
@@ -47,7 +47,7 @@ public final class MineEntranceThemeGameTests {
             level.setBlock(pos.below(), soil.defaultBlockState(), 3);
             helper.assertTrue(com.stardew.craft.mining.OrdinaryMineRuntime.entranceTheme(level, pos, 1) == theme, "Generated entrance ignored local soil theme");
             var stack = new ItemStack(exit);
-            stack.set(DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY.with(MineExitBlock.THEME, theme));
+            PortItemData.set(stack, DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY.with(MineExitBlock.THEME, theme));
             place(helper, player, pos, stack);
             for (int tier = 0; tier < 4; tier++) {
                 var at = pos.above(tier);
@@ -58,7 +58,7 @@ public final class MineEntranceThemeGameTests {
             level.removeBlock(pos, false);
             for (boolean shaft : new boolean[]{false, true}) {
                 stack = new ItemStack(entrance);
-                stack.set(DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY.with(MineLadderBlock.THEME, theme).with(MineLadderBlock.SHAFT, shaft));
+                PortItemData.set(stack, DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY.with(MineLadderBlock.THEME, theme).with(MineLadderBlock.SHAFT, shaft));
                 place(helper, player, pos, stack);
                 var state = level.getBlockState(pos);
                 var picked = entrance.getCloneItemStack(level, pos, state);

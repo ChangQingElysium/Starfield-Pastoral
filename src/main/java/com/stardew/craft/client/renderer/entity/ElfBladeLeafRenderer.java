@@ -45,7 +45,7 @@ public class ElfBladeLeafRenderer extends EntityRenderer<ElfBladeLeafEntity> {
         stack.pushPose(); stack.translate(-position.x, -position.y, -position.z);
         var out = buffers.getBuffer(WeaponEffectRenderTypes.MOLTEN_GLOW);
         ElfLightGeometry.core(out, stack.last().pose(), head);
-        if (Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean())
+        if (Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get())
             ElfLightGeometry.trail(out, stack.last().pose(), samples, entity.isOrbiting() ? 0.025 : 0.045);
         stack.popPose();
         super.render(entity, yaw, partial, stack, buffers, light);

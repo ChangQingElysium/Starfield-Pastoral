@@ -42,7 +42,7 @@ public final class DesertFestivalMineService {
 
     public static MineData get(ServerLevel level) {
         return level.getServer().overworld().getDataStorage().computeIfAbsent(
-            new SavedData.Factory<>(MineData::new, MineData::load),
+            com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(MineData::new, MineData::load)), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(MineData::new, MineData::load)),
             DATA_NAME
         );
     }

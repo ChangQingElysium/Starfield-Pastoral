@@ -14,7 +14,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import com.stardew.craft.port.net.neoforged.neoforge.attachment.AttachmentType;
 import net.minecraftforge.event.level.ChunkEvent;
 import net.minecraftforge.event.level.LevelEvent;
@@ -104,7 +104,7 @@ public final class LegacyFarmSoilMigration {
             }
         }
         if (candidates.isEmpty()) return;
-        List<UUID> completed = new ArrayList<>(chunk.getData(COMPLETED));
+        List<UUID> completed = new ArrayList<>(com.stardew.craft.port.PortAttachments.getData(chunk, COMPLETED));
         for (FarmInstance farm : candidates) {
             if (completed.contains(farm.getInstanceId())) continue;
             BlockPos min = farm.getFarmBoundsMin(), max = farm.getFarmBoundsMax();
@@ -120,7 +120,7 @@ public final class LegacyFarmSoilMigration {
                         (pos, state) -> level.setBlock(pos, state, Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE));
             }
             completed.add(farm.getInstanceId());
-            chunk.setData(COMPLETED, List.copyOf(completed));
+            com.stardew.craft.port.PortAttachments.setData(chunk, COMPLETED, List.copyOf(completed));
             chunk.setUnsaved(true);
             if (changed > 0) StardewCraft.LOGGER.debug("[FARM_SOIL] Migrated {} blocks in farm {} chunk {}",
                     changed, farm.getInstanceId(), chunk.getPos());

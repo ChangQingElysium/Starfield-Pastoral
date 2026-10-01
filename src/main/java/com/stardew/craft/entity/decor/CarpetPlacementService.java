@@ -66,7 +66,7 @@ public final class CarpetPlacementService {
         level.playSound(null, anchorPos, soundType.getPlaceSound(), SoundSource.BLOCKS,
                 (soundType.getVolume() + 1.0F) / 2.0F, soundType.getPitch() * 0.8F);
         level.gameEvent(player, GameEvent.ENTITY_PLACE, anchorPos);
-        context.getItemInHand().consume(1, player);
+        com.stardew.craft.port.PortItemStacks.consume(context.getItemInHand(), 1, player);
         return InteractionResult.CONSUME;
     }
 

@@ -95,7 +95,7 @@ public class WakeUpEventQueueData extends SavedData {
 
     public static WakeUpEventQueueData get(ServerLevel level) {
         return level.getServer().overworld().getDataStorage().computeIfAbsent(
-                new SavedData.Factory<>(WakeUpEventQueueData::new, WakeUpEventQueueData::load),
+                com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(WakeUpEventQueueData::new, WakeUpEventQueueData::load)), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(WakeUpEventQueueData::new, WakeUpEventQueueData::load)),
                 DATA_NAME
         );
     }
@@ -106,7 +106,7 @@ public class WakeUpEventQueueData extends SavedData {
         ServerLevel overworld = server.getLevel(Level.OVERWORLD);
         if (overworld == null) throw new IllegalStateException("Overworld not available");
         return overworld.getDataStorage().computeIfAbsent(
-                new SavedData.Factory<>(WakeUpEventQueueData::new, WakeUpEventQueueData::load),
+                com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(WakeUpEventQueueData::new, WakeUpEventQueueData::load)), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(WakeUpEventQueueData::new, WakeUpEventQueueData::load)),
                 DATA_NAME
         );
     }

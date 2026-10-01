@@ -19,7 +19,7 @@ public final class PrizeTicketBoxBlock extends SpecialOrdersBoardBlock {
     }
 
     @Override
-    protected InteractionResult useWithoutItem(@Nonnull BlockState state, @Nonnull Level level,
+    public InteractionResult useWithoutItem(@Nonnull BlockState state, @Nonnull Level level,
             @Nonnull BlockPos pos, @Nonnull Player player, @Nonnull BlockHitResult hit) {
         if (findMainPos(level, pos, state) == null) return InteractionResult.PASS;
         if (player instanceof ServerPlayer serverPlayer) {

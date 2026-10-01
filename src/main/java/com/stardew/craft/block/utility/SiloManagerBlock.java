@@ -1,5 +1,6 @@
 package com.stardew.craft.block.utility;
 
+import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.animal.data.AnimalWorldData;
 import com.stardew.craft.animal.model.AnimalBuildingRecord;
 import com.stardew.craft.animal.model.AnimalBuildingType;
@@ -32,9 +33,10 @@ import net.minecraft.world.SimpleMenuProvider;
 import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.Optional;
+import com.stardew.craft.port.PortBlockInteraction;
 
 @SuppressWarnings("null")
-public class SiloManagerBlock extends BuildingManagerModelBlock {
+public class SiloManagerBlock extends BuildingManagerModelBlock implements PortBlockInteraction {
     public static final String TAG_RELOCATE = CoopManagerBlock.TAG_RELOCATE;
     public static final String TAG_BUILDING_ID = CoopManagerBlock.TAG_BUILDING_ID;
     public static final String TAG_OWNER = CoopManagerBlock.TAG_OWNER;
@@ -76,8 +78,15 @@ public class SiloManagerBlock extends BuildingManagerModelBlock {
         return java.util.List.of(new ItemStack(ModBlocks.SILO_MANAGER.get()));
     }
 
+    // PORT(1.20.1): replay the 1.21 useItemOn/useWithoutItem dispatch.
     @Override
-    protected ItemInteractionResult useItemOn(ItemStack stack,
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player,
+            InteractionHand hand, BlockHitResult hit) {
+        return PortBlockInteraction.dispatch(this, state, level, pos, player, hand, hit);
+    }
+
+    @Override
+    public ItemInteractionResult useItemOn(ItemStack stack,
                                               BlockState state,
                                               Level level,
                                               BlockPos pos,
@@ -114,7 +123,7 @@ public class SiloManagerBlock extends BuildingManagerModelBlock {
     }
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState state,
+    public InteractionResult useWithoutItem(BlockState state,
                                                Level level,
                                                BlockPos pos,
                                                Player player,
@@ -143,7 +152,7 @@ public class SiloManagerBlock extends BuildingManagerModelBlock {
         if (!(level instanceof ServerLevel serverLevel) || !(placer instanceof ServerPlayer serverPlayer)) {
             return;
         }
-        CompoundTag tag = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
+        CompoundTag tag = PortItemData.getOrDefault(stack, DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
         if (!tag.contains(TAG_RELOCATE, Tag.TAG_COMPOUND)) {
             return;
         }
@@ -361,7 +370,7 @@ public class SiloManagerBlock extends BuildingManagerModelBlock {
         data.deactivateBuildingForRelocation(existing.buildingId());
 
         ItemStack managerItem = new ItemStack(ModBlocks.SILO_MANAGER.get().asItem());
-        CompoundTag rootTag = managerItem.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
+        CompoundTag rootTag = PortItemData.getOrDefault(managerItem, DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
         CompoundTag relocateTag = new CompoundTag();
         relocateTag.putString(TAG_BUILDING_ID, existing.buildingId());
         relocateTag.putString(TAG_OWNER, existing.ownerPlayerUuid());
@@ -370,7 +379,7 @@ public class SiloManagerBlock extends BuildingManagerModelBlock {
         relocateTag.putInt(TAG_TIER, existing.buildingType().tier());
         relocateTag.putInt(TAG_ANIMAL_COUNT, 0);
         rootTag.put(TAG_RELOCATE, relocateTag);
-        managerItem.set(DataComponents.CUSTOM_DATA, CustomData.of(rootTag));
+        PortItemData.set(managerItem, DataComponents.CUSTOM_DATA, CustomData.of(rootTag));
 
         if (!player.getInventory().add(managerItem)) {
             popResource(level, managerPos, managerItem);

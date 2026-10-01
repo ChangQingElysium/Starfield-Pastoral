@@ -1,5 +1,6 @@
 package com.stardew.craft.gametest;
 
+import com.stardew.craft.port.PortItemData;
 import com.mojang.authlib.GameProfile;
 import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.block.mine.MineStoneBlock;
@@ -60,11 +61,11 @@ public final class MineStoneGameTests {
         var foreign = new ItemStack(Items.NETHERITE_PICKAXE);
         var enchantments = level.registryAccess().registryOrThrow(Registries.ENCHANTMENT);
         foreign.enchant(enchantments.getHolderOrThrow(Enchantments.EFFICIENCY), 5);
-        foreign.enchant(enchantments.getHolderOrThrow(StardewEnchantments.SWIFT), 1);
+        com.stardew.craft.port.PortItemStacks.enchant(foreign, enchantments.getHolderOrThrow(StardewEnchantments.SWIFT), 1);
         h.assertTrue(MineStoneMining.pickaxePower(foreign) == 1 && MineStoneMining.breakTicks(1, foreign) == 12,
                 "External enchantments bypass normalization");
         var swift = new ItemStack(ModItems.IRIDIUM_PICKAXE.get());
-        swift.enchant(enchantments.getHolderOrThrow(StardewEnchantments.SWIFT), 1);
+        com.stardew.craft.port.PortItemStacks.enchant(swift, enchantments.getHolderOrThrow(StardewEnchantments.SWIFT), 1);
         player.setItemInHand(InteractionHand.MAIN_HAND, swift);
         h.assertTrue(progressTicks(state.getDestroyProgress(player, level, pos)) == 6, "Iridium Swift not 6 ticks");
         h.assertTrue(MineStoneMining.breakTicks(3, 2, 1, false) == 22, "Copper must need two whole swings for 3 HP");
@@ -96,7 +97,7 @@ public final class MineStoneGameTests {
                 "Road and its markings are separated");
         var planks = com.stardew.craft.item.catalog.StardewItemDisplayStacks.stacksForItem(ModItems.MINE_PLANKS.get())
                 .stream().sorted(com.stardew.craft.item.catalog.StardewItemComparator.STACK).toList();
-        h.assertTrue(planks.size() == 8 && planks.get(1).get(com.stardew.craft.port.net.minecraft.core.component.DataComponents.BLOCK_STATE)
+        h.assertTrue(planks.size() == 8 && PortItemData.get(planks.get(1), com.stardew.craft.port.net.minecraft.core.component.DataComponents.BLOCK_STATE)
                 .properties().get("theme").equals("earth_dark"), "Normal/dark variants not adjacent");
         for (var tab : java.util.List.of(com.stardew.craft.item.catalog.StardewCatalogTab.BUILDING,
                 com.stardew.craft.item.catalog.StardewCatalogTab.NATURE)) {
@@ -227,7 +228,7 @@ public final class MineStoneGameTests {
                 && Math.abs(data.getEnergy() - (100 - wornCost)) < 0.0001,
                 "Last durability lost its mining settlement for source " + source);
         var efficient = new ItemStack(ModItems.PICKAXE.get());
-        efficient.enchant(level.registryAccess().registryOrThrow(Registries.ENCHANTMENT)
+        com.stardew.craft.port.PortItemStacks.enchant(efficient, level.registryAccess().registryOrThrow(Registries.ENCHANTMENT)
                 .getHolderOrThrow(StardewEnchantments.EFFICIENT), 1);
         player.setItemInHand(InteractionHand.MAIN_HAND, efficient);
         data.setEnergy(0);

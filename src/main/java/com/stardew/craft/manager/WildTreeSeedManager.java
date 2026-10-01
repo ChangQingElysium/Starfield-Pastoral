@@ -56,7 +56,7 @@ public class WildTreeSeedManager extends SavedData {
 	@SuppressWarnings("null")
 	public static WildTreeSeedManager get(ServerLevel level) {
 		return level.getDataStorage().computeIfAbsent(
-				new SavedData.Factory<>(WildTreeSeedManager::new, WildTreeSeedManager::load, null),
+				com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(WildTreeSeedManager::new, WildTreeSeedManager::load, null)), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(WildTreeSeedManager::new, WildTreeSeedManager::load, null)),
 				DATA_NAME
 		);
 	}
@@ -298,7 +298,7 @@ public class WildTreeSeedManager extends SavedData {
 
 	@SuppressWarnings("null")
 	@Override
-	public CompoundTag save(@SuppressWarnings("null") CompoundTag tag, @SuppressWarnings("null") net.minecraft.core.HolderLookup.Provider provider) {
+	public CompoundTag save(@SuppressWarnings("null") CompoundTag tag) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
 		ListTag list = new ListTag();
 		for (Map.Entry<GlobalPos, Entry> e : entries.entrySet()) {
 			CompoundTag t = new CompoundTag();

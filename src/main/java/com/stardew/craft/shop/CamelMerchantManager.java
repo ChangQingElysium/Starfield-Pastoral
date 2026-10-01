@@ -19,7 +19,7 @@ public final class CamelMerchantManager extends SavedData {
 
     public static CamelMerchantManager get(ServerLevel level) {
         return level.getDataStorage().computeIfAbsent(
-            new SavedData.Factory<>(CamelMerchantManager::new, CamelMerchantManager::load),
+            com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(CamelMerchantManager::new, CamelMerchantManager::load)), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(CamelMerchantManager::new, CamelMerchantManager::load)),
             DATA_NAME
         );
     }

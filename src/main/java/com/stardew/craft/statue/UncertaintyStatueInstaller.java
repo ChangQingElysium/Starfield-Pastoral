@@ -32,7 +32,7 @@ public final class UncertaintyStatueInstaller extends SavedData {
         if (overworld == null) {
             return new UncertaintyStatueInstaller();
         }
-        return overworld.getDataStorage().computeIfAbsent(factory(), DATA_NAME);
+        return overworld.getDataStorage().computeIfAbsent(com.stardew.craft.port.PortSavedData.loader(factory()), com.stardew.craft.port.PortSavedData.constructor(factory()), DATA_NAME);
     }
 
     public void resetForMigration() {
@@ -89,7 +89,7 @@ public final class UncertaintyStatueInstaller extends SavedData {
 
     @Override
     @Nonnull
-    public CompoundTag save(@Nonnull CompoundTag tag, @Nonnull HolderLookup.Provider registries) {
+    public CompoundTag save(@Nonnull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
         tag.putInt("PlacedVersion", placedVersion);
         return tag;
     }
@@ -100,7 +100,7 @@ public final class UncertaintyStatueInstaller extends SavedData {
         return installer;
     }
 
-    public static SavedData.Factory<UncertaintyStatueInstaller> factory() {
-        return new SavedData.Factory<>(UncertaintyStatueInstaller::new, UncertaintyStatueInstaller::load);
+    public static com.stardew.craft.port.PortSavedData.Factory<UncertaintyStatueInstaller> factory() {
+        return new com.stardew.craft.port.PortSavedData.Factory<>(UncertaintyStatueInstaller::new, UncertaintyStatueInstaller::load);
     }
 }

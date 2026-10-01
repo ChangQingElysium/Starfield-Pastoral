@@ -14,7 +14,6 @@ import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketFlow;
 import com.stardew.craft.port.net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
-import com.stardew.craft.port.net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import com.stardew.craft.port.net.minecraft.server.network.CommonListenerCookie;
@@ -113,8 +112,7 @@ public final class OvernightTransitionGameTests {
             previousDayTime = valley.getDayTime();
             previousTime = StardewTimeManager.get();
             previousFarms = FarmInstanceRegistry.get();
-            player = new ServerPlayer(server, h.getLevel(), new GameProfile(UUID.randomUUID(), "OvernightProbe"),
-                    ClientInformation.createDefault()) {
+            player = new ServerPlayer(server, h.getLevel(), new GameProfile(UUID.randomUUID(), "OvernightProbe")) {
                 @Override public void teleportTo(ServerLevel target, double x, double y, double z, float yaw, float pitch) {
                     steps.add("warp");
                     if (failWarp) throw new IllegalStateException("Injected home warp failure");
@@ -123,9 +121,9 @@ public final class OvernightTransitionGameTests {
                 }
             };
             player.connection = new ServerGamePacketListenerImpl(server, new Connection(PacketFlow.SERVERBOUND),
-                    player, CommonListenerCookie.createInitial(player.getGameProfile(), false)) {
+                    player) {
                 @Override public void send(Packet<?> packet) {
-                    if (packet instanceof ClientboundCustomPayloadPacket custom) packets.add(custom.payload().type().id().toString());
+                    if (ClientboundCustomPayloadPacket.unwrap(packet) instanceof ClientboundCustomPayloadPacket custom) packets.add(custom.payload().type().id().toString());
                 }
             };
             var playersField = net.minecraft.server.players.PlayerList.class.getDeclaredField("players");

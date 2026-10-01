@@ -28,8 +28,9 @@ public class PastureGrassGrowthManager extends SavedData {
     public static PastureGrassGrowthManager get(ServerLevel level) {
         ServerLevel overworld = level.getServer().overworld();
         return overworld.getDataStorage().computeIfAbsent(
-                new SavedData.Factory<>(PastureGrassGrowthManager::new,
-                        (tag, provider) -> new PastureGrassGrowthManager()),
+                com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(PastureGrassGrowthManager::new,
+                        (tag, provider) -> new PastureGrassGrowthManager())), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(PastureGrassGrowthManager::new,
+                        (tag, provider) -> new PastureGrassGrowthManager())),
                 DATA_NAME
         );
     }

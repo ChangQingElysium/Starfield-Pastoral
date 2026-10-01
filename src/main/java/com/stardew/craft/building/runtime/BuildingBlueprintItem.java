@@ -1,5 +1,6 @@
 package com.stardew.craft.building.runtime;
 
+import com.stardew.craft.port.PortItemData;
 import net.minecraft.core.Direction;
 import net.minecraft.core.BlockPos;
 import com.stardew.craft.port.net.minecraft.core.component.DataComponents;
@@ -24,7 +25,7 @@ public final class BuildingBlueprintItem extends com.stardew.craft.item.SimpleSt
     public static final String PERMIT = "BuildingPermit";
     private static final String PREVIEW_DEPTH = "BlueprintPreviewDepth";
     private static final java.util.Map<UUID, Long> LAST_USE = new java.util.WeakHashMap<>();
-    public static CompoundTag draft(ItemStack stack) { return stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag(); }
+    public static CompoundTag draft(ItemStack stack) { return PortItemData.getOrDefault(stack, DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag(); }
     public static Direction facing(ItemStack stack) {
         Direction value = Direction.byName(draft(stack).getString("DraftFacing"));
         return value == null || value.getAxis().isVertical() ? Direction.SOUTH : value;
@@ -77,7 +78,7 @@ public final class BuildingBlueprintItem extends com.stardew.craft.item.SimpleSt
             if (PrefabDefinitions.available(family)) tag.putInt(PREVIEW_DEPTH, PrefabDefinitions.get(family).reservation().maxExclusive().getZ());
             else tag.remove(PREVIEW_DEPTH);
             if (!tag.equals(before)) {
-                stack.set(DataComponents.CUSTOM_DATA,CustomData.of(tag));player.getInventory().setChanged();
+                PortItemData.set(stack, DataComponents.CUSTOM_DATA,CustomData.of(tag));player.getInventory().setChanged();
             }
         }
     }
@@ -96,7 +97,7 @@ public final class BuildingBlueprintItem extends com.stardew.craft.item.SimpleSt
         if (pinned(stack,player.level())!=null && !tag.getBoolean("MoveSelf"))
             tag.putLong("DraftAnchor",BlockPos.of(tag.getLong("DraftAnchor")).offset(gripOffset(item.family(),previous)).subtract(gripOffset(item.family(),next)).asLong());
         tag.putString("DraftFacing",next.getName());
-        stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag)); BuildingDrafts.get(player.server).write(stack); player.getInventory().setChanged();
+        PortItemData.set(stack, DataComponents.CUSTOM_DATA, CustomData.of(tag)); BuildingDrafts.get(player.server).write(stack); player.getInventory().setChanged();
     }
     public static boolean aimsAtPinned(Player player, ItemStack stack, net.minecraft.resources.ResourceLocation family) {
         BlockPos anchor = pinned(stack, player.level());
@@ -105,7 +106,7 @@ public final class BuildingBlueprintItem extends com.stardew.craft.item.SimpleSt
         return aimsAt(player, BuildingPlacementService.aabb(bounds));
     }
     public static boolean aimsAt(Player player, net.minecraft.world.phys.AABB box) {
-        var eye = player.getEyePosition(); var end = eye.add(player.getViewVector(1).scale(player.blockInteractionRange()));
+        var eye = player.getEyePosition(); var end = eye.add(player.getViewVector(1).scale(player.getBlockReach()));
         var point = box.contains(eye) ? java.util.Optional.of(eye) : box.clip(eye, end);
         if (point.isEmpty()) return false;
         var solid = target(player);
@@ -120,7 +121,7 @@ public final class BuildingBlueprintItem extends com.stardew.craft.item.SimpleSt
         if(endMove && isMove(stack)) { BuildingMoveSession.restoreHeld(player,stack);drafts.consume(stack);stack.shrink(1); }
         else {
             var tag=draft(stack);tag.remove("DraftAnchor");tag.remove("DraftDimension");
-            stack.set(DataComponents.CUSTOM_DATA,CustomData.of(tag));drafts.write(stack);
+            PortItemData.set(stack, DataComponents.CUSTOM_DATA,CustomData.of(tag));drafts.write(stack);
         }
         player.getInventory().setChanged();drafts.synchronize(player);
     }
@@ -129,21 +130,21 @@ public final class BuildingBlueprintItem extends com.stardew.craft.item.SimpleSt
     public net.minecraft.resources.ResourceLocation family() { return family; }
     public BuildingBlueprintItem(net.minecraft.resources.ResourceLocation family, Properties properties) { super("stardewcraft.type.building", -1, properties.stacksTo(1)); this.family = family; }
     public static void bindMove(ItemStack stack, BuildingRecord record) {
-        stack.set(DataComponents.CUSTOM_NAME, net.minecraft.network.chat.Component.translatable("building.stardewcraft.move_building").append(" · ").append(record.title()));
+        PortItemData.set(stack, DataComponents.CUSTOM_NAME, net.minecraft.network.chat.Component.translatable("building.stardewcraft.move_building").append(" · ").append(record.title()));
         CompoundTag tag = new CompoundTag(); tag.putUUID("DraftId",UUID.randomUUID()); tag.putUUID("MoveBuilding", record.id()); tag.putLong("MoveRevision", record.revision());
         if (record.mode() == BuildingRecord.Mode.SELF_BUILT) {
             var local = UtilityBuildings.moveBounds(record,BlockPos.ZERO,Direction.SOUTH);
             tag.putLong("MoveMin",local.min().asLong());tag.putLong("MoveMax",local.maxExclusive().asLong());
         }
-        tag.putBoolean("MoveSelf", record.mode() == BuildingRecord.Mode.SELF_BUILT); tag.putBoolean("LiftedMove",true); tag.putInt("MoveTier", record.tier()); tag.putString("MoveFacing", record.facing().getName()); stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+        tag.putBoolean("MoveSelf", record.mode() == BuildingRecord.Mode.SELF_BUILT); tag.putBoolean("LiftedMove",true); tag.putInt("MoveTier", record.tier()); tag.putString("MoveFacing", record.facing().getName()); PortItemData.set(stack, DataComponents.CUSTOM_DATA, CustomData.of(tag));
     }
     public static BuildingRecord moving(net.minecraft.server.level.ServerLevel level, ItemStack stack) {
-        var tag = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
+        var tag = PortItemData.getOrDefault(stack, DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
         if (!tag.hasUUID("MoveBuilding")) return null;
         var record = BuildingWorldData.get(level.getServer()).find(tag.getUUID("MoveBuilding"));
         return record != null && record.revision() == tag.getLong("MoveRevision") ? record : null;
     }
-    public static boolean isMove(ItemStack stack) { return stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag().hasUUID("MoveBuilding"); }
+    public static boolean isMove(ItemStack stack) { return PortItemData.getOrDefault(stack, DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag().hasUUID("MoveBuilding"); }
     private static void discardMoveDocument(ServerPlayer player, ItemStack stack) {
         BuildingMoveSession.restoreHeld(player,stack);
         BuildingDrafts.get(player.server).consume(stack);
@@ -162,21 +163,23 @@ public final class BuildingBlueprintItem extends com.stardew.craft.item.SimpleSt
         }
         player.getInventory().setChanged();
     }
-    public static Direction moveFacing(ItemStack stack) { return Direction.byName(stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag().getString("MoveFacing")); }
+    public static Direction moveFacing(ItemStack stack) { return Direction.byName(PortItemData.getOrDefault(stack, DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag().getString("MoveFacing")); }
     public static UUID permit(ItemStack stack) {
-        var tag = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
+        var tag = PortItemData.getOrDefault(stack, DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
         return tag.hasUUID(PERMIT) ? tag.getUUID(PERMIT) : null;
     }
     public static void bind(ItemStack stack, UUID permit) {
-        CompoundTag tag = new CompoundTag(); tag.putUUID(PERMIT, permit); stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+        CompoundTag tag = new CompoundTag(); tag.putUUID(PERMIT, permit); PortItemData.set(stack, DataComponents.CUSTOM_DATA, CustomData.of(tag));
     }
     public static BlockHitResult target(Player player) {
         var eye = player.getEyePosition();
-        return player.level().clip(new ClipContext(eye, eye.add(player.getViewVector(1).scale(player.blockInteractionRange())),
+        return player.level().clip(new ClipContext(eye, eye.add(player.getViewVector(1).scale(player.getBlockReach())),
                 ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, player));
     }
-    @Override public void appendHoverText(net.minecraft.world.item.ItemStack stack, TooltipContext context,
-            java.util.List<net.minecraft.network.chat.Component> lines, net.minecraft.world.item.TooltipFlag flag) {
+    @Override public void appendHoverText(net.minecraft.world.item.ItemStack stack,
+            @javax.annotation.Nullable Level level,
+            java.util.List<net.minecraft.network.chat.Component> lines,
+            net.minecraft.world.item.TooltipFlag flag) {
         lines.add(net.minecraft.network.chat.Component.translatable(isMove(stack) ? "building.stardewcraft.move_hint" : "building.stardewcraft.blueprint_hint").withStyle(net.minecraft.ChatFormatting.GRAY));
     }
     @Override public InteractionResult useOn(UseOnContext context) {
@@ -210,7 +213,7 @@ public final class BuildingBlueprintItem extends com.stardew.craft.item.SimpleSt
             CompoundTag tag = draft(stack); tag.putLong("DraftAnchor", targetAnchor(stack,hit.getBlockPos(),facing(stack,player)).asLong());
             tag.putString("DraftFacing",facing(stack,player).getName());
             tag.putString("DraftDimension", player.level().dimension().location().toString());
-            stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag)); BuildingDrafts.get(serverPlayer.server).write(stack); player.getInventory().setChanged();
+            PortItemData.set(stack, DataComponents.CUSTOM_DATA, CustomData.of(tag)); BuildingDrafts.get(serverPlayer.server).write(stack); player.getInventory().setChanged();
             return InteractionResult.CONSUME;
         }
         if (!aimsAtPinned(player, stack, family)) return InteractionResult.CONSUME;

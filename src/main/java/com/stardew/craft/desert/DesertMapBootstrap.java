@@ -246,7 +246,7 @@ public final class DesertMapBootstrap {
 
         static DesertSavedData get(ServerLevel level) {
             return level.getDataStorage().computeIfAbsent(
-                    new SavedData.Factory<>(DesertSavedData::new, DesertSavedData::load),
+                    com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(DesertSavedData::new, DesertSavedData::load)), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(DesertSavedData::new, DesertSavedData::load)),
                     DATA_NAME
             );
         }

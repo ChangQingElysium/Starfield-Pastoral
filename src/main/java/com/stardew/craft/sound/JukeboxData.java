@@ -29,7 +29,7 @@ public class JukeboxData extends SavedData {
     /** 获取当前 ServerLevel 的唱片机数据。 */
     public static JukeboxData get(ServerLevel level) {
         return level.getDataStorage().computeIfAbsent(
-                new Factory<>(JukeboxData::new, JukeboxData::load),
+                com.stardew.craft.port.PortSavedData.loader(new Factory<>(JukeboxData::new, JukeboxData::load)), com.stardew.craft.port.PortSavedData.constructor(new Factory<>(JukeboxData::new, JukeboxData::load)),
                 DATA_ID
         );
     }

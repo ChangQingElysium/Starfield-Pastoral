@@ -49,14 +49,17 @@ public class StardewDaggerItem extends Item
 
     @SuppressWarnings("null")
     @Override
-    public ItemAttributeModifiers getDefaultAttributeModifiers() {
+    // PORT(1.20.1): items expose default attribute modifiers per slot instead of a default component.
+    public com.google.common.collect.Multimap<net.minecraft.world.entity.ai.attributes.Attribute,
+            net.minecraft.world.entity.ai.attributes.AttributeModifier> getDefaultAttributeModifiers(
+            net.minecraft.world.entity.EquipmentSlot slot) {
         if (weaponData == null) {
-            return super.getDefaultAttributeModifiers();
+            return super.getDefaultAttributeModifiers(slot);
         }
         return WeaponItemSupport.createAttributeModifiers(
                 weaponId,
                 weaponData
-        );
+        ).portModifiers(slot);
     }
 
     @Override
@@ -118,12 +121,10 @@ public class StardewDaggerItem extends Item
     }
 
     @Override
-    public void appendHoverText(
-            @SuppressWarnings("null") ItemStack stack,
-            @SuppressWarnings("null") TooltipContext context,
+    public void appendHoverText(@SuppressWarnings("null") ItemStack stack,
+            @javax.annotation.Nullable Level level,
             @SuppressWarnings("null") List<Component> tooltipComponents,
-            @SuppressWarnings("null") TooltipFlag tooltipFlag
-    ) {
+            @SuppressWarnings("null") TooltipFlag tooltipFlag) {
         if (weaponData != null) {
             ensureWeaponStats(stack);
             boolean expanded =

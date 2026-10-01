@@ -1,5 +1,6 @@
 package com.stardew.craft.block.mine;
 
+import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.block.shape.ModelVoxelShapeCache;
 import com.stardew.craft.core.ModMiningDimensions;
@@ -36,6 +37,7 @@ import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import com.stardew.craft.port.PortBlockInteraction;
 
 /**
  * 矿井梯子方块 - 通往下一层的传送点
@@ -47,7 +49,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
  * - 紫色粒子效果（普通梯子）/ 红色粒子效果（竖井/shaft）
  * - SHAFT=true 时：确认对话 → 跳多层 + 伤害（SDV 原版 Skull Cavern 机制）
  */
-public class MineLadderBlock extends Block {
+public class MineLadderBlock extends Block implements PortBlockInteraction {
     
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
     /** 是否为竖井（骷髅矿 20% 概率）。竖井需确认对话，跳 3-15 层并造成伤害。 */
@@ -88,7 +90,7 @@ public class MineLadderBlock extends Block {
                 && (context.getPlayer() == null || !context.getPlayer().getAbilities().instabuild)) {
             return null;
         }
-        var properties = context.getItemInHand().getOrDefault(com.stardew.craft.port.net.minecraft.core.component.DataComponents.BLOCK_STATE,
+        var properties = PortItemData.getOrDefault(context.getItemInHand(), com.stardew.craft.port.net.minecraft.core.component.DataComponents.BLOCK_STATE,
                 com.stardew.craft.port.net.minecraft.world.item.component.BlockItemStateProperties.EMPTY);
         Theme theme = properties.get(THEME);
         if (theme == null) {
@@ -104,9 +106,9 @@ public class MineLadderBlock extends Block {
                 .setValue(THEME, theme).setValue(SHAFT, Boolean.TRUE.equals(properties.get(SHAFT)));
     }
 
-    @Override public ItemStack getCloneItemStack(net.minecraft.world.level.LevelReader level, BlockPos pos, BlockState state) {
+    @Override public ItemStack getCloneItemStack(BlockGetter level, BlockPos pos, BlockState state) {
         var stack = new ItemStack(this);
-        stack.set(com.stardew.craft.port.net.minecraft.core.component.DataComponents.BLOCK_STATE,
+        PortItemData.set(stack, com.stardew.craft.port.net.minecraft.core.component.DataComponents.BLOCK_STATE,
                 com.stardew.craft.port.net.minecraft.world.item.component.BlockItemStateProperties.EMPTY.with(THEME, state).with(SHAFT, state));
         return stack;
     }
@@ -149,12 +151,19 @@ public class MineLadderBlock extends Block {
         return super.onDestroyedByPlayer(state, level, pos, player, willHarvest, fluid);
     }
 
+    // PORT(1.20.1): replay the 1.21 useItemOn/useWithoutItem dispatch.
+    @Override
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player,
+            InteractionHand hand, BlockHitResult hit) {
+        return PortBlockInteraction.dispatch(this, state, level, pos, player, hand, hit);
+    }
+
     /**
      * 右键交互 - 普通梯子直接传送，竖井弹确认对话
      */
     @SuppressWarnings("null")
     @Override
-    protected InteractionResult useWithoutItem(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") Level level, @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") Player player, @SuppressWarnings("null") BlockHitResult hitResult) {
+    public InteractionResult useWithoutItem(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") Level level, @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") Player player, @SuppressWarnings("null") BlockHitResult hitResult) {
         if (level.isClientSide()) {
             return InteractionResult.SUCCESS;
         }
@@ -186,7 +195,7 @@ public class MineLadderBlock extends Block {
      */
     @SuppressWarnings("null")
     @Override
-    protected com.stardew.craft.port.net.minecraft.world.ItemInteractionResult useItemOn(
+    public com.stardew.craft.port.net.minecraft.world.ItemInteractionResult useItemOn(
             @SuppressWarnings("null") net.minecraft.world.item.ItemStack stack,
             @SuppressWarnings("null") BlockState state,
             @SuppressWarnings("null") Level level,

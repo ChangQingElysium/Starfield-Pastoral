@@ -17,17 +17,11 @@ import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.BlockHitResult;
 
 public final class SnowLayerTemplateBlock extends MaterialTemplateBlock {
-    public static final MapCodec<SnowLayerTemplateBlock> CODEC = simpleCodec(SnowLayerTemplateBlock::new);
     public static final IntegerProperty LAYERS = BlockStateProperties.LAYERS;
 
     public SnowLayerTemplateBlock(Properties properties) {
         super(TemplateShape.SNOW_LAYER, properties);
         registerDefaultState(defaultBlockState().setValue(LAYERS, 1));
-    }
-
-    @Override
-    protected MapCodec<SnowLayerTemplateBlock> codec() {
-        return CODEC;
     }
 
     @Override
@@ -37,7 +31,7 @@ public final class SnowLayerTemplateBlock extends MaterialTemplateBlock {
     }
 
     @Override
-    protected boolean canBeReplaced(BlockState state, BlockPlaceContext context) {
+    public boolean canBeReplaced(BlockState state, BlockPlaceContext context) {
         return context.getItemInHand().is(asItem()) && state.getValue(LAYERS) < 8
                 && (!context.replacingClickedOnBlock() || context.getClickedFace() == Direction.UP);
     }
@@ -50,7 +44,7 @@ public final class SnowLayerTemplateBlock extends MaterialTemplateBlock {
     }
 
     @Override
-    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
+    public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
                                               Player player, InteractionHand hand, BlockHitResult hit) {
         // Let BlockItem placement handle stacking, item consumption and collision checks.
         return stack.is(asItem()) ? ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION

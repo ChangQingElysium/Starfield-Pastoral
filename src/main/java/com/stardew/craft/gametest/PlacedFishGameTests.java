@@ -1,5 +1,7 @@
 package com.stardew.craft.gametest;
 
+import com.stardew.craft.port.PortGameTests;
+import com.stardew.craft.port.PortItemData;
 import com.google.gson.JsonParser;
 import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.block.decor.PlacedFishBlock;
@@ -28,6 +30,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.gametest.GameTestHolder;
 import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import com.stardew.craft.port.PortBlockInteraction;
 
 @GameTestHolder("stardewcraft_fish_placement")
 @PrefixGameTestTemplate(false)
@@ -38,11 +41,11 @@ public final class PlacedFishGameTests {
         return pos;
     }
     private static Player player(GameTestHelper h, GameType mode) {
-        var player=h.makeMockPlayer(mode);mode.updatePlayerAbilities(player.getAbilities());player.setShiftKeyDown(true);return player;
+        var player=PortGameTests.makeMockPlayer(h, mode);mode.updatePlayerAbilities(player.getAbilities());player.setShiftKeyDown(true);return player;
     }
     private static ItemStack fish() {
         var stack=new ItemStack(ModItems.LEGEND.get(),5);QualityHelper.setQuality(stack,3);
-        stack.set(DataComponents.CUSTOM_NAME,Component.literal("My first legend"));return stack;
+        PortItemData.set(stack, DataComponents.CUSTOM_NAME,Component.literal("My first legend"));return stack;
     }
     private static InteractionResult place(GameTestHelper h, Player player, BlockPos support, Direction face, ItemStack fish) {
         player.setItemInHand(InteractionHand.MAIN_HAND,fish);
@@ -80,22 +83,22 @@ public final class PlacedFishGameTests {
             for(var record:JsonParser.parseReader(reader).getAsJsonArray()) {
                 String id=record.getAsJsonObject().get("id").getAsString();
                 var held=new ItemStack(BuiltInRegistries.ITEM.get(new ResourceLocation("stardewcraft",id)),3);
-                QualityHelper.setQuality(held,2);held.set(DataComponents.CUSTOM_NAME,Component.literal(id+" trophy"));var expected=held.copyWithCount(1);
+                QualityHelper.setQuality(held,2);PortItemData.set(held, DataComponents.CUSTOM_NAME,Component.literal(id+" trophy"));var expected=held.copyWithCount(1);
                 h.assertTrue(place(h,player,pos.below(),Direction.UP,held).consumesAction(),"Cannot place "+id);
                 h.assertTrue(held.getCount()==2&&!level.getBlockState(pos).getValue(PlacedFishBlock.WALL),"Wrong consumption or attachment "+id);
                 var entity=(PlacedFishBlockEntity)level.getBlockEntity(pos);
                 h.assertTrue(ItemStack.matches(expected,entity.fish()),"Components lost "+id);
                 var client=new PlacedFishBlockEntity(pos,entity.getBlockState());
-                client.onDataPacket(null,entity.getUpdatePacket(),level.registryAccess());
+                client.onDataPacket(null,entity.getUpdatePacket());
                 h.assertTrue(ItemStack.matches(expected,client.fish()),"Live packet lost fish components "+id);
                 entity.takeFish();
-                client.onDataPacket(null,entity.getUpdatePacket(),level.registryAccess());
+                client.onDataPacket(null,entity.getUpdatePacket());
                 h.assertTrue(client.fish().isEmpty(),"Empty packet retained the old fish "+id);
                 entity.storeFish(expected);
                 var clone=ModBlocks.PLACED_FISH.get().getCloneItemStack(level.getBlockState(pos),null,level,pos,player);
                 h.assertTrue(ItemStack.matches(expected,clone),"Pick block must return the fish "+id);
                 player.setItemInHand(InteractionHand.MAIN_HAND,ItemStack.EMPTY);
-                level.getBlockState(pos).useWithoutItem(level,player,new BlockHitResult(Vec3.atCenterOf(pos),Direction.UP,pos,false));
+                PortBlockInteraction.stateUseWithoutItem(level.getBlockState(pos), level,player,new BlockHitResult(Vec3.atCenterOf(pos),Direction.UP,pos,false));
                 h.assertTrue(level.isEmptyBlock(pos)&&ItemStack.matches(expected,player.getMainHandItem()),"Cannot recover "+id);
                 h.assertTrue(level.getEntitiesOfClass(ItemEntity.class,new AABB(pos).inflate(2)).isEmpty(),"Pickup also dropped an item "+id);
                 count++;

@@ -56,17 +56,22 @@ public final class GreenSlimeEntity extends StardewMonsterEntity {
                 .add(Attributes.ATTACK_DAMAGE, 0).add(Attributes.MOVEMENT_SPEED, .25)
                 .add(Attributes.FOLLOW_RANGE, 64).add(Attributes.STEP_HEIGHT, .5);
     }
-    @Override protected void defineSynchedData(SynchedEntityData.Builder builder) {
-        super.defineSynchedData(builder);
-        builder.define(COLOR, 0x55E01F);
-        builder.define(ANTENNA, 0);
-        builder.define(GROWTH, 1F);
-        builder.define(FROST_RUSH, false);
-        builder.define(FROST_RUSH_START, 0L);
+    @Override protected void defineSynchedData() {
+        super.defineSynchedData();
+        this.entityData.define(COLOR, 0x55E01F);
+        this.entityData.define(ANTENNA, 0);
+        this.entityData.define(GROWTH, 1F);
+        this.entityData.define(FROST_RUSH, false);
+        this.entityData.define(FROST_RUSH_START, 0L);
     }
     @Override protected void registerGoals() {}
 
-    @Override public net.minecraft.world.entity.EntityDimensions getDefaultDimensions(net.minecraft.world.entity.Pose pose) {
+    // PORT(1.20.1): 1.21 LivingEntity#getDimensions is sleeping ? SLEEPING_DIMENSIONS : getDefaultDimensions(pose)
+    // (times the 1.20.5+ scale attribute, always 1 here); 1.20.1 only has getDimensions.
+    @Override public net.minecraft.world.entity.EntityDimensions getDimensions(net.minecraft.world.entity.Pose pose) {
+        return pose == net.minecraft.world.entity.Pose.SLEEPING ? SLEEPING_DIMENSIONS : getDefaultDimensions(pose);
+    }
+    public net.minecraft.world.entity.EntityDimensions getDefaultDimensions(net.minecraft.world.entity.Pose pose) {
         return net.minecraft.world.entity.EntityDimensions.scalable(GreenSlimeRules.collisionWidth(antenna()) * growth(),
                 GreenSlimeRules.collisionHeight(antenna()) * growth() + GreenSlimeRules.COLLISION_TOP_MARGIN);
     }
@@ -184,10 +189,10 @@ public final class GreenSlimeEntity extends StardewMonsterEntity {
         if (recoveryTicks > 0) recoveryTicks--;
         var nearest = level().getNearestPlayer(getX(), getY(), getZ(), focused ? 64 : 4,
                 p -> p instanceof net.minecraft.world.entity.player.Player player && player.isAlive()
-                        && !player.isCreative() && !player.isSpectator() && !player.hasEffect(ModMobEffects.AVOID_MONSTERS)
+                        && !player.isCreative() && !player.isSpectator() && !player.hasEffect(ModMobEffects.AVOID_MONSTERS.get())
                         && hasLineOfSight(player));
         if (nearest != null && (!nearest.isAlive() || nearest.isCreative() || nearest.isSpectator()
-                || nearest.hasEffect(ModMobEffects.AVOID_MONSTERS))) nearest = null;
+                || nearest.hasEffect(ModMobEffects.AVOID_MONSTERS.get()))) nearest = null;
         setTarget(nearest);
         var target = getTarget(); // Target events (including garlic oil) remain authoritative.
         if (phase() == CHARGE) {

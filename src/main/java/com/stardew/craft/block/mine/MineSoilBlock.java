@@ -1,5 +1,6 @@
 package com.stardew.craft.block.mine;
 
+import com.stardew.craft.port.PortItemData;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import com.stardew.craft.port.net.minecraft.core.component.DataComponents;
@@ -14,17 +15,11 @@ import net.minecraft.world.level.block.state.properties.IntegerProperty;
 
 /** Three persistent painted surfaces sharing one full-cube block and item identity. */
 public final class MineSoilBlock extends Block {
-    public static final MapCodec<MineSoilBlock> CODEC = simpleCodec(MineSoilBlock::new);
     public static final IntegerProperty VARIANT = IntegerProperty.create("variant", 0, 2);
 
     public MineSoilBlock(Properties properties) {
         super(properties);
         registerDefaultState(defaultBlockState().setValue(VARIANT, 0));
-    }
-
-    @Override
-    public MapCodec<MineSoilBlock> codec() {
-        return CODEC;
     }
 
     @Override
@@ -34,7 +29,7 @@ public final class MineSoilBlock extends Block {
 
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
-        Integer fixed = context.getItemInHand().getOrDefault(DataComponents.BLOCK_STATE,
+        Integer fixed = PortItemData.getOrDefault(context.getItemInHand(), DataComponents.BLOCK_STATE,
                 BlockItemStateProperties.EMPTY).get(VARIANT);
         if (fixed != null) return defaultBlockState().setValue(VARIANT, fixed);
         if (context.getLevel().isClientSide) return defaultBlockState();
@@ -44,9 +39,9 @@ public final class MineSoilBlock extends Block {
     }
 
     @Override
-    public ItemStack getCloneItemStack(LevelReader level, BlockPos pos, BlockState state) {
+    public ItemStack getCloneItemStack(net.minecraft.world.level.BlockGetter level, BlockPos pos, BlockState state) {
         ItemStack stack = new ItemStack(this);
-        stack.set(DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY.with(VARIANT, state));
+        PortItemData.set(stack, DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY.with(VARIANT, state));
         return stack;
     }
 }

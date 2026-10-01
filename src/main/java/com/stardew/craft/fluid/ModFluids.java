@@ -20,7 +20,7 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.minecraftforge.common.SoundActions;
-import com.stardew.craft.port.net.neoforged.neoforge.fluids.BaseFlowingFluid;
+import net.minecraftforge.fluids.ForgeFlowingFluid;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidType;
 import com.stardew.craft.port.net.neoforged.neoforge.registries.DeferredHolder;
@@ -46,12 +46,9 @@ public final class ModFluids {
             .sound(SoundActions.BUCKET_FILL, SoundEvents.BUCKET_FILL)
             .sound(SoundActions.BUCKET_EMPTY, SoundEvents.BUCKET_EMPTY)
             .sound(SoundActions.FLUID_VAPORIZE, SoundEvents.FIRE_EXTINGUISH)
-            .addDripstoneDripping(
-                PointedDripstoneBlock.WATER_TRANSFER_PROBABILITY_PER_RANDOM_TICK,
-                ParticleTypes.DRIPPING_DRIPSTONE_WATER,
-                Blocks.WATER_CAULDRON,
-                SoundEvents.POINTED_DRIPSTONE_DRIP_WATER_INTO_CAULDRON
-            )
+            // PORT(1.20.1): FluidType.Properties#addDripstoneDripping does not exist; 1.20.1 dripstone hardcodes
+            // water/lava for cauldron filling (drip particles still match via the water fluid tag).
+            // See docs/porting/bulk-port-gaps.md.
     ) {
         @Override
         @SuppressWarnings("removal")
@@ -106,14 +103,14 @@ public final class ModFluids {
         }
     });
 
-    public static final DeferredHolder<Fluid, FlowingFluid> FISH_POND_WATER = FLUIDS.register("fish_pond_water", () -> new BaseFlowingFluid.Source(fishPondWaterProperties()));
-    public static final DeferredHolder<Fluid, FlowingFluid> FLOWING_FISH_POND_WATER = FLUIDS.register("flowing_fish_pond_water", () -> new BaseFlowingFluid.Flowing(fishPondWaterProperties()));
+    public static final DeferredHolder<Fluid, FlowingFluid> FISH_POND_WATER = FLUIDS.register("fish_pond_water", () -> new ForgeFlowingFluid.Source(fishPondWaterProperties()));
+    public static final DeferredHolder<Fluid, FlowingFluid> FLOWING_FISH_POND_WATER = FLUIDS.register("flowing_fish_pond_water", () -> new ForgeFlowingFluid.Flowing(fishPondWaterProperties()));
 
     private ModFluids() {
     }
 
-    private static BaseFlowingFluid.Properties fishPondWaterProperties() {
-        return new BaseFlowingFluid.Properties(FISH_POND_WATER_TYPE::value, FISH_POND_WATER, FLOWING_FISH_POND_WATER)
+    private static ForgeFlowingFluid.Properties fishPondWaterProperties() {
+        return new ForgeFlowingFluid.Properties(FISH_POND_WATER_TYPE::value, FISH_POND_WATER, FLOWING_FISH_POND_WATER)
             .block(() -> (LiquidBlock) ModBlocks.FISH_POND_WATER.get())
             .slopeFindDistance(4)
             .levelDecreasePerBlock(1)

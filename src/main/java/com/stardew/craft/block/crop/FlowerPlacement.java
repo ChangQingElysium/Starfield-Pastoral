@@ -1,5 +1,6 @@
 package com.stardew.craft.block.crop;
 
+import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.manager.CropGrowthManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -138,7 +139,7 @@ public final class FlowerPlacement {
     }
 
     private static Integer readFlowerColor(ItemStack stack) {
-        CustomData data = stack.get(DataComponents.CUSTOM_DATA);
+        CustomData data = PortItemData.get(stack, DataComponents.CUSTOM_DATA);
         if (data == null) {
             return null;
         }

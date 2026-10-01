@@ -18,13 +18,13 @@ public final class LivestockCollectors {
             int room=0;
             for(int i=0;i<slots.size();i++)if(facility.access().canInsert(i,product)) {
                 var slot=slots.get(i);int limit=Math.min(product.getMaxStackSize(),Math.max(0,facility.access().slotLimit(i,product)));
-                if(slot.isEmpty())room+=limit;else if(ItemStack.isSameItemSameComponents(slot,product))room+=Math.max(0,limit-slot.getCount());
+                if(slot.isEmpty())room+=limit;else if(ItemStack.isSameItemSameTags(slot,product))room+=Math.max(0,limit-slot.getCount());
             }
             if(room<product.getCount())return false;
             int remaining=product.getCount();
             for(int i=0;i<slots.size()&&remaining>0;i++)if(facility.access().canInsert(i,product)) {
                 var slot=slots.get(i);int limit=Math.min(product.getMaxStackSize(),Math.max(0,facility.access().slotLimit(i,product)));
-                if(!slot.isEmpty()&&!ItemStack.isSameItemSameComponents(slot,product))continue;
+                if(!slot.isEmpty()&&!ItemStack.isSameItemSameTags(slot,product))continue;
                 int n=Math.min(remaining,Math.max(0,limit-slot.getCount()));
                 if(n>0){if(slot.isEmpty())slots.set(i,product.copyWithCount(n));else slot.grow(n);remaining-=n;}
             }

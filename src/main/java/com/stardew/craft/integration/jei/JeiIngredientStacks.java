@@ -29,7 +29,7 @@ public final class JeiIngredientStacks {
                 if (source == null || source.isEmpty()) continue;
                 ItemStack stack = source.copy();
                 stack.setCount(count);
-                if (normalized.stream().noneMatch(existing -> ItemStack.isSameItemSameComponents(existing, stack))) {
+                if (normalized.stream().noneMatch(existing -> ItemStack.isSameItemSameTags(existing, stack))) {
                     normalized.add(stack);
                 }
             }

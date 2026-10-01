@@ -19,7 +19,7 @@ public final class RexBreathEntity extends Projectile {
  private static final EntityDataAccessor<Float> DISTANCE=SynchedEntityData.defineId(RexBreathEntity.class,EntityDataSerializers.FLOAT);
  private boolean owned;private int floor;private java.util.UUID generation;
  public RexBreathEntity(EntityType<? extends RexBreathEntity> type,Level level){super(type,level);setNoGravity(true);}
- @Override protected void defineSynchedData(SynchedEntityData.Builder b){b.define(DISTANCE,0F);}
+ @Override protected void defineSynchedData(){this.entityData.define(DISTANCE,0F);}
  public void launch(MinePepperRexEntity owner,Vec3 origin,double angle){setOwner(owner);var c=owner.monsterState().context();owned=c.generation()!=null;floor=c.floor();generation=c.generation();setPos(origin);var target=owner.getTarget();
   double pitch=target==null?0:Math.atan2(target.getBoundingBox().getCenter().y-origin.y,Math.max(.001,target.position().subtract(origin).horizontalDistance()));
   pitch=Math.clamp(pitch,-Math.PI/6,Math.PI/6);

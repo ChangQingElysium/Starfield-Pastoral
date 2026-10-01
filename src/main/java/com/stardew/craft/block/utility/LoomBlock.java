@@ -59,7 +59,7 @@ public class LoomBlock extends MapUtilityStaticBlock implements EntityBlock {
 
     @SuppressWarnings("null")
     @Override
-    protected List<ItemStack> getDrops(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") LootParams.Builder params) {
+    public List<ItemStack> getDrops(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") LootParams.Builder params) {
         if (state.getValue(PART) == Part.EXTENSION) return List.of();
         return List.of(new ItemStack(ModBlocks.LOOM.get()));
     }
@@ -86,7 +86,7 @@ public class LoomBlock extends MapUtilityStaticBlock implements EntityBlock {
 
     @SuppressWarnings("null")
     @Override
-    protected ItemInteractionResult useItemOn(@SuppressWarnings("null") ItemStack stack, @SuppressWarnings("null") BlockState state, @SuppressWarnings("null") Level level, @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") Player player, @SuppressWarnings("null") InteractionHand hand, @SuppressWarnings("null") BlockHitResult hit) {
+    public ItemInteractionResult useItemOn(@SuppressWarnings("null") ItemStack stack, @SuppressWarnings("null") BlockState state, @SuppressWarnings("null") Level level, @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") Player player, @SuppressWarnings("null") InteractionHand hand, @SuppressWarnings("null") BlockHitResult hit) {
         if (state.getValue(PART) == Part.EXTENSION) return super.useItemOn(stack, state, level, pos, player, hand, hit);
         if (level.isClientSide) {
             return ItemInteractionResult.sidedSuccess(true);
@@ -121,7 +121,7 @@ public class LoomBlock extends MapUtilityStaticBlock implements EntityBlock {
 
     @SuppressWarnings("null")
     @Override
-    protected InteractionResult useWithoutItem(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") Level level, @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") Player player, @SuppressWarnings("null") BlockHitResult hit) {
+    public InteractionResult useWithoutItem(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") Level level, @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") Player player, @SuppressWarnings("null") BlockHitResult hit) {
         if (state.getValue(PART) == Part.EXTENSION) return super.useWithoutItem(state, level, pos, player, hit);
         if (level.isClientSide) {
             return InteractionResult.SUCCESS;

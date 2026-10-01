@@ -46,7 +46,7 @@ public class OfficeChair2Block extends MapUtilityStaticBlock implements EntityBl
     }
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+    public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         if (player.isShiftKeyDown()) {
             return InteractionResult.PASS;
         }

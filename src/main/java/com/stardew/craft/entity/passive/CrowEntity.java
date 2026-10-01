@@ -96,10 +96,10 @@ public class CrowEntity extends Mob implements GeoEntity {
     }
 
     @Override
-    protected void defineSynchedData(@Nonnull SynchedEntityData.Builder builder) {
-        super.defineSynchedData(builder);
-        builder.define(DATA_STATE, STATE_PECKING);
-        builder.define(DATA_GROUNDED, true);
+    protected void defineSynchedData() {
+        super.defineSynchedData();
+        this.entityData.define(DATA_STATE, STATE_PECKING);
+        this.entityData.define(DATA_GROUNDED, true);
     }
 
     public int  getCrowState()       { return entityData.get(DATA_STATE); }

@@ -28,7 +28,7 @@ public final class FestivalWorldData extends SavedData {
     public static FestivalWorldData get(ServerLevel level) {
         FestivalWorldData data =
                 level.getServer().overworld().getDataStorage().computeIfAbsent(
-            new SavedData.Factory<>(FestivalWorldData::new, FestivalWorldData::load),
+            com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(FestivalWorldData::new, FestivalWorldData::load)), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(FestivalWorldData::new, FestivalWorldData::load)),
             DATA_NAME
         );
         ServerLevel festivalLevel = level.getServer()
@@ -102,7 +102,7 @@ public final class FestivalWorldData extends SavedData {
 
     @Override
     @Nonnull
-    public CompoundTag save(@Nonnull CompoundTag tag, @Nonnull HolderLookup.Provider provider) {
+    public CompoundTag save(@Nonnull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
         ListTag activeList = new ListTag();
         for (String festivalId : activePassiveFestivalIds) {
             CompoundTag entry = new CompoundTag();

@@ -103,12 +103,12 @@ public final class NativeBatGameTests {
         });
         h.runAtTickTime(72, () -> {
             h.assertTrue(player.getHealth() < player.getMaxHealth(), "Native bat did not damage overlapping player");
-            player.addEffect(new net.minecraft.world.effect.MobEffectInstance(com.stardew.craft.effect.ModMobEffects.AVOID_MONSTERS, 200));
+            player.addEffect(new net.minecraft.world.effect.MobEffectInstance(com.stardew.craft.effect.ModMobEffects.AVOID_MONSTERS.get(), 200));
             player.invulnerableTime = 0; player.setHealth(player.getMaxHealth());
             bat.setPos(player.getX(), player.getY() + .85, player.getZ());
         });
         h.runAtTickTime(74, () -> {
-            h.assertTrue(bat.getTarget() == null && player.getHealth() == player.getMaxHealth(), "Garlic oil did not block native pursuit/contact: target="+bat.getTarget()+", effect="+player.hasEffect(com.stardew.craft.effect.ModMobEffects.AVOID_MONSTERS)+", HP="+player.getHealth());
+            h.assertTrue(bat.getTarget() == null && player.getHealth() == player.getMaxHealth(), "Garlic oil did not block native pursuit/contact: target="+bat.getTarget()+", effect="+player.hasEffect(com.stardew.craft.effect.ModMobEffects.AVOID_MONSTERS.get())+", HP="+player.getHealth());
             h.assertTrue(bat.phase() == MineBatEntity.AWAKE, "Losing a target reset source awareness");
             bat.discard(); player.discard(); h.succeed();
         });

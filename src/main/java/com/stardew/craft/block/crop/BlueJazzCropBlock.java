@@ -1,5 +1,6 @@
 package com.stardew.craft.block.crop;
 
+import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.item.ModItems;
 import com.stardew.craft.item.quality.QualityHelper;
 import com.stardew.craft.manager.CropGrowthManager;
@@ -94,11 +95,11 @@ public class BlueJazzCropBlock extends StardewCropBlock {
             @SuppressWarnings("null")
             int color = state.getValue(COLOR);
             @SuppressWarnings("null")
-            var customData = stack.getOrDefault(com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_DATA,
+            var customData = PortItemData.getOrDefault(stack, com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_DATA,
                     com.stardew.craft.port.net.minecraft.world.item.component.CustomData.EMPTY);
             var tag = customData.copyTag();
             tag.putInt("FlowerColor", color);
-            stack.set(com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_DATA,
+            PortItemData.set(stack, com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_DATA,
                     com.stardew.craft.port.net.minecraft.world.item.component.CustomData.of(tag));
             setFlowerVariantModelData(stack, color);
         }
@@ -143,7 +144,7 @@ public class BlueJazzCropBlock extends StardewCropBlock {
     }
 
     @Override
-    protected boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
+    public boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
         if (!super.canSurvive(state, level, pos)) return false;
         if (state.getValue(HALF) == DoubleBlockHalf.UPPER) return true;
         BlockState above = level.getBlockState(pos.above());
@@ -151,14 +152,14 @@ public class BlueJazzCropBlock extends StardewCropBlock {
     }
 
     @Override
-    protected BlockState updateShape(BlockState state, Direction direction, BlockState neighborState,
+    public BlockState updateShape(BlockState state, Direction direction, BlockState neighborState,
                                      LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
         if (!state.canSurvive(level, pos)) return Blocks.AIR.defaultBlockState();
         return super.updateShape(state, direction, neighborState, level, pos, neighborPos);
     }
 
     @Override
-    protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean isMoving) {
+    public void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean isMoving) {
         if (state.getValue(HALF) == DoubleBlockHalf.UPPER) return;
         if (!state.is(oldState.getBlock()) && level instanceof ServerLevel) {
             syncMultiBlockPartnerFromRoot(level, pos, state);
@@ -175,7 +176,7 @@ public class BlueJazzCropBlock extends StardewCropBlock {
     }
 
     @Override
-    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
+    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
         if (!state.is(newState.getBlock())) {
             boolean lower = state.getValue(HALF) == DoubleBlockHalf.LOWER;
             BlockPos partnerPos = lower ? pos.above() : pos.below();

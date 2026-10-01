@@ -1239,7 +1239,7 @@ public class BundleScreen extends AbstractContainerScreen<BundleMenu> {
             // Track component
             boolean merged = false;
             for (ItemStack existing : partialDonationComponents) {
-                if (ItemStack.isSameItemSameComponents(existing, carried)) {
+                if (ItemStack.isSameItemSameTags(existing, carried)) {
                     existing.grow(amountToTake);
                     merged = true;
                     break;

@@ -418,9 +418,10 @@ public final class MasteryTrackerMenuScreen extends Screen {
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollY) {
+        double scrollX = 0.0D; // PORT(1.20.1): no horizontal scroll before 1.20.2
         if (maxScroll <= 0) {
-            return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
+            return super.mouseScrolled(mouseX, mouseY, scrollY);
         }
         scrollOffset = Math.max(0, Math.min(maxScroll, scrollOffset - (int) Math.round(scrollY * ui(32))));
         return true;

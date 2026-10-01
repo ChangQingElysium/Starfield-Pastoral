@@ -92,7 +92,7 @@ public class SkullKeyItem extends Item implements IStardewItem {
 
     /** 掉落实体不可被火/熔岩/爆炸等伤害（fireResistant 已经覆盖大半，这里再保险）。 */
     @Override
-    public boolean canBeHurtBy(@Nonnull ItemStack stack, @Nonnull net.minecraft.world.damagesource.DamageSource source) {
+    public boolean canBeHurtBy(@Nonnull net.minecraft.world.damagesource.DamageSource source) {
         return false;
     }
 
@@ -136,8 +136,10 @@ public class SkullKeyItem extends Item implements IStardewItem {
     // ─────────────────────────── Tooltip ───────────────────────────
 
     @Override
-    public void appendHoverText(@Nonnull ItemStack stack, @Nonnull TooltipContext context,
-                                @Nonnull List<Component> tooltipComponents, @Nonnull TooltipFlag tooltipFlag) {
+    public void appendHoverText(@Nonnull ItemStack stack,
+                                @javax.annotation.Nullable Level level,
+                                @Nonnull List<Component> tooltipComponents,
+                                @Nonnull TooltipFlag tooltipFlag) {
         // 一条干净的描述句（深金，无斜体）—— 全部用同一色度，不再多行花字
         tooltipComponents.add(Component.translatable("stardewcraft.item.skull_key.tooltip.flavor")
                 .withStyle(Style.EMPTY.withColor(TextColor.fromRgb(0xC9A24A))));

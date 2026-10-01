@@ -15,7 +15,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import com.stardew.craft.port.net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import static com.stardew.craft.combat.skill.handler.HeavyHammerRules.*;
@@ -88,7 +88,7 @@ public final class HeavyHammerVisuals {
         while(SEEN.size()>512)SEEN.remove(SEEN.keySet().iterator().next());
         boolean gold=p.skill().startsWith("infinity_");
         if(p.target()>=0) {
-            if(Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()) {
+            if(Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()) {
                 CONTACTS.add(new Contact(p.caster(),p.target(),level.getGameTime(),point,gold,p.phase()==HeavyHammerFxPayload.HIT_ECHO,Math.clamp(p.radius(),.3f,1.3f)));
                 while(CONTACTS.size()>128) CONTACTS.removeFirst();
             }
@@ -118,12 +118,12 @@ public final class HeavyHammerVisuals {
         };
     }
     private static void addBurst(int caster,Vec3 center,HeavyHammerBurstGeometry.Shape shape,float radius,float yaw,long seed) {
-        if(!Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean())return;
+        if(!Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get())return;
         BURSTS.add(new Burst(caster,level.getGameTime(),center,shape,radius,yaw,seed));
         while(BURSTS.size()>32)BURSTS.removeFirst();
     }
     private static void addWave(int caster,Vec3 center,float radius,boolean gold,boolean heavy,boolean inward,boolean sweep,float yaw) {
-        if(!Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean())return;
+        if(!Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get())return;
         var actor=level.getEntity(caster);if(actor==null)return;
         List<Band> paths=new ArrayList<>();double facing=Math.toRadians(yaw+90);
         int bands=heavy?3:2;
@@ -150,8 +150,8 @@ public final class HeavyHammerVisuals {
     private static boolean holdingInfinity(int id){return level.getEntity(id) instanceof LivingEntity e&&e.isAlive()&&e.getMainHandItem().getItem() instanceof IStardewWeapon w&&"infinity_gavel".equals(w.getWeaponId());}
     @SubscribeEvent public static void render(RenderLevelStageEvent e) {
         if(e.getStage()!=RenderLevelStageEvent.Stage.AFTER_PARTICLES)return;
-        ensureLevel();if(level==null||!Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean())return;
-        var mc=Minecraft.getInstance();double now=level.getGameTime()+e.getPartialTick().getGameTimeDeltaPartialTick(false);
+        ensureLevel();if(level==null||!Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get())return;
+        var mc=Minecraft.getInstance();double now=level.getGameTime()+e.getPartialTick();
         Vec3 camera=e.getCamera().getPosition();var stack=e.getPoseStack();stack.pushPose();stack.translate(-camera.x,-camera.y,-camera.z);
         var pose=stack.last().pose();var buffers=mc.renderBuffers().bufferSource();
         for(int pass=0;pass<2;pass++) {

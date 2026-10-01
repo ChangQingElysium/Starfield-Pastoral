@@ -415,8 +415,9 @@ public abstract class FarmFolioScreen extends Screen {
     }
 
     @Override
-    public boolean mouseScrolled(double mx, double my, double dx, double dy) {
-        return super.mouseScrolled(mx / zoom, my / zoom, dx, dy);
+    public boolean mouseScrolled(double mx, double my, double dy) {
+        double dx = 0.0D; // PORT(1.20.1): no horizontal scroll before 1.20.2
+        return super.mouseScrolled(mx / zoom, my / zoom, dy);
     }
 
     @Override

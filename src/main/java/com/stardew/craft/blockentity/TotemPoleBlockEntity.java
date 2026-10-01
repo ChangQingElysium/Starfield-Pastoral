@@ -136,8 +136,8 @@ public class TotemPoleBlockEntity extends BlockEntity {
 
     @SuppressWarnings("null")
     @Override
-    protected void saveAdditional(@Nonnull CompoundTag tag, @Nonnull HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
+    protected void saveAdditional(@Nonnull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        super.saveAdditional(tag);
         tag.putString(TAG_NAME, poleName);
         tag.putInt(TAG_ID, poleId);
         tag.putString(TAG_TYPE, totemType.getId());
@@ -147,8 +147,8 @@ public class TotemPoleBlockEntity extends BlockEntity {
 
     @SuppressWarnings("null")
     @Override
-    protected void loadAdditional(@Nonnull CompoundTag tag, @Nonnull HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
+    public void load(@Nonnull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        super.load(tag);
         poleName = tag.getString(TAG_NAME);
         poleId = tag.getInt(TAG_ID);
         totemType = TotemType.fromId(tag.getString(TAG_TYPE));
@@ -167,9 +167,9 @@ public class TotemPoleBlockEntity extends BlockEntity {
     @SuppressWarnings("null")
     @Override
     @Nonnull
-    public CompoundTag getUpdateTag(@Nonnull HolderLookup.Provider registries) {
-        CompoundTag tag = super.getUpdateTag(registries);
-        saveAdditional(tag, registries);
+    public CompoundTag getUpdateTag() { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        CompoundTag tag = super.getUpdateTag();
+        saveAdditional(tag);
         return tag;
     }
 

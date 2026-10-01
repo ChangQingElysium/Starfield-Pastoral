@@ -27,7 +27,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import com.stardew.craft.port.net.neoforged.neoforge.event.level.BlockDropsEvent;
 import net.minecraftforge.event.level.BlockEvent;
 import java.util.ArrayList;
@@ -410,11 +410,11 @@ public final class MineStoneMining {
                 player != null && PlayerStardewDataAPI.hasProfession(player, ProfessionType.EXCAVATOR),
                 player != null && PlayerStardewDataAPI.hasProfession(player, ProfessionType.GEOLOGIST),
                 player != null && PlayerStardewDataAPI.hasProfession(player, ProfessionType.PROSPECTOR),
-                player != null && player.hasEffect(com.stardew.craft.effect.ModMobEffects.DWARF_STATUE_4),
-                player != null && player.hasEffect(com.stardew.craft.effect.ModMobEffects.DWARF_STATUE_2),
+                player != null && player.hasEffect(com.stardew.craft.effect.ModMobEffects.DWARF_STATUE_4.get()),
+                player != null && player.hasEffect(com.stardew.craft.effect.ModMobEffects.DWARF_STATUE_2.get()),
                 festival, festival ? DesertFestivalMineService.currentRating(level) : 0,
                 (player != null && PlayerStardewDataAPI.hasProfession(player, ProfessionType.MINER) ? 1 : 0)
-                        + (player != null && player.hasEffect(com.stardew.craft.effect.ModMobEffects.DWARF_STATUE_0) ? 1 : 0),
+                        + (player != null && player.hasEffect(com.stardew.craft.effect.ModMobEffects.DWARF_STATUE_0.get()) ? 1 : 0),
                 player != null && PlayerDataManager.getPlayerData(player).hasMastery(SkillType.MINING));
         // This source entry runs before the location-specific stone rewards, including calico nodes.
         DesertFestivalMineService.tryAddStoneEggDrop(level, player, pos, r);

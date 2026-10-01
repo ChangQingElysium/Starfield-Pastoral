@@ -17,9 +17,11 @@ public final class TrashCanUpgradeItem extends SimpleStardewItem {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context,
-                                List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
+    public void appendHoverText(ItemStack stack,
+                                @javax.annotation.Nullable net.minecraft.world.level.Level level,
+                                List<Component> tooltipComponents,
+                                TooltipFlag tooltipFlag) {
+        super.appendHoverText(stack, level, tooltipComponents, tooltipFlag);
         tooltipComponents.add(Component.translatable(
                 "stardewcraft.trash_can.upgrade.description", reclaimPercent).withStyle(ChatFormatting.GRAY));
     }

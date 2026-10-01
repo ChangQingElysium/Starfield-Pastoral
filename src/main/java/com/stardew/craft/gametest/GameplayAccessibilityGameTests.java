@@ -27,6 +27,7 @@ import net.minecraftforge.gametest.GameTestHolder;
 import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 import java.util.UUID;
+import com.stardew.craft.port.PortBlockInteraction;
 
 @GameTestHolder("stardewcraft_play_fixes")
 @PrefixGameTestTemplate(false)
@@ -80,7 +81,7 @@ public final class GameplayAccessibilityGameTests {
                         MinecraftForge.EVENT_BUS.post(event);
                         h.assertTrue(event.isCanceled(), "Protected food use must stop before consumption");
                         // Exercise the block itself too: a vetoed removal must never award anything.
-                        state.useWithoutItem(level, player, hit);
+                        PortBlockInteraction.stateUseWithoutItem(state, level, player, hit);
                         h.assertTrue(data.getEnergy() == 1 && data.getHealth() == 1, "No repeatable food effects");
                         h.assertTrue(player.getInventory().countItem(item) == 0, "No shift-use item duplication");
                         h.assertTrue(level.getBlockState(pos).is(food), "Native food stays in place");
@@ -101,15 +102,15 @@ public final class GameplayAccessibilityGameTests {
             player.getAbilities().instabuild = false;
             player.setShiftKeyDown(false);
             h.assertTrue(!BuildingProtection.deniesInteraction(level, free), "Player food remains usable");
-            state.useWithoutItem(level, player, freeHit);
+            PortBlockInteraction.stateUseWithoutItem(state, level, player, freeHit);
             h.assertTrue(level.getBlockState(free).isAir() && data.getEnergy() > 1, "Player food is consumed and restores energy");
             float energy = data.getEnergy();
-            state.useWithoutItem(level, player, freeHit);
+            PortBlockInteraction.stateUseWithoutItem(state, level, player, freeHit);
             h.assertTrue(data.getEnergy() == energy, "A consumed serving cannot award effects twice");
             level.setBlock(free, state, 3);
             player.setShiftKeyDown(true);
-            state.useWithoutItem(level, player, freeHit);
-            state.useWithoutItem(level, player, freeHit);
+            PortBlockInteraction.stateUseWithoutItem(state, level, player, freeHit);
+            PortBlockInteraction.stateUseWithoutItem(state, level, player, freeHit);
             h.assertTrue(level.getBlockState(free).isAir() && player.getInventory().countItem(item) == 1,
                     "Player food can be picked up exactly once");
         } finally {

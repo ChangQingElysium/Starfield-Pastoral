@@ -30,8 +30,8 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
-import com.stardew.craft.port.net.neoforged.neoforge.common.ItemAbilities;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
+import net.minecraftforge.common.ToolActions;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.event.level.LevelEvent;
@@ -113,7 +113,7 @@ public final class SunroomService {
     }
 
     private static boolean isActuallyTargetingBush(ServerPlayer player) {
-        HitResult hit = player.pick(player.blockInteractionRange(), 1.0F, false);
+        HitResult hit = player.pick(player.getBlockReach(), 1.0F, false);
         return hit instanceof BlockHitResult blockHit
                 && isCentralTeaBush(player.serverLevel(), blockHit.getBlockPos());
     }
@@ -148,7 +148,7 @@ public final class SunroomService {
         return !stack.isEmpty()
                 && (stack.getItem() instanceof AxeItem
                 || stack.is(ItemTags.AXES)
-                || stack.canPerformAction(ItemAbilities.AXE_DIG));
+                || stack.canPerformAction(ToolActions.AXE_DIG));
     }
 
     public static void ensurePlaced(ServerLevel level) {
@@ -231,7 +231,7 @@ public final class SunroomService {
 
     private static CentralTeaBushData data(ServerLevel level) {
         return level.getServer().overworld().getDataStorage().computeIfAbsent(
-                new SavedData.Factory<>(CentralTeaBushData::new, CentralTeaBushData::load),
+                com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(CentralTeaBushData::new, CentralTeaBushData::load)), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(CentralTeaBushData::new, CentralTeaBushData::load)),
                 DATA_NAME);
     }
 

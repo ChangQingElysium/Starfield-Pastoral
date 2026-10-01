@@ -175,7 +175,7 @@ public final class InsectDashSkillHandler implements RuntimeWeaponSkillHandler {
                 );
                 if (executionState.earnedFinishSpeed()) {
                     context.player().addEffect(new MobEffectInstance(
-                            ModMobEffects.SPEED,
+                            ModMobEffects.SPEED.get(),
                             FINISH_SPEED_DURATION_TICKS,
                             FINISH_SPEED_AMPLIFIER,
                             false,
@@ -253,7 +253,7 @@ public final class InsectDashSkillHandler implements RuntimeWeaponSkillHandler {
                 PlayerStardewDataAPI.getEnergy(context.player()),
                 context.player().getAbilities().instabuild,
                 context.player().hasEffect(
-                        ModMobEffects.STATUE_OF_BLESSINGS_2
+                        ModMobEffects.STATUE_OF_BLESSINGS_2.get()
                 ),
                 stage
         );

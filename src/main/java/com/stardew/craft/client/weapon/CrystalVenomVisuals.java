@@ -13,7 +13,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import com.stardew.craft.port.net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import static com.stardew.craft.client.weapon.MeleeWeaponVisuals.*;
@@ -49,8 +49,8 @@ public final class CrystalVenomVisuals {
     }
     @SubscribeEvent public static void render(RenderLevelStageEvent e) {
         if(e.getStage()!=RenderLevelStageEvent.Stage.AFTER_PARTICLES) return;
-        ensureLevel();var mc=Minecraft.getInstance();if(level==null||mc.player==null||!Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()) return;
-        Vec3 camera=e.getCamera().getPosition();float partial=e.getPartialTick().getGameTimeDeltaPartialTick(false);
+        ensureLevel();var mc=Minecraft.getInstance();if(level==null||mc.player==null||!Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()) return;
+        Vec3 camera=e.getCamera().getPosition();float partial=e.getPartialTick();
         double now=level.getGameTime()+partial;var stack=e.getPoseStack();var buffers=mc.renderBuffers().bufferSource();
         var out=buffers.getBuffer(WeaponEffectRenderTypes.MOLTEN_GLOW);stack.pushPose();
         for(Cast cast:CASTS.values()) {

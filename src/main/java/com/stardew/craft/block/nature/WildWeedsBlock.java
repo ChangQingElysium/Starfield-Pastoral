@@ -112,13 +112,13 @@ public class WildWeedsBlock extends Block implements EntityBlock {
 	}
 
 	@Override
-	public BlockState playerWillDestroy(@SuppressWarnings("null") Level level, @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") BlockState state, @SuppressWarnings("null") Player player) {
+	public void playerWillDestroy(@SuppressWarnings("null") Level level, @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") BlockState state, @SuppressWarnings("null") Player player) {
 		if (!level.isClientSide && level instanceof ServerLevel serverLevel) {
 			if (!player.isCreative()) {
 				spawnWeedDrops(serverLevel, pos, serverLevel.getRandom(), player);
 			}
 		}
-		return super.playerWillDestroy(level, pos, state, player);
+		super.playerWillDestroy(level, pos, state, player);
 	}
 
 	/**

@@ -1,5 +1,6 @@
 package com.stardew.craft.gametest;
 
+import com.stardew.craft.port.PortItemData;
 import com.mojang.authlib.GameProfile;
 import com.stardew.craft.entity.projectile.SlingshotProjectile;
 import com.stardew.craft.item.ModItems;
@@ -167,13 +168,13 @@ public final class SlingshotGameTests {
     public static void projectileKeepsItemDamageAndSpinThroughSave(GameTestHelper h) {
         var player=FakePlayerFactory.get(h.getLevel(),new GameProfile(UUID.randomUUID(),"Slingshot save"));
         var ammo=new ItemStack(ModItems.IRIDIUM_ORE.get());
-        ammo.set(com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_NAME,net.minecraft.network.chat.Component.literal("snapshot"));
+        PortItemData.set(ammo, com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_NAME,net.minecraft.network.chat.Component.literal("snapshot"));
         var shot=new SlingshotProjectile(h.getLevel(),player,new ItemStack(ModItems.SLINGSHOT.get()),ammo,87);
         var tag=new net.minecraft.nbt.CompoundTag();shot.addAdditionalSaveData(tag);
         var loaded=new SlingshotProjectile(com.stardew.craft.entity.ModEntities.SLINGSHOT_PROJECTILE.get(),h.getLevel());
         loaded.readAdditionalSaveData(tag);
         h.assertTrue(loaded.releasedDamage()==87&&loaded.spinDegreesPerTick()==shot.spinDegreesPerTick(),"Release values not saved");
-        h.assertTrue(ItemStack.isSameItemSameComponents(ammo,loaded.getItem()),"Ammo components not saved");h.succeed();
+        h.assertTrue(ItemStack.isSameItemSameTags(ammo,loaded.getItem()),"Ammo components not saved");h.succeed();
     }
     @GameTest(templateNamespace="stardewcraft_slingshot",template="ring_utilities",timeoutTicks=40)
     public static void sweptShotPassesNodeThenHitsWall(GameTestHelper h) {

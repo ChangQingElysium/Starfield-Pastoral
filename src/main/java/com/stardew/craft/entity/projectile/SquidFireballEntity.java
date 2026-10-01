@@ -25,7 +25,7 @@ public final class SquidFireballEntity extends Projectile {
     private int frames,bounces=3,tailCounter=50,floor;private boolean owned;private java.util.UUID generation;
     private final java.util.ArrayDeque<Vec3> tail=new java.util.ArrayDeque<>();
     public SquidFireballEntity(EntityType<? extends SquidFireballEntity> type,Level level){super(type,level);setNoGravity(true);}
-    @Override protected void defineSynchedData(SynchedEntityData.Builder b){}
+    @Override protected void defineSynchedData(){}
     public void launch(MineSquidKidEntity owner,Player player){setOwner(owner);var c=owner.monsterState().context();owned=c.generation()!=null;generation=c.generation();floor=c.floor();setPos(owner.getX(),owner.getY()+owner.getBbHeight()*.5,owner.getZ());setDeltaMovement(MonsterSpace.aim(position(),player.getBoundingBox(),24./64));}
     public int bouncesLeft(){return bounces;}public int sourceFrames(){return frames;}public java.util.List<Vec3> tail(){return java.util.List.copyOf(tail);}
     @Override public void tick(){

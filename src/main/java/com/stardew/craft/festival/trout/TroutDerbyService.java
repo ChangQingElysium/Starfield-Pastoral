@@ -236,7 +236,7 @@ public final class TroutDerbyService {
             ItemStack existing = inventory.getItem(slot);
             if (existing.isEmpty()) {
                 remaining -= Math.min(stack.getMaxStackSize(), inventoryMax);
-            } else if (ItemStack.isSameItemSameComponents(existing, stack)) {
+            } else if (ItemStack.isSameItemSameTags(existing, stack)) {
                 int slotLimit = Math.min(existing.getMaxStackSize(), inventoryMax);
                 remaining -= Math.max(0, slotLimit - existing.getCount());
             }

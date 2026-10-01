@@ -1,5 +1,6 @@
 package com.stardew.craft.gametest;
 
+import com.stardew.craft.port.PortGameTests;
 import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.block.decor.MapDecorStaticBlock;
 import net.minecraft.core.BlockPos;
@@ -24,7 +25,7 @@ public final class GravestoneGameTests {
         var level=h.getLevel();var main=h.absolutePos(new BlockPos(10,1,10));
         for(var at:BlockPos.betweenClosed(main.offset(-3,-1,-3),main.offset(3,4,3)))
             level.setBlock(at,at.getY()==main.getY()-1?Blocks.STONE.defaultBlockState():Blocks.AIR.defaultBlockState(),3);
-        var player=h.makeMockPlayer(GameType.SURVIVAL);player.setPos(Vec3.atCenterOf(main.offset(3,0,3)));
+        var player=PortGameTests.makeMockPlayer(h, GameType.SURVIVAL);player.setPos(Vec3.atCenterOf(main.offset(3,0,3)));
         for(var block:new MapDecorStaticBlock[]{ModBlocks.TALL_GRAVESTONE.get(),ModBlocks.SHORT_GRAVESTONE.get()})
             for(var facing:Direction.Plane.HORIZONTAL){
                 player.setYRot(facing.getOpposite().toYRot());player.setItemInHand(InteractionHand.MAIN_HAND,new ItemStack(block,3));

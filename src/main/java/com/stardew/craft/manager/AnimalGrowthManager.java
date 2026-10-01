@@ -136,7 +136,7 @@ public class AnimalGrowthManager extends SavedData {
 
     public static AnimalGrowthManager get(ServerLevel level) {
         return level.getDataStorage().computeIfAbsent(
-            new SavedData.Factory<>(AnimalGrowthManager::new, AnimalGrowthManager::load),
+            com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(AnimalGrowthManager::new, AnimalGrowthManager::load)), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(AnimalGrowthManager::new, AnimalGrowthManager::load)),
             DATA_NAME
         );
     }
@@ -151,7 +151,7 @@ public class AnimalGrowthManager extends SavedData {
     }
 
     @Override
-    public CompoundTag save(@Nonnull CompoundTag tag, @Nonnull HolderLookup.Provider provider) {
+    public CompoundTag save(@Nonnull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
         tag.putInt(
                 "lastReproductionProcessedAbsDay",
                 lastReproductionProcessedAbsDay

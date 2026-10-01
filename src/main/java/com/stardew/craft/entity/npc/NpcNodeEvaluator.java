@@ -1,5 +1,6 @@
 package com.stardew.craft.entity.npc;
 
+import com.stardew.craft.port.PortLevels;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.BlockGetter;
@@ -10,7 +11,7 @@ import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.level.block.state.properties.Half;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.Node;
-import com.stardew.craft.port.net.minecraft.world.level.pathfinder.PathType;
+import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
 import net.minecraft.world.phys.AABB;
 
@@ -66,14 +67,15 @@ public class NpcNodeEvaluator extends WalkNodeEvaluator {
         if (failures.size() > 32) failures.remove(failures.keySet().iterator().next());
     }
 
+    // PORT(1.20.1): 1.21 getPathType(PathfindingContext, x, y, z) is 1.20.1 getBlockPathType(BlockGetter, x, y, z).
     @Override
-    public PathType getPathType(com.stardew.craft.port.net.minecraft.world.level.pathfinder.PathfindingContext context, int x, int y, int z) {
-        PathType type = super.getPathType(context,x,y,z);
-        if (type == PathType.FENCE && context.level().getBlockState(new BlockPos(x,y,z)).getBlock()
+    public BlockPathTypes getBlockPathType(BlockGetter level, int x, int y, int z) {
+        BlockPathTypes type = super.getBlockPathType(level,x,y,z);
+        if (type == BlockPathTypes.FENCE && level.getBlockState(new BlockPos(x,y,z)).getBlock()
                 instanceof net.minecraft.world.level.block.FenceGateBlock) {
             // The route executor can operate gates just like wooden doors. Do not
             // classify their closed 1.5-block collision as an impassable fence.
-            return PathType.DOOR_WOOD_CLOSED;
+            return BlockPathTypes.DOOR_WOOD_CLOSED;
         }
         return type;
     }
@@ -128,9 +130,9 @@ public class NpcNodeEvaluator extends WalkNodeEvaluator {
     @Override
     public int getNeighbors(@javax.annotation.Nonnull Node[] buffer, @javax.annotation.Nonnull Node node) {
         int count = super.getNeighbors(buffer, node);
-        if (this.currentContext == null) return count;
+        if (this.level == null) return count; // PORT(1.20.1): 1.21 currentContext.level() is NodeEvaluator#level
 
-        BlockGetter level = this.currentContext.level();
+        BlockGetter level = this.level;
         int accepted = 0;
         for (int i = 0; i < count; i++) {
             Node neighbor = buffer[i];
@@ -147,19 +149,19 @@ public class NpcNodeEvaluator extends WalkNodeEvaluator {
             // Vanilla accepts a one-block jump even with a 0.6 step height. Reject
             // that edge, not the cached node: the same node may have a level approach.
             if (!canStepBetween(node, neighbor)) continue;
-            if (neighbor.type == PathType.WATER || neighbor.type == PathType.WATER_BORDER || neighbor.type == PathType.LAVA) {
+            if (neighbor.type == BlockPathTypes.WATER || neighbor.type == BlockPathTypes.WATER_BORDER || neighbor.type == BlockPathTypes.LAVA) {
                 neighbor.costMalus = -1.0F;
                 continue;
             }
-            if (neighbor.type != PathType.DOOR_WOOD_CLOSED && neighbor.type != PathType.WALKABLE_DOOR
+            if (neighbor.type != BlockPathTypes.DOOR_WOOD_CLOSED && neighbor.type != BlockPathTypes.WALKABLE_DOOR
                     && !hasNpcClearance(neighbor)) {
                 neighbor.costMalus = -1.0F;
                 continue;
             }
-            if (neighbor.type != PathType.WALKABLE
-                && neighbor.type != PathType.WALKABLE_DOOR
-                && neighbor.type != PathType.DOOR_OPEN
-                && neighbor.type != PathType.DOOR_WOOD_CLOSED) {
+            if (neighbor.type != BlockPathTypes.WALKABLE
+                && neighbor.type != BlockPathTypes.WALKABLE_DOOR
+                && neighbor.type != BlockPathTypes.DOOR_OPEN
+                && neighbor.type != BlockPathTypes.DOOR_WOOD_CLOSED) {
                 buffer[accepted++] = neighbor;
                 continue;
             }
@@ -210,7 +212,7 @@ public class NpcNodeEvaluator extends WalkNodeEvaluator {
         // Entity occupancy is transient and must not erase the only route through
         // a doorway. Physical NPC collision and the finite traffic cost below own
         // crowd handling; this check is strictly architectural clearance.
-        return this.mob.level().noBlockCollision(this.mob, box);
+        return PortLevels.noBlockCollision(this.mob.level(), this.mob, box);
     }
 
     private float trafficCost(Node node) {
@@ -253,7 +255,7 @@ public class NpcNodeEvaluator extends WalkNodeEvaluator {
             fromFloor + this.mob.getBbHeight(),
             from.z + 0.5D + halfWidth
         ).deflate(1.0E-7D);
-        return this.mob.level().noBlockCollision(this.mob, body.expandTowards(
+        return PortLevels.noBlockCollision(this.mob.level(), this.mob, body.expandTowards(
                 to.x - from.x, 0.0D, to.z - from.z));
     }
 
@@ -264,7 +266,7 @@ public class NpcNodeEvaluator extends WalkNodeEvaluator {
         if (rise <= this.mob.maxUpStep() + 1.0E-7D) return true;
         // The node is at the stair's top, but entering from its low side crosses
         // two half-block risers. A full block or the stair's high side needs a jump.
-        var surface = this.currentContext.level().getBlockState(new BlockPos(to.x, to.y - 1, to.z));
+        var surface = this.level.getBlockState(new BlockPos(to.x, to.y - 1, to.z));
         if (!(surface.getBlock() instanceof StairBlock) || surface.getValue(StairBlock.HALF) != Half.BOTTOM
                 || this.mob.maxUpStep() < 0.5F || rise > 1.0D + 1.0E-7D) return false;
         var uphill = surface.getValue(StairBlock.FACING);

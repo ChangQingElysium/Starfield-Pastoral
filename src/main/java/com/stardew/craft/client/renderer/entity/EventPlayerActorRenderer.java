@@ -51,18 +51,18 @@ public class EventPlayerActorRenderer extends MobRenderer<EventPlayerActorEntity
     public ResourceLocation getTextureLocation(@javax.annotation.Nonnull EventPlayerActorEntity entity) {
         AbstractClientPlayer skinSource = findSkinSource(entity);
         if (skinSource != null) {
-            return skinSource.getSkin().texture();
+            return com.stardew.craft.port.net.minecraft.client.resources.PlayerSkin.of(skinSource).texture();
         }
         Minecraft mc = Minecraft.getInstance();
         var connection = mc.getConnection();
         if (connection != null && entity.getSkinSourcePlayerId() != null) {
             var info = connection.getPlayerInfo(entity.getSkinSourcePlayerId());
             if (info != null) {
-                return info.getSkin().texture();
+                return com.stardew.craft.port.net.minecraft.client.resources.PlayerSkin.of(info).texture();
             }
         }
         if (mc.player instanceof AbstractClientPlayer clientPlayer) {
-            return clientPlayer.getSkin().texture();
+            return com.stardew.craft.port.net.minecraft.client.resources.PlayerSkin.of(clientPlayer).texture();
         }
         return STEVE_SKIN;
     }
@@ -141,7 +141,7 @@ public class EventPlayerActorRenderer extends MobRenderer<EventPlayerActorEntity
         }
         AbstractClientPlayer player = findSkinSource(playerId);
         if (player != null) {
-            return player.getSkin().model() == PlayerSkin.Model.SLIM;
+            return com.stardew.craft.port.net.minecraft.client.resources.PlayerSkin.of(player).model() == PlayerSkin.Model.SLIM;
         }
         Minecraft mc = Minecraft.getInstance();
         var connection = mc.getConnection();
@@ -149,7 +149,7 @@ public class EventPlayerActorRenderer extends MobRenderer<EventPlayerActorEntity
             return false;
         }
         var info = connection.getPlayerInfo(playerId);
-        return info != null && info.getSkin().model() == PlayerSkin.Model.SLIM;
+        return info != null && com.stardew.craft.port.net.minecraft.client.resources.PlayerSkin.of(info).model() == PlayerSkin.Model.SLIM;
     }
 
     private static AbstractClientPlayer findSkinSource(UUID playerId) {

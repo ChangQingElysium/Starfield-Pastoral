@@ -1,5 +1,6 @@
 package com.stardew.craft.gametest;
 
+import com.stardew.craft.port.PortGameTests;
 import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.block.decor.ManholeBlock;
 import com.stardew.craft.block.decor.MapDecorStaticBlock;
@@ -31,7 +32,7 @@ public final class ManholeGameTests {
         var block = ModBlocks.MANHOLE.get();
         for (var at : BlockPos.betweenClosed(main.offset(-5, -1, -5), main.offset(5, 3, 5)))
             level.setBlock(at, at.getY() == main.getY() - 1 ? Blocks.STONE.defaultBlockState() : Blocks.AIR.defaultBlockState(), 3);
-        var player = h.makeMockPlayer(GameType.SURVIVAL);
+        var player = PortGameTests.makeMockPlayer(h, GameType.SURVIVAL);
         player.setPos(Vec3.atCenterOf(main.offset(5, 0, 5)));
         for (var facing : Direction.Plane.HORIZONTAL) {
             for (int brokenCell = 0; brokenCell < ManholeBlock.CELL_COUNT; brokenCell++) {

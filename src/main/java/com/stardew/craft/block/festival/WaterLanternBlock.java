@@ -42,7 +42,7 @@ public class WaterLanternBlock extends Block implements EntityBlock {
     }
 
     @Override
-    protected BlockState updateShape(BlockState state, Direction direction, BlockState neighborState, LevelAccessor level,
+    public BlockState updateShape(BlockState state, Direction direction, BlockState neighborState, LevelAccessor level,
                                      BlockPos pos, BlockPos neighborPos) {
         if (!canSurvive(state, level, pos)) {
             return Blocks.AIR.defaultBlockState();

@@ -9,7 +9,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
-import com.stardew.craft.port.net.minecraft.client.gui.screens.options.controls.KeyBindsScreen;
+import net.minecraft.client.gui.screens.controls.KeyBindsScreen;
 import net.minecraft.network.chat.Component;
 import java.util.ArrayList;
 import java.util.List;
@@ -103,7 +103,7 @@ public final class StardewSettingsScreen extends Screen {
         clockInput.setTextColor(valid ? MenuPageArt.INK : 0xFFA13E30);
         if (valid) { Config.TIME_SPEED_MULTIPLIER.set(Double.parseDouble(value)); Config.SERVER_SPEC.save(); }
     }
-    @Override public boolean mouseScrolled(double mx, double my, double dx, double dy) {
+    @Override public boolean mouseScrolled(double mx, double my, double dy) {
         if (mx < x + 14 || mx >= x + panelW - 14 || my < listY || my >= listBottom) return false;
         int next = Math.max(0, Math.min(maxScroll(), scroll + (dy > 0 ? -1 : dy < 0 ? 1 : 0)));
         if (next != scroll) { scroll = next; rebuild(); }

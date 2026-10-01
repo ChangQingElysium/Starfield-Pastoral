@@ -33,9 +33,11 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import net.minecraft.world.InteractionHand;
+import com.stardew.craft.port.PortBlockInteraction;
 
 @SuppressWarnings("null")
-public class FurnitureStorageBlock extends Block implements EntityBlock {
+public class FurnitureStorageBlock extends Block implements EntityBlock, PortBlockInteraction {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final EnumProperty<Part> PART = EnumProperty.create("part", Part.class);
 
@@ -81,7 +83,7 @@ public class FurnitureStorageBlock extends Block implements EntityBlock {
     }
 
     @Override
-    protected List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
+    public List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
         if (state.getValue(PART) == Part.EXTENSION) {
             return List.of();
         }
@@ -152,8 +154,15 @@ public class FurnitureStorageBlock extends Block implements EntityBlock {
         return state.setValue(FACING, mirror.mirror(state.getValue(FACING)));
     }
 
+    // PORT(1.20.1): replay the 1.21 useItemOn/useWithoutItem dispatch.
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player,
+            InteractionHand hand, BlockHitResult hit) {
+        return PortBlockInteraction.dispatch(this, state, level, pos, player, hand, hit);
+    }
+
+    @Override
+    public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         BlockPos mainPos = mainPos(pos, state);
         BlockState mainState = level.getBlockState(mainPos);
         if (!mainState.is(this) || mainState.getValue(PART) != Part.MAIN) {
@@ -206,15 +215,15 @@ public class FurnitureStorageBlock extends Block implements EntityBlock {
     }
 
     @Override
-    public BlockState playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
+    public void playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
         if (!level.isClientSide && width > 1 && state.getValue(PART) == Part.EXTENSION && !player.isCreative()) {
             popResource(level, pos, new ItemStack(this));
         }
-        return super.playerWillDestroy(level, pos, state, player);
+        super.playerWillDestroy(level, pos, state, player);
     }
 
     @Override
-    protected BlockState updateShape(BlockState state,
+    public BlockState updateShape(BlockState state,
                                      Direction direction,
                                      BlockState neighborState,
                                      LevelAccessor level,

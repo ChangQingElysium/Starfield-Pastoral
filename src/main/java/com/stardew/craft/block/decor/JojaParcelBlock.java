@@ -16,17 +16,11 @@ import net.minecraft.world.level.block.state.properties.SlabType;
 
 /** A directional parcel using vanilla slab placement, merging and collision rules. */
 public final class JojaParcelBlock extends SlabBlock {
-    public static final MapCodec<JojaParcelBlock> CODEC = simpleCodec(JojaParcelBlock::new);
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
 
     public JojaParcelBlock(Properties properties) {
         super(properties);
         registerDefaultState(defaultBlockState().setValue(FACING, Direction.NORTH));
-    }
-
-    @Override
-    public MapCodec<? extends SlabBlock> codec() {
-        return CODEC;
     }
 
     @Override
@@ -45,12 +39,12 @@ public final class JojaParcelBlock extends SlabBlock {
     }
 
     @Override
-    protected BlockState rotate(BlockState state, Rotation rotation) {
+    public BlockState rotate(BlockState state, Rotation rotation) {
         return state.setValue(FACING, rotation.rotate(state.getValue(FACING)));
     }
 
     @Override
-    protected BlockState mirror(BlockState state, Mirror mirror) {
+    public BlockState mirror(BlockState state, Mirror mirror) {
         return state.rotate(mirror.getRotation(state.getValue(FACING)));
     }
 }

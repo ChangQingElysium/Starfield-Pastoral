@@ -58,7 +58,7 @@ public final class RuralFenceBlock extends MapDecorStaticBlock {
     }
 
     @Override
-    protected boolean isPathfindable(BlockState state, PathComputationType type) {
+    public boolean isPathfindable(BlockState state, BlockGetter level, BlockPos pos, PathComputationType type) {
         return false;
     }
 
@@ -87,7 +87,7 @@ public final class RuralFenceBlock extends MapDecorStaticBlock {
     }
 
     @Override
-    protected BlockState updateShape(BlockState state, Direction direction, BlockState neighborState,
+    public BlockState updateShape(BlockState state, Direction direction, BlockState neighborState,
                                      LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
         BlockState result = super.updateShape(state, direction, neighborState, level, pos, neighborPos);
         if (!result.is(this)) return result;
@@ -105,7 +105,7 @@ public final class RuralFenceBlock extends MapDecorStaticBlock {
     }
 
     @Override
-    protected void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+    public void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
         if (state.getValue(PART) == Part.MAIN) {
             BlockState updated = withConnections(state, level, pos);
             if (updated != state) level.setBlock(pos, updated, UPDATE_ALL);

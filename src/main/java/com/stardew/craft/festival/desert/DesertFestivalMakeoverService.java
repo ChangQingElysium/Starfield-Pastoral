@@ -1,5 +1,6 @@
 package com.stardew.craft.festival.desert;
 
+import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.event.SleepVoteTracker;
 import com.stardew.craft.network.ItemPickupHudPacket;
 import com.stardew.craft.network.payload.OpenNpcDialogueScreenPayload;
@@ -160,13 +161,13 @@ public final class DesertFestivalMakeoverService {
         float hue = (random.nextFloat() + slotIndex * 0.23F) % 1.0F;
         int color = Mth.hsvToRgb(hue, 0.55F + random.nextFloat() * 0.3F, 0.65F + random.nextFloat() * 0.3F) & 0xFFFFFF;
         ItemStack stack = new ItemStack(item);
-        stack.set(DataComponents.DYED_COLOR, new DyedItemColor(color, true));
+        PortItemData.set(stack, DataComponents.DYED_COLOR, new DyedItemColor(color, true));
 
         var patternLookup = player.level().registryAccess().lookupOrThrow(Registries.TRIM_PATTERN);
         var materialLookup = player.level().registryAccess().lookupOrThrow(Registries.TRIM_MATERIAL);
         Holder<TrimPattern> pattern = patternLookup.getOrThrow(randomTrimPattern(random, slotIndex));
         Holder<TrimMaterial> material = materialLookup.getOrThrow(TRIM_MATERIALS.get(random.nextInt(TRIM_MATERIALS.size())));
-        stack.set(DataComponents.TRIM, new ArmorTrim(material, pattern));
+        PortItemData.set(stack, DataComponents.TRIM, new ArmorTrim(material, pattern));
         return stack;
     }
 

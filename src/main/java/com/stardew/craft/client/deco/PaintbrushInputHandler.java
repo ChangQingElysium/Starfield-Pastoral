@@ -14,7 +14,7 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import com.stardew.craft.port.net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.minecraftforge.client.event.InputEvent;
 
@@ -46,7 +46,8 @@ public final class PaintbrushInputHandler {
         if (!mc.player.isShiftKeyDown()) return;
 
         PaintbrushSelectionManager mgr = PaintbrushSelectionManager.get();
-        mgr.cycleMode(event.getScrollDeltaY() > 0 ? -1 : 1);
+        // PORT(1.20.1): Forge exposes the vertical scroll as getScrollDelta().
+        mgr.cycleMode(event.getScrollDelta() > 0 ? -1 : 1);
         event.setCanceled(true);
     }
 

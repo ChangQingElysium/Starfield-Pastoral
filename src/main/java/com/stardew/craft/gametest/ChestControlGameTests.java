@@ -1,5 +1,7 @@
 package com.stardew.craft.gametest;
 
+import com.stardew.craft.port.PortItemStacks;
+import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.menu.WoodenChestMenu;
 import java.util.concurrent.atomic.AtomicInteger;
 import net.minecraft.core.NonNullList;
@@ -71,13 +73,13 @@ public final class ChestControlGameTests {
         var list = new net.minecraft.nbt.ListTag();
         var entry = new net.minecraft.nbt.CompoundTag();
         entry.putInt("Slot", 53);
-        entry.put("Stack", new ItemStack(Items.DIAMOND, 12).save(registries));
+        entry.put("Stack", PortItemStacks.save(new ItemStack(Items.DIAMOND, 12), registries));
         list.add(entry);
         oldSave.put("items", list);
         oldSave.putInt("colorSelection", 5);
-        chest.loadWithComponents(oldSave, registries);
+        chest.load(oldSave);
         var reloaded = new com.stardew.craft.blockentity.StoneChestBlockEntity(net.minecraft.core.BlockPos.ZERO, state);
-        reloaded.loadWithComponents(chest.saveWithFullMetadata(registries), registries);
+        reloaded.load(chest.saveWithFullMetadata());
         helper.assertTrue(reloaded.getItem(53).getCount() == 12 && reloaded.getColorSelection() == 5,
                 "Shrinking an old chest discarded its tail slots or color");
         var player = FakePlayerFactory.getMinecraft(helper.getLevel());
@@ -177,7 +179,7 @@ public final class ChestControlGameTests {
                 chest.setColorSelection(7);
                 chest.setItem(69, new ItemStack(Items.EMERALD, 19));
                 var reloaded = new com.stardew.craft.blockentity.StorageChestBlockEntity(net.minecraft.core.BlockPos.ZERO, state);
-                reloaded.loadWithComponents(chest.saveWithoutMetadata(h.getLevel().registryAccess()), h.getLevel().registryAccess());
+                reloaded.load(chest.saveWithoutMetadata());
                 h.assertTrue(reloaded.getColorSelection() == 7 && reloaded.getItem(69).getCount() == 19,
                         "Big chest reload lost its color or final slot");
             } else {
@@ -201,7 +203,7 @@ public final class ChestControlGameTests {
         bag.setItem(2, new ItemStack(Items.GOLD_INGOT, 2));
         bag.setItem(3, new ItemStack(Items.DIRT, 3));
         var named = new ItemStack(Items.DIAMOND, 4);
-        named.set(com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_NAME, net.minecraft.network.chat.Component.literal("Different specimen"));
+        PortItemData.set(named, com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_NAME, net.minecraft.network.chat.Component.literal("Different specimen"));
         bag.setItem(4, named);
         com.stardew.craft.inventory.ChestMenuActions.fillStacks(chest, 36, bag);
         h.assertTrue(chest.getItem(0).getCount() == 64 && chest.getItem(2).getCount() == 10
@@ -221,12 +223,12 @@ public final class ChestControlGameTests {
         var state = com.stardew.craft.block.ModBlocks.JUNIMO_CHEST.get().defaultBlockState();
         var tag = new net.minecraft.nbt.CompoundTag(); tag.putUUID("SharedOwner", owner);
         var first = new com.stardew.craft.blockentity.StorageChestBlockEntity(net.minecraft.core.BlockPos.ZERO, state);
-        first.setLevel(level); first.loadWithComponents(tag, level.registryAccess());
+        first.setLevel(level); first.load(tag);
         first.setItem(8, new ItemStack(Items.DIAMOND, 23));
-        var savedBlock = first.saveWithoutMetadata(level.registryAccess());
+        var savedBlock = first.saveWithoutMetadata();
         h.assertTrue(savedBlock.getList("items", 10).isEmpty(), "Shared items were copied into chunk data");
         var second = new com.stardew.craft.blockentity.StorageChestBlockEntity(net.minecraft.core.BlockPos.ZERO.above(), state);
-        second.setLevel(level); second.loadWithComponents(savedBlock, level.registryAccess());
+        second.setLevel(level); second.load(savedBlock);
         h.assertTrue(second.getItem(8).getCount() == 23, "Block reload erased shared inventory");
         second.removeItem(8, 3);
         h.assertTrue(first.getItem(8).getCount() == 20, "Two Junimo chests have different inventories");
@@ -298,7 +300,7 @@ public final class ChestControlGameTests {
                 "Full chest was broken or failed to move in the preferred direction");
         var result = (com.stardew.craft.blockentity.StorageChestBlockEntity) moved;
         h.assertTrue(result.getItem(69).getCount() == 13 && result.getColorSelection() == 3, "Moving lost items or color");
-        var handler = level.getCapability(com.stardew.craft.port.net.neoforged.neoforge.capabilities.Capabilities.ItemHandler.BLOCK, destination, net.minecraft.core.Direction.UP);
+        var handler = com.stardew.craft.port.PortCapabilities.getCapability(level, com.stardew.craft.port.net.neoforged.neoforge.capabilities.Capabilities.ItemHandler.BLOCK, destination, net.minecraft.core.Direction.UP);
         h.assertTrue(handler != null && handler.getSlots() == 70 && handler.extractItem(69, 2, false).getCount() == 2
                 && result.getItem(69).getCount() == 11, "Automation did not follow the moved chest");
         h.succeed();

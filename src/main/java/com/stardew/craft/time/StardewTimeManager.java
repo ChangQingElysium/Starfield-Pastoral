@@ -885,11 +885,15 @@ public class StardewTimeManager extends SavedData {
         
         ServerLevel overworld = server.overworld();
         return overworld.getDataStorage().computeIfAbsent(
-            new SavedData.Factory<StardewTimeManager>(
+            com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<StardewTimeManager>(
                 StardewTimeManager::new,
                 StardewTimeManager::load,
                 null  // DataFixTypes
-            ),
+            )), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<StardewTimeManager>(
+                StardewTimeManager::new,
+                StardewTimeManager::load,
+                null  // DataFixTypes
+            )),
             DATA_NAME
         );
     }

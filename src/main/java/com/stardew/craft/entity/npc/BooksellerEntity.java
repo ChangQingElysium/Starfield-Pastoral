@@ -59,7 +59,7 @@ public class BooksellerEntity extends PathfinderMob implements GeoEntity {
     }
 
     @Override
-    public boolean canBeLeashed() {
+    public boolean canBeLeashed(net.minecraft.world.entity.player.Player player) {
         return false;
     }
 

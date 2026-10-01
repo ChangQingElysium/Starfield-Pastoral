@@ -32,10 +32,10 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import com.stardew.craft.port.PortBlockInteraction;
 
 @SuppressWarnings("null")
-public class AnimalProduceSpotBlock extends BaseEntityBlock {
-    public static final MapCodec<AnimalProduceSpotBlock> CODEC = simpleCodec(AnimalProduceSpotBlock::new);
+public class AnimalProduceSpotBlock extends BaseEntityBlock implements PortBlockInteraction {
     private static final VoxelShape SHAPE = Block.box(2.0D, 0.0D, 2.0D, 14.0D, 2.0D, 14.0D);
 
     public AnimalProduceSpotBlock(Properties properties) {
@@ -43,17 +43,12 @@ public class AnimalProduceSpotBlock extends BaseEntityBlock {
     }
 
     @Override
-    protected @Nonnull MapCodec<? extends BaseEntityBlock> codec() {
-        return CODEC;
-    }
-
-    @Override
-    protected @Nonnull RenderShape getRenderShape(@Nonnull BlockState state) {
+    public @Nonnull RenderShape getRenderShape(@Nonnull BlockState state) {
         return RenderShape.INVISIBLE;
     }
 
     @Override
-    protected @Nonnull VoxelShape getShape(@Nonnull BlockState state,
+    public @Nonnull VoxelShape getShape(@Nonnull BlockState state,
                                            @Nonnull BlockGetter level,
                                            @Nonnull BlockPos pos,
                                            @Nonnull CollisionContext context) {
@@ -61,15 +56,22 @@ public class AnimalProduceSpotBlock extends BaseEntityBlock {
     }
 
     @Override
-    protected @Nonnull VoxelShape getCollisionShape(@Nonnull BlockState state,
+    public @Nonnull VoxelShape getCollisionShape(@Nonnull BlockState state,
                                                     @Nonnull BlockGetter level,
                                                     @Nonnull BlockPos pos,
                                                     @Nonnull CollisionContext context) {
         return Shapes.empty();
     }
 
+    // PORT(1.20.1): replay the 1.21 useItemOn/useWithoutItem dispatch.
     @Override
-    protected @Nonnull ItemInteractionResult useItemOn(@Nonnull ItemStack stack,
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player,
+            InteractionHand hand, BlockHitResult hit) {
+        return PortBlockInteraction.dispatch(this, state, level, pos, player, hand, hit);
+    }
+
+    @Override
+    public @Nonnull ItemInteractionResult useItemOn(@Nonnull ItemStack stack,
                                                        @Nonnull BlockState state,
                                                        @Nonnull Level level,
                                                        @Nonnull BlockPos pos,
@@ -82,7 +84,7 @@ public class AnimalProduceSpotBlock extends BaseEntityBlock {
     }
 
     @Override
-    protected @Nonnull InteractionResult useWithoutItem(@Nonnull BlockState state,
+    public @Nonnull InteractionResult useWithoutItem(@Nonnull BlockState state,
                                                         @Nonnull Level level,
                                                         @Nonnull BlockPos pos,
                                                         @Nonnull Player player,

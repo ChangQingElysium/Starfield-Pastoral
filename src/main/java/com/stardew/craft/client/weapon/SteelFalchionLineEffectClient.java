@@ -41,8 +41,8 @@ public final class SteelFalchionLineEffectClient {
     public static void onClientTick(ClientTickEvent.Post event){ensureLevel();if(level==null||Minecraft.getInstance().isPaused())return;long now=level.getGameTime();LINES.values().removeIf(l->now>Math.max(l.end+4,l.burstUntil));}
     public static void onRenderLevel(RenderLevelStageEvent event){
         if(event.getStage()!=RenderLevelStageEvent.Stage.AFTER_PARTICLES)return;ensureLevel();
-        if(level==null||!Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()||LINES.isEmpty())return;
-        var mc=Minecraft.getInstance();Vec3 camera=event.getCamera().getPosition();float partial=event.getPartialTick().getGameTimeDeltaPartialTick(false);
+        if(level==null||!Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()||LINES.isEmpty())return;
+        var mc=Minecraft.getInstance();Vec3 camera=event.getCamera().getPosition();float partial=event.getPartialTick();
         double now=level.getGameTime()+partial;var buffers=mc.renderBuffers().bufferSource();var out=buffers.getBuffer(WeaponEffectRenderTypes.MOLTEN_GLOW);var pose=event.getPoseStack().last().pose();
         for(Line l:LINES.values()){
             if(l.points.stream().noneMatch(p->p!=null&&p.distanceToSqr(camera)<48*48))continue;

@@ -30,12 +30,12 @@ public final class MineMetalHeadEntity extends StardewMonsterEntity {
     @Override protected void registerGoals(){}
     @Override protected ResourceLocation definitionId(){return new ResourceLocation("stardewcraft:metal_head");}
     @Override protected void configureSpawn(MonsterDefinition d,MonsterSpawnContext c){var r=MonsterStatResolver.base(d,c,random);int area=c.floor()>120?121:c.floor()>=80?80:c.floor()>=40?40:0;setInitialHealth(r.initialHealth()*(area==80?3:area==40?2:1));replaceCombatStats(r.combat());entityData.set(COLOR,area==40?0x40e0d0:0xffffff);movement.face(2);}
-    @Override protected void defineSynchedData(SynchedEntityData.Builder b){super.defineSynchedData(b);b.define(MOVING,false);b.define(COLOR,0xffffff);b.define(HIT,-100L);}
+    @Override protected void defineSynchedData(){super.defineSynchedData();this.entityData.define(MOVING,false);this.entityData.define(COLOR,0xffffff);this.entityData.define(HIT,-100L);}
     public boolean moving(){return entityData.get(MOVING);}
     public int color(){return entityData.get(COLOR);}
     public double hitTime(float p){return (level().getGameTime()-entityData.get(HIT)+p)/20.;}
     public void stunFor(int milliseconds){stunMilliseconds=Math.max(stunMilliseconds,milliseconds);}
-    private boolean valid(Player p){return p.isAlive()&&!p.isCreative()&&!p.isSpectator()&&!p.hasEffect(ModMobEffects.AVOID_MONSTERS)&&(monsterState().context().generation()==null||OrdinaryMineRuntime.floorAt(p.blockPosition())==monsterState().context().floor());}
+    private boolean valid(Player p){return p.isAlive()&&!p.isCreative()&&!p.isSpectator()&&!p.hasEffect(ModMobEffects.AVOID_MONSTERS.get())&&(monsterState().context().generation()==null||OrdinaryMineRuntime.floorAt(p.blockPosition())==monsterState().context().floor());}
     @Override protected void customServerAiStep(){
         if(!initialized())initialize(MonsterSpawnContext.capture((ServerLevel)level(),MonsterSpawnContext.Source.WORLD,1));var target=level().getNearestPlayer(getX(),getY(),getZ(),64,e->e instanceof Player p&&valid(p));setTarget(target);double x=getX(),z=getZ();
         for(int i=0;i<3;i++){

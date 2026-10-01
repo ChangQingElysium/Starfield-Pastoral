@@ -61,17 +61,15 @@ public class PortalTriggerBlockEntity extends BlockEntity {
     // ── NBT 持久化 ──
 
     @Override
-    protected void saveAdditional(CompoundTag tag,
-                                  net.minecraft.core.HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
+    protected void saveAdditional(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        super.saveAdditional(tag);
         tag.putString(TAG_TARGET_ID, targetId);
         tag.putString(TAG_MARKER, markerTag);
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag,
-                                  net.minecraft.core.HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
+    public void load(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        super.load(tag);
         targetId = tag.getString(TAG_TARGET_ID);
         markerTag = tag.getString(TAG_MARKER);
     }
@@ -85,9 +83,9 @@ public class PortalTriggerBlockEntity extends BlockEntity {
     }
 
     @Override
-    public CompoundTag getUpdateTag(net.minecraft.core.HolderLookup.Provider registries) {
-        CompoundTag tag = super.getUpdateTag(registries);
-        saveAdditional(tag, registries);
+    public CompoundTag getUpdateTag() { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        CompoundTag tag = super.getUpdateTag();
+        saveAdditional(tag);
         return tag;
     }
 }

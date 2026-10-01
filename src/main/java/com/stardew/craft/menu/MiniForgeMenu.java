@@ -378,7 +378,7 @@ public class MiniForgeMenu extends AbstractContainerMenu {
             if (existing.isEmpty()) {
                 continue;
             }
-            if (ItemStack.isSameItemSameComponents(existing, stack)
+            if (ItemStack.isSameItemSameTags(existing, stack)
                     && existing.getCount() < existing.getMaxStackSize()) {
                 int moved = Math.min(stack.getCount(), existing.getMaxStackSize() - existing.getCount());
                 existing.grow(moved);

@@ -202,7 +202,7 @@ final class DwarfDaggerThrustExecutionState
             return false;
         }
         target.addEffect(new MobEffectInstance(
-                ModMobEffects.WEAK_POINT,
+                ModMobEffects.WEAK_POINT.get(),
                 DwarfDaggerThrustSkillHandler.WEAK_POINT_DURATION_TICKS,
                 DwarfDaggerThrustSkillHandler.WEAK_POINT_AMPLIFIER,
                 false,

@@ -13,7 +13,7 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.ViewArea;
-import com.stardew.craft.port.net.minecraft.client.renderer.chunk.SectionRenderDispatcher;
+import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher;
 import net.minecraft.client.renderer.culling.Frustum;
 import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Mixin;
@@ -35,8 +35,8 @@ public abstract class TownDoorLevelRendererMixin {
     @Shadow private RenderTarget translucentTarget;
     @Shadow @Nullable private ClientLevel level;
     @Shadow @Nullable private ViewArea viewArea;
-    @Shadow @Nullable private SectionRenderDispatcher sectionRenderDispatcher;
-    @Shadow @Final private ObjectArrayList<SectionRenderDispatcher.RenderSection> visibleSections;
+    @Shadow @Nullable private ChunkRenderDispatcher sectionRenderDispatcher;
+    @Shadow @Final private ObjectArrayList<ChunkRenderDispatcher.RenderChunk> visibleSections;
 
     /** Immersive Portals skips the nested world's full framebuffer clear. */
     @Redirect(method = "renderLevel", at = @At(value = "INVOKE",

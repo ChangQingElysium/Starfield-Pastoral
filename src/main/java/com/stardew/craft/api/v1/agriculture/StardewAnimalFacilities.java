@@ -1,5 +1,6 @@
 package com.stardew.craft.api.v1.agriculture;
 
+import com.stardew.craft.port.PortItemStacks;
 import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.blockentity.*;
 import net.minecraft.core.BlockPos;
@@ -79,10 +80,10 @@ public final class StardewAnimalFacilities {
                 case COLLECTOR -> be instanceof AutoGrabberBlockEntity?1:0;
             };}
             public int hay(){return be instanceof FeedTroughBlockEntity trough?trough.getAutomationInput().getCount():be instanceof AutoFeedTroughBlockEntity trough?trough.getAutomationInput().getCount():0;}
-            public CompoundTag snapshot(){return be==null?new CompoundTag():be.saveCustomOnly(level.registryAccess());}
+            public CompoundTag snapshot(){return be==null?new CompoundTag():be.saveWithoutMetadata();}
             public CompoundTag withHay(CompoundTag input,int count){
                 if(count<0||count>1)throw new IllegalArgumentException("Builtin trough holds one hay");
-                var tag=input.copy();tag.remove("hay");if(count>0)tag.put("hay",new ItemStack(com.stardew.craft.item.ModItems.HAY.get(),count).save(level.registryAccess()));return tag;
+                var tag=input.copy();tag.remove("hay");if(count>0)tag.put("hay",PortItemStacks.save(new ItemStack(com.stardew.craft.item.ModItems.HAY.get(),count), level.registryAccess()));return tag;
             }
             public List<ItemStack> inventory(){
                 if(!(be instanceof AutoGrabberBlockEntity box))return List.of();
@@ -90,12 +91,12 @@ public final class StardewAnimalFacilities {
             }
             public CompoundTag withInventory(CompoundTag input,List<ItemStack> slots){
                 var tag=input.copy();var rows=new ListTag();
-                for(int i=0;i<slots.size();i++)if(!slots.get(i).isEmpty()){var row=new CompoundTag();row.putInt("Slot",i);row.put("Stack",slots.get(i).save(level.registryAccess()));rows.add(row);}
+                for(int i=0;i<slots.size();i++)if(!slots.get(i).isEmpty()){var row=new CompoundTag();row.putInt("Slot",i);row.put("Stack",PortItemStacks.save(slots.get(i), level.registryAccess()));rows.add(row);}
                 tag.put("items",rows);return tag;
             }
             public void apply(CompoundTag tag){
                 if(be==null)throw new IllegalStateException("Pending facility disappeared at "+pos);
-                be.loadWithComponents(tag,level.registryAccess());be.setChanged();
+                be.load(tag);be.setChanged();
                 if(be instanceof FeedTroughBlockEntity trough)trough.setHayPresent(tag.contains("hay"));
                 if(be instanceof AutoFeedTroughBlockEntity trough)trough.setHayPresent(tag.contains("hay"));
                 if(be instanceof AutoGrabberBlockEntity box)box.refreshVisualState();

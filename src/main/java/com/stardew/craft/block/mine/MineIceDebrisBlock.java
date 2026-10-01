@@ -15,7 +15,6 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 /** Ground IceCrystal objects 319..321; independent of wall ice and counted mining stones. */
 public final class MineIceDebrisBlock extends Block {
-    public static final MapCodec<MineIceDebrisBlock> CODEC = simpleCodec(MineIceDebrisBlock::new);
     public static final IntegerProperty VARIANT = IntegerProperty.create("variant", 0, 2);
     // One enclosing AABB per approved model; the planted tips below the floor are excluded.
     private static final VoxelShape[] SHAPES = {
@@ -29,13 +28,11 @@ public final class MineIceDebrisBlock extends Block {
         registerDefaultState(defaultBlockState().setValue(VARIANT, 0));
     }
 
-    @Override public MapCodec<MineIceDebrisBlock> codec() { return CODEC; }
-
     @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(VARIANT);
     }
 
-    @Override protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+    @Override public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return SHAPES[state.getValue(VARIANT)];
     }
 

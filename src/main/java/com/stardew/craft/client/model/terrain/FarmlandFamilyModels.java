@@ -25,7 +25,7 @@ final class FarmlandFamilyModels {
             event.register(id(family,season,wet));
     }
 
-    static void bind(Map<ModelResourceLocation,BakedModel> models, TerrainFarmlandQuads[][][] plain,
+    static void bind(Map<ResourceLocation, BakedModel> models, TerrainFarmlandQuads[][][] plain,
             TerrainFarmlandQuads[][][][] fertilizers) {
         for (int family=0;family<3;family++) for(int season=0;season<4;season++) for(int wet=0;wet<2;wet++) {
             BakedQuad atlas=Objects.requireNonNull(models.get(id(family,season,wet)))

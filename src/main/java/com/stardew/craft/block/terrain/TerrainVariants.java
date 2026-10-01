@@ -1,5 +1,6 @@
 package com.stardew.craft.block.terrain;
 
+import com.stardew.craft.port.PortItemData;
 import javax.annotation.Nullable;
 import com.stardew.craft.port.net.minecraft.core.component.DataComponents;
 import net.minecraft.util.RandomSource;
@@ -41,7 +42,7 @@ public final class TerrainVariants {
         }
         IntegerProperty property = property(state);
         if (property == null) return state;
-        Integer fixed = context.getItemInHand().getOrDefault(DataComponents.BLOCK_STATE,
+        Integer fixed = PortItemData.getOrDefault(context.getItemInHand(), DataComponents.BLOCK_STATE,
                 BlockItemStateProperties.EMPTY).get(property);
         if (fixed != null) return state.setValue(property, fixed);
         // The server chooses once; the block state is then saved and synchronized normally.
@@ -73,7 +74,7 @@ public final class TerrainVariants {
         IntegerProperty property = property(state);
         if (property == null || original.isEmpty()) return original;
         ItemStack copy = original.copy();
-        copy.set(DataComponents.BLOCK_STATE, copy.getOrDefault(DataComponents.BLOCK_STATE,
+        PortItemData.set(copy, DataComponents.BLOCK_STATE, PortItemData.getOrDefault(copy, DataComponents.BLOCK_STATE,
                 BlockItemStateProperties.EMPTY).with(property, state));
         return copy;
     }

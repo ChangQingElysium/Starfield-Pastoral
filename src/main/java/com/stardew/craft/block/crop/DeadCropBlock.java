@@ -18,18 +18,12 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 public class DeadCropBlock extends BushBlock {
-    public static final MapCodec<DeadCropBlock> CODEC = simpleCodec(DeadCropBlock::new);
     public static final IntegerProperty VARIANT = IntegerProperty.create("variant", 0, 3);
 
     @SuppressWarnings("null")
     public DeadCropBlock(Properties properties) {
         super(properties.dynamicShape());
         this.registerDefaultState(this.stateDefinition.any().setValue(VARIANT, 0));
-    }
-
-    @Override
-    protected MapCodec<? extends BushBlock> codec() {
-        return CODEC;
     }
 
     @Override
@@ -77,7 +71,7 @@ public class DeadCropBlock extends BushBlock {
     }
 
     @Override
-    public ItemStack getCloneItemStack(@SuppressWarnings("null") LevelReader level, @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") BlockState state) {
+    public ItemStack getCloneItemStack(@SuppressWarnings("null") BlockGetter level, @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") BlockState state) {
         return ItemStack.EMPTY; // No item for dead crop? Or maybe returns the ModItems.FIBER equivalent? Stardew logic says scythe destroys it.
     }
     

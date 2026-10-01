@@ -15,7 +15,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import net.minecraftforge.client.event.ModelEvent;
 import net.minecraftforge.client.event.RegisterColorHandlersEvent;
 
@@ -23,7 +23,8 @@ import net.minecraftforge.client.event.RegisterColorHandlersEvent;
 public final class TemplateClientEvents {
     @SubscribeEvent
     public static void modifyModels(ModelEvent.ModifyBakingResult event) {
-        Map<ModelResourceLocation, BakedModel> models = event.getModels();
+        // PORT(1.20.1): Forge keys baked models by ResourceLocation (ModelResourceLocation is a subclass).
+        Map<net.minecraft.resources.ResourceLocation, BakedModel> models = event.getModels();
         int wrappedBlockStates = 0;
         int wrappedItems = 0;
         for (TemplateShape shape : TemplateShape.values()) {

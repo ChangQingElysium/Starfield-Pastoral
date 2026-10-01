@@ -1,5 +1,6 @@
 package com.stardew.craft.blockentity;
 
+import com.stardew.craft.port.PortItemStacks;
 import com.stardew.craft.sound.ModSounds;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -140,10 +141,10 @@ public class AnvilBlockEntity extends TimedProductionBlockEntity {
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
+    protected void saveAdditional(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        super.saveAdditional(tag);
         if (!product.isEmpty()) {
-            tag.put(TAG_PRODUCT, product.save(registries));
+            tag.put(TAG_PRODUCT, PortItemStacks.save(product, registries));
         }
         tag.putLong(TAG_READY_AT, readyAtAbsMinute);
         tag.putBoolean(TAG_READY, ready);
@@ -152,9 +153,9 @@ public class AnvilBlockEntity extends TimedProductionBlockEntity {
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
-        product = tag.contains(TAG_PRODUCT) ? ItemStack.parse(registries, tag.getCompound(TAG_PRODUCT)).orElse(ItemStack.EMPTY) : ItemStack.EMPTY;
+    public void load(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        super.load(tag);
+        product = tag.contains(TAG_PRODUCT) ? PortItemStacks.parse(registries, tag.getCompound(TAG_PRODUCT)).orElse(ItemStack.EMPTY) : ItemStack.EMPTY;
         readyAtAbsMinute = tag.getLong(TAG_READY_AT);
         ready = tag.getBoolean(TAG_READY);
         nextTapTick = tag.contains(TAG_NEXT_TAP_TICK) ? tag.getLong(TAG_NEXT_TAP_TICK) : -1;
@@ -162,9 +163,9 @@ public class AnvilBlockEntity extends TimedProductionBlockEntity {
     }
 
     @Override
-    public CompoundTag getUpdateTag(net.minecraft.core.HolderLookup.Provider registries) {
+    public CompoundTag getUpdateTag() { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
         CompoundTag tag = new CompoundTag();
-        saveAdditional(tag, registries);
+        saveAdditional(tag);
         return tag;
     }
 

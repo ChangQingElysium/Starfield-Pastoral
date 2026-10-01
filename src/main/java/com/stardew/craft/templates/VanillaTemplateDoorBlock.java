@@ -10,7 +10,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockSetType;
 
 public final class VanillaTemplateDoorBlock extends DoorBlock implements EntityBlock, TemplateBlock {
-    public VanillaTemplateDoorBlock(BlockBehaviour.Properties properties) { super(BlockSetType.OAK, properties); }
+    public VanillaTemplateDoorBlock(BlockBehaviour.Properties properties) { super(properties, BlockSetType.OAK); } // PORT(1.20.1): 1.20.1 constructor takes Properties first
     @Override public TemplateShape templateShape() { return TemplateShape.DOOR; }
     @Nullable @Override public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new TemplateBlockEntity(pos, state);

@@ -123,14 +123,14 @@ public class EventSeenData extends SavedData {
         ServerLevel overworld = server.getLevel(Level.OVERWORLD);
         if (overworld == null) throw new IllegalStateException("Overworld not available");
         return overworld.getDataStorage().computeIfAbsent(
-                new SavedData.Factory<>(EventSeenData::new, EventSeenData::load),
+                com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(EventSeenData::new, EventSeenData::load)), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(EventSeenData::new, EventSeenData::load)),
                 DATA_NAME
         );
     }
 
     public static EventSeenData get(ServerLevel level) {
         return level.getServer().overworld().getDataStorage().computeIfAbsent(
-                new SavedData.Factory<>(EventSeenData::new, EventSeenData::load),
+                com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(EventSeenData::new, EventSeenData::load)), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(EventSeenData::new, EventSeenData::load)),
                 DATA_NAME
         );
     }

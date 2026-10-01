@@ -30,7 +30,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FarmBlock;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import com.stardew.craft.port.net.neoforged.neoforge.common.ItemAbilities;
+import net.minecraftforge.common.ToolActions;
 import net.minecraftforge.common.util.FakePlayerFactory;
 import net.minecraftforge.gametest.GameTestHolder;
 import net.minecraftforge.gametest.PrefixGameTestTemplate;
@@ -128,7 +128,7 @@ public final class PlantingSoilGameTests {
             var context=new UseOnContext(player,InteractionHand.MAIN_HAND,new BlockHitResult(Vec3.atCenterOf(pos),Direction.UP,pos,false));
             for(Block dirt:new Block[]{Blocks.DIRT,Blocks.GRASS_BLOCK,Blocks.DIRT_PATH}) {
                 level.setBlock(pos,dirt.defaultBlockState(),3);
-                var tilled=dirt.defaultBlockState().getToolModifiedState(context,ItemAbilities.HOE_TILL,true);
+                var tilled=dirt.defaultBlockState().getToolModifiedState(context,ToolActions.HOE_TILL,true);
                 h.assertTrue(tilled!=null && tilled.is(Blocks.FARMLAND) && !TerrainSoils.cropSupport(tilled),"Imported soil became a planting substrate");
                 h.assertTrue(TerrainSoils.restored(tilled)==Blocks.DIRT,"Imported farmland decayed to own dirt");
             }
@@ -146,7 +146,7 @@ public final class PlantingSoilGameTests {
             } finally {dimension.set(level,oldDimension);}
             for(Block dirt:new Block[]{ModBlocks.DIRT.get(),ModBlocks.HARD_SOIL.get(),ModBlocks.SAND.get(),ModBlocks.YELLOW_DIRT.get()}) {
                 level.setBlock(pos,dirt.defaultBlockState(),3);
-                var tilled=dirt.defaultBlockState().getToolModifiedState(context,ItemAbilities.HOE_TILL,true);
+                var tilled=dirt.defaultBlockState().getToolModifiedState(context,ToolActions.HOE_TILL,true);
                 h.assertTrue(tilled!=null && TerrainSoils.cropSupport(tilled),"Own soil did not till to own farmland "+dirt);
             }
         } finally {player.setItemInHand(InteractionHand.MAIN_HAND,old);}

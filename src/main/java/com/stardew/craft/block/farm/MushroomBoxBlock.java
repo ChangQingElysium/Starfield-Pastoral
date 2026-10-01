@@ -20,6 +20,7 @@ import net.minecraft.world.phys.BlockHitResult;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import com.stardew.craft.port.PortBlockInteraction;
 
 /**
  * 蘑菇培养盆（Mushroom Box）— 放置在农场洞穴内，每日产蘑菇。
@@ -27,7 +28,7 @@ import javax.annotation.Nullable;
  * <p>生存模式不可破坏（strength=-1），不受活塞影响（PushReaction.BLOCK），
  * 不在创造栏出现，无掉落。</p>
  */
-public class MushroomBoxBlock extends Block implements EntityBlock {
+public class MushroomBoxBlock extends Block implements EntityBlock, PortBlockInteraction {
 
     public static final BooleanProperty READY = BooleanProperty.create("ready");
 
@@ -47,9 +48,16 @@ public class MushroomBoxBlock extends Block implements EntityBlock {
         return new MushroomBoxBlockEntity(pos, state);
     }
 
+    // PORT(1.20.1): replay the 1.21 useItemOn/useWithoutItem dispatch.
+    @Override
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player,
+            InteractionHand hand, BlockHitResult hit) {
+        return PortBlockInteraction.dispatch(this, state, level, pos, player, hand, hit);
+    }
+
     @SuppressWarnings("null")
     @Override
-    protected ItemInteractionResult useItemOn(@Nonnull ItemStack stack, @Nonnull BlockState state, @Nonnull Level level,
+    public ItemInteractionResult useItemOn(@Nonnull ItemStack stack, @Nonnull BlockState state, @Nonnull Level level,
                                               @Nonnull BlockPos pos, @Nonnull Player player, @Nonnull InteractionHand hand,
                                               @Nonnull BlockHitResult hit) {
         if (harvest(level, pos, player)) {
@@ -60,7 +68,7 @@ public class MushroomBoxBlock extends Block implements EntityBlock {
 
     @SuppressWarnings("null")
     @Override
-    protected InteractionResult useWithoutItem(@Nonnull BlockState state, @Nonnull Level level, @Nonnull BlockPos pos,
+    public InteractionResult useWithoutItem(@Nonnull BlockState state, @Nonnull Level level, @Nonnull BlockPos pos,
                                                @Nonnull Player player, @Nonnull BlockHitResult hit) {
         if (harvest(level, pos, player)) {
             return level.isClientSide ? InteractionResult.SUCCESS : InteractionResult.CONSUME;

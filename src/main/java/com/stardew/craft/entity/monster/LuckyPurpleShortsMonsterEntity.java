@@ -96,7 +96,7 @@ public class LuckyPurpleShortsMonsterEntity extends Monster {
     }
 
     @Override
-    protected void dropCustomDeathLoot(net.minecraft.server.level.ServerLevel level, DamageSource damageSource, boolean recentlyHit) {
+    protected void dropCustomDeathLoot(DamageSource damageSource, int looting, boolean recentlyHit) {
     }
 
     @Override

@@ -25,6 +25,9 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModContainer;
+import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -71,8 +74,11 @@ public class StardewCraft {
     }
 
     // The constructor for the mod class is the first code that is run when your mod is loaded.
-    // FML will recognize some parameter types like IEventBus or ModContainer and pass them in automatically.
-    public StardewCraft(IEventBus modEventBus, ModContainer modContainer) {
+    // PORT(1.20.1): Forge constructs @Mod classes with no arguments; the mod bus and container come from the loading context.
+    public StardewCraft() {
+        IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+        ModContainer modContainer = ModLoadingContext.get().getActiveContainer();
+        com.stardew.craft.port.event.PortEventBridges.install(modEventBus);
         com.stardew.craft.api.v1.internal.BuiltinApiTypes.bootstrap();
         com.stardew.craft.world.interaction.BuiltinMapInteractionActions
                 .bootstrap();
@@ -144,10 +150,16 @@ public class StardewCraft {
         }
 
         // Register our mod's ModConfigSpecs so that FML can create and load the config files for us
-        modContainer.registerConfig(ModConfig.Type.COMMON, Config.COMMON_SPEC);
-        modContainer.registerConfig(ModConfig.Type.CLIENT, Config.CLIENT_SPEC);
-        modContainer.registerConfig(ModConfig.Type.SERVER, Config.SERVER_SPEC);
-        modContainer.getEventBus().addListener(com.stardew.craft.config.ConfigMigration::onConfigEvent);
+        net.minecraftforge.fml.ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, Config.COMMON_SPEC);
+        net.minecraftforge.fml.ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, Config.CLIENT_SPEC);
+        net.minecraftforge.fml.ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, Config.SERVER_SPEC);
+        modEventBus.addListener(com.stardew.craft.config.ConfigMigration::onConfigEvent);
+
+        // PORT(1.20.1): MinecraftForge's second @Mod(dist = CLIENT) entry point; Forge allows one @Mod class per mod id.
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> new StardewCraftClient(modEventBus, modContainer));
+
+        // PORT(1.20.1): MinecraftForge routes every @EventBusSubscriber listener by event type once the mod is constructed.
+        com.stardew.craft.port.event.PortEventSubscribers.inject(MODID, modEventBus, StardewCraft.class.getClassLoader());
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {
@@ -254,7 +266,7 @@ public class StardewCraft {
     public void onServerStarted(
             net.minecraftforge.event.server.ServerStartedEvent event
     ) {
-        if (com.stardew.craft.port.net.neoforged.neoforge.gametest.GameTestHooks
+        if (net.minecraftforge.gametest.ForgeGameTestHooks
                 .isGametestServer()) {
             LOGGER.info(
                     "Keeping extension registrations open for isolated GameTests");

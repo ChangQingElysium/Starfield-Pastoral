@@ -289,7 +289,7 @@ public final class ForageSpawnService {
         // Our mod's wild weeds (杂草)
         if (block instanceof com.stardew.craft.block.nature.WildWeedsBlock) return true;
         // Short grass and fern
-        if (block == Blocks.SHORT_GRASS || block == Blocks.FERN) return true;
+        if (block == Blocks.GRASS || block == Blocks.FERN) return true;
         // Tall grass and large fern
         if (block == Blocks.TALL_GRASS || block == Blocks.LARGE_FERN) return true;
         // All vanilla small flowers (poppy, dandelion, cornflower, etc.)
@@ -362,7 +362,7 @@ public final class ForageSpawnService {
         if (!level.dimension().equals(com.stardew.craft.core.ModDimensions.STARDEW_VALLEY)) return;
 
         ForageInitData data = level.getDataStorage().computeIfAbsent(
-                ForageInitData.factory(), INIT_DATA_ID);
+                com.stardew.craft.port.PortSavedData.loader(ForageInitData.factory()), com.stardew.craft.port.PortSavedData.constructor(ForageInitData.factory()), INIT_DATA_ID);
         if (data.isInitialized()) return;
 
         StardewCraft.LOGGER.info("[ForageSpawn] Running first-day initial forage spawn (season={})", season);
@@ -388,13 +388,13 @@ public final class ForageSpawnService {
 
         @Override
         @Nonnull
-        public CompoundTag save(@Nonnull CompoundTag tag, @Nonnull HolderLookup.Provider registries) {
+        public CompoundTag save(@Nonnull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
             tag.putBoolean("Initialized", initialized);
             return tag;
         }
 
-        public static SavedData.Factory<ForageInitData> factory() {
-            return new SavedData.Factory<>(ForageInitData::new, (tag, provider) -> new ForageInitData(tag));
+        public static com.stardew.craft.port.PortSavedData.Factory<ForageInitData> factory() {
+            return new com.stardew.craft.port.PortSavedData.Factory<>(ForageInitData::new, (tag, provider) -> new ForageInitData(tag));
         }
     }
 

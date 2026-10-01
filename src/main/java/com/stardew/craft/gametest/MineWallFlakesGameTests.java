@@ -1,5 +1,6 @@
 package com.stardew.craft.gametest;
 
+import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.block.mine.MineWallFlakesBlock;
 import net.minecraft.core.BlockPos;
@@ -48,7 +49,7 @@ public final class MineWallFlakesGameTests {
                         MineWallFlakesBlock.ABOVE, MineWallFlakesBlock.BELOW, MineWallFlakesBlock.LEFT, MineWallFlakesBlock.RIGHT})
                     h.assertTrue(state.getValue(connection), "Missing connection on " + facing + ": " + connection);
                 h.assertTrue(state.getCollisionShape(level, center).isEmpty(), "Shallow decoration obstructs movement");
-                h.assertTrue(block.getCloneItemStack(level, center, state).getOrDefault(DataComponents.BLOCK_STATE,
+                h.assertTrue(PortItemData.getOrDefault(block.getCloneItemStack(level, center, state), DataComponents.BLOCK_STATE,
                         BlockItemStateProperties.EMPTY).get(MineWallFlakesBlock.VARIANT) == 0, "Pick lost variant");
                 level.removeBlock(center.relative(right.getOpposite()), false);
                 state = level.getBlockState(center);

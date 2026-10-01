@@ -7,7 +7,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import com.stardew.craft.port.net.neoforged.neoforge.event.entity.living.FinalizeSpawnEvent;
 import net.minecraftforge.event.entity.living.MobSpawnEvent;
 
@@ -28,7 +28,7 @@ public final class StardewMobSpawnEvents {
     @SubscribeEvent
     public static void onSpawnPlacement(MobSpawnEvent.SpawnPlacementCheck event) {
         if (blocksSpawn(event.getLevel().getLevel().dimension(), event.getSpawnType())) {
-            event.setResult(MobSpawnEvent.SpawnPlacementCheck.Result.FAIL);
+            event.setResult(net.minecraftforge.eventbus.api.Event.Result.DENY); // PORT(1.20.1): Forge DENY == NeoForge FAIL
         }
     }
 

@@ -26,9 +26,9 @@ public class ModParticles {
     public static final DeferredHolder<ParticleType<?>, ParticleType<com.stardew.craft.port.net.minecraft.core.particles.ColorParticleOption>> BIG_SLIME_SPLASH = PARTICLES.register("big_slime_splash", ModParticles::colorParticle);
     public static final DeferredHolder<ParticleType<?>, ParticleType<com.stardew.craft.port.net.minecraft.core.particles.ColorParticleOption>> BIG_SLIME_SPLASH_SLOW = PARTICLES.register("big_slime_splash_slow", ModParticles::colorParticle);
     private static ParticleType<com.stardew.craft.port.net.minecraft.core.particles.ColorParticleOption> colorParticle(){
-        return new ParticleType<>(false){
-            @Override public com.mojang.serialization.MapCodec<com.stardew.craft.port.net.minecraft.core.particles.ColorParticleOption> codec(){return com.stardew.craft.port.net.minecraft.core.particles.ColorParticleOption.codec(this);}
-            @Override public com.stardew.craft.port.net.minecraft.network.codec.StreamCodec<? super com.stardew.craft.port.net.minecraft.network.RegistryFriendlyByteBuf,com.stardew.craft.port.net.minecraft.core.particles.ColorParticleOption> streamCodec(){return com.stardew.craft.port.net.minecraft.core.particles.ColorParticleOption.streamCodec(this);}
+        // PORT(1.20.1): 1.20.1 particle types take a Deserializer and a Codec instead of MapCodec/StreamCodec.
+        return new ParticleType<>(false, com.stardew.craft.port.net.minecraft.core.particles.ColorParticleOption.DESERIALIZER){
+            @Override public com.mojang.serialization.Codec<com.stardew.craft.port.net.minecraft.core.particles.ColorParticleOption> codec(){return com.stardew.craft.port.net.minecraft.core.particles.ColorParticleOption.codec(this).codec();}
         };
     }
 

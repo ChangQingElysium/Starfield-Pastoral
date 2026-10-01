@@ -4,7 +4,7 @@ import com.stardew.craft.StardewCraft;
 import com.stardew.craft.combat.skill.DashMovementTracker;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import com.stardew.craft.port.net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 /** Single event owner for weapon-skill work that requires ServerTick.Post. */

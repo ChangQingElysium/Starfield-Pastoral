@@ -64,7 +64,7 @@ public final class SurfaceFloorItem extends Item implements IStardewItem {
         return InteractionResult.sidedSuccess(level.isClientSide);
     }
 
-    @Override public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> lines, TooltipFlag flag) {
+    @Override public void appendHoverText(ItemStack stack, @javax.annotation.Nullable Level level, List<Component> lines, TooltipFlag flag) {
         lines.add(Component.translatable("tooltip.stardewcraft.surface_floor.place").withStyle(ChatFormatting.GRAY));
         lines.add(Component.translatable("tooltip.stardewcraft.surface_floor.remove").withStyle(ChatFormatting.GRAY));
         if (floor == SurfaceFloorType.STRAW)

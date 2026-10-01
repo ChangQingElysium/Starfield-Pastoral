@@ -25,7 +25,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FarmBlock;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import com.stardew.craft.port.net.neoforged.neoforge.common.ItemAbilities;
+import net.minecraftforge.common.ToolActions;
 import net.minecraftforge.common.util.FakePlayerFactory;
 import net.minecraftforge.gametest.GameTestHolder;
 import net.minecraftforge.gametest.PrefixGameTestTemplate;
@@ -46,7 +46,7 @@ public final class HardSoilGameTests {
             player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.IRON_HOE));
             var context = new UseOnContext(player, InteractionHand.MAIN_HAND,
                     new BlockHitResult(Vec3.atCenterOf(pos), Direction.UP, pos, false));
-            var tilled = level.getBlockState(pos).getToolModifiedState(context, ItemAbilities.HOE_TILL, false);
+            var tilled = level.getBlockState(pos).getToolModifiedState(context, ToolActions.HOE_TILL, false);
             h.assertTrue(tilled != null && tilled.is(ModBlocks.INFERTILE_FARMLAND.get()), "HardSoil did not till to infertile farmland");
             level.setBlock(pos, tilled, 3);
             for (Block crop : new Block[]{Blocks.WHEAT, Blocks.CARROTS, Blocks.POTATOES, Blocks.PUMPKIN_STEM, ModBlocks.PARSNIP_CROP.get()})
@@ -57,12 +57,12 @@ public final class HardSoilGameTests {
                 var drops = Block.getDrops(state, level, pos, null);
                 h.assertTrue(drops.size() == 1 && drops.getFirst().is(ModItems.HARD_SOIL.get()), "Farmland dropped another substrate");
             }
-            h.assertTrue(Blocks.SAND.defaultBlockState().getToolModifiedState(context, ItemAbilities.HOE_TILL, true) == null,
+            h.assertTrue(Blocks.SAND.defaultBlockState().getToolModifiedState(context, ToolActions.HOE_TILL, true) == null,
                     "Vanilla sand identity changed");
             for (Block grass : new Block[]{ModBlocks.GRASS_BLOCK.get(), ModBlocks.DARK_GRASS_BLOCK.get()})
-                h.assertTrue(grass.defaultBlockState().getToolModifiedState(context, ItemAbilities.HOE_TILL, true) == null, "Grass became tillable");
+                h.assertTrue(grass.defaultBlockState().getToolModifiedState(context, ToolActions.HOE_TILL, true) == null, "Grass became tillable");
             level.setBlock(pos.above(), Blocks.STONE.defaultBlockState(), 3);
-            h.assertTrue(ModBlocks.HARD_SOIL.get().defaultBlockState().getToolModifiedState(context, ItemAbilities.HOE_TILL, true) == null,
+            h.assertTrue(ModBlocks.HARD_SOIL.get().defaultBlockState().getToolModifiedState(context, ToolActions.HOE_TILL, true) == null,
                     "Covered sand allowed tilling");
         } finally { player.setItemInHand(InteractionHand.MAIN_HAND, old); }
         h.succeed();

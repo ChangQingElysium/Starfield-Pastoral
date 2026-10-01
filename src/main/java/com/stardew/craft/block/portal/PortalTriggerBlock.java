@@ -26,6 +26,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 
 import javax.annotation.Nullable;
+import com.stardew.craft.port.PortBlockInteraction;
 
 /**
  * 隐形传送触发方块 — 替代 vanilla Interaction 实体用于室内外传送。
@@ -37,7 +38,7 @@ import javax.annotation.Nullable;
  * - 右键触发传送（通过 BlockEntity 存储的目标 ID）
  */
 @SuppressWarnings("null")
-public class PortalTriggerBlock extends Block implements EntityBlock {
+public class PortalTriggerBlock extends Block implements EntityBlock, PortBlockInteraction {
 
     public PortalTriggerBlock(Properties properties) {
         super(properties);
@@ -149,8 +150,15 @@ public class PortalTriggerBlock extends Block implements EntityBlock {
         return true;
     }
 
+    // PORT(1.20.1): replay the 1.21 useItemOn/useWithoutItem dispatch.
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos,
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player,
+            InteractionHand hand, BlockHitResult hit) {
+        return PortBlockInteraction.dispatch(this, state, level, pos, player, hand, hit);
+    }
+
+    @Override
+    public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos,
                                                Player player, BlockHitResult hitResult) {
         if (level.isClientSide) return InteractionResult.SUCCESS;
         if (!(player instanceof ServerPlayer sp)) return InteractionResult.PASS;
@@ -166,7 +174,7 @@ public class PortalTriggerBlock extends Block implements EntityBlock {
     }
 
     @Override
-    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
+    public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
                                               Player player, InteractionHand hand, BlockHitResult hitResult) {
         InteractionResult result = useWithoutItem(state, level, pos, player, hitResult);
         return switch (result) {

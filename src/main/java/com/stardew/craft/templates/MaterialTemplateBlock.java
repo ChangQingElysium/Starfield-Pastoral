@@ -38,8 +38,9 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import com.stardew.craft.port.PortBlockInteraction;
 
-public class MaterialTemplateBlock extends BaseEntityBlock implements TemplateBlock {
+public class MaterialTemplateBlock extends BaseEntityBlock implements TemplateBlock, PortBlockInteraction {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final BooleanProperty FLIPPED = BooleanProperty.create("flipped");
     public static final BooleanProperty SOLID = BooleanProperty.create("solid");
@@ -59,11 +60,6 @@ public class MaterialTemplateBlock extends BaseEntityBlock implements TemplateBl
 
     public TemplateShape templateShape() {
         return templateShape;
-    }
-
-    @Override
-    protected MapCodec<? extends BaseEntityBlock> codec() {
-        return simpleCodec(properties -> new MaterialTemplateBlock(templateShape, properties));
     }
 
     @Override
@@ -135,29 +131,29 @@ public class MaterialTemplateBlock extends BaseEntityBlock implements TemplateBl
     }
 
     @Override
-    protected BlockState rotate(BlockState state, Rotation rotation) {
+    public BlockState rotate(BlockState state, Rotation rotation) {
         return state.setValue(FACING, rotation.rotate(state.getValue(FACING)));
     }
 
     @Override
-    protected BlockState mirror(BlockState state, Mirror mirror) {
+    public BlockState mirror(BlockState state, Mirror mirror) {
         return state.rotate(mirror.getRotation(state.getValue(FACING)));
     }
 
     @Override
-    protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+    public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return TemplateShapeCache.get(templateShape, state);
     }
 
     @Override
-    protected VoxelShape getOcclusionShape(BlockState state, BlockGetter level, BlockPos pos) {
+    public VoxelShape getOcclusionShape(BlockState state, BlockGetter level, BlockPos pos) {
         return templateShape.canOccludeWithSolidMaterial() && state.getValue(SOLID)
                 ? TemplateShapeCache.get(templateShape, state)
                 : Shapes.empty();
     }
 
     @Override
-    protected boolean useShapeForLightOcclusion(BlockState state) {
+    public boolean useShapeForLightOcclusion(BlockState state) {
         // Called while Block's super-constructor is still building every state,
         // before templateShape has been assigned. Non-occluding template types
         // are handled by Properties.noOcclusion().
@@ -189,18 +185,18 @@ public class MaterialTemplateBlock extends BaseEntityBlock implements TemplateBl
     }
 
     @Override
-    protected float getShadeBrightness(BlockState state, BlockGetter level, BlockPos pos) {
+    public float getShadeBrightness(BlockState state, BlockGetter level, BlockPos pos) {
         float ownShade = Block.isShapeFullBlock(TemplateShapeCache.get(templateShape, state)) ? 0.2F : 1.0F;
         return Math.max(TemplateMaterials.effectiveMaterial(level, pos).getShadeBrightness(level, pos), ownShade);
     }
 
     @Override
-    protected boolean propagatesSkylightDown(BlockState state, BlockGetter level, BlockPos pos) {
+    public boolean propagatesSkylightDown(BlockState state, BlockGetter level, BlockPos pos) {
         return state.getValue(PROPAGATES_SKYLIGHT) || super.propagatesSkylightDown(state, level, pos);
     }
 
     @Override
-    protected RenderShape getRenderShape(BlockState state) {
+    public RenderShape getRenderShape(BlockState state) {
         return RenderShape.MODEL;
     }
 
@@ -210,8 +206,15 @@ public class MaterialTemplateBlock extends BaseEntityBlock implements TemplateBl
         return new TemplateBlockEntity(pos, state);
     }
 
+    // PORT(1.20.1): replay the 1.21 useItemOn/useWithoutItem dispatch.
     @Override
-    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player,
+            InteractionHand hand, BlockHitResult hit) {
+        return PortBlockInteraction.dispatch(this, state, level, pos, player, hand, hit);
+    }
+
+    @Override
+    public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
                                               Player player, InteractionHand hand, BlockHitResult hit) {
         if (!(stack.getItem() instanceof BlockItem blockItem)) {
             return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
@@ -247,7 +250,7 @@ public class MaterialTemplateBlock extends BaseEntityBlock implements TemplateBl
     }
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos,
+    public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos,
                                                Player player, BlockHitResult hit) {
         if (!player.isShiftKeyDown()) {
             return InteractionResult.PASS;
@@ -265,7 +268,7 @@ public class MaterialTemplateBlock extends BaseEntityBlock implements TemplateBl
     }
 
     @Override
-    public BlockState playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
+    public void playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
         if (!(this instanceof CompositeTemplateBlock) && !level.isClientSide() && !player.getAbilities().instabuild
                 && level.getBlockEntity(pos) instanceof TemplateBlockEntity template) {
             BlockState material = template.material();
@@ -273,7 +276,7 @@ public class MaterialTemplateBlock extends BaseEntityBlock implements TemplateBl
                 popResource(level, pos, new ItemStack(material.getBlock().asItem()));
             }
         }
-        return super.playerWillDestroy(level, pos, state, player);
+        super.playerWillDestroy(level, pos, state, player);
     }
 
     @Override
@@ -287,7 +290,7 @@ public class MaterialTemplateBlock extends BaseEntityBlock implements TemplateBl
     }
 
     @Override
-    protected float getDestroyProgress(BlockState state, Player player, BlockGetter level, BlockPos pos) {
+    public float getDestroyProgress(BlockState state, Player player, BlockGetter level, BlockPos pos) {
         return TemplateMaterials.effectiveMaterial(level, pos).getDestroyProgress(player, level, pos);
     }
 

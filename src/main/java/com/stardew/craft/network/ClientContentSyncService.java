@@ -8,7 +8,7 @@ import com.stardew.craft.server.performance.ServerPerformanceRecorder;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import net.minecraftforge.event.OnDatapackSyncEvent;
 import net.minecraftforge.event.server.ServerStoppedEvent;
 import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
@@ -50,7 +50,10 @@ public final class ClientContentSyncService {
             StardewContentRegistry.validateAndLog();
         }
         FestivalAvailabilitySyncPayload festivalSnapshot = FestivalAvailabilitySyncPayload.current();
-        List<ServerPlayer> recipients = event.getRelevantPlayers().toList();
+        // PORT(1.20.1): NeoForge's getRelevantPlayers(): the joining player, or everyone on a reload.
+        List<ServerPlayer> recipients = event.getPlayer() != null
+                ? List.of(event.getPlayer())
+                : List.copyOf(event.getPlayerList().getPlayers());
         ServerPerformanceRecorder.increment(PerformanceCounter.CONTENT_SYNC_RECIPIENTS, recipients.size());
 
         for (ServerPlayer player : recipients) {

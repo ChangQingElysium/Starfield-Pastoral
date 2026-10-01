@@ -83,7 +83,7 @@ public class RouteEditorScreen extends Screen {
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollY) {
         scroll = Mth.clamp(scroll - (int) Math.signum(scrollY) * 3, 0, maxScroll());
         return true;
     }

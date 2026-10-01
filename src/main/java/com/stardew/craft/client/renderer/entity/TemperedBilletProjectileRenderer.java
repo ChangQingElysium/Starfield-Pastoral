@@ -30,7 +30,7 @@ public class TemperedBilletProjectileRenderer extends EntityRenderer<TemperedBil
     @Override public void render(TemperedBilletProjectileEntity entity,float yaw,float partial,
             PoseStack stack,MultiBufferSource buffer,int packedLight) {
         Vec3 head=entity.getPosition(partial);
-        if(Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()) {
+        if(Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()) {
             BloodForgeGeometry.billetTrail(buffer.getBuffer(WeaponEffectRenderTypes.MOLTEN_GLOW),
                     stack.last().pose(),entity.trail(),head,entity.tickCount-1+partial);
         }

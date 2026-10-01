@@ -21,7 +21,6 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 /** One material and one item: stacked sections leave a cap only at the top. */
 public final class ChimneyTemplateBlock extends MaterialTemplateBlock {
-    public static final MapCodec<ChimneyTemplateBlock> CODEC = simpleCodec(ChimneyTemplateBlock::new);
     public static final BooleanProperty CAPPED = BooleanProperty.create("capped");
     private static final List<TemplateBox> CAPPED_BOXES = List.of(
             new TemplateBox(3, 0, 3, 13, 12, 6),
@@ -51,11 +50,6 @@ public final class ChimneyTemplateBlock extends MaterialTemplateBlock {
     }
 
     @Override
-    protected MapCodec<ChimneyTemplateBlock> codec() {
-        return CODEC;
-    }
-
-    @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         super.createBlockStateDefinition(builder);
         builder.add(CAPPED);
@@ -68,13 +62,13 @@ public final class ChimneyTemplateBlock extends MaterialTemplateBlock {
     }
 
     @Override
-    protected BlockState updateShape(BlockState state, Direction direction, BlockState neighbor,
+    public BlockState updateShape(BlockState state, Direction direction, BlockState neighbor,
                                      LevelAccessor level, BlockPos pos, BlockPos other) {
         return direction == Direction.UP ? state.setValue(CAPPED, !neighbor.is(this)) : state;
     }
 
     @Override
-    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
+    public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
                                               Player player, InteractionHand hand, BlockHitResult hit) {
         return stack.is(asItem()) ? ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION
                 : super.useItemOn(stack, state, level, pos, player, hand, hit);

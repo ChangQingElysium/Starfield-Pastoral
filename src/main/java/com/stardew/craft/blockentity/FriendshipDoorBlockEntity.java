@@ -112,8 +112,8 @@ public class FriendshipDoorBlockEntity extends BlockEntity {
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider provider) {
-        super.saveAdditional(tag, provider);
+    protected void saveAdditional(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
+        super.saveAdditional(tag);
         if (!npcIds.isEmpty()) {
             tag.putString(TAG_NPC_ID, npcIds.getFirst());
             ListTag list = new ListTag();
@@ -126,8 +126,8 @@ public class FriendshipDoorBlockEntity extends BlockEntity {
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider provider) {
-        super.loadAdditional(tag, provider);
+    public void load(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
+        super.load(tag);
         npcIds = readNpcIds(tag);
         requiredPoints = tag.contains(TAG_REQUIRED_POINTS) ? Math.max(0, tag.getInt(TAG_REQUIRED_POINTS)) : DEFAULT_REQUIRED_POINTS;
     }
@@ -148,13 +148,13 @@ public class FriendshipDoorBlockEntity extends BlockEntity {
     }
 
     @Override
-    public CompoundTag getUpdateTag(HolderLookup.Provider provider) {
-        return saveWithoutMetadata(provider);
+    public CompoundTag getUpdateTag() { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
+        return saveWithoutMetadata();
     }
 
     @Override
-    public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider provider) {
-        loadAdditional(tag, provider);
+    public void handleUpdateTag(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
+        load(tag);
     }
 
     @Override

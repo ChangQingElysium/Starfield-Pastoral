@@ -44,13 +44,14 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import com.stardew.craft.port.PortBlockInteraction;
 
 /**
  * 蟹笼方块 - 用于在水中捕获海鲜
  * 必须放置在水方块中
  * 需要鱼饵才能捕获
  */
-public class CrabPotBlock extends Block implements EntityBlock, SimpleWaterloggedBlock {
+public class CrabPotBlock extends Block implements EntityBlock, SimpleWaterloggedBlock, PortBlockInteraction {
 	public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
 	public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 	public static final BooleanProperty WORKING = BooleanProperty.create("working");
@@ -80,7 +81,7 @@ public class CrabPotBlock extends Block implements EntityBlock, SimpleWaterlogge
 
 	@SuppressWarnings("null")
 	@Override
-	protected void spawnAfterBreak(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") net.minecraft.server.level.ServerLevel level, @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") ItemStack stack, boolean dropExperience) {
+	public void spawnAfterBreak(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") net.minecraft.server.level.ServerLevel level, @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") ItemStack stack, boolean dropExperience) {
 		// 兜底：确保破坏时有碎片粒子。
 		// 2001 = levelEvent 的“方块破坏粒子+音效”，data 是 blockstate 的 id。
 		level.levelEvent(2001, pos, Block.getId(state));
@@ -145,7 +146,7 @@ public class CrabPotBlock extends Block implements EntityBlock, SimpleWaterlogge
 
 	@SuppressWarnings("null")
 	@Override
-	protected BlockState updateShape(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") Direction direction, @SuppressWarnings("null") BlockState neighborState, @SuppressWarnings("null") LevelAccessor level,
+	public BlockState updateShape(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") Direction direction, @SuppressWarnings("null") BlockState neighborState, @SuppressWarnings("null") LevelAccessor level,
 			@SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") BlockPos neighborPos) {
 		// 关键：作为含水方块，邻居更新时要继续维持水的tick，否则经常会被流体系统“纠正”导致方块被替换/弹出。
 		if (state.getValue(WATERLOGGED)) {
@@ -154,9 +155,16 @@ public class CrabPotBlock extends Block implements EntityBlock, SimpleWaterlogge
 		return super.updateShape(state, direction, neighborState, level, pos, neighborPos);
 	}
 
+	// PORT(1.20.1): replay the 1.21 useItemOn/useWithoutItem dispatch.
+	@Override
+	public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player,
+	        InteractionHand hand, BlockHitResult hit) {
+	    return PortBlockInteraction.dispatch(this, state, level, pos, player, hand, hit);
+	}
+
 	@SuppressWarnings("null")
 	@Override
-	protected ItemInteractionResult useItemOn(@SuppressWarnings("null") ItemStack stack, @SuppressWarnings("null") BlockState state,
+	public ItemInteractionResult useItemOn(@SuppressWarnings("null") ItemStack stack, @SuppressWarnings("null") BlockState state,
 			@SuppressWarnings("null") Level level, @SuppressWarnings("null") BlockPos pos,
 			@SuppressWarnings("null") Player player, @SuppressWarnings("null") InteractionHand hand,
 			@SuppressWarnings("null") BlockHitResult hit) {
@@ -168,7 +176,7 @@ public class CrabPotBlock extends Block implements EntityBlock, SimpleWaterlogge
 
 	@SuppressWarnings("null")
 	@Override
-	protected InteractionResult useWithoutItem(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") Level level, @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") Player player, @SuppressWarnings("null") BlockHitResult hit) {
+	public InteractionResult useWithoutItem(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") Level level, @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") Player player, @SuppressWarnings("null") BlockHitResult hit) {
 		if (level.isClientSide) {
 			return InteractionResult.SUCCESS;
 		}

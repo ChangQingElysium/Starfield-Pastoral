@@ -1,5 +1,6 @@
 package com.stardew.craft.pet;
 
+import com.stardew.craft.port.PortItemStacks;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.core.ModDimensions;
 import com.stardew.craft.entity.ModEntities;
@@ -17,7 +18,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import net.minecraftforge.event.server.ServerStoppedEvent;
 import com.stardew.craft.port.net.neoforged.neoforge.event.tick.ServerTickEvent;
 
@@ -167,9 +168,9 @@ public final class PetService {
         if (pet == null || !pet.variant.available() || !manages(player, pet.farm)) return;
         ItemStack held = player.getMainHandItem();
         if (held.getItem() instanceof StardewHatItem && pet.variant.wearsHat()) {
-            ItemStack old = ItemStack.parseOptional(player.registryAccess(), pet.hat);
+            ItemStack old = PortItemStacks.parseOptional(player.registryAccess(), pet.hat);
             if (!old.isEmpty()) { pet.hat = new CompoundTag(); if (!player.getInventory().add(old)) player.drop(old, false); }
-            else { pet.hat = (CompoundTag) held.copyWithCount(1).save(player.registryAccess()); held.shrink(1); }
+            else { pet.hat = (CompoundTag) com.stardew.craft.port.PortItemStacks.save(held.copyWithCount(1), player.registryAccess()); held.shrink(1); }
             entity.playSound(com.stardew.craft.sound.ModSounds.DIRTY_HIT.get(), .6f, 1);
             data.setDirty(); entity.refresh(pet); return;
         }

@@ -1,5 +1,6 @@
 package com.stardew.craft.gametest;
 
+import com.stardew.craft.port.PortItemStacks;
 import com.mojang.authlib.GameProfile;
 import com.stardew.craft.animal.runtime.*;
 import com.stardew.craft.block.ModBlocks;
@@ -289,10 +290,10 @@ public final class LivestockGameTests {
             h.assertTrue(home.tier() == 2 && incubator.tryInsert(egg, player) && egg.getCount() == 1, "Valid tier-two incubation failed");
             h.assertTrue(incubator.getRemainingAbsMinutes() == 9000, "Source incubation duration mismatch");
             incubator.advanceDays(6); h.assertTrue(incubator.isReady(), "Incubator did not complete after source overnight time");
-            var state = incubator.saveWithFullMetadata(level.registryAccess()); var data = LivestockWorldData.get(level.getServer());
+            var state = incubator.saveWithFullMetadata(); var data = LivestockWorldData.get(level.getServer());
             h.assertTrue(incubator.claimReadyAnimal(player, "Puddle") == com.stardew.craft.blockentity.IncubatorBlockEntity.ClaimResult.SUCCESS, "Ready newborn rejected");
             h.assertTrue(data.occupancy(home.id()) == 1 && data.all().stream().anyMatch(a -> a.home().equals(data.find(state.getUUID("NewbornReceipt")).home()) && a.species() == LivestockSpecies.DUCK), "Wrong newborn species");
-            incubator.loadWithComponents(state, level.registryAccess());
+            incubator.load(state);
             h.assertTrue(incubator.claimReadyAnimal(player, "Duplicate") == com.stardew.craft.blockentity.IncubatorBlockEntity.ClaimResult.SUCCESS && data.occupancy(home.id()) == 1 && !incubator.hasInput(), "Replayed incubation duplicated newborn");
         } finally { farms.deleteFarm(owner); }
         h.succeed();
@@ -496,7 +497,7 @@ public final class LivestockGameTests {
         return buildings.find(home.id());
     }
     private static void fillHay(net.minecraft.server.level.ServerLevel level, BlockPos pos) {
-        var trough = level.getBlockEntity(pos); var tag = trough.saveWithFullMetadata(level.registryAccess());
-        tag.put("hay", new ItemStack(ModItems.HAY.get()).save(level.registryAccess())); trough.loadWithComponents(tag, level.registryAccess());
+        var trough = level.getBlockEntity(pos); var tag = trough.saveWithFullMetadata();
+        tag.put("hay", PortItemStacks.save(new ItemStack(ModItems.HAY.get()), level.registryAccess())); trough.load(tag);
     }
 }

@@ -1,5 +1,6 @@
 package com.stardew.craft.client.model.terrain;
 
+import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.block.terrain.TerrainShapeBlock;
@@ -33,7 +34,7 @@ import net.minecraft.world.level.block.GrassBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import net.minecraftforge.client.ChunkRenderTypeSet;
 import net.minecraftforge.client.event.ModelEvent;
 import net.minecraftforge.client.model.BakedModelWrapper;
@@ -54,7 +55,7 @@ public final class ShapedTerrainModels {
         }
     }
     /** Called after the ordinary terrain wrappers, so a cube can receive the edge of a neighboring half block. */
-    public static void wrapFull(Map<ModelResourceLocation,BakedModel> models){
+    public static void wrapFull(Map<net.minecraft.resources.ResourceLocation, BakedModel> models){
         for(Block block:List.of(ModBlocks.GRASS_BLOCK.get(),ModBlocks.DARK_GRASS_BLOCK.get(),ModBlocks.DIRT.get(),ModBlocks.CLIFF.get(),ModBlocks.FARMLAND.get(),ModBlocks.SAND.get(),ModBlocks.SANDY_FARMLAND.get(), ModBlocks.HARD_SOIL.get(), ModBlocks.INFERTILE_FARMLAND.get(),
                 ModBlocks.TOWN_PAVING.get(),ModBlocks.PLAZA_RED_BRICKS.get(),ModBlocks.ASPHALT_ROAD.get(),ModBlocks.PALE_PAVING.get()))
             for(BlockState state:block.getStateDefinition().getPossibleStates()){
@@ -105,7 +106,7 @@ public final class ShapedTerrainModels {
         @Override public ItemOverrides getOverrides(){
             if(!item)return super.getOverrides();
             return new ItemOverrides(){@Override public BakedModel resolve(BakedModel model,ItemStack stack,@Nullable ClientLevel level,@Nullable LivingEntity entity,int seed){
-                var property=TerrainVariants.property(state);Integer v=property==null?null:stack.getOrDefault(DataComponents.BLOCK_STATE,BlockItemStateProperties.EMPTY).get(property);
+                var property=TerrainVariants.property(state);Integer v=property==null?null:PortItemData.getOrDefault(stack, DataComponents.BLOCK_STATE,BlockItemStateProperties.EMPTY).get(property);
                 return v==null||v==state.getValue(property)?Surface.this:new Surface(originalModel,state.setValue(property,v),true,false);
             }};
         }

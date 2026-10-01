@@ -95,7 +95,7 @@ public class StatueOfBlessingsBlock extends TallMasteryBlock implements EntityBl
     );
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+    public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         if (state.getValue(PART) == Part.EXTENSION) {
             pos = TallMasteryBlock.getMainPos(pos, state);
             state = level.getBlockState(pos);

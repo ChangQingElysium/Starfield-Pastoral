@@ -38,7 +38,7 @@ public class DeluxeWormBinBlock extends MapUtilityStaticBlock implements EntityB
 
     @SuppressWarnings("null")
     @Override
-    protected List<ItemStack> getDrops(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") LootParams.Builder params) {
+    public List<ItemStack> getDrops(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") LootParams.Builder params) {
         if (state.getValue(PART) == Part.EXTENSION) return List.of();
         return List.of(new ItemStack(ModBlocks.DELUXE_WORM_BIN.get()));
     }
@@ -65,7 +65,7 @@ public class DeluxeWormBinBlock extends MapUtilityStaticBlock implements EntityB
 
     @SuppressWarnings("null")
     @Override
-    protected ItemInteractionResult useItemOn(@SuppressWarnings("null") ItemStack stack, @SuppressWarnings("null") BlockState state, @SuppressWarnings("null") Level level, @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") Player player, @SuppressWarnings("null") InteractionHand hand, @SuppressWarnings("null") BlockHitResult hit) {
+    public ItemInteractionResult useItemOn(@SuppressWarnings("null") ItemStack stack, @SuppressWarnings("null") BlockState state, @SuppressWarnings("null") Level level, @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") Player player, @SuppressWarnings("null") InteractionHand hand, @SuppressWarnings("null") BlockHitResult hit) {
         if (state.getValue(PART) == Part.EXTENSION) {
             BlockPos mainPos = findMainPos(level, pos, state);
             return mainPos == null ? ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION : useItemOn(stack, level.getBlockState(mainPos), level, mainPos, player, hand, hit);
@@ -97,7 +97,7 @@ public class DeluxeWormBinBlock extends MapUtilityStaticBlock implements EntityB
 
     @SuppressWarnings("null")
     @Override
-    protected InteractionResult useWithoutItem(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") Level level, @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") Player player, @SuppressWarnings("null") BlockHitResult hit) {
+    public InteractionResult useWithoutItem(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") Level level, @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") Player player, @SuppressWarnings("null") BlockHitResult hit) {
         if (state.getValue(PART) == Part.EXTENSION) {
             BlockPos mainPos = findMainPos(level, pos, state);
             return mainPos == null ? InteractionResult.PASS : useWithoutItem(level.getBlockState(mainPos), level, mainPos, player, hit);

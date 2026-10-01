@@ -1,5 +1,6 @@
 package com.stardew.craft.combat.skill;
 
+import com.stardew.craft.port.PortItemStacks;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.combat.WeaponCombatIdentity;
 import com.stardew.craft.combat.equipment.EquipmentNegativeStatusProtection;
@@ -24,7 +25,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import com.stardew.craft.port.net.neoforged.neoforge.event.tick.EntityTickEvent;
 import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
@@ -571,7 +572,7 @@ public final class WickedKrisPoisonTracker {
         tag.putString(idKey, snapshot.weaponId().toString());
         tag.put(
                 weaponKey,
-                snapshot.weapon().saveOptional(
+                PortItemStacks.saveOptional(snapshot.weapon(), 
                         target.level().registryAccess()
                 )
         );
@@ -593,7 +594,7 @@ public final class WickedKrisPoisonTracker {
         if (weaponId == null) {
             return null;
         }
-        ItemStack weapon = ItemStack.parse(
+        ItemStack weapon = PortItemStacks.parse(
                 target.level().registryAccess(),
                 tag.getCompound(weaponKey)
         ).orElse(ItemStack.EMPTY);

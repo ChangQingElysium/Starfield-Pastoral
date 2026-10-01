@@ -31,9 +31,11 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import net.minecraft.world.InteractionHand;
+import com.stardew.craft.port.PortBlockInteraction;
 
 @SuppressWarnings("null")
-public class StoneChestBlock extends Block implements EntityBlock {
+public class StoneChestBlock extends Block implements EntityBlock, PortBlockInteraction {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final BooleanProperty OPEN = BlockStateProperties.OPEN;
 
@@ -57,7 +59,7 @@ public class StoneChestBlock extends Block implements EntityBlock {
     }
 
     @Override
-    protected List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
+    public List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
         return List.of(new ItemStack(ModBlocks.STONE_CHEST.get()));
     }
 
@@ -98,14 +100,21 @@ public class StoneChestBlock extends Block implements EntityBlock {
         return state.setValue(FACING, mirror.mirror(state.getValue(FACING)));
     }
 
+    // PORT(1.20.1): replay the 1.21 useItemOn/useWithoutItem dispatch.
     @Override
-    protected com.stardew.craft.port.net.minecraft.world.ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level,
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player,
+            InteractionHand hand, BlockHitResult hit) {
+        return PortBlockInteraction.dispatch(this, state, level, pos, player, hand, hit);
+    }
+
+    @Override
+    public com.stardew.craft.port.net.minecraft.world.ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level,
             BlockPos pos, Player player, net.minecraft.world.InteractionHand hand, BlockHitResult hit) {
         return com.stardew.craft.inventory.ChestInteractions.swap(stack, level, pos, player);
     }
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState state,
+    public InteractionResult useWithoutItem(BlockState state,
                                                Level level,
                                                BlockPos pos,
                                                Player player,

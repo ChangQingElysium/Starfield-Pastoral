@@ -1,5 +1,6 @@
 package com.stardew.craft.integration.jei;
 
+import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.core.ModTags;
 import com.stardew.craft.fishing.data.FishingDataManager;
@@ -662,7 +663,7 @@ public class StardewJeiPlugin implements IModPlugin {
         @Override
         public Object getSubtypeData(ItemStack stack, UidContext context) {
             return context == UidContext.Ingredient
-                    ? stack.getOrDefault(com.stardew.craft.port.net.minecraft.core.component.DataComponents.BLOCK_STATE,
+                    ? PortItemData.getOrDefault(stack, com.stardew.craft.port.net.minecraft.core.component.DataComponents.BLOCK_STATE,
                             com.stardew.craft.port.net.minecraft.world.item.component.BlockItemStateProperties.EMPTY)
                     : null;
         }
@@ -670,7 +671,7 @@ public class StardewJeiPlugin implements IModPlugin {
         @Override
         public String getLegacyStringSubtypeInfo(ItemStack stack, UidContext context) {
             if (context != UidContext.Ingredient) return "";
-            var state = stack.getOrDefault(com.stardew.craft.port.net.minecraft.core.component.DataComponents.BLOCK_STATE,
+            var state = PortItemData.getOrDefault(stack, com.stardew.craft.port.net.minecraft.core.component.DataComponents.BLOCK_STATE,
                     com.stardew.craft.port.net.minecraft.world.item.component.BlockItemStateProperties.EMPTY);
             return new java.util.TreeMap<>(state.properties()).toString();
         }

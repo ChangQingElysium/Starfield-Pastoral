@@ -19,6 +19,8 @@ import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraft.world.InteractionHand;
+import com.stardew.craft.port.PortBlockInteraction;
 
 /**
  * Junimo Note scroll block – one per Community Center area (0–6).
@@ -26,7 +28,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
  * Unbreakable in survival mode (strength -1).
  */
 @SuppressWarnings("null")
-public class JunimoNoteBlock extends Block {
+public class JunimoNoteBlock extends Block implements PortBlockInteraction {
 
     /** 0=Pantry, 1=Crafts Room, 2=Fish Tank, 3=Boiler Room, 4=Vault, 5=Bulletin Board, 6=Abandoned Joja Mart */
     public static final IntegerProperty AREA = IntegerProperty.create("area", 0, 6);
@@ -46,12 +48,19 @@ public class JunimoNoteBlock extends Block {
     }
 
     @Override
-    protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+    public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return SHAPE;
     }
 
+    // PORT(1.20.1): replay the 1.21 useItemOn/useWithoutItem dispatch.
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos,
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player,
+            InteractionHand hand, BlockHitResult hit) {
+        return PortBlockInteraction.dispatch(this, state, level, pos, player, hand, hit);
+    }
+
+    @Override
+    public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos,
                                                Player player, BlockHitResult hit) {
         if (level.isClientSide) return InteractionResult.SUCCESS;
 

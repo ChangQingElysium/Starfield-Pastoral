@@ -90,7 +90,7 @@ public final class MasterySiteInstaller extends SavedData {
     public static MasterySiteInstaller get(ServerLevel anyLevelInServer) {
         ServerLevel overworld = anyLevelInServer.getServer().getLevel(net.minecraft.world.level.Level.OVERWORLD);
         if (overworld == null) return new MasterySiteInstaller();
-        return overworld.getDataStorage().computeIfAbsent(factory(), DATA_NAME);
+        return overworld.getDataStorage().computeIfAbsent(com.stardew.craft.port.PortSavedData.loader(factory()), com.stardew.craft.port.PortSavedData.constructor(factory()), DATA_NAME);
     }
 
     public void resetForMigration() {
@@ -323,7 +323,7 @@ public final class MasterySiteInstaller extends SavedData {
 
     @Override
     @Nonnull
-    public CompoundTag save(@Nonnull CompoundTag tag, @Nonnull HolderLookup.Provider registries) {
+    public CompoundTag save(@Nonnull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
         tag.putInt("PlacedVersion", placedVersion);
         return tag;
     }
@@ -334,7 +334,7 @@ public final class MasterySiteInstaller extends SavedData {
         return m;
     }
 
-    public static SavedData.Factory<MasterySiteInstaller> factory() {
-        return new SavedData.Factory<>(MasterySiteInstaller::new, MasterySiteInstaller::load);
+    public static com.stardew.craft.port.PortSavedData.Factory<MasterySiteInstaller> factory() {
+        return new com.stardew.craft.port.PortSavedData.Factory<>(MasterySiteInstaller::new, MasterySiteInstaller::load);
     }
 }

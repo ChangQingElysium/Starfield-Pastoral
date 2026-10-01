@@ -1,5 +1,6 @@
 package com.stardew.craft.auction;
 
+import com.stardew.craft.port.PortItemStacks;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -28,7 +29,7 @@ public class AuctionWorldData extends SavedData {
         if (server == null) {
             return new AuctionWorldData();
         }
-        return server.overworld().getDataStorage().computeIfAbsent(factory(), DATA_NAME);
+        return server.overworld().getDataStorage().computeIfAbsent(com.stardew.craft.port.PortSavedData.loader(factory()), com.stardew.craft.port.PortSavedData.constructor(factory()), DATA_NAME);
     }
 
     public Map<UUID, AuctionRecord> auctions() {
@@ -54,7 +55,7 @@ public class AuctionWorldData extends SavedData {
 
     @Override
     @Nonnull
-    public CompoundTag save(@Nonnull CompoundTag tag, @Nonnull HolderLookup.Provider provider) {
+    public CompoundTag save(@Nonnull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
         ListTag auctionsTag = new ListTag();
         for (AuctionRecord auction : auctions.values()) {
             auctionsTag.add(auction.save(provider));
@@ -68,7 +69,7 @@ public class AuctionWorldData extends SavedData {
             ListTag stacksTag = new ListTag();
             for (ItemStack stack : entry.getValue()) {
                 if (!stack.isEmpty()) {
-                    stacksTag.add(stack.save(provider));
+                    stacksTag.add(PortItemStacks.save(stack, provider));
                 }
             }
             ownerTag.put("Stacks", stacksTag);
@@ -98,7 +99,7 @@ public class AuctionWorldData extends SavedData {
             List<ItemStack> stacks = new ArrayList<>();
             ListTag stacksTag = ownerTag.getList("Stacks", Tag.TAG_COMPOUND);
             for (int j = 0; j < stacksTag.size(); j++) {
-                ItemStack stack = ItemStack.parse(provider, stacksTag.getCompound(j)).orElse(ItemStack.EMPTY);
+                ItemStack stack = PortItemStacks.parse(provider, stacksTag.getCompound(j)).orElse(ItemStack.EMPTY);
                 if (!stack.isEmpty()) {
                     stacks.add(stack);
                 }
@@ -110,8 +111,8 @@ public class AuctionWorldData extends SavedData {
         return data;
     }
 
-    public static SavedData.Factory<AuctionWorldData> factory() {
-        return new SavedData.Factory<>(AuctionWorldData::new, AuctionWorldData::load);
+    public static com.stardew.craft.port.PortSavedData.Factory<AuctionWorldData> factory() {
+        return new com.stardew.craft.port.PortSavedData.Factory<>(AuctionWorldData::new, AuctionWorldData::load);
     }
 
     public enum Status {
@@ -254,7 +255,7 @@ public class AuctionWorldData extends SavedData {
             tag.putUUID("Id", id);
             tag.putUUID("Seller", sellerId);
             tag.putString("SellerName", sellerName);
-            tag.put("Stack", stack.save(provider));
+            tag.put("Stack", PortItemStacks.save(stack, provider));
             tag.putInt("StartingPrice", startingPrice);
             if (highestBidderId != null) {
                 tag.putUUID("HighestBidder", highestBidderId);
@@ -268,7 +269,7 @@ public class AuctionWorldData extends SavedData {
             if (!tag.hasUUID("Id") || !tag.hasUUID("Seller")) {
                 return null;
             }
-            ItemStack stack = ItemStack.parse(provider, tag.getCompound("Stack")).orElse(ItemStack.EMPTY);
+            ItemStack stack = PortItemStacks.parse(provider, tag.getCompound("Stack")).orElse(ItemStack.EMPTY);
             if (stack.isEmpty()) {
                 return null;
             }

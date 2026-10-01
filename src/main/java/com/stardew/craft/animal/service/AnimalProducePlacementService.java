@@ -429,7 +429,7 @@ public final class AnimalProducePlacementService {
                 && produceSpot.getProduceLedgerEntryId() <= 0L
                 && produceSpot.getAnimalId() == entry.animalId()
                 && produceSpot.getBuildingId().equals(entry.buildingId())
-                && ItemStack.isSameItemSameComponents(
+                && ItemStack.isSameItemSameTags(
                         produceSpot.getProduceStack(),
                         stackForLedgerEntry(entry))) {
             // Recover the narrow crash window where the chunk saved its projection before the

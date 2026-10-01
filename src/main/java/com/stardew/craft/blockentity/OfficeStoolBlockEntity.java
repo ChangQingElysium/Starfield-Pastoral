@@ -79,14 +79,14 @@ public class OfficeStoolBlockEntity extends BlockEntity {
     }
 
     @Override
-    protected void saveAdditional(@Nonnull CompoundTag tag, @Nonnull net.minecraft.core.HolderLookup.Provider provider) {
-        super.saveAdditional(tag, provider);
+    protected void saveAdditional(@Nonnull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
+        super.saveAdditional(tag);
         tag.putFloat(TAG_TOP_YAW, topYawDegrees);
     }
 
     @Override
-    protected void loadAdditional(@Nonnull CompoundTag tag, @Nonnull net.minecraft.core.HolderLookup.Provider provider) {
-        super.loadAdditional(tag, provider);
+    public void load(@Nonnull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
+        super.load(tag);
         if (tag.contains(TAG_TOP_YAW, Tag.TAG_FLOAT)) {
             topYawDegrees = normalizeYaw(tag.getFloat(TAG_TOP_YAW));
         } else {
@@ -95,9 +95,9 @@ public class OfficeStoolBlockEntity extends BlockEntity {
     }
 
     @Override
-    public CompoundTag getUpdateTag(@Nonnull net.minecraft.core.HolderLookup.Provider provider) {
+    public CompoundTag getUpdateTag() { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
         CompoundTag tag = new CompoundTag();
-        saveAdditional(tag, provider);
+        saveAdditional(tag);
         return tag;
     }
 

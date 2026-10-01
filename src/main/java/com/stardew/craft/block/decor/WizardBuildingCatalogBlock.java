@@ -20,10 +20,12 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 import javax.annotation.Nullable;
+import net.minecraft.world.level.Level;
+import com.stardew.craft.port.PortBlockInteraction;
 
 /** The per-player magic-building catalog revealed by the Magic Ink event. */
 @SuppressWarnings("null")
-public final class WizardBuildingCatalogBlock extends Block implements EntityBlock {
+public final class WizardBuildingCatalogBlock extends Block implements EntityBlock, PortBlockInteraction {
     private static final VoxelShape SHAPE = Block.box(3.0D, 0.0D, 3.0D, 13.0D, 19.0D, 13.0D);
 
     public WizardBuildingCatalogBlock(Properties properties) {
@@ -46,8 +48,15 @@ public final class WizardBuildingCatalogBlock extends Block implements EntityBlo
         return SHAPE;
     }
 
+    // PORT(1.20.1): replay the 1.21 useItemOn/useWithoutItem dispatch.
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, net.minecraft.world.level.Level level,
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player,
+            InteractionHand hand, BlockHitResult hit) {
+        return PortBlockInteraction.dispatch(this, state, level, pos, player, hand, hit);
+    }
+
+    @Override
+    public InteractionResult useWithoutItem(BlockState state, net.minecraft.world.level.Level level,
                                                 BlockPos pos, Player player, BlockHitResult hit) {
         if (!level.isClientSide && player instanceof ServerPlayer serverPlayer) {
             WizardBuildingService.open(serverPlayer);
@@ -56,7 +65,7 @@ public final class WizardBuildingCatalogBlock extends Block implements EntityBlo
     }
 
     @Override
-    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state,
+    public ItemInteractionResult useItemOn(ItemStack stack, BlockState state,
                                               net.minecraft.world.level.Level level, BlockPos pos,
                                               Player player, InteractionHand hand, BlockHitResult hit) {
         if (!level.isClientSide && player instanceof ServerPlayer serverPlayer) {

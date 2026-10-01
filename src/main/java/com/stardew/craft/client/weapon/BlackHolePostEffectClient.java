@@ -39,7 +39,7 @@ public final class BlackHolePostEffectClient {
     private BlackHolePostEffectClient() {}
 
     public static void add(float x, float y, float z, float radiusNorm, float strength, int durationTicks) {
-        if (!Config.ENABLE_WEAPON_POST_EFFECTS.getAsBoolean()) {
+        if (!Config.ENABLE_WEAPON_POST_EFFECTS.get()) {
             return;
         }
         if (durationTicks <= 0 || strength <= 0.0f) {
@@ -67,7 +67,7 @@ public final class BlackHolePostEffectClient {
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_WEATHER) {
             return;
         }
-        if (!Config.ENABLE_WEAPON_POST_EFFECTS.getAsBoolean()) {
+        if (!Config.ENABLE_WEAPON_POST_EFFECTS.get()) {
             return;
         }
         if (EFFECTS.isEmpty()) {
@@ -104,7 +104,7 @@ public final class BlackHolePostEffectClient {
         shaderInstance.safeGetUniform("Center").set(screen.x, screen.y);
         shaderInstance.safeGetUniform("Strength").set(strength);
         shaderInstance.safeGetUniform("Radius").set(effect.radiusNorm);
-        shaderInstance.safeGetUniform("Time").set(mc.level.getGameTime() + event.getPartialTick().getGameTimeDeltaPartialTick(false));
+        shaderInstance.safeGetUniform("Time").set(mc.level.getGameTime() + event.getPartialTick());
 
         RenderSystem.setShader(() -> shaderInstance);
         RenderSystem.setShaderTexture(0, mc.getMainRenderTarget().getColorTextureId());

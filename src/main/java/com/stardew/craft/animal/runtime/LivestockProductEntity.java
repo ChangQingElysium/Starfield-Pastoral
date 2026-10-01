@@ -1,5 +1,6 @@
 package com.stardew.craft.animal.runtime;
 
+import com.stardew.craft.port.PortItemStacks;
 import com.stardew.craft.building.runtime.BuildingService;
 import com.stardew.craft.building.runtime.BuildingWorldData;
 import com.stardew.craft.item.ModItems;
@@ -23,13 +24,13 @@ public final class LivestockProductEntity extends Entity {
     public LivestockProductEntity(EntityType<? extends LivestockProductEntity> type, Level level) {
         super(type, level); setNoGravity(true); noPhysics = true;
     }
-    @Override protected void defineSynchedData(SynchedEntityData.Builder builder) { builder.define(ITEM, ItemStack.EMPTY); }
+    @Override protected void defineSynchedData() { this.entityData.define(ITEM, ItemStack.EMPTY); }
     public ItemStack getItem() { return entityData.get(ITEM); }
     public void setItem(ItemStack stack) { entityData.set(ITEM, stack.copy()); }
     @Override protected void readAdditionalSaveData(CompoundTag tag) {}
     @Override protected void addAdditionalSaveData(CompoundTag tag) {}
     public static ItemStack stack(LivestockWorldData.Product egg, ServerLevel level) {
-        if(!egg.stackData().isEmpty())return ItemStack.parseOptional(level.registryAccess(),egg.stackData());
+        if(!egg.stackData().isEmpty())return PortItemStacks.parseOptional(level.registryAccess(),egg.stackData());
         return LivestockProducts.stack(egg.item(), egg.count(), egg.quality());
     }
     @Override public boolean shouldBeSaved() { return false; }

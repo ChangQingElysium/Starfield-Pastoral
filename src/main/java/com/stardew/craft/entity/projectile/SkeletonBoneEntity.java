@@ -24,7 +24,7 @@ public final class SkeletonBoneEntity extends Projectile {
     public static final float WIDTH=21F/64;
     private int sourceFrames,floor;private float damage=10;private boolean owned;private java.util.UUID generation;
     public SkeletonBoneEntity(EntityType<? extends SkeletonBoneEntity> type,Level level){super(type,level);setNoGravity(true);}
-    @Override protected void defineSynchedData(SynchedEntityData.Builder b){}
+    @Override protected void defineSynchedData(){}
     public void launch(MineSkeletonEntity owner,Player player){
         setOwner(owner);damage=owner.monsterState().stats().getDamage();var context=owner.monsterState().context();owned=context.generation()!=null;generation=context.generation();floor=context.floor();
         // Aim once from the current throwing hand to the actual body; no homing or gravity.

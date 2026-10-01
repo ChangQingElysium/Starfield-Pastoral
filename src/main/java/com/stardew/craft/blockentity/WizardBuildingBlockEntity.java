@@ -510,7 +510,7 @@ public final class WizardBuildingBlockEntity extends net.minecraft.world.level.b
         }
         ItemStack remaining = incoming.copy();
         for (ItemStack stored : items) {
-            if (ItemStack.isSameItemSameComponents(stored, remaining) && stored.getCount() < stored.getMaxStackSize()) {
+            if (ItemStack.isSameItemSameTags(stored, remaining) && stored.getCount() < stored.getMaxStackSize()) {
                 int moved = Math.min(remaining.getCount(), stored.getMaxStackSize() - stored.getCount());
                 stored.grow(moved);
                 remaining.shrink(moved);
@@ -592,8 +592,8 @@ public final class WizardBuildingBlockEntity extends net.minecraft.world.level.b
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
+    protected void saveAdditional(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        super.saveAdditional(tag);
         net.minecraft.world.ContainerHelper.saveAllItems(tag, items, registries);
         if (owner != null) tag.putUUID("Owner", owner);
         tag.putInt("RaisinDays", raisinDaysLeft);
@@ -602,8 +602,8 @@ public final class WizardBuildingBlockEntity extends net.minecraft.world.level.b
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
+    public void load(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        super.load(tag);
         items.clear();
         net.minecraft.world.ContainerHelper.loadAllItems(tag, items, registries);
         owner = tag.hasUUID("Owner") ? tag.getUUID("Owner") : null;
@@ -614,8 +614,8 @@ public final class WizardBuildingBlockEntity extends net.minecraft.world.level.b
     }
 
     @Override
-    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
-        CompoundTag tag = super.getUpdateTag(registries);
+    public CompoundTag getUpdateTag() { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        CompoundTag tag = super.getUpdateTag();
         tag.putBoolean("GoldClockEnabled", goldClockEnabled);
         return tag;
     }

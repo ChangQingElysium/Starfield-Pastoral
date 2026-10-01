@@ -17,6 +17,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.util.FakePlayerFactory;
 import net.minecraftforge.gametest.GameTestHolder;
 import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import com.stardew.craft.port.PortBlockInteraction;
 
 @GameTestHolder(StardewCraft.MODID)
 @PrefixGameTestTemplate(false)
@@ -38,7 +39,7 @@ public final class ChimneyTemplateGameTests {
             level.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
             var clicked = pos.below();
             var hit = new BlockHitResult(Vec3.atBottomCenterOf(clicked).add(0, 1, 0), Direction.UP, clicked, false);
-            if (i > 0) h.assertTrue(level.getBlockState(clicked).useItemOn(stack, level, player,
+            if (i > 0) h.assertTrue(PortBlockInteraction.stateUseItemOn(level.getBlockState(clicked), stack, level, player,
                     InteractionHand.MAIN_HAND, hit) == ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION,
                     "Template swallowed stacking");
             h.assertTrue(item.place(new BlockPlaceContext(player, InteractionHand.MAIN_HAND, stack, hit)).consumesAction(), "Stack placement failed");

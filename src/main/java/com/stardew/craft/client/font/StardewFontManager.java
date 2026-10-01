@@ -6,14 +6,13 @@ import com.stardew.craft.StardewCraft;
 import com.stardew.craft.mixin.FontFontSetAccessor;
 import com.stardew.craft.mixin.FontSetProvidersAccessor;
 import net.minecraft.client.Minecraft;
-import com.stardew.craft.port.net.minecraft.client.gui.font.FontOption;
 import net.minecraft.client.gui.font.FontSet;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
 
 import java.io.IOException;
@@ -97,12 +96,11 @@ final class StardewFontManager implements ResourceManagerReloadListener {
         StardewFontData data = StardewFontData.load(resources, metrics);
         StardewGlyphProvider provider = new StardewGlyphProvider(data, resources);
         FontSet fontSet = new FontSet(Minecraft.getInstance().getTextureManager(), role.id());
-        List<GlyphProvider.Conditional> providers = new ArrayList<>(fallbacks.size() + 1);
-        providers.add(new GlyphProvider.Conditional(provider, FontOption.Filter.ALWAYS_PASS));
-        for (GlyphProvider fallback : fallbacks) {
-            providers.add(new GlyphProvider.Conditional(fallback, FontOption.Filter.ALWAYS_PASS));
-        }
-        fontSet.reload(providers, Set.of());
+        // PORT(1.20.1): no FontOption filters before 1.20.5; an ALWAYS_PASS provider is a plain provider.
+        List<GlyphProvider> providers = new ArrayList<>(fallbacks.size() + 1);
+        providers.add(provider);
+        providers.addAll(fallbacks);
+        fontSet.reload(providers);
         loaded.put(role, new LoadedFont(data, provider, fontSet));
     }
 
@@ -118,12 +116,11 @@ final class StardewFontManager implements ResourceManagerReloadListener {
         StardewFontData data = authored.data().withLayout(8.0F / referenceHeight, 10.0F);
         StardewGlyphProvider provider = new StardewGlyphProvider(data, resources);
         FontSet fontSet = new FontSet(Minecraft.getInstance().getTextureManager(), target.id());
-        List<GlyphProvider.Conditional> providers = new ArrayList<>(fallbacks.size() + 1);
-        providers.add(new GlyphProvider.Conditional(provider, FontOption.Filter.ALWAYS_PASS));
-        for (GlyphProvider fallback : fallbacks) {
-            providers.add(new GlyphProvider.Conditional(fallback, FontOption.Filter.ALWAYS_PASS));
-        }
-        fontSet.reload(providers, Set.of());
+        // PORT(1.20.1): no FontOption filters before 1.20.5; an ALWAYS_PASS provider is a plain provider.
+        List<GlyphProvider> providers = new ArrayList<>(fallbacks.size() + 1);
+        providers.add(provider);
+        providers.addAll(fallbacks);
+        fontSet.reload(providers);
         loaded.put(target, new LoadedFont(data, provider, fontSet));
     }
 

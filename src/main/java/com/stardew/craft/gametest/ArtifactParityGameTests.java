@@ -111,7 +111,7 @@ public final class ArtifactParityGameTests {
         var field = ArtifactDropService.class.getDeclaredField("locationDrops"); field.setAccessible(true);
         var previous = field.get(null);
         var tool = new ItemStack(ModItems.IRIDIUM_HOE.get());
-        tool.enchant(helper.getLevel().registryAccess().registryOrThrow(net.minecraft.core.registries.Registries.ENCHANTMENT)
+        com.stardew.craft.port.PortItemStacks.enchant(tool, helper.getLevel().registryAccess().registryOrThrow(net.minecraft.core.registries.Registries.ENCHANTMENT)
                 .getHolderOrThrow(com.stardew.craft.enchantment.StardewEnchantments.GENEROUS), 1);
         try (var stream = ArtifactParityGameTests.class.getClassLoader()
                 .getResourceAsStream("data/stardewcraft/artifact_spots/vanilla.json")) {

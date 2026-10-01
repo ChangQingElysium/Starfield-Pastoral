@@ -6,7 +6,7 @@ import com.stardew.craft.tooltip.WaterAmountTooltipComponent;
 
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import net.minecraftforge.client.event.RegisterClientTooltipComponentFactoriesEvent;
 
 @SuppressWarnings("removal")

@@ -1,5 +1,6 @@
 package com.stardew.craft.templates;
 
+import com.stardew.craft.port.PortItemData;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -98,7 +99,7 @@ public final class TemplateBlockEntity extends BlockEntity {
 
     private void updateMaterialLight() {
         if (level == null) return;
-        var lights = level.getAuxLightManager(worldPosition);
+        var lights = com.stardew.craft.port.PortAuxLight.getAuxLightManager(level, worldPosition);
         if (lights != null) {
             BlockState effective = material == null ? TemplateMaterials.defaultMaterial() : material;
             BlockState fillMaterial = effectiveFillMaterial();
@@ -108,8 +109,8 @@ public final class TemplateBlockEntity extends BlockEntity {
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
+    protected void saveAdditional(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        super.saveAdditional(tag);
         if (material != null) {
             tag.put(MATERIAL_TAG, NbtUtils.writeBlockState(material));
         }
@@ -117,8 +118,8 @@ public final class TemplateBlockEntity extends BlockEntity {
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
+    public void load(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        super.load(tag);
         readMaterial(tag, registries);
         if (level != null && !level.isClientSide()) synchronizeMaterialProperties();
     }
@@ -146,7 +147,7 @@ public final class TemplateBlockEntity extends BlockEntity {
     }
 
     public static ModelData itemMaterials(net.minecraft.world.item.ItemStack stack) {
-        var data = stack.get(com.stardew.craft.port.net.minecraft.core.component.DataComponents.BLOCK_ENTITY_DATA);
+        var data = PortItemData.get(stack, com.stardew.craft.port.net.minecraft.core.component.DataComponents.BLOCK_ENTITY_DATA);
         if (data == null) return ModelData.EMPTY;
         CompoundTag tag = data.copyTag();
         ModelData.Builder builder = ModelData.builder();
@@ -160,8 +161,8 @@ public final class TemplateBlockEntity extends BlockEntity {
     }
 
     @Override
-    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
-        CompoundTag tag = super.getUpdateTag(registries);
+    public CompoundTag getUpdateTag() { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        CompoundTag tag = super.getUpdateTag();
         if (material != null) {
             tag.put(MATERIAL_TAG, NbtUtils.writeBlockState(material));
         }
@@ -170,14 +171,13 @@ public final class TemplateBlockEntity extends BlockEntity {
     }
 
     @Override
-    public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider registries) {
+    public void handleUpdateTag(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
         readMaterial(tag, registries);
         markClientModelDirty();
     }
 
     @Override
-    public void onDataPacket(Connection connection, ClientboundBlockEntityDataPacket packet,
-                             HolderLookup.Provider registries) {
+    public void onDataPacket(Connection connection, ClientboundBlockEntityDataPacket packet) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
         readMaterial(packet.getTag(), registries);
         markClientModelDirty();
     }

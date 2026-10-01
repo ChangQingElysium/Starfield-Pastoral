@@ -209,7 +209,7 @@ public class CrabPotItem extends StardewBlockItem {
 
 	@SuppressWarnings("null")
 	public static BlockHitResult clipFromPlayerPOV(Level level, Player player, ClipContext.Fluid fluidMode) {
-		double reach = player.blockInteractionRange();
+		double reach = player.getBlockReach();
 		Vec3 start = player.getEyePosition();
 		Vec3 look = player.getViewVector(1.0F);
 		Vec3 end = start.add(look.x * reach, look.y * reach, look.z * reach);

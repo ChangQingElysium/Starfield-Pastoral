@@ -1,5 +1,6 @@
 package com.stardew.craft.item.tool;
 
+import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.network.payload.PointPlanSyncPayload;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -140,7 +141,7 @@ public class PointPlanWandItem extends Item implements com.stardew.craft.item.IS
         }
         CompoundTag tag = data(stack);
         tag.putString(TAG_SELECTED_PLAN, targetPlanId);
-        stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+        PortItemData.set(stack, DataComponents.CUSTOM_DATA, CustomData.of(tag));
     }
 
     public static List<Plan> getPlans(ItemStack stack) {
@@ -293,11 +294,11 @@ public class PointPlanWandItem extends Item implements com.stardew.craft.item.IS
             list.add(planTag);
         }
         tag.put(TAG_PLANS, list);
-        stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+        PortItemData.set(stack, DataComponents.CUSTOM_DATA, CustomData.of(tag));
     }
 
     private static CompoundTag data(ItemStack stack) {
-        return stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
+        return PortItemData.getOrDefault(stack, DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
     }
 
     private static String normalizeDirection(Player player) {

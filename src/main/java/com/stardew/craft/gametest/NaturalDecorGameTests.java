@@ -1,5 +1,6 @@
 package com.stardew.craft.gametest;
 
+import com.stardew.craft.port.PortItemData;
 import com.mojang.authlib.GameProfile;
 import com.mojang.serialization.JsonOps;
 import com.stardew.craft.StardewCraft;
@@ -101,7 +102,7 @@ public final class NaturalDecorGameTests {
             var encoded=BlockState.CODEC.encodeStart(JsonOps.INSTANCE,state).getOrThrow();
             helper.assertTrue(BlockState.CODEC.parse(JsonOps.INSTANCE,encoded).getOrThrow().equals(state),"Plant state failed save round-trip");
         }
-        helper.assertTrue(fixed.get(DataComponents.BLOCK_STATE).get(NaturalPlantBlock.VARIANT)==1,"Fixed item changed");
+        helper.assertTrue(PortItemData.get(fixed, DataComponents.BLOCK_STATE).get(NaturalPlantBlock.VARIANT)==1,"Fixed item changed");
         level.setBlock(pos.below(),Blocks.STONE.defaultBlockState(),3);
         helper.assertTrue(!level.getBlockState(pos).getValue(NaturalPlantBlock.IN_PLANTER),"Plant retained planter offset on ground");
         helper.assertTrue(level.getBlockState(pos).getValue(NaturalPlantBlock.VARIANT)==1,"Support update rerolled plant");

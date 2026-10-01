@@ -32,7 +32,7 @@ public final class BuildingMovePreview {
         for(var pos:BuildingTransfer.sourcePositions(level,record)){
             var at=centered?pos.subtract(record.anchor()).rotate(inverse):PrefabDefinitions.rotateCell(pos.subtract(record.anchor()),inverse);
             var row=new CompoundTag();row.putIntArray("Pos",new int[]{at.getX(),at.getY(),at.getZ()});row.put("State",NbtUtils.writeBlockState(level.getBlockState(pos).rotate(inverse)));
-            var be=level.getBlockEntity(pos);if(be!=null)row.put("Appearance",be.saveWithFullMetadata(level.registryAccess()));blocks.add(row);
+            var be=level.getBlockEntity(pos);if(be!=null)row.put("Appearance",be.saveWithFullMetadata());blocks.add(row);
         }
         var covers=new ListTag();var floors=com.stardew.craft.floor.SurfaceFloorData.get(level);
         for(var pos:BlockPos.betweenClosed(bounds.min().below(centered?1:0),bounds.maxInclusive())){

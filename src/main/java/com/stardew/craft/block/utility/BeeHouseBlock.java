@@ -40,11 +40,12 @@ import net.minecraft.util.StringRepresentable;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
+import com.stardew.craft.port.PortBlockInteraction;
 
 /**
  * Bee House - produces honey.
  */
-public class BeeHouseBlock extends Block implements EntityBlock {
+public class BeeHouseBlock extends Block implements EntityBlock, PortBlockInteraction {
 	public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
 	public static final BooleanProperty READY = BooleanProperty.create("ready");
 	public static final EnumProperty<Part> PART = EnumProperty.create("part", Part.class);
@@ -84,7 +85,7 @@ public class BeeHouseBlock extends Block implements EntityBlock {
 
 	@SuppressWarnings("null")
 	@Override
-	protected List<ItemStack> getDrops(@Nonnull BlockState state, @Nonnull LootParams.Builder params) {
+	public List<ItemStack> getDrops(@Nonnull BlockState state, @Nonnull LootParams.Builder params) {
 		if (state.getValue(PART) == Part.EXTENSION) {
 			return List.of();
 		}
@@ -215,9 +216,16 @@ public class BeeHouseBlock extends Block implements EntityBlock {
 		return (lvl, pos, st, be) -> BeeHouseBlockEntity.serverTick(lvl, pos, st, (BeeHouseBlockEntity) be);
 	}
 
+	// PORT(1.20.1): replay the 1.21 useItemOn/useWithoutItem dispatch.
+	@Override
+	public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player,
+	        InteractionHand hand, BlockHitResult hit) {
+	    return PortBlockInteraction.dispatch(this, state, level, pos, player, hand, hit);
+	}
+
 	@SuppressWarnings("null")
 	@Override
-	protected ItemInteractionResult useItemOn(@Nonnull ItemStack stack, @Nonnull BlockState state, @Nonnull Level level, @Nonnull BlockPos pos, @Nonnull Player player, @Nonnull InteractionHand hand, @Nonnull BlockHitResult hit) {
+	public ItemInteractionResult useItemOn(@Nonnull ItemStack stack, @Nonnull BlockState state, @Nonnull Level level, @Nonnull BlockPos pos, @Nonnull Player player, @Nonnull InteractionHand hand, @Nonnull BlockHitResult hit) {
 		if (state.getValue(PART) == Part.EXTENSION) {
 			BlockPos mainPos = getMainPos(pos, state);
 			BlockState mainState = level.getBlockState(mainPos);
@@ -241,7 +249,7 @@ public class BeeHouseBlock extends Block implements EntityBlock {
 
 	@SuppressWarnings("null")
 	@Override
-	protected InteractionResult useWithoutItem(@Nonnull BlockState state, @Nonnull Level level, @Nonnull BlockPos pos, @Nonnull Player player, @Nonnull BlockHitResult hit) {
+	public InteractionResult useWithoutItem(@Nonnull BlockState state, @Nonnull Level level, @Nonnull BlockPos pos, @Nonnull Player player, @Nonnull BlockHitResult hit) {
 		if (state.getValue(PART) == Part.EXTENSION) {
 			BlockPos mainPos = getMainPos(pos, state);
 			BlockState mainState = level.getBlockState(mainPos);
@@ -282,11 +290,11 @@ public class BeeHouseBlock extends Block implements EntityBlock {
 
 	@SuppressWarnings("null")
 	@Override
-	public BlockState playerWillDestroy(@SuppressWarnings("null") Level level, @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") BlockState state, @SuppressWarnings("null") Player player) {
+	public void playerWillDestroy(@SuppressWarnings("null") Level level, @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") BlockState state, @SuppressWarnings("null") Player player) {
 		if (!level.isClientSide && state.getValue(PART) == Part.EXTENSION && !player.isCreative()) {
 			popResource(level, pos, new ItemStack(ModBlocks.BEE_HOUSE.get()));
 		}
-		return super.playerWillDestroy(level, pos, state, player);
+		super.playerWillDestroy(level, pos, state, player);
 	}
 
 	@SuppressWarnings("null")

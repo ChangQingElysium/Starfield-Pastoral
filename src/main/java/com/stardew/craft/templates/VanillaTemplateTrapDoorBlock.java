@@ -12,7 +12,7 @@ import net.minecraft.world.level.block.state.properties.BlockSetType;
 public final class VanillaTemplateTrapDoorBlock extends TrapDoorBlock implements EntityBlock, TemplateBlock {
     private final TemplateShape shape;
     public VanillaTemplateTrapDoorBlock(TemplateShape shape, BlockBehaviour.Properties properties) {
-        super(shape == TemplateShape.IRON_TRAPDOOR ? BlockSetType.IRON : BlockSetType.OAK, properties);
+        super(properties, shape == TemplateShape.IRON_TRAPDOOR ? BlockSetType.IRON : BlockSetType.OAK); // PORT(1.20.1): 1.20.1 constructor takes Properties first
         this.shape = shape;
     }
     @Override public TemplateShape templateShape() { return shape; }

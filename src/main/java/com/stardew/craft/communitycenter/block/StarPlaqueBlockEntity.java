@@ -89,14 +89,14 @@ public class StarPlaqueBlockEntity extends BlockEntity {
     // ── NBT ──
 
     @Override
-    protected void saveAdditional(@Nonnull CompoundTag tag, @Nonnull HolderLookup.Provider provider) {
-        super.saveAdditional(tag, provider);
+    protected void saveAdditional(@Nonnull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
+        super.saveAdditional(tag);
         tag.putInt(TAG_STARS, numberOfStars);
     }
 
     @Override
-    protected void loadAdditional(@Nonnull CompoundTag tag, @Nonnull HolderLookup.Provider provider) {
-        super.loadAdditional(tag, provider);
+    public void load(@Nonnull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
+        super.load(tag);
         numberOfStars = tag.getInt(TAG_STARS);
     }
 
@@ -104,7 +104,7 @@ public class StarPlaqueBlockEntity extends BlockEntity {
 
     @Override
     public @Nonnull CompoundTag getUpdateTag(@Nonnull HolderLookup.Provider provider) {
-        CompoundTag tag = super.getUpdateTag(provider);
+        CompoundTag tag = super.getUpdateTag();
         tag.putInt(TAG_STARS, numberOfStars);
         return tag;
     }

@@ -1,5 +1,6 @@
 package com.stardew.craft.blockentity;
 
+import com.stardew.craft.port.PortItemStacks;
 import com.stardew.craft.api.v1.item.StardewItemDataApi;
 import com.stardew.craft.item.ModItems;
 import com.stardew.craft.item.artisan.ArtisanRecipeDataManager;
@@ -316,21 +317,21 @@ public class PreservesJarBlockEntity extends TimedProductionBlockEntity {
 
 	@SuppressWarnings("null")
 	@Override
-	public CompoundTag getUpdateTag(@SuppressWarnings("null") net.minecraft.core.HolderLookup.Provider registries) {
-		CompoundTag tag = super.getUpdateTag(registries);
-		saveAdditional(tag, registries);
+	public CompoundTag getUpdateTag() { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+		CompoundTag tag = super.getUpdateTag();
+		saveAdditional(tag);
 		return tag;
 	}
 
 	@SuppressWarnings("null")
 	@Override
-	protected void saveAdditional(@SuppressWarnings("null") CompoundTag tag, @SuppressWarnings("null") net.minecraft.core.HolderLookup.Provider registries) {
-		super.saveAdditional(tag, registries);
+	protected void saveAdditional(@SuppressWarnings("null") CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+		super.saveAdditional(tag);
 		if (!input.isEmpty()) {
-			tag.put(TAG_INPUT, input.save(registries));
+			tag.put(TAG_INPUT, PortItemStacks.save(input, registries));
 		}
 		if (!product.isEmpty()) {
-			tag.put(TAG_PRODUCT, product.save(registries));
+			tag.put(TAG_PRODUCT, PortItemStacks.save(product, registries));
 		}
 		tag.putLong(TAG_READY_AT, readyAtAbsMinute);
 		tag.putBoolean(TAG_READY, ready);
@@ -338,10 +339,10 @@ public class PreservesJarBlockEntity extends TimedProductionBlockEntity {
 
 	@SuppressWarnings("null")
 	@Override
-	protected void loadAdditional(@SuppressWarnings("null") CompoundTag tag, @SuppressWarnings("null") net.minecraft.core.HolderLookup.Provider registries) {
-		super.loadAdditional(tag, registries);
-		input = tag.contains(TAG_INPUT) ? ItemStack.parse(registries, tag.getCompound(TAG_INPUT)).orElse(ItemStack.EMPTY) : ItemStack.EMPTY;
-		product = tag.contains(TAG_PRODUCT) ? ItemStack.parse(registries, tag.getCompound(TAG_PRODUCT)).orElse(ItemStack.EMPTY) : ItemStack.EMPTY;
+	public void load(@SuppressWarnings("null") CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+		super.load(tag);
+		input = tag.contains(TAG_INPUT) ? PortItemStacks.parse(registries, tag.getCompound(TAG_INPUT)).orElse(ItemStack.EMPTY) : ItemStack.EMPTY;
+		product = tag.contains(TAG_PRODUCT) ? PortItemStacks.parse(registries, tag.getCompound(TAG_PRODUCT)).orElse(ItemStack.EMPTY) : ItemStack.EMPTY;
 		readyAtAbsMinute = tag.getLong(TAG_READY_AT);
 		ready = tag.getBoolean(TAG_READY);
 	}

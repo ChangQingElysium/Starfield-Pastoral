@@ -53,8 +53,8 @@ public final class RockCrabEntity extends StardewMonsterEntity {
         waiter=random.nextDouble()<.4;
         if(variant.equals("iridium_crab"))waiter=true;
     }
-    @Override protected void defineSynchedData(SynchedEntityData.Builder builder) {
-        super.defineSynchedData(builder);builder.define(SHELL,5);builder.define(SHELL_GONE,false);builder.define(MOVING,false);builder.define(HIT_START,-100L);
+    @Override protected void defineSynchedData() {
+        super.defineSynchedData();this.entityData.define(SHELL,5);this.entityData.define(SHELL_GONE,false);this.entityData.define(MOVING,false);this.entityData.define(HIT_START,-100L);
     }
     public int shellHealth() { return entityData.get(SHELL); }
     public boolean shellGone() { return entityData.get(SHELL_GONE); }
@@ -66,7 +66,7 @@ public final class RockCrabEntity extends StardewMonsterEntity {
     @Override public boolean causeFallDamage(float distance,float multiplier,DamageSource source) { return false; }
     @Override public net.minecraft.world.phys.AABB getBoundingBoxForCulling() { return super.getBoundingBoxForCulling().inflate(.6); }
     private boolean valid(Player p) {
-        return p.isAlive()&&!p.isCreative()&&!p.isSpectator()&&!p.hasEffect(ModMobEffects.AVOID_MONSTERS)
+        return p.isAlive()&&!p.isCreative()&&!p.isSpectator()&&!p.hasEffect(ModMobEffects.AVOID_MONSTERS.get())
                 &&(monsterState().context().generation()==null||com.stardew.craft.mining.OrdinaryMineRuntime.floorAt(p.blockPosition())==monsterState().context().floor());
     }
     public static boolean withinNotice(int x,int z,int playerX,int playerZ) { return Math.abs(x-playerX)<=3&&Math.abs(z-playerZ)<=3; }

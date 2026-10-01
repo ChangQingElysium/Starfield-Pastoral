@@ -39,7 +39,7 @@ public class SharedMoneyData extends SavedData {
         if (server == null) {
             return new SharedMoneyData();
         }
-        return server.overworld().getDataStorage().computeIfAbsent(factory(), DATA_NAME);
+        return server.overworld().getDataStorage().computeIfAbsent(com.stardew.craft.port.PortSavedData.loader(factory()), com.stardew.craft.port.PortSavedData.constructor(factory()), DATA_NAME);
     }
 
     public int getMoney(ServerPlayer player) {
@@ -278,7 +278,7 @@ public class SharedMoneyData extends SavedData {
 
     @Override
     @Nonnull
-    public CompoundTag save(@Nonnull CompoundTag tag, @Nonnull HolderLookup.Provider provider) {
+    public CompoundTag save(@Nonnull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
         ListTag groupList = new ListTag();
         for (Group group : groups.values()) {
             CompoundTag groupTag = new CompoundTag();
@@ -326,7 +326,7 @@ public class SharedMoneyData extends SavedData {
         return data;
     }
 
-    public static SavedData.Factory<SharedMoneyData> factory() {
-        return new SavedData.Factory<>(SharedMoneyData::new, SharedMoneyData::load);
+    public static com.stardew.craft.port.PortSavedData.Factory<SharedMoneyData> factory() {
+        return new com.stardew.craft.port.PortSavedData.Factory<>(SharedMoneyData::new, SharedMoneyData::load);
     }
 }

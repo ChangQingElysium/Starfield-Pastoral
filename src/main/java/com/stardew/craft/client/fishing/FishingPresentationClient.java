@@ -18,7 +18,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import com.stardew.craft.port.net.neoforged.neoforge.client.event.ClientTickEvent;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -98,7 +98,7 @@ public final class FishingPresentationClient {
     public static boolean eligible(AbstractClientPlayer p){return FishingRigAssets.rig!=null&&p.isAlive()&&!p.isSpectator()&&!p.isInvisible()&&p.getMainHandItem().getItem() instanceof FishingRodItem&&p.getOffhandItem().isEmpty();}
     /** Keep every world-rendered player on Minecraft's native model and held-item animation. */
     public static boolean worldOwned(AbstractClientPlayer p){return FishingWorldRenderScope.owns(p.getUUID())&&firstPerson(p)&&eligible(p);}
-    public static State state(AbstractClientPlayer p){if(!eligible(p))return null;var state=STATES.computeIfAbsent(p.getUUID(),k->new State());state.lookPitch=p.getViewXRot(Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(false));return state;}
+    public static State state(AbstractClientPlayer p){if(!eligible(p))return null;var state=STATES.computeIfAbsent(p.getUUID(),k->new State());state.lookPitch=p.getViewXRot(com.stardew.craft.port.net.minecraft.client.DeltaTracker.client().getGameTimeDeltaPartialTick(false));return state;}
     public static void clear(){STATES.clear();level=Minecraft.getInstance().level;}
     public static void cancelLocal(){var p=Minecraft.getInstance().player;if(p!=null)STATES.remove(p.getUUID());FishingMinigameHud.cancel();}
     public static void receive(FishingPresentationPayload packet) {

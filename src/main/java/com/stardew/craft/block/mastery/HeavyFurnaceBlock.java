@@ -34,7 +34,7 @@ public class HeavyFurnaceBlock extends FurnaceBlock {
     }
 
     @Override
-    protected List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
+    public List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
         if (state.getValue(PART) == Part.EXTENSION) return List.of();
         return List.of(new ItemStack(ModBlocks.HEAVY_FURNACE.get()));
     }

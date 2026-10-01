@@ -13,7 +13,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import com.stardew.craft.port.net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 
@@ -37,7 +37,7 @@ public final class DragonRapierVisuals {
         boolean rapier=base.equals("rapier_riposte"),guard=p.skill().endsWith("_guard"),breath=base.equals("dragontooth_club_breath")&&p.phase()>0;
         String key=p.caster()+":"+p.tick()+":"+p.skill()+":"+p.phase()+":"+p.target();if(SEEN.putIfAbsent(key,level.getGameTime())!=null)return;
         while(SEEN.size()>256)SEEN.remove(SEEN.keySet().iterator().next());
-        if(Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()){EFFECTS.add(new Effect(p,level.getGameTime()));while(EFFECTS.size()>96)EFFECTS.removeFirst();}
+        if(Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()){EFFECTS.add(new Effect(p,level.getGameTime()));while(EFFECTS.size()>96)EFFECTS.removeFirst();}
         if(p.target()<0)level.playLocalSound(p.center().x,p.center().y+.6,p.center().z,guard?SoundEvents.SHIELD_BLOCK:breath?SoundEvents.FIRECHARGE_USE:SoundEvents.PLAYER_ATTACK_SWEEP,SoundSource.PLAYERS,breath?.22f:guard?.5f:.5f,rapier?1.2f:breath?.75f:.6f,false);
         else if(!Long.valueOf(p.tick()).equals(SOUNDS.put(p.caster(),p.tick()))) {
             level.playLocalSound(p.center().x,p.center().y,p.center().z,rapier?SoundEvents.TRIDENT_HIT:SoundEvents.PLAYER_ATTACK_STRONG,SoundSource.PLAYERS,rapier?.4f:breath?.3f:.65f,rapier?1.25f:breath?.9f:.55f,false);
@@ -48,8 +48,8 @@ public final class DragonRapierVisuals {
     }
     @SubscribeEvent public static void tick(ClientTickEvent.Post event){ensureLevel();if(level==null||Minecraft.getInstance().isPaused())return;long now=level.getGameTime();EFFECTS.removeIf(e->now-e.born>=8);SEEN.values().removeIf(t->now-t>40);SOUNDS.values().removeIf(t->now-t>40);}
     @SubscribeEvent public static void render(RenderLevelStageEvent e) {
-        if(e.getStage()!=RenderLevelStageEvent.Stage.AFTER_PARTICLES)return;ensureLevel();if(level==null||!Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean())return;
-        var mc=Minecraft.getInstance();double now=level.getGameTime()+e.getPartialTick().getGameTimeDeltaPartialTick(false);Vec3 camera=e.getCamera().getPosition();var stack=e.getPoseStack();stack.pushPose();stack.translate(-camera.x,-camera.y,-camera.z);
+        if(e.getStage()!=RenderLevelStageEvent.Stage.AFTER_PARTICLES)return;ensureLevel();if(level==null||!Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get())return;
+        var mc=Minecraft.getInstance();double now=level.getGameTime()+e.getPartialTick();Vec3 camera=e.getCamera().getPosition();var stack=e.getPoseStack();stack.pushPose();stack.translate(-camera.x,-camera.y,-camera.z);
         var pose=stack.last().pose();var buffers=mc.renderBuffers().bufferSource();
         for(int pass=0;pass<2;pass++) {
             boolean edge=pass==0;var type=edge?WeaponEffectRenderTypes.IMPACT_EDGE:WeaponEffectRenderTypes.MOLTEN_GLOW;var out=buffers.getBuffer(type);

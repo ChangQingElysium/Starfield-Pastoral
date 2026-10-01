@@ -44,8 +44,8 @@ public class FairyCompanionEntity extends Entity {
     }
 
     @Override
-    protected void defineSynchedData(SynchedEntityData.Builder builder) {
-        builder.define(OWNER, Optional.empty());
+    protected void defineSynchedData() {
+        this.entityData.define(OWNER, Optional.empty());
     }
 
     public Optional<UUID> getOwnerUuid() {
@@ -162,7 +162,7 @@ public class FairyCompanionEntity extends Entity {
     }
 
     @Override
-    public Packet<ClientGamePacketListener> getAddEntityPacket(net.minecraft.server.level.ServerEntity serverEntity) {
-        return new ClientboundAddEntityPacket(this, serverEntity);
+    public Packet<ClientGamePacketListener> getAddEntityPacket() {
+        return new ClientboundAddEntityPacket(this);
     }
 }

@@ -1,5 +1,6 @@
 package com.stardew.craft.gametest;
 
+import com.stardew.craft.port.PortGameTests;
 import com.google.gson.JsonParser;
 import com.mojang.authlib.GameProfile;
 import com.stardew.craft.api.v1.item.StardewItemDataApi;
@@ -17,7 +18,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
-import com.stardew.craft.port.net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
@@ -38,7 +38,7 @@ public final class SurfaceFloorGameTests {
     private SurfaceFloorGameTests() {}
     private static ServerPlayer player(GameTestHelper helper) {
         var level = helper.getLevel();
-        return new ServerPlayer(level.getServer(), level, new GameProfile(UUID.randomUUID(), "Floor test"), ClientInformation.createDefault());
+        return new ServerPlayer(level.getServer(), level, new GameProfile(UUID.randomUUID(), "Floor test"));
     }
 
     @GameTest(templateNamespace = "stardewcraft_surface_floor", template = "ring_utilities")
@@ -59,14 +59,14 @@ public final class SurfaceFloorGameTests {
 
         var job = new GroundVariantDebugCommand.BatchJob(start, end);
         var random = net.minecraft.util.RandomSource.create(42L);
-        helper.assertValueEqual(job.processBatch(level, random, 5), 5,
+        PortGameTests.assertValueEqual(helper, job.processBatch(level, random, 5), 5,
                 "debug repair ignored its per-tick block budget");
         helper.assertTrue(!job.isComplete(), "debug repair completed an oversized job in its first batch");
         while (!job.isComplete()) job.processBatch(level, random, 5);
         var result = job.result();
-        helper.assertValueEqual(result.matched(), 64L, "debug repair matched non-varied terrain");
+        PortGameTests.assertValueEqual(helper, result.matched(), 64L, "debug repair matched non-varied terrain");
         helper.assertTrue(result.changed() > 0, "debug repair did not change any pre-existing variants");
-        helper.assertValueEqual(result.skippedUnloaded(), 0L, "loaded test positions were skipped");
+        PortGameTests.assertValueEqual(helper, result.skippedUnloaded(), 0L, "loaded test positions were skipped");
         long variedGrass = 0L;
         long variedDirt = 0L;
         for (int z = 0; z < 8; z++) for (int x = 0; x < 8; x++) {
@@ -102,7 +102,7 @@ public final class SurfaceFloorGameTests {
             helper.assertTrue(level.getBlockState(pos) == ground && level.getBlockState(pos.above()) == furniture
                     && level.getBlockEntity(pos.above()) == chest, "Changed host, furniture or block entity");
             helper.assertTrue(ground.isCollisionShapeFullBlock(level, pos), "Host collision changed");
-            helper.assertValueEqual(StardewItemDataApi.getSellPrice(stack), 1,
+            PortGameTests.assertValueEqual(helper, StardewItemDataApi.getSellPrice(stack), 1,
                     "Floor item lost its original 1g base price: " + type);
             ((SurfaceFloorItem) type.item()).onItemUseFirst(stack, context);
             helper.assertTrue(stack.getCount() == 1, "Duplicate placement consumed another item");

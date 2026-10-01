@@ -81,7 +81,7 @@ public final class CutsceneTextAboveHeadRenderer {
         Vec3 cameraPos = event.getCamera().getPosition();
         PoseStack poseStack = event.getPoseStack();
         MultiBufferSource.BufferSource buffer = mc.renderBuffers().bufferSource();
-        float partial = event.getPartialTick().getGameTimeDeltaPartialTick(false);
+        float partial = event.getPartialTick();
 
         for (var iterator = BUBBLES.entrySet().iterator(); iterator.hasNext();) {
             Map.Entry<Integer, Bubble> entry = iterator.next();

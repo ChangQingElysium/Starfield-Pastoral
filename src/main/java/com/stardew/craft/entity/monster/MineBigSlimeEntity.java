@@ -1,5 +1,6 @@
 package com.stardew.craft.entity.monster;
-import com.stardew.craft.combat.MonsterStats;
+
+import com.stardew.craft.port.PortItemStacks;import com.stardew.craft.combat.MonsterStats;
 import com.stardew.craft.monster.*;
 import com.stardew.craft.sound.ModSounds;
 import net.minecraft.nbt.CompoundTag;
@@ -53,14 +54,14 @@ public final class MineBigSlimeEntity extends StardewMonsterEntity {
         entityData.set(COLOR,BigSlimeRules.color(area,random));if(BigSlimeRules.holdsCake(area,random))heldItem(MonsterSourceLoot.item("221",1));
         random.nextBoolean(); // Source consumes this before testing the disabled SC_NO_FOOD task rule.
     }
-    @Override protected void defineSynchedData(SynchedEntityData.Builder b){super.defineSynchedData(b);b.define(COLOR,0xff8a2be2);b.define(MOVING,false);b.define(HELD,ItemStack.EMPTY);b.define(HIT,-100L);}
+    @Override protected void defineSynchedData(){super.defineSynchedData();this.entityData.define(COLOR,0xff8a2be2);this.entityData.define(MOVING,false);this.entityData.define(HELD,ItemStack.EMPTY);this.entityData.define(HIT,-100L);}
     public int color(){return entityData.get(COLOR);}
     public boolean moving(){return entityData.get(MOVING);}
     public ItemStack heldItem(){return entityData.get(HELD);}
     public void heldItem(ItemStack item){entityData.set(HELD,item.copy());if(item.isEmpty())getPersistentData().remove("StardewMonsterHeldLoot");else getPersistentData().putString("StardewMonsterHeldLoot",net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(item.getItem()).toString());}
     public double hitTime(float p){return (level().getGameTime()-entityData.get(HIT)+p)/20.;}
     public void stunFor(int ms){stunMilliseconds=Math.max(stunMilliseconds,ms);}
-    private boolean valid(Player p){return p.isAlive()&&!p.isCreative()&&!p.isSpectator()&&!p.hasEffect(com.stardew.craft.effect.ModMobEffects.AVOID_MONSTERS)&&(monsterState().context().generation()==null||com.stardew.craft.mining.OrdinaryMineRuntime.floorAt(p.blockPosition())==monsterState().context().floor());}
+    private boolean valid(Player p){return p.isAlive()&&!p.isCreative()&&!p.isSpectator()&&!p.hasEffect(com.stardew.craft.effect.ModMobEffects.AVOID_MONSTERS.get())&&(monsterState().context().generation()==null||com.stardew.craft.mining.OrdinaryMineRuntime.floorAt(p.blockPosition())==monsterState().context().floor());}
     @Override protected void customServerAiStep(){
         if(!initialized())initialize(MonsterSpawnContext.capture((ServerLevel)level(),MonsterSpawnContext.Source.WORLD,121));
         var target=level().getNearestPlayer(getX(),getY(),getZ(),128,e->e instanceof Player p&&valid(p));setTarget(target);double x=getX(),z=getZ();movement.slipperiness(slipperiness);
@@ -73,7 +74,7 @@ public final class MineBigSlimeEntity extends StardewMonsterEntity {
     @Override public boolean causeFallDamage(float distance,float multiplier,DamageSource source){return false;}
     @Override public boolean hurt(DamageSource source,float amount){float before=getHealth();boolean accepted=super.hurt(source,amount);if(!level().isClientSide&&getHealth()<before){slipperiness=3;entityData.set(HIT,level().getGameTime());}return accepted;}
     @Override public void knockback(double strength,double x,double z){super.knockback(strength,x,z);var v=getDeltaMovement();lastTrajectoryX=v.x*64;lastTrajectoryZ=v.z*64;movement.knockback(lastTrajectoryX,lastTrajectoryZ);setDeltaMovement(Vec3.ZERO);}
-    @Override protected void dropAllDeathLoot(ServerLevel level,DamageSource source){
+    @Override protected void dropAllDeathLoot(DamageSource source){ServerLevel level=(ServerLevel)level(); // PORT(1.20.1): no ServerLevel parameter
         // LivingDeath has already accepted death. Add children before LivingDrops
         // settles population/ladder rolls, matching BigSlime.takeDamage ordering.
         if(!splitPrepared){splitPrepared=true;if(!source.is(DamageTypes.GENERIC_KILL)&&!source.is(DamageTypes.FELL_OUT_OF_WORLD)){
@@ -86,7 +87,7 @@ public final class MineBigSlimeEntity extends StardewMonsterEntity {
                 double dx=(int)lastTrajectoryX/8+random.nextInt(-2,3),dz=(int)lastTrajectoryZ/8+random.nextInt(-2,3);float scale=.75F+random.nextInt(-5,10)/100F;child.fromBigSlime(scale,dx,dz);MonsterFactory.addOffspring(level,child);
             }
         }}
-        super.dropAllDeathLoot(level,source);
+        super.dropAllDeathLoot(source);
     }
     private void splash(double x,double z,boolean slow){
         if(level() instanceof ServerLevel server){var type=slow?com.stardew.craft.weather.ModParticles.BIG_SLIME_SPLASH_SLOW.get():com.stardew.craft.weather.ModParticles.BIG_SLIME_SPLASH.get();server.sendParticles(com.stardew.craft.port.net.minecraft.core.particles.ColorParticleOption.create(type,color()),getX()+x,getY()+.5,getZ()+z,1,0,0,0,0);}
@@ -95,6 +96,6 @@ public final class MineBigSlimeEntity extends StardewMonsterEntity {
     @Override protected void tickDeath(){super.tickDeath();if(deathTime==2)splash(-.5,0,false);if(deathTime==4)splash(.5,0,false);if(deathTime==6)splash(0,-.5,true);}
     @Override protected SoundEvent getHurtSound(DamageSource source){return ModSounds.MONSTER_BAT_HIT.get();}
     @Override protected SoundEvent getDeathSound(){return ModSounds.SLIMEDEAD.get();}
-    @Override public void addAdditionalSaveData(CompoundTag t){super.addAdditionalSaveData(t);t.putInt("BigSlimeColor",color());if(!heldItem().isEmpty())t.put("BigSlimeHeld",heldItem().save(level().registryAccess()));t.put("BigSlimeMovement",movement.save());t.putInt("BigSlimeSlip",slipperiness);t.putInt("BigSlimeStun",stunMilliseconds);t.putDouble("BigSlimeTrajectoryX",lastTrajectoryX);t.putDouble("BigSlimeTrajectoryZ",lastTrajectoryZ);t.putBoolean("BigSlimeSplit",splitPrepared);}
-    @Override public void readAdditionalSaveData(CompoundTag t){super.readAdditionalSaveData(t);entityData.set(COLOR,t.getInt("BigSlimeColor"));heldItem(t.contains("BigSlimeHeld")?ItemStack.parseOptional(level().registryAccess(),t.getCompound("BigSlimeHeld")):ItemStack.EMPTY);movement.load(t.getCompound("BigSlimeMovement"));slipperiness=t.contains("BigSlimeSlip")?t.getInt("BigSlimeSlip"):2;stunMilliseconds=t.getInt("BigSlimeStun");lastTrajectoryX=t.getDouble("BigSlimeTrajectoryX");lastTrajectoryZ=t.getDouble("BigSlimeTrajectoryZ");splitPrepared=t.getBoolean("BigSlimeSplit");}
+    @Override public void addAdditionalSaveData(CompoundTag t){super.addAdditionalSaveData(t);t.putInt("BigSlimeColor",color());if(!heldItem().isEmpty())t.put("BigSlimeHeld",PortItemStacks.save(heldItem(), level().registryAccess()));t.put("BigSlimeMovement",movement.save());t.putInt("BigSlimeSlip",slipperiness);t.putInt("BigSlimeStun",stunMilliseconds);t.putDouble("BigSlimeTrajectoryX",lastTrajectoryX);t.putDouble("BigSlimeTrajectoryZ",lastTrajectoryZ);t.putBoolean("BigSlimeSplit",splitPrepared);}
+    @Override public void readAdditionalSaveData(CompoundTag t){super.readAdditionalSaveData(t);entityData.set(COLOR,t.getInt("BigSlimeColor"));heldItem(t.contains("BigSlimeHeld")?PortItemStacks.parseOptional(level().registryAccess(),t.getCompound("BigSlimeHeld")):ItemStack.EMPTY);movement.load(t.getCompound("BigSlimeMovement"));slipperiness=t.contains("BigSlimeSlip")?t.getInt("BigSlimeSlip"):2;stunMilliseconds=t.getInt("BigSlimeStun");lastTrajectoryX=t.getDouble("BigSlimeTrajectoryX");lastTrajectoryZ=t.getDouble("BigSlimeTrajectoryZ");splitPrepared=t.getBoolean("BigSlimeSplit");}
 }

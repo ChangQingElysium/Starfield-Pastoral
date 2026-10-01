@@ -1,5 +1,6 @@
 package com.stardew.craft.building.runtime;
 
+import com.stardew.craft.port.PortItemData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -15,7 +16,7 @@ import java.util.*;
 /** Write-ahead demolition and manager refund; a reload retries only the exact original component list. */
 public final class BuildingRemovalJournal extends SavedData {
     private final Map<UUID,CompoundTag> pending=new LinkedHashMap<>();
-    public static BuildingRemovalJournal get(MinecraftServer server){return server.overworld().getDataStorage().computeIfAbsent(new Factory<>(BuildingRemovalJournal::new,BuildingRemovalJournal::load),"stardew_building_removals");}
+    public static BuildingRemovalJournal get(MinecraftServer server){return server.overworld().getDataStorage().computeIfAbsent(com.stardew.craft.port.PortSavedData.loader(new Factory<>(BuildingRemovalJournal::new,BuildingRemovalJournal::load)), com.stardew.craft.port.PortSavedData.constructor(new Factory<>(BuildingRemovalJournal::new,BuildingRemovalJournal::load)),"stardew_building_removals");}
     public boolean contains(UUID id){return pending.containsKey(id);}
     public void prepare(ServerPlayer player,BuildingRecord record,Collection<BlockPos> positions){
         if(pending.containsKey(record.id()))return;
@@ -42,7 +43,7 @@ public final class BuildingRemovalJournal extends SavedData {
                     if(data.hasUUID("BuildingRefund") && data.getUUID("BuildingRefund").equals(record.id())){delivered=true;break;}
                 }
                 if(!delivered){
-                    var item=new ItemStack(PrefabDefinitions.managerItem(record.family()));var receipt=new CompoundTag();receipt.putUUID("BuildingRefund",record.id());item.set(com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_DATA,com.stardew.craft.port.net.minecraft.world.item.component.CustomData.of(receipt));
+                    var item=new ItemStack(PrefabDefinitions.managerItem(record.family()));var receipt=new CompoundTag();receipt.putUUID("BuildingRefund",record.id());PortItemData.set(item, com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_DATA,com.stardew.craft.port.net.minecraft.world.item.component.CustomData.of(receipt));
                     var plan=BuildingPurchasePlan.prepare(player.getInventory(),item,List.of());if(plan==null)continue;plan.apply(player.getInventory());
                 }
                 server.getPlayerList().saveAll();
@@ -50,6 +51,6 @@ public final class BuildingRemovalJournal extends SavedData {
             pending.remove(entry.getKey());setDirty();server.overworld().getDataStorage().save();
         }
     }
-    @Override public CompoundTag save(CompoundTag tag,HolderLookup.Provider registries){var list=new ListTag();pending.values().forEach(value->list.add(value.copy()));tag.put("Removals",list);return tag;}
+    @Override public CompoundTag save(CompoundTag tag){ net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();var list=new ListTag();pending.values().forEach(value->list.add(value.copy()));tag.put("Removals",list);return tag;}
     public static BuildingRemovalJournal load(CompoundTag tag,HolderLookup.Provider registries){var data=new BuildingRemovalJournal();for(var raw:tag.getList("Removals",10)){var row=(CompoundTag)raw;data.pending.put(row.getCompound("Building").getUUID("Id"),row.copy());}return data;}
 }

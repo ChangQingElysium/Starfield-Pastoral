@@ -1,5 +1,6 @@
 package com.stardew.craft.inventory;
 
+import com.stardew.craft.port.PortItemStacks;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
@@ -17,7 +18,7 @@ public final class JunimoChestData extends SavedData {
     private final Map<UUID, UUID> viewers = new HashMap<>();
     public static JunimoChestData get(MinecraftServer server) {
         return server.overworld().getDataStorage().computeIfAbsent(
-                new Factory<>(JunimoChestData::new, JunimoChestData::load), "stardewcraft_junimo_chests");
+                com.stardew.craft.port.PortSavedData.loader(new Factory<>(JunimoChestData::new, JunimoChestData::load)), com.stardew.craft.port.PortSavedData.constructor(new Factory<>(JunimoChestData::new, JunimoChestData::load)), "stardewcraft_junimo_chests");
     }
     public NonNullList<ItemStack> items(UUID owner) {
         return inventories.computeIfAbsent(owner, ignored -> NonNullList.withSize(9, ItemStack.EMPTY));
@@ -33,7 +34,7 @@ public final class JunimoChestData extends SavedData {
     }
     public void opened(UUID owner, UUID player) { viewers.put(owner, player); }
     public void closed(UUID owner, UUID player) { viewers.remove(owner, player); }
-    @Override public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
+    @Override public CompoundTag save(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
         ListTag farms = new ListTag();
         inventories.forEach((owner, items) -> {
             CompoundTag farm = new CompoundTag();
@@ -41,7 +42,7 @@ public final class JunimoChestData extends SavedData {
             ListTag stacks = new ListTag();
             for (int i = 0; i < items.size(); i++) if (!items.get(i).isEmpty()) {
                 CompoundTag entry = new CompoundTag();
-                entry.putInt("Slot", i); entry.put("Stack", items.get(i).save(registries)); stacks.add(entry);
+                entry.putInt("Slot", i); entry.put("Stack", PortItemStacks.save(items.get(i), registries)); stacks.add(entry);
             }
             farm.put("Items", stacks); farms.add(farm);
         });
@@ -57,7 +58,7 @@ public final class JunimoChestData extends SavedData {
             for (var v : farm.getList("Items", 10)) {
                 CompoundTag entry = (CompoundTag) v;
                 int slot = entry.getInt("Slot");
-                if (slot >= 0 && slot < 9) items.set(slot, ItemStack.parse(registries, entry.getCompound("Stack")).orElse(ItemStack.EMPTY));
+                if (slot >= 0 && slot < 9) items.set(slot, PortItemStacks.parse(registries, entry.getCompound("Stack")).orElse(ItemStack.EMPTY));
             }
         }
         return data;

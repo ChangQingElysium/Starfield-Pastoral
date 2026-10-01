@@ -1,5 +1,6 @@
 package com.stardew.craft.gametest;
 
+import com.stardew.craft.port.PortItemData;
 import com.mojang.authlib.GameProfile;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.block.ModBlocks;
@@ -17,7 +18,6 @@ import com.stardew.craft.port.net.minecraft.core.component.DataComponents;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.NbtOps;
-import com.stardew.craft.port.net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
@@ -72,14 +72,14 @@ public final class RedPavingGameTests {
         var level = helper.getLevel();
         var pos = helper.absolutePos(new BlockPos(8, 1, 8));
         var block = ModBlocks.PLAZA_RED_BRICKS.get();
-        var player = new ServerPlayer(level.getServer(), level, new GameProfile(UUID.randomUUID(), "Paving test"), ClientInformation.createDefault());
+        var player = new ServerPlayer(level.getServer(), level, new GameProfile(UUID.randomUUID(), "Paving test"));
         player.getAbilities().instabuild = true;
         level.setBlock(pos.above(), Blocks.AIR.defaultBlockState(), 3);
         for (int variant = 0; variant < 6; variant++) {
             var source = block.defaultBlockState().setValue(TerrainVariants.PAVING, variant);
             var ordinary = new ItemStack(block);
             var fixed = TerrainVariants.fixedCopy(ordinary, source);
-            helper.assertTrue(!ordinary.has(DataComponents.BLOCK_STATE), "Ctrl-copy fixed the original stack");
+            helper.assertTrue(!PortItemData.has(ordinary, DataComponents.BLOCK_STATE), "Ctrl-copy fixed the original stack");
             player.setItemInHand(InteractionHand.MAIN_HAND, fixed);
             for (int repeat = 0; repeat < 5; repeat++) {
                 level.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);

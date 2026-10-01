@@ -370,11 +370,12 @@ public class FarmAdminScreen extends Screen {
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollY) {
+        double scrollX = 0.0D; // PORT(1.20.1): no horizontal scroll before 1.20.2
         int oldOffset = scrollOffset;
         scrollOffset = (int) Math.max(0, Math.min(maxScroll, scrollOffset - scrollY * 20));
         if (scrollOffset != oldOffset) return true;
-        return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
+        return super.mouseScrolled(mouseX, mouseY, scrollY);
     }
 
     @Override

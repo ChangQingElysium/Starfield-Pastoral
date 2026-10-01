@@ -28,7 +28,7 @@ import java.util.List;
  * Handles ring-specific on-kill and on-hit effects.
  * Registered as a Forge event subscriber.
  */
-@net.minecraftforge.fml.common.Mod.EventBusSubscriber(modid = com.stardew.craft.StardewCraft.MODID)
+@com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber(modid = com.stardew.craft.StardewCraft.MODID)
 @SuppressWarnings("null")
 public class RingEffectHandler {
 

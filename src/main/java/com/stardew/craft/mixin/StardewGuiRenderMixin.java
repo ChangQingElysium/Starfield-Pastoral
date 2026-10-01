@@ -6,11 +6,11 @@ import com.stardew.craft.client.gui.common.StardewGuiViewport;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
-import com.stardew.craft.port.net.neoforged.neoforge.client.ClientHooks;
+import net.minecraftforge.client.ForgeHooksClient;
 import org.spongepowered.asm.mixin.Mixin;
 
 /** Includes MinecraftForge's pre/post render events so extension overlays share the same coordinates. */
-@Mixin(ClientHooks.class)
+@Mixin(ForgeHooksClient.class)
 public abstract class StardewGuiRenderMixin {
     @WrapMethod(method = "drawScreenInternal", remap = false)
     private static void stardewcraft$render(Screen screen, GuiGraphics graphics, int mouseX, int mouseY,

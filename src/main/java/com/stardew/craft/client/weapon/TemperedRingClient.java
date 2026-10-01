@@ -11,7 +11,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import com.stardew.craft.port.net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 
@@ -30,7 +30,7 @@ public final class TemperedRingClient {
     public static void receive(TemperedRingPayload p) {
         ensureLevel(); if(!p.active()) {RINGS.remove(p.id());return;}
         var player=Minecraft.getInstance().player;
-        if(level==null||player==null||!Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()
+        if(level==null||player==null||!Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()
                 ||p.duration()<=0||p.duration()>40||!Float.isFinite(p.radius())||p.radius()<=0||p.radius()>4
                 ||!Double.isFinite(p.x())||!Double.isFinite(p.y())||!Double.isFinite(p.z())
                 ||player.distanceToSqr(p.x(),p.y(),p.z())>48*48||RINGS.containsKey(p.id())) return;
@@ -49,10 +49,10 @@ public final class TemperedRingClient {
     }
     @SubscribeEvent public static void render(RenderLevelStageEvent e) {
         if(e.getStage()!=RenderLevelStageEvent.Stage.AFTER_PARTICLES) return;
-        ensureLevel();if(level==null||RINGS.isEmpty()||!Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()) return;
+        ensureLevel();if(level==null||RINGS.isEmpty()||!Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()) return;
         var mc=Minecraft.getInstance();var stack=e.getPoseStack();var buffers=mc.renderBuffers().bufferSource();
         Vec3 camera=e.getCamera().getPosition();
-        double now=level.getGameTime()+e.getPartialTick().getGameTimeDeltaPartialTick(false);
+        double now=level.getGameTime()+e.getPartialTick();
         stack.pushPose();
         var out=buffers.getBuffer(WeaponEffectRenderTypes.MOLTEN_GLOW);
         for(Ring ring:RINGS.values()) {

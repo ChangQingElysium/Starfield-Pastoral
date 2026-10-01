@@ -15,10 +15,10 @@ public final class ElfBladeMarkRenderer {
     public static void onRenderLevel(RenderLevelStageEvent event) {
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_ENTITIES) return;
         Minecraft mc = Minecraft.getInstance();
-        if (mc.level == null || !Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()) return;
+        if (mc.level == null || !Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()) return;
         var ids = ElfBladeMarkClientState.markedEntityIds();
         if (ids.isEmpty()) return;
-        float partial = event.getPartialTick().getGameTimeDeltaPartialTick(false);
+        float partial = event.getPartialTick();
         long tick = mc.level.getGameTime();
         Vec3 camera = event.getCamera().getPosition();
         var stack = event.getPoseStack();

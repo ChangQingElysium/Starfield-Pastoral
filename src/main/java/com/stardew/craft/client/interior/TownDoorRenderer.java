@@ -21,7 +21,7 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.client.renderer.RenderBuffers;
 import net.minecraft.client.renderer.ShaderInstance;
-import com.stardew.craft.port.net.minecraft.client.renderer.chunk.SectionRenderDispatcher;
+import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -50,7 +50,7 @@ final class TownDoorRenderer implements AutoCloseable {
     private static final double PREPARE_RANGE = 32.0;
     private static final double NEAR_PLANE_FRUSTUM_BYPASS = 0.1;
     private RenderBuffers portalBuffers;
-    private final Map<Integer, ObjectArrayList<SectionRenderDispatcher.RenderSection>> portalVisibleSections = new HashMap<>();
+    private final Map<Integer, ObjectArrayList<ChunkRenderDispatcher.RenderChunk>> portalVisibleSections = new HashMap<>();
     private final ViewCamera virtualCamera = new ViewCamera();
     private final SodiumContext sodiumContext = new SodiumContext();
     private final IrisContext irisContext = new IrisContext();
@@ -71,7 +71,7 @@ final class TownDoorRenderer implements AutoCloseable {
         boolean promoted = false;
         try {
             var levelRenderer = (TownDoorLevelRendererAccessor) mc.levelRenderer;
-            ObjectArrayList<SectionRenderDispatcher.RenderSection> cached = portalVisibleSections.get(doorId);
+            ObjectArrayList<ChunkRenderDispatcher.RenderChunk> cached = portalVisibleSections.get(doorId);
             if (cached != null && !cached.isEmpty()) {
                 var mainVisibleSections = levelRenderer.stardewcraft$getVisibleSections();
                 levelRenderer.stardewcraft$setVisibleSections(cached);

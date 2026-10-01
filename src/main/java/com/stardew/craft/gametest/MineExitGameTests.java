@@ -8,7 +8,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
-import com.stardew.craft.port.net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
@@ -36,7 +35,7 @@ public final class MineExitGameTests {
         var block = (MineExitBlock) ModBlocks.MINE_EXIT.get();
         BlockPos root = helper.absolutePos(new BlockPos(8, 2, 8));
         var player = new ServerPlayer(level.getServer(), level,
-                new GameProfile(UUID.randomUUID(), "Exit ladder test"), ClientInformation.createDefault()) {
+                new GameProfile(UUID.randomUUID(), "Exit ladder test")) {
             // No connected client: expose the two permission modes directly for this test player.
             @Override public boolean isCreative() { return getAbilities().instabuild; }
         };

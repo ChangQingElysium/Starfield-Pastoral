@@ -152,7 +152,7 @@ public final class DesertFestivalRaceService {
 
     public static RaceData get(MinecraftServer server) {
         return server.overworld().getDataStorage().computeIfAbsent(
-            new SavedData.Factory<>(RaceData::new, RaceData::load),
+            com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(RaceData::new, RaceData::load)), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(RaceData::new, RaceData::load)),
             DATA_NAME
         );
     }
@@ -595,7 +595,7 @@ public final class DesertFestivalRaceService {
         }
 
         @Override
-        public CompoundTag save(@Nonnull CompoundTag tag, @Nonnull HolderLookup.Provider registries) {
+        public CompoundTag save(@Nonnull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
             tag.putInt("DateKey", dateKey);
             tag.putInt("NextRoomId", nextRoomId);
             tag.put("Rewards", intMap(rewardsToCollect));

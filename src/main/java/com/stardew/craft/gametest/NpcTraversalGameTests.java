@@ -1,5 +1,6 @@
 package com.stardew.craft.gametest;
 
+import com.stardew.craft.port.PortLevels;
 import com.stardew.craft.entity.ModEntities;
 import com.stardew.craft.entity.npc.StardewNpcEntity;
 import com.stardew.craft.npc.runtime.NpcCentralMovementService;
@@ -1025,7 +1026,7 @@ public final class NpcTraversalGameTests {
                     double distance = npc.position().subtract(target).horizontalDistance();
                     h.assertTrue(distance >= 0.5D && distance <= 1.5D,
                             "NPC did not stop at the nearest safe furniture edge: " + npc.position());
-                    h.assertTrue(level.noBlockCollision(npc, npc.getBoundingBox()),
+                    h.assertTrue(PortLevels.noBlockCollision(level, npc, npc.getBoundingBox()),
                             "NPC settled inside the blocked furniture target");
                     com.stardew.craft.npc.runtime.NpcChunkForceManager.releaseNpcForcedChunks(
                             level, npc.getNpcId());
@@ -1215,7 +1216,7 @@ public final class NpcTraversalGameTests {
         execute(h, npc, plan);
         h.assertTrue(stepIndex.getInt(plan) == 1 && settled.getBoolean(plan),
                 "Blocked furniture edge kept retrying after navigation discarded its completed path");
-        h.assertTrue(level.noBlockCollision(npc, npc.getBoundingBox()),
+        h.assertTrue(PortLevels.noBlockCollision(level, npc, npc.getBoundingBox()),
                 "NPC settled inside furniture after its path was discarded");
         h.succeed();
     }
@@ -1291,7 +1292,7 @@ public final class NpcTraversalGameTests {
                     h.assertTrue(settled.getBoolean(plan), "Unreachable target reported exact arrival");
                     h.assertTrue(npc.getX() > base.getX() + 2.5 && npc.getX() < base.getX() + 4,
                             "NPC did not walk to the reachable side of the wall: " + npc.position() + " base=" + base + " target=" + target);
-                    h.assertTrue(level.noBlockCollision(npc, npc.getBoundingBox()), "Nearest endpoint is obstructed");
+                    h.assertTrue(PortLevels.noBlockCollision(level, npc, npc.getBoundingBox()), "Nearest endpoint is obstructed");
                     h.succeed();
                 }
             } catch (ReflectiveOperationException exception) { throw new RuntimeException(exception); }

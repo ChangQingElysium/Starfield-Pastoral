@@ -27,18 +27,14 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 import javax.annotation.Nullable;
+import net.minecraft.world.InteractionHand;
+import com.stardew.craft.port.PortBlockInteraction;
 
 @SuppressWarnings("null")
-public class FriendshipDoorBlock extends DoorBlock implements EntityBlock {
-    public static final MapCodec<FriendshipDoorBlock> CODEC = simpleCodec(FriendshipDoorBlock::new);
+public class FriendshipDoorBlock extends DoorBlock implements EntityBlock, PortBlockInteraction {
 
     public FriendshipDoorBlock(Properties properties) {
-        super(BlockSetType.OAK, properties);
-    }
-
-    @Override
-    public MapCodec<? extends DoorBlock> codec() {
-        return CODEC;
+        super(properties, BlockSetType.OAK); // PORT(1.20.1): 1.20.1 constructor takes Properties first
     }
 
     @Override
@@ -46,8 +42,15 @@ public class FriendshipDoorBlock extends DoorBlock implements EntityBlock {
         return new FriendshipDoorBlockEntity(pos, state);
     }
 
+    // PORT(1.20.1): replay the 1.21 useItemOn/useWithoutItem dispatch.
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player,
+            InteractionHand hand, BlockHitResult hit) {
+        return PortBlockInteraction.dispatch(this, state, level, pos, player, hand, hit);
+    }
+
+    @Override
+    public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         if (!canPlayerUseDoor(level, state, pos, player)) {
             if (!level.isClientSide) {
                 FriendshipDoorBlockEntity door = getDoorData(level, state, pos);
@@ -56,7 +59,8 @@ public class FriendshipDoorBlock extends DoorBlock implements EntityBlock {
             }
             return InteractionResult.SUCCESS;
         }
-        return super.useWithoutItem(state, level, pos, player, hit);
+        // PORT(1.20.1): 1.20.1 DoorBlock#use is the 1.21 DoorBlock#useWithoutItem (hand-independent).
+        return super.use(state, level, pos, player, net.minecraft.world.InteractionHand.MAIN_HAND, hit);
     }
 
     @Override
@@ -74,8 +78,8 @@ public class FriendshipDoorBlock extends DoorBlock implements EntityBlock {
     }
 
     @Override
-    protected boolean isPathfindable(BlockState state, PathComputationType type) {
-        return type == PathComputationType.LAND || super.isPathfindable(state, type);
+    public boolean isPathfindable(BlockState state, BlockGetter level, BlockPos pos, PathComputationType type) {
+        return type == PathComputationType.LAND || super.isPathfindable(state, level, pos, type);
     }
 
     private boolean canPlayerUseDoor(BlockGetter level, BlockState state, BlockPos pos, Player player) {

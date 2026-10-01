@@ -85,13 +85,13 @@ public final class TemplateLightingGameTests {
             var template = (TemplateBlockEntity) level.getBlockEntity(pos);
             template.setMaterial(Blocks.GLOWSTONE.defaultBlockState());
             helper.assertTrue(level.getBlockState(pos).getLightEmission(level, pos) == 15
-                            && level.getAuxLightManager(pos).getLightAt(pos) == 15,
+                            && com.stardew.craft.port.PortAuxLight.getAuxLightManager(level, pos).getLightAt(pos) == 15,
                     "Template did not publish its light for background lighting/chunk saves: " + entry.getKey());
             template.setMaterial(null);
-            helper.assertTrue(level.getAuxLightManager(pos).getLightAt(pos) == 0, "Removing a material left cached light");
+            helper.assertTrue(com.stardew.craft.port.PortAuxLight.getAuxLightManager(level, pos).getLightAt(pos) == 0, "Removing a material left cached light");
             template.setMaterial(Blocks.GLOWSTONE.defaultBlockState());
             level.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
-            helper.assertTrue(level.getAuxLightManager(pos).getLightAt(pos) == 0, "Breaking a template left ghost light");
+            helper.assertTrue(com.stardew.craft.port.PortAuxLight.getAuxLightManager(level, pos).getLightAt(pos) == 0, "Breaking a template left ghost light");
         }
         helper.succeed();
     }

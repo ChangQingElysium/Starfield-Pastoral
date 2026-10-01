@@ -43,7 +43,7 @@ public class PowderMelonCropBlock extends TomatoCropBlock {
     }
 
     @Override
-    protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean moving) {
+    public void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean moving) {
         if (state.getValue(HALF) == net.minecraft.world.level.block.state.properties.DoubleBlockHalf.LOWER) {
             BlockState above = level.getBlockState(pos.above());
             if (!above.isAir() && above.getBlock() != this) return;

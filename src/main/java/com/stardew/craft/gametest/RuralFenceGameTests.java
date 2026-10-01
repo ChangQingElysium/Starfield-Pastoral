@@ -119,7 +119,7 @@ public final class RuralFenceGameTests {
             var shape = state.getShape(level, pos);
             helper.assertTrue(Math.abs(shape.bounds().maxY - 31.0 / 16) < 1E-8, "Wrong fence height");
             helper.assertTrue(!Shapes.joinIsNotEmpty(shape, upper.getShape(level, pos.above()).move(0, 1, 0), BooleanOp.NOT_SAME), "Upper outline diverges");
-            helper.assertTrue(!state.isPathfindable(PathComputationType.LAND), "AI can walk through fence");
+            helper.assertTrue(!state.isPathfindable(level, pos, PathComputationType.LAND), "AI can walk through fence");
             clear(level, pos);
             helper.assertTrue(level.getBlockState(pos.above()).isAir(), "Upper cell was orphaned");
         }

@@ -12,7 +12,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.*;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import net.minecraftforge.client.event.*;
 import org.joml.*;
 import java.lang.Math;
@@ -28,7 +28,7 @@ public final class SlingshotRenderer {
     public static ResourceLocation id(String s){return new ResourceLocation(StardewCraft.MODID,s);}
     public static void renderHeld(net.minecraft.world.entity.LivingEntity entity,ItemStack item,ItemDisplayContext context,boolean left,
                                   PoseStack stack,MultiBufferSource buffers,int light){
-        var mc=Minecraft.getInstance();float partial=mc.getTimer().getGameTimeDeltaPartialTick(false);
+        var mc=Minecraft.getInstance();float partial=com.stardew.craft.port.net.minecraft.client.DeltaTracker.client().getGameTimeDeltaPartialTick(false);
         float draw=SlingshotPresentation.draw(entity,item,partial);
         boolean drawing=SlingshotPresentation.isDrawing(entity,item);
         var slingshot=(SlingshotItem)item.getItem();
@@ -37,7 +37,7 @@ public final class SlingshotRenderer {
         float anchorY=slingshot.isMaster()?11.25f:10.5f;
         var model=mc.getItemRenderer().getModel(item,entity.level(),entity,entity.getId());
         stack.pushPose();
-        com.stardew.craft.port.net.neoforged.neoforge.client.ClientHooks.handleCameraTransforms(stack,model,context,left);
+        net.minecraftforge.client.ForgeHooksClient.handleCameraTransforms(stack,model,context,left);
         // ItemInHandLayer contributes -90 degrees around X. The raised vanilla bow
         // arm supplies the other quarter turn; a resting arm needs it on the item.
         if ((context == ItemDisplayContext.THIRD_PERSON_RIGHT_HAND

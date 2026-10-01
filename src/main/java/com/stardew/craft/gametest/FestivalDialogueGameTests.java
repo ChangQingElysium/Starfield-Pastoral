@@ -16,7 +16,6 @@ import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketFlow;
 import com.stardew.craft.port.net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
-import com.stardew.craft.port.net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import com.stardew.craft.port.net.minecraft.server.network.CommonListenerCookie;
@@ -168,11 +167,11 @@ public final class FestivalDialogueGameTests {
 
     private static ServerPlayer player(ServerLevel level, List<OpenNpcDialogueScreenPayload> packets) {
         var player = new ServerPlayer(level.getServer(), level,
-                new GameProfile(UUID.randomUUID(), "FestivalReader"), ClientInformation.createDefault());
+                new GameProfile(UUID.randomUUID(), "FestivalReader"));
         player.connection = new ServerGamePacketListenerImpl(level.getServer(), new Connection(PacketFlow.SERVERBOUND),
-                player, CommonListenerCookie.createInitial(player.getGameProfile(), false)) {
+                player) {
             @Override public void send(Packet<?> packet) {
-                if (packet instanceof ClientboundCustomPayloadPacket custom
+                if (ClientboundCustomPayloadPacket.unwrap(packet) instanceof ClientboundCustomPayloadPacket custom
                         && custom.payload() instanceof OpenNpcDialogueScreenPayload dialogue) packets.add(dialogue);
             }
         };

@@ -14,7 +14,7 @@ import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 /** Two neighboring shop doors form a pair, even if the first leaf had the wrong hinge. */
 public final class ShopGlassDoorBlock extends DoorBlock {
     public ShopGlassDoorBlock(Properties properties) {
-        super(BlockSetType.OAK, properties);
+        super(properties, BlockSetType.OAK); // PORT(1.20.1): 1.20.1 constructor takes Properties first
     }
 
     @Override

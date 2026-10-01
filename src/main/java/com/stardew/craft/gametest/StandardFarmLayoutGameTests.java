@@ -557,7 +557,7 @@ public final class StandardFarmLayoutGameTests {
             }
         }
         helper.getLevel().setBlock(grass, ModBlocks.GRASS_BLOCK.get().defaultBlockState(), 3);
-        helper.getLevel().setBlock(grass.above(), Blocks.SHORT_GRASS.defaultBlockState(), 3);
+        helper.getLevel().setBlock(grass.above(), Blocks.GRASS.defaultBlockState(), 3);
         helper.assertTrue(grass.above().equals(FarmDebrisPlacementRules.findMonsterSurface(
                         helper.getLevel(), farm, grass.getX(), grass.getZ())),
                 "Collision-free farm vegetation incorrectly blocked Wilderness monsters");

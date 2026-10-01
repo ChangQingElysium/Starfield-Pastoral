@@ -1,5 +1,6 @@
 package com.stardew.craft.block.mine;
 
+import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.block.ModBlocks;
 import java.util.function.Supplier;
 import net.minecraft.world.level.block.Block;
@@ -32,7 +33,7 @@ public enum MineBuildingTheme implements net.minecraft.util.StringRepresentable 
             net.minecraft.world.level.block.state.properties.EnumProperty.create("theme", MineBuildingTheme.class);
 
     public static MineBuildingTheme forPlacement(net.minecraft.world.item.context.BlockPlaceContext context) {
-        var fixed = context.getItemInHand().getOrDefault(com.stardew.craft.port.net.minecraft.core.component.DataComponents.BLOCK_STATE,
+        var fixed = PortItemData.getOrDefault(context.getItemInHand(), com.stardew.craft.port.net.minecraft.core.component.DataComponents.BLOCK_STATE,
                 com.stardew.craft.port.net.minecraft.world.item.component.BlockItemStateProperties.EMPTY).get(PROPERTY);
         if (fixed != null) return fixed;
         for (var direction : net.minecraft.core.Direction.values()) {
@@ -45,7 +46,7 @@ public enum MineBuildingTheme implements net.minecraft.util.StringRepresentable 
 
     public static net.minecraft.world.item.ItemStack picked(Block block, BlockState state) {
         var stack = new net.minecraft.world.item.ItemStack(block);
-        stack.set(com.stardew.craft.port.net.minecraft.core.component.DataComponents.BLOCK_STATE,
+        PortItemData.set(stack, com.stardew.craft.port.net.minecraft.core.component.DataComponents.BLOCK_STATE,
                 com.stardew.craft.port.net.minecraft.world.item.component.BlockItemStateProperties.EMPTY.with(PROPERTY, state));
         return stack;
     }

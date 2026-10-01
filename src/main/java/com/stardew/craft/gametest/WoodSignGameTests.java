@@ -1,5 +1,6 @@
 package com.stardew.craft.gametest;
 
+import com.stardew.craft.port.PortItemData;
 import com.mojang.authlib.GameProfile;
 import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.block.utility.WoodSignBlock;
@@ -29,6 +30,7 @@ import net.minecraftforge.gametest.GameTestHolder;
 import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 import java.util.UUID;
+import com.stardew.craft.port.PortBlockInteraction;
 
 @GameTestHolder("stardewcraft_signs")
 @PrefixGameTestTemplate(false)
@@ -65,20 +67,20 @@ public final class WoodSignGameTests {
         BlockPos pos = stand(h);
         var player = player(h);
         var item = new ItemStack(Items.DIAMOND, 17);
-        item.set(DataComponents.CUSTOM_NAME, Component.literal("Display specimen"));
+        PortItemData.set(item, DataComponents.CUSTOM_NAME, Component.literal("Display specimen"));
         player.setItemInHand(InteractionHand.MAIN_HAND, item);
-        var result = h.getLevel().getBlockState(pos.above()).useItemOn(item, h.getLevel(), player,
+        var result = PortBlockInteraction.stateUseItemOn(h.getLevel().getBlockState(pos.above()), item, h.getLevel(), player,
                 InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atCenterOf(pos.above()), Direction.NORTH, pos.above(), false));
         h.assertTrue(result.consumesAction() && item.getCount() == 17, "Display interaction failed or consumed items");
         var sign = (WoodSignBlockEntity) h.getLevel().getBlockEntity(pos);
         h.assertTrue(sign.getDisplayItem().getCount() == 1, "Display copy was not normalized");
-        item.set(DataComponents.CUSTOM_NAME, Component.literal("Changed in hand"));
+        PortItemData.set(item, DataComponents.CUSTOM_NAME, Component.literal("Changed in hand"));
         h.assertTrue(sign.getDisplayItem().getHoverName().getString().equals("Display specimen"), "Display aliases the held stack");
         var reloaded = new WoodSignBlockEntity(pos, sign.getBlockState());
-        reloaded.loadWithComponents(sign.saveWithFullMetadata(h.getLevel().registryAccess()), h.getLevel().registryAccess());
+        reloaded.load(sign.saveWithFullMetadata());
         h.assertTrue(ItemStack.matches(sign.getDisplayItem(), reloaded.getDisplayItem()), "NBT reload lost display components");
         var clientCopy = new WoodSignBlockEntity(pos, sign.getBlockState());
-        clientCopy.loadWithComponents(sign.getUpdateTag(h.getLevel().registryAccess()), h.getLevel().registryAccess());
+        clientCopy.load(sign.getUpdateTag());
         h.assertTrue(ItemStack.matches(sign.getDisplayItem(), clientCopy.getDisplayItem()), "Chunk/update sync lost display components");
         h.succeed();
     }

@@ -5,15 +5,14 @@ import com.stardew.craft.port.net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Tiers;
-import com.stardew.craft.port.net.minecraft.world.item.component.Unbreakable;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
-import com.stardew.craft.port.net.neoforged.neoforge.common.ItemAbilities;
-import com.stardew.craft.port.net.neoforged.neoforge.common.ItemAbility;
+import net.minecraftforge.common.ToolActions;
+import net.minecraftforge.common.ToolAction;
 
 @SuppressWarnings("null")
 public class StardewAxeItem extends AxeItem implements IStardewItem {
@@ -39,9 +38,16 @@ public class StardewAxeItem extends AxeItem implements IStardewItem {
 	private final Tier tier;
 
 	public StardewAxeItem(Tier tier, Properties properties) {
-		super(toVanillaTier(tier), properties.stacksTo(1)
-				.component(DataComponents.UNBREAKABLE, new Unbreakable(false)));
+		super(toVanillaTier(tier), properties.stacksTo(1)); // PORT(1.20.1): unbreakable via isDamageable (no default components)
 		this.tier = tier;
+	}
+
+	// PORT(1.20.1): 1.21 gave these tools a hidden minecraft:unbreakable default component.
+	// 1.20.1 has no per-item default components; Forge's isDamageable(stack) has the same effect
+	// (no durability loss, no durability bar, no "Unbreakable" tooltip line).
+	@Override
+	public boolean isDamageable(net.minecraft.world.item.ItemStack stack) {
+		return false;
 	}
 
 	private static net.minecraft.world.item.Tier toVanillaTier(Tier tier) {
@@ -69,9 +75,9 @@ public class StardewAxeItem extends AxeItem implements IStardewItem {
 	}
 
 	@Override
-	public boolean canPerformAction(@SuppressWarnings("null") ItemStack stack, @SuppressWarnings("null") ItemAbility ability) {
+	public boolean canPerformAction(@SuppressWarnings("null") ItemStack stack, @SuppressWarnings("null") ToolAction ability) {
 		// 关键：让方块/系统能识别这是"斧头能力"（包括砍/去皮/刮蜡等）。
-		return ItemAbilities.DEFAULT_AXE_ACTIONS.contains(ability);
+		return ToolActions.DEFAULT_AXE_ACTIONS.contains(ability);
 	}
 
 	@Override

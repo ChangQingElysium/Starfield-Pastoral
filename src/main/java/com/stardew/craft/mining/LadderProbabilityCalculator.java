@@ -83,7 +83,7 @@ public class LadderProbabilityCalculator {
         // 获取玩家数据
         int luckLevel = PlayerStardewDataAPI.getLuckBuffLevel(player);
         double dailyLuck = getDailyLuck(player);
-        boolean hasDwarfBuff = player.hasEffect(ModMobEffects.DWARF_STATUE_1);
+        boolean hasDwarfBuff = player.hasEffect(ModMobEffects.DWARF_STATUE_1.get());
         
         // 计算概率
         double probability = calculateProbability(

@@ -42,7 +42,7 @@ public class FairStrengthTesterBlock extends MapDecorStaticBlock implements Enti
     }
 
     @Override
-    protected boolean isPathfindable(@Nonnull BlockState state, @Nonnull PathComputationType type) {
+    public boolean isPathfindable(@Nonnull BlockState state, BlockGetter level, BlockPos pos, @Nonnull PathComputationType type) {
         return false;
     }
 
@@ -84,7 +84,7 @@ public class FairStrengthTesterBlock extends MapDecorStaticBlock implements Enti
     }
 
     @Override
-    protected void onPlace(@Nonnull BlockState state, @Nonnull Level level, @Nonnull BlockPos pos,
+    public void onPlace(@Nonnull BlockState state, @Nonnull Level level, @Nonnull BlockPos pos,
                            @Nonnull BlockState oldState, boolean isMoving) {
         super.onPlace(state, level, pos, oldState, isMoving);
         if (level.isClientSide || state.getValue(PART) != Part.MAIN) {
@@ -111,7 +111,7 @@ public class FairStrengthTesterBlock extends MapDecorStaticBlock implements Enti
     }
 
     @Override
-    protected ItemInteractionResult useItemOn(@Nonnull ItemStack stack, @Nonnull BlockState state, @Nonnull Level level,
+    public ItemInteractionResult useItemOn(@Nonnull ItemStack stack, @Nonnull BlockState state, @Nonnull Level level,
                                              @Nonnull BlockPos pos, @Nonnull Player player, @Nonnull InteractionHand hand,
                                              @Nonnull BlockHitResult hit) {
         BlockPos mainPos = mainPosForInteraction(level, pos, state);
@@ -132,7 +132,7 @@ public class FairStrengthTesterBlock extends MapDecorStaticBlock implements Enti
     }
 
     @Override
-    protected InteractionResult useWithoutItem(@Nonnull BlockState state, @Nonnull Level level, @Nonnull BlockPos pos,
+    public InteractionResult useWithoutItem(@Nonnull BlockState state, @Nonnull Level level, @Nonnull BlockPos pos,
                                                @Nonnull Player player, @Nonnull BlockHitResult hit) {
         BlockPos mainPos = mainPosForInteraction(level, pos, state);
         if (mainPos == null && state.is(this)) {
@@ -171,7 +171,7 @@ public class FairStrengthTesterBlock extends MapDecorStaticBlock implements Enti
     }
 
     @Override
-    protected List<ItemStack> getDrops(@Nonnull BlockState state, @Nonnull LootParams.Builder params) {
+    public List<ItemStack> getDrops(@Nonnull BlockState state, @Nonnull LootParams.Builder params) {
         return List.of();
     }
 }

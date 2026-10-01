@@ -40,7 +40,7 @@ public class BulletinBoardBlock extends MapDecorWallStaticBlock {
     }
 
     @Override
-    protected InteractionResult useWithoutItem(@Nonnull BlockState state,
+    public InteractionResult useWithoutItem(@Nonnull BlockState state,
                                                @Nonnull Level level,
                                                @Nonnull BlockPos pos,
                                                @Nonnull Player player,

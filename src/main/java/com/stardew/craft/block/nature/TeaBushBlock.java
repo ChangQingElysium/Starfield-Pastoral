@@ -36,9 +36,11 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraft.world.InteractionHand;
+import com.stardew.craft.port.PortBlockInteraction;
 
 /** Permanent tea bush with three ages, harvest shoots and source-faithful cosmetic seasons. */
-public final class TeaBushBlock extends Block {
+public final class TeaBushBlock extends Block implements PortBlockInteraction {
     public static final IntegerProperty STAGE = IntegerProperty.create("stage", 0, 3);
     public static final IntegerProperty SEASON = IntegerProperty.create("season", 0, 3);
     public static final EnumProperty<DoubleBlockHalf> HALF = BlockStateProperties.DOUBLE_BLOCK_HALF;
@@ -57,7 +59,7 @@ public final class TeaBushBlock extends Block {
     }
 
     @Override
-    protected boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
+    public boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
         if (level instanceof Level actualLevel && SunroomService.isCentralTeaBush(actualLevel, pos)) {
             return true;
         }
@@ -84,7 +86,7 @@ public final class TeaBushBlock extends Block {
     }
 
     @Override
-    protected BlockState updateShape(BlockState state, Direction direction, BlockState neighborState,
+    public BlockState updateShape(BlockState state, Direction direction, BlockState neighborState,
                                      LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
         return state.canSurvive(level, pos)
                 ? super.updateShape(state, direction, neighborState, level, pos, neighborPos)
@@ -92,7 +94,7 @@ public final class TeaBushBlock extends Block {
     }
 
     @Override
-    protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean movedByPiston) {
+    public void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean movedByPiston) {
         if (!level.isClientSide()
                 && state.getValue(HALF) == DoubleBlockHalf.LOWER
                 && !state.is(oldState.getBlock())) {
@@ -106,7 +108,7 @@ public final class TeaBushBlock extends Block {
     }
 
     @Override
-    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
+    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
         if (!level.isClientSide() && !state.is(newState.getBlock())) {
             if (state.getValue(HALF) == DoubleBlockHalf.LOWER) {
                 BlockPos above = pos.above();
@@ -127,12 +129,12 @@ public final class TeaBushBlock extends Block {
     }
 
     @Override
-    protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+    public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return halfShape(state, level, pos);
     }
 
     @Override
-    protected VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+    public VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         if (GardenPotBlock.isPottedPlant(level, pos, state)) {
             return Shapes.empty();
         }
@@ -162,8 +164,15 @@ public final class TeaBushBlock extends Block {
         return Block.box(2.0D, 0.0D, 2.0D, 14.0D, 16.0D, 14.0D);
     }
 
+    // PORT(1.20.1): replay the 1.21 useItemOn/useWithoutItem dispatch.
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos,
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player,
+            InteractionHand hand, BlockHitResult hit) {
+        return PortBlockInteraction.dispatch(this, state, level, pos, player, hand, hit);
+    }
+
+    @Override
+    public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos,
                                                Player player, BlockHitResult hit) {
         if (level.isClientSide()) {
             return InteractionResult.SUCCESS;
@@ -213,7 +222,7 @@ public final class TeaBushBlock extends Block {
     }
 
     @Override
-    public ItemStack getCloneItemStack(LevelReader level, BlockPos pos, BlockState state) {
+    public ItemStack getCloneItemStack(BlockGetter level, BlockPos pos, BlockState state) {
         return new ItemStack(ModItems.TEA_SAPLING.get());
     }
 }

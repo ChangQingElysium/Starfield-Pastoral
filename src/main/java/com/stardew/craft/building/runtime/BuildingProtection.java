@@ -92,7 +92,7 @@ public final class BuildingProtection {
         if (FishPondPrefabs.interact(event)) return true;
         if (event.getItemStack().getItem() instanceof BuildingBlueprintItem
                 || event.getItemStack().getItem() instanceof BuildingUpgradePermitItem) {
-            event.setUseBlock(com.stardew.craft.port.net.neoforged.neoforge.common.util.TriState.FALSE);
+            event.setUseBlock(com.stardew.craft.port.net.neoforged.neoforge.common.util.TriState.FALSE.toResult());
             return false;
         }
         if (!(event.getEntity() instanceof net.minecraft.server.level.ServerPlayer player)

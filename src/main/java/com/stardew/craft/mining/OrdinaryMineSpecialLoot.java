@@ -27,7 +27,7 @@ public final class OrdinaryMineSpecialLoot {
         String[] pool=POOLS[Math.clamp(floor/20,0,6)];String name=pool[random.nextInt(pool.length)];
         var stack=new ItemStack(BuiltInRegistries.ITEM.get(new ResourceLocation("stardewcraft",name)));
         if(name.equals("holy_blade")) level.registryAccess().registryOrThrow(Registries.ENCHANTMENT)
-                .getHolder(com.stardew.craft.enchantment.StardewEnchantments.CRUSADER).ifPresent(e->stack.enchant(e,1));
+                .getHolder(com.stardew.craft.enchantment.StardewEnchantments.CRUSADER).ifPresent(e->com.stardew.craft.port.PortItemStacks.enchant(stack, e,1));
         return stack;
     }
 }

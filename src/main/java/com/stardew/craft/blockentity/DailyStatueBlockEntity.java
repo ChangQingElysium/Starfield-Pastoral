@@ -1,5 +1,6 @@
 package com.stardew.craft.blockentity;
 
+import com.stardew.craft.port.PortItemStacks;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -286,21 +287,19 @@ public final class DailyStatueBlockEntity extends BlockEntity
     }
 
     @Override
-    protected void saveAdditional(
-            CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
+    protected void saveAdditional(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        super.saveAdditional(tag);
         if (!product.isEmpty()) {
-            tag.put("Product", product.save(registries));
+            tag.put("Product", PortItemStacks.save(product, registries));
         }
         tag.putLong("LastDay", lastDayIndex);
     }
 
     @Override
-    protected void loadAdditional(
-            CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
+    public void load(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        super.load(tag);
         product = tag.contains("Product")
-                ? ItemStack.parse(registries, tag.getCompound("Product"))
+                ? PortItemStacks.parse(registries, tag.getCompound("Product"))
                 .orElse(ItemStack.EMPTY)
                 : ItemStack.EMPTY;
         lastDayIndex = tag.contains("LastDay") ? tag.getLong("LastDay") : -1L;
@@ -313,9 +312,9 @@ public final class DailyStatueBlockEntity extends BlockEntity
     }
 
     @Override
-    public CompoundTag getUpdateTag(net.minecraft.core.HolderLookup.Provider registries) {
-        CompoundTag tag = super.getUpdateTag(registries);
-        saveAdditional(tag, registries);
+    public CompoundTag getUpdateTag() { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        CompoundTag tag = super.getUpdateTag();
+        saveAdditional(tag);
         return tag;
     }
 }

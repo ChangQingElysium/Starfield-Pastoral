@@ -88,7 +88,7 @@ public final class ShadowFootprintData extends SavedData {
     }
 
     @Override
-    public CompoundTag save(CompoundTag tag, HolderLookup.Provider provider) {
+    public CompoundTag save(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
         tag.put("Positions", new LongArrayTag(positions.stream().mapToLong(Long::longValue).toArray()));
         tag.putBoolean("NextLeft", nextLeft);
         return tag;
@@ -107,7 +107,7 @@ public final class ShadowFootprintData extends SavedData {
 
     public static ShadowFootprintData get(ServerLevel level) {
         return level.getDataStorage().computeIfAbsent(
-                new SavedData.Factory<>(ShadowFootprintData::new, ShadowFootprintData::load),
+                com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(ShadowFootprintData::new, ShadowFootprintData::load)), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(ShadowFootprintData::new, ShadowFootprintData::load)),
                 DATA_NAME);
     }
 

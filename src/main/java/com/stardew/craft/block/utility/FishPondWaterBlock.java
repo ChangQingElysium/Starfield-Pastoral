@@ -21,8 +21,8 @@ public class FishPondWaterBlock extends LiquidBlock {
     }
 
     @Override
-    public net.minecraft.world.item.ItemStack pickupBlock(net.minecraft.world.entity.player.Player player,
-            net.minecraft.world.level.LevelAccessor level, BlockPos pos, BlockState state) {
+    public net.minecraft.world.item.ItemStack pickupBlock(net.minecraft.world.level.LevelAccessor level, BlockPos pos,
+            BlockState state) {
         return net.minecraft.world.item.ItemStack.EMPTY;
     }
 

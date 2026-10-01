@@ -106,8 +106,8 @@ public class HeaterBlockEntity extends net.minecraft.world.level.block.entity.Bl
 
     @SuppressWarnings("null")
     @Override
-    protected void saveAdditional(@SuppressWarnings("null") CompoundTag tag, @SuppressWarnings("null") net.minecraft.core.HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
+    protected void saveAdditional(@SuppressWarnings("null") CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        super.saveAdditional(tag);
         if (!buildingId.isBlank()) {
             tag.putString(TAG_BUILDING_ID, buildingId);
         }
@@ -116,8 +116,8 @@ public class HeaterBlockEntity extends net.minecraft.world.level.block.entity.Bl
 
     @SuppressWarnings("null")
     @Override
-    protected void loadAdditional(@SuppressWarnings("null") CompoundTag tag, @SuppressWarnings("null") net.minecraft.core.HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
+    public void load(@SuppressWarnings("null") CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        super.load(tag);
         buildingId = tag.getString(TAG_BUILDING_ID);
         working = tag.getBoolean("working");
     }

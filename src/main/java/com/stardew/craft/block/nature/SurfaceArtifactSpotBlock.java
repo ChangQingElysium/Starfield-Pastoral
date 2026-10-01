@@ -27,30 +27,30 @@ public final class SurfaceArtifactSpotBlock extends Block {
     public boolean isSeedSpot() { return seedSpot; }
 
     @Override
-    protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+    public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return OUTLINE;
     }
 
     @Override
-    protected boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
+    public boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
         return ArtifactSpotSpawnService.isDiggableSurface(level.getBlockState(pos.below()));
     }
 
     @Override
-    protected BlockState updateShape(BlockState state, Direction direction, BlockState neighbour,
+    public BlockState updateShape(BlockState state, Direction direction, BlockState neighbour,
                                      LevelAccessor level, BlockPos pos, BlockPos neighbourPos) {
         return direction == Direction.DOWN && !state.canSurvive(level, pos)
                 ? Blocks.AIR.defaultBlockState() : super.updateShape(state, direction, neighbour, level, pos, neighbourPos);
     }
 
     @Override
-    protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState old, boolean moving) {
+    public void onPlace(BlockState state, Level level, BlockPos pos, BlockState old, boolean moving) {
         super.onPlace(state, level, pos, old, moving);
         if (level instanceof ServerLevel server) ArtifactSpotSpawnService.track(server, pos);
     }
 
     @Override
-    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState replacement, boolean moving) {
+    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState replacement, boolean moving) {
         if (level instanceof ServerLevel server && state.getBlock() != replacement.getBlock())
             ArtifactSpotSpawnService.untrack(server, pos);
         super.onRemove(state, level, pos, replacement, moving);

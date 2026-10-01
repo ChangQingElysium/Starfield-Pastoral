@@ -139,7 +139,7 @@ public final class DamageCalculator {
                 resolvedSkill.getDamageMultiplier()
         ));
 
-        MobEffectInstance vulnerable = target.getEffect(ModMobEffects.VULNERABLE);
+        MobEffectInstance vulnerable = target.getEffect(ModMobEffects.VULNERABLE.get());
         if (vulnerable != null) {
             float multiplier = 1.0f + 0.10f * (vulnerable.getAmplifier() + 1);
             request.addPreDefenseAdjustment(DamageAdjustment.multiply("target_vulnerable", multiplier));
@@ -163,7 +163,7 @@ public final class DamageCalculator {
         if (equipmentStats != null) {
             criticalChance *= 1.0f + equipmentStats.getCritChance();
         }
-        if (attacker.hasEffect(ModMobEffects.STATUE_OF_BLESSINGS_5)) {
+        if (attacker.hasEffect(ModMobEffects.STATUE_OF_BLESSINGS_5.get())) {
             criticalChance += 0.1f;
         }
         if (playerData != null && playerData.hasProfession(ProfessionType.SCOUT)) {

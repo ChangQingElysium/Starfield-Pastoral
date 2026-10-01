@@ -34,7 +34,7 @@ public final class PrismaticButterflyService {
         if (!(player.level() instanceof ServerLevel level) || level.dimension() != ModDimensions.STARDEW_VALLEY) {
             return;
         }
-        if (!player.hasEffect(ModMobEffects.STATUE_OF_BLESSINGS_6)) {
+        if (!player.hasEffect(ModMobEffects.STATUE_OF_BLESSINGS_6.get())) {
             removeOwnedButterflies(level, player, false);
             return;
         }

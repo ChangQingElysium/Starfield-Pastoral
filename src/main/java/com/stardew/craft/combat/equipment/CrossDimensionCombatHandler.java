@@ -19,8 +19,8 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
-import net.minecraftforge.event.entity.living.LivingDamageEvent;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 import com.stardew.craft.port.net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 
 /**
@@ -98,15 +98,15 @@ public final class CrossDimensionCombatHandler {
                 damageEnteringNativeProtection(
                         event.getNewDamage(),
                         event.getContainer().getReduction(
-                                net.minecraftforge.common.damagesource
+                                com.stardew.craft.port.net.neoforged.neoforge.common.damagesource
                                         .DamageContainer.Reduction.ARMOR
                         ),
                         event.getContainer().getReduction(
-                                net.minecraftforge.common.damagesource
+                                com.stardew.craft.port.net.neoforged.neoforge.common.damagesource
                                         .DamageContainer.Reduction.ENCHANTMENTS
                         ),
                         event.getContainer().getReduction(
-                                net.minecraftforge.common.damagesource
+                                com.stardew.craft.port.net.neoforged.neoforge.common.damagesource
                                         .DamageContainer.Reduction.MOB_EFFECTS
                         )
                 ),

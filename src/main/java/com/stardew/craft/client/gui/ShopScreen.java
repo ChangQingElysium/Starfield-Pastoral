@@ -211,7 +211,7 @@ public class ShopScreen extends Screen {
      */
     private boolean canSellAt(ItemStack stack) {
         if (!heldItem.isEmpty()) {
-            return ItemStack.isSameItemSameComponents(heldItem, stack);
+            return ItemStack.isSameItemSameTags(heldItem, stack);
         }
         if (stack.isEmpty()) return false;
         if (StardewItemDataApi.getSellPrice(stack) <= 0) return false;
@@ -910,9 +910,7 @@ public class ShopScreen extends Screen {
 
         // --- MC 原生 tooltip 内容（名称、模组说明、耦魔等）---
         if (!stack.isEmpty()) {
-            List<Component> vanillaLines = stack.getTooltipLines(
-                net.minecraft.world.item.Item.TooltipContext.EMPTY,
-                mc.player,
+            List<Component> vanillaLines = stack.getTooltipLines(mc.player,
                 net.minecraft.world.item.TooltipFlag.Default.NORMAL);
             lines.addAll(vanillaLines);
         } else {
@@ -980,8 +978,7 @@ public class ShopScreen extends Screen {
         if (mc.player == null) return;
         ItemStack stack = mc.player.getInventory().getItem(slot);
         if (stack.isEmpty()) return;
-        List<Component> lines = new ArrayList<>(stack.getTooltipLines(
-            net.minecraft.world.item.Item.TooltipContext.EMPTY, mc.player,
+        List<Component> lines = new ArrayList<>(stack.getTooltipLines(mc.player,
             net.minecraft.world.item.TooltipFlag.Default.NORMAL));
         boolean sellable = canSellAt(stack);
         if (sellable) {
@@ -1124,7 +1121,7 @@ public class ShopScreen extends Screen {
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX,double mouseY,double hScroll,double vScroll){
+    public boolean mouseScrolled(double mouseX, double mouseY, double vScroll){
         int dir=vScroll>0?-1:1;
         int ni=Math.max(0,Math.min(forSale.size()-ROWS,currentIndex+dir));
         if (ni!=currentIndex) { currentIndex=ni; updateScrollBarPosition(); playSound(ModSounds.SHINY4.get()); }
@@ -1168,7 +1165,7 @@ public class ShopScreen extends Screen {
         int maxStackSize = Math.max(1, salable.getMaxStackSize());
         int availableSpace = maxStackSize;
 
-        if (!heldItem.isEmpty() && ItemStack.isSameItemSameComponents(heldItem, salable)) {
+        if (!heldItem.isEmpty() && ItemStack.isSameItemSameTags(heldItem, salable)) {
             availableSpace = Math.max(0, maxStackSize - heldItem.getCount());
         }
 
@@ -1433,7 +1430,7 @@ public class ShopScreen extends Screen {
                     bought.setCount(r.quantity());
                     if (heldItem.isEmpty()) {
                         heldItem = bought;
-                    } else if (ItemStack.isSameItemSameComponents(heldItem, bought)) {
+                    } else if (ItemStack.isSameItemSameTags(heldItem, bought)) {
                         heldItem.grow(bought.getCount());
                     } else {
                         placeHeldItemInInventory();

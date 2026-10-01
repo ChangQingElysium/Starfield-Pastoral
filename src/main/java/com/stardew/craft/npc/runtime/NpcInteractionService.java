@@ -1,5 +1,6 @@
 package com.stardew.craft.npc.runtime;
 
+import com.stardew.craft.port.PortItemData;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -1268,7 +1269,7 @@ public final class NpcInteractionService {
         }
         state.setLastTalkDayKey(dayContext.dayKey());
         // SDV NPC.cs:2933 — Blessing of Friendship: 寒暄好感 60（默认 20）
-        int amount = (player != null && player.hasEffect(com.stardew.craft.effect.ModMobEffects.STATUE_OF_BLESSINGS_4)) ? 60 : 20;
+        int amount = (player != null && player.hasEffect(com.stardew.craft.effect.ModMobEffects.STATUE_OF_BLESSINGS_4.get())) ? 60 : 20;
         amount = BookPowerEffects.applyFriendshipGain(PlayerDataManager.getPlayerData(player), amount);
         state.addPoints(amount, getMaxFriendshipPointsFor(npcId));
     }
@@ -1615,7 +1616,7 @@ public final class NpcInteractionService {
     private static String resolveItemCategory(ItemStack held) {
         if (held.isEmpty()) return null;
         com.stardew.craft.port.net.minecraft.world.item.component.CustomData customData =
-            held.getOrDefault(com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_DATA,
+            PortItemData.getOrDefault(held, com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_DATA,
                               com.stardew.craft.port.net.minecraft.world.item.component.CustomData.EMPTY);
         net.minecraft.nbt.CompoundTag tag = customData.copyTag();
         if (tag.contains("StardewCategory")) {
@@ -1927,7 +1928,7 @@ public final class NpcInteractionService {
     private static float qualityMultiplier(ItemStack held) {
         if (held.isEmpty()) return 1f;
         com.stardew.craft.port.net.minecraft.world.item.component.CustomData customData =
-            held.getOrDefault(com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_DATA,
+            PortItemData.getOrDefault(held, com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_DATA,
                               com.stardew.craft.port.net.minecraft.world.item.component.CustomData.EMPTY);
         net.minecraft.nbt.CompoundTag tag = customData.copyTag();
         if (tag.contains("StardewQuality")) {

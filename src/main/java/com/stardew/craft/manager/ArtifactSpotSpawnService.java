@@ -21,7 +21,7 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import net.minecraftforge.event.level.ChunkEvent;
 import java.util.*;
 
@@ -206,8 +206,9 @@ public final class ArtifactSpotSpawnService {
     public static void recordTreasureTotem(ServerLevel level) { data(level).totems++; data(level).setDirty(); }
 
     private static SpotData data(ServerLevel level) {
-        return level.getDataStorage().computeIfAbsent(new SavedData.Factory<>(SpotData::new,
-                (tag, lookup) -> new SpotData(tag)), "stardewcraft_surface_artifact_spots");
+        return level.getDataStorage().computeIfAbsent(com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(SpotData::new,
+                (tag, lookup) -> new SpotData(tag))), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(SpotData::new,
+                (tag, lookup) -> new SpotData(tag))), "stardewcraft_surface_artifact_spots");
     }
 
     public static final class SpotData extends SavedData {
@@ -222,7 +223,7 @@ public final class ArtifactSpotSpawnService {
             totems = tag.getLong("TreasureTotemsUsed");
         }
         @Override
-        public CompoundTag save(CompoundTag tag, HolderLookup.Provider lookup) {
+        public CompoundTag save(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider lookup = com.stardew.craft.port.PortRegistries.lookup();
             tag.putLongArray("Spots", spots.stream().mapToLong(Long::longValue).toArray());
             var days = new CompoundTag(); updated.forEach(days::putInt); tag.put("Days", days);
             tag.putLong("TreasureTotemsUsed", totems); return tag;

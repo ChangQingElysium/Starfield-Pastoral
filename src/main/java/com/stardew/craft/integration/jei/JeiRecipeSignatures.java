@@ -31,6 +31,6 @@ final class JeiRecipeSignatures {
     static String stack(ItemStack stack) {
         if (stack == null || stack.isEmpty()) return "empty";
         return BuiltInRegistries.ITEM.getKey(stack.getItem()) + "x" + stack.getCount()
-                + stack.getComponents().toString();
+                + String.valueOf(stack.getTag()); // PORT(1.20.1): item data lives in the NBT tag
     }
 }

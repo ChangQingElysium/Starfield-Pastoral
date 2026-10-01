@@ -1,5 +1,6 @@
 package com.stardew.craft.item.tool;
 
+import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.network.payload.RouteEditorSyncPayload;
 import net.minecraft.core.BlockPos;
 import com.stardew.craft.port.net.minecraft.core.component.DataComponents;
@@ -74,7 +75,7 @@ public class RouteEditorWandItem extends Item implements com.stardew.craft.item.
     }
 
     public static String getRouteId(ItemStack stack) {
-        CompoundTag tag = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
+        CompoundTag tag = PortItemData.getOrDefault(stack, DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
         String id = tag.getString(TAG_ROUTE_ID).trim();
         return id.isEmpty() ? DEFAULT_ROUTE_ID : id;
     }
@@ -87,13 +88,13 @@ public class RouteEditorWandItem extends Item implements com.stardew.craft.item.
         if (clean.length() > 96) {
             clean = clean.substring(0, 96);
         }
-        CompoundTag tag = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
+        CompoundTag tag = PortItemData.getOrDefault(stack, DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
         tag.putString(TAG_ROUTE_ID, clean);
-        stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+        PortItemData.set(stack, DataComponents.CUSTOM_DATA, CustomData.of(tag));
     }
 
     public static List<BlockPos> getPoints(ItemStack stack) {
-        CompoundTag tag = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
+        CompoundTag tag = PortItemData.getOrDefault(stack, DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
         long[] encoded = tag.getLongArray(TAG_POINTS);
         List<BlockPos> points = new ArrayList<>(encoded.length);
         for (long value : encoded) {
@@ -125,12 +126,12 @@ public class RouteEditorWandItem extends Item implements com.stardew.craft.item.
     }
 
     private static void writePoints(ItemStack stack, List<BlockPos> points) {
-        CompoundTag tag = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
+        CompoundTag tag = PortItemData.getOrDefault(stack, DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
         long[] encoded = new long[points.size()];
         for (int i = 0; i < points.size(); i++) {
             encoded[i] = points.get(i).asLong();
         }
         tag.putLongArray(TAG_POINTS, encoded);
-        stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+        PortItemData.set(stack, DataComponents.CUSTOM_DATA, CustomData.of(tag));
     }
 }

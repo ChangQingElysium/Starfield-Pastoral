@@ -21,7 +21,7 @@ public final class ClientFishPondSwimVisuals {
     public record JumpFishBinding(Vec3 startPosition,float scale,float yawDegrees,float pitchDegrees) {}
     public static JumpFishBinding reserveForJump(String dimension,ItemStack fish,Vec3 start,int holdTicks) {
         Swimmer best=null;School selected=null;double distance=Double.MAX_VALUE;
-        for(var school:schools.values())if(school.dimension.equals(dimension)&&ItemStack.isSameItemSameComponents(fish,school.fish)) {
+        for(var school:schools.values())if(school.dimension.equals(dimension)&&ItemStack.isSameItemSameTags(fish,school.fish)) {
             for(var swimmer:school.fishList)if(swimmer.reservedUntil<school.tick && swimmer.p.distanceToSqr(start)<distance) {
                 distance=swimmer.p.distanceToSqr(start);best=swimmer;selected=school;
             }
@@ -58,7 +58,7 @@ public final class ClientFishPondSwimVisuals {
         void sync(FishPondBucketBlockEntity be) {
             seen=level.getGameTime();var next=be.getFishSignPreview();
             Set<Long> nextCells=new HashSet<>();for(long p:be.getPondWaterCells())nextCells.add(p);
-            if(!cells.equals(nextCells)||!ItemStack.isSameItemSameComponents(fish,next)){fishList.clear();cells=Set.copyOf(nextCells);fish=next;space=new PondSwimSpace(cells,p->!level.getFluidState(p).isEmpty());}
+            if(!cells.equals(nextCells)||!ItemStack.isSameItemSameTags(fish,next)){fishList.clear();cells=Set.copyOf(nextCells);fish=next;space=new PondSwimSpace(cells,p->!level.getFluidState(p).isEmpty());}
             int count=be.getFishPopulation();
             while(fishList.size()>count)fishList.removeLast();
             while(fishList.size()<count) {

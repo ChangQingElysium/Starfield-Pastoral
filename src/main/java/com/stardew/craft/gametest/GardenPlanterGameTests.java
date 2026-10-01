@@ -143,7 +143,10 @@ public final class GardenPlanterGameTests {
                 Blocks.BROWN_MUSHROOM,Blocks.DEAD_BUSH,Blocks.FERN,Blocks.WHEAT,Blocks.NETHER_WART}) {
             var plant=block.defaultBlockState();
             helper.assertTrue(plant.canSurvive(level,pos.above()),"Standard plant hook was not used: "+block);
-            helper.assertTrue(planter.defaultBlockState().canSustainPlant(level,pos,Direction.NORTH,plant).isDefault(),"Planter forced side planting");
+            // PORT(1.20.1): Forge has no TriState; "not forced" means a side answer equals the planter's default-rule answer.
+            var plantable=(net.minecraftforge.common.IPlantable)block;
+            helper.assertTrue(planter.defaultBlockState().canSustainPlant(level,pos,Direction.NORTH,plantable)
+                    ==planter.defaultBlockState().canSustainPlant(level,pos,Direction.DOWN,plantable),"Planter forced side planting");
         }
         level.setBlock(pos,Blocks.STONE.defaultBlockState(),3);
         helper.assertTrue(!Blocks.OAK_SAPLING.defaultBlockState().canSurvive(level,pos.above()),"Plant support leaked outside planters");

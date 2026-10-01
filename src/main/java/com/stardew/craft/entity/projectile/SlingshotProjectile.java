@@ -1,5 +1,6 @@
 package com.stardew.craft.entity.projectile;
 
+import com.stardew.craft.port.PortItemStacks;
 import com.stardew.craft.combat.skill.*;
 import com.stardew.craft.entity.ModEntities;
 import net.minecraft.nbt.CompoundTag;
@@ -30,8 +31,8 @@ public final class SlingshotProjectile extends net.minecraft.world.entity.projec
         weapon=WeaponDamageSnapshot.capture(net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(bow.getItem()), bow);
     }
     public int releasedDamage() { return damage; }
-    @Override protected void defineSynchedData(net.minecraft.network.syncher.SynchedEntityData.Builder builder) {
-        builder.define(AMMO, ItemStack.EMPTY); builder.define(SPIN, 0f);
+    @Override protected void defineSynchedData() {
+        this.entityData.define(AMMO, ItemStack.EMPTY); this.entityData.define(SPIN, 0f);
     }
     public void setItem(ItemStack item) { entityData.set(AMMO, item.copyWithCount(1)); }
     @Override public ItemStack getItem() { return entityData.get(AMMO); }
@@ -69,7 +70,7 @@ public final class SlingshotProjectile extends net.minecraft.world.entity.projec
             HitResult hit = entityHit == null ? blockHit : new EntityHitResult(entityHit.getEntity(),
                     entityHit.getEntity().getBoundingBox().inflate(29/128d).clip(from, end).orElse(end));
             if (hit.getType() != HitResult.Type.MISS
-                    && !com.stardew.craft.port.net.neoforged.neoforge.event.EventHooks.onProjectileImpact(this, hit)) {
+                    && !net.minecraftforge.event.ForgeEventFactory.onProjectileImpact(this, hit)) {
                 setPos(hit.getLocation());
                 if (hit instanceof EntityHitResult e) onHitEntity(e);
                 else onHitBlock((BlockHitResult) hit);
@@ -114,6 +115,6 @@ public final class SlingshotProjectile extends net.minecraft.world.entity.projec
                 (random.nextDouble()-.5)*.08,random.nextDouble()*.08,(random.nextDouble()-.5)*.08);
         else super.handleEntityEvent(event);
     }
-    @Override public void addAdditionalSaveData(CompoundTag tag){super.addAdditionalSaveData(tag);tag.putInt("SlingshotDamage",damage);tag.putFloat("SlingshotSpin",spinDegreesPerTick());if(!getItem().isEmpty())tag.put("Ammo",getItem().save(registryAccess()));MeowmereProjectileEntity.writeReleaseWeaponSnapshot(tag,weapon,registryAccess());}
-    @Override public void readAdditionalSaveData(CompoundTag tag){super.readAdditionalSaveData(tag);damage=tag.getInt("SlingshotDamage");entityData.set(SPIN,tag.getFloat("SlingshotSpin"));setItem(ItemStack.parseOptional(registryAccess(),tag.getCompound("Ammo")));weapon=MeowmereProjectileEntity.readReleaseWeaponSnapshot(tag,registryAccess());setNoGravity(true);}
+    @Override public void addAdditionalSaveData(CompoundTag tag){super.addAdditionalSaveData(tag);tag.putInt("SlingshotDamage",damage);tag.putFloat("SlingshotSpin",spinDegreesPerTick());if(!getItem().isEmpty())tag.put("Ammo",com.stardew.craft.port.PortItemStacks.save(getItem(),registryAccess()));MeowmereProjectileEntity.writeReleaseWeaponSnapshot(tag,weapon,registryAccess());}
+    @Override public void readAdditionalSaveData(CompoundTag tag){super.readAdditionalSaveData(tag);damage=tag.getInt("SlingshotDamage");entityData.set(SPIN,tag.getFloat("SlingshotSpin"));setItem(PortItemStacks.parseOptional(registryAccess(),tag.getCompound("Ammo")));weapon=MeowmereProjectileEntity.readReleaseWeaponSnapshot(tag,registryAccess());setNoGravity(true);}
 }

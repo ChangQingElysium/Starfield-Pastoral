@@ -47,7 +47,7 @@ public class MailboxBlock extends MapUtilityStaticBlock implements EntityBlock {
 
     @SuppressWarnings("null")
     @Override
-    protected List<ItemStack> getDrops(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") LootParams.Builder params) {
+    public List<ItemStack> getDrops(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") LootParams.Builder params) {
         if (state.getValue(PART) == Part.EXTENSION) return List.of();
         return List.of(new ItemStack(ModBlocks.MAILBOX.get()));
     }
@@ -87,7 +87,7 @@ public class MailboxBlock extends MapUtilityStaticBlock implements EntityBlock {
 
     @SuppressWarnings("null")
     @Override
-    protected InteractionResult useWithoutItem(@SuppressWarnings("null") BlockState state,
+    public InteractionResult useWithoutItem(@SuppressWarnings("null") BlockState state,
                                                @SuppressWarnings("null") Level level,
                                                @SuppressWarnings("null") BlockPos pos,
                                                @SuppressWarnings("null") Player player,
@@ -127,7 +127,7 @@ public class MailboxBlock extends MapUtilityStaticBlock implements EntityBlock {
 
     @SuppressWarnings("null")
     @Override
-    public BlockState playerWillDestroy(@SuppressWarnings("null") Level level,
+    public void playerWillDestroy(@SuppressWarnings("null") Level level,
                                         @SuppressWarnings("null") BlockPos pos,
                                         @SuppressWarnings("null") BlockState state,
                                         @SuppressWarnings("null") Player player) {
@@ -138,10 +138,10 @@ public class MailboxBlock extends MapUtilityStaticBlock implements EntityBlock {
                 BlockEntity be = level.getBlockEntity(mainPos);
                 if (be instanceof MailboxBlockEntity mailbox && mailbox.isSystemBlock()) {
                     player.sendSystemMessage(Component.translatable("stardewcraft.mailbox.system_block"));
-                    return state;
+                    return;
                 }
             }
         }
-        return super.playerWillDestroy(level, pos, state, player);
+        super.playerWillDestroy(level, pos, state, player);
     }
 }

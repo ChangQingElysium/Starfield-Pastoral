@@ -163,11 +163,11 @@ public abstract class BaseCoopAnimalEntity extends Animal implements GeoEntity {
 	}
 
 	@Override
-	protected void defineSynchedData(@Nonnull SynchedEntityData.Builder builder) {
-		super.defineSynchedData(builder);
-		builder.define(DATA_EMOTE_BASE_INDEX, -1);
-		builder.define(DATA_EMOTE_TICKS_LEFT, 0);
-		builder.define(DATA_SLEEPING, false);
+	protected void defineSynchedData() {
+		super.defineSynchedData();
+		this.entityData.define(DATA_EMOTE_BASE_INDEX, -1);
+		this.entityData.define(DATA_EMOTE_TICKS_LEFT, 0);
+		this.entityData.define(DATA_SLEEPING, false);
 	}
 
 	@Override

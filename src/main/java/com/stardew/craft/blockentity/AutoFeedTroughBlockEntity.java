@@ -1,5 +1,6 @@
 package com.stardew.craft.blockentity;
 
+import com.stardew.craft.port.PortItemStacks;
 import com.stardew.craft.animal.data.AnimalWorldData;
 import com.stardew.craft.block.utility.AutoFeedTroughBlock;
 import com.stardew.craft.item.ModItems;
@@ -372,19 +373,19 @@ public class AutoFeedTroughBlockEntity extends net.minecraft.world.level.block.e
 
     @SuppressWarnings("null")
     @Override
-    protected void saveAdditional(@SuppressWarnings("null") CompoundTag tag, @SuppressWarnings("null") net.minecraft.core.HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
+    protected void saveAdditional(@SuppressWarnings("null") CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        super.saveAdditional(tag);
         if (!hayStack.isEmpty()) {
-            tag.put(TAG_HAY, hayStack.save(registries));
+            tag.put(TAG_HAY, PortItemStacks.save(hayStack, registries));
         }
     }
 
     @SuppressWarnings("null")
     @Override
-    protected void loadAdditional(@SuppressWarnings("null") CompoundTag tag, @SuppressWarnings("null") net.minecraft.core.HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
+    public void load(@SuppressWarnings("null") CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        super.load(tag);
         hayStack = tag.contains(TAG_HAY)
-            ? ItemStack.parse(registries, tag.getCompound(TAG_HAY)).orElse(ItemStack.EMPTY)
+            ? PortItemStacks.parse(registries, tag.getCompound(TAG_HAY)).orElse(ItemStack.EMPTY)
             : ItemStack.EMPTY;
         if (!hayStack.isEmpty() && hayStack.getCount() > getAutomationSlotLimit(0)) {
             hayStack.setCount(getAutomationSlotLimit(0));
@@ -393,14 +394,14 @@ public class AutoFeedTroughBlockEntity extends net.minecraft.world.level.block.e
 
     @SuppressWarnings("null")
     @Override
-    public CompoundTag getUpdateTag(@SuppressWarnings("null") net.minecraft.core.HolderLookup.Provider registries) {
-        return saveWithoutMetadata(registries);
+    public CompoundTag getUpdateTag() { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        return saveWithoutMetadata();
     }
 
     @SuppressWarnings("null")
     @Override
-    public void handleUpdateTag(@SuppressWarnings("null") CompoundTag tag, @SuppressWarnings("null") net.minecraft.core.HolderLookup.Provider registries) {
-        loadAdditional(tag, registries);
+    public void handleUpdateTag(@SuppressWarnings("null") CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        load(tag);
     }
 
     @Nullable

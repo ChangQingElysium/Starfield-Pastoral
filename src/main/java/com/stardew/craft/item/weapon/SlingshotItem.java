@@ -1,5 +1,6 @@
 package com.stardew.craft.item.weapon;
 
+import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.combat.WeaponType;
 import com.stardew.craft.combat.equipment.EquipmentResolver;
 import com.stardew.craft.entity.projectile.SlingshotProjectile;
@@ -44,10 +45,10 @@ public final class SlingshotItem extends Item implements IStardewItem, IStardewW
         return InteractionResultHolder.pass(p.getItemInHand(h));
     }
     public static ItemStack ammunition(ItemStack stack) {
-        return stack.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY).copyOne();
+        return PortItemData.getOrDefault(stack, DataComponents.CONTAINER, ItemContainerContents.EMPTY).copyOne();
     }
     public static void ammunition(ItemStack stack, ItemStack ammo) {
-        stack.set(DataComponents.CONTAINER, ItemContainerContents.fromItems(List.of(ammo.copy())));
+        PortItemData.set(stack, DataComponents.CONTAINER, ItemContainerContents.fromItems(List.of(ammo.copy())));
     }
     public static boolean accepts(ItemStack stack) { return SlingshotAmmo.accepts(stack); }
     @Override public boolean overrideOtherStackedOnMe(ItemStack bow, ItemStack incoming, Slot slot,
@@ -65,7 +66,7 @@ public final class SlingshotItem extends Item implements IStardewItem, IStardewW
         }
         if(!accepts(incoming)) return true; // Invalid ammo leaves the tool and cursor unchanged on right-click.
         if(old.isEmpty()) { ammunition(bow, incoming); cursor.accept(ItemStack.EMPTY); }
-        else if(ItemStack.isSameItemSameComponents(old, incoming)) {
+        else if(ItemStack.isSameItemSameTags(old, incoming)) {
             int count = Math.min(incoming.getCount(), old.getMaxStackSize() - old.getCount());
             if (count == 0) { ammunition(bow, incoming); cursor.accept(old); }
             else { old.grow(count); incoming.shrink(count); ammunition(bow, old); }
@@ -88,21 +89,23 @@ public final class SlingshotItem extends Item implements IStardewItem, IStardewW
         player.startUsingItem(hand); return InteractionResultHolder.consume(stack);
     }
     @Override public void onUseTick(Level level, LivingEntity entity, ItemStack stack, int remaining) {
-        if (!level.isClientSide && getUseDuration(stack, entity) - remaining == CHARGE_TICKS)
+        if (!level.isClientSide && getUseDuration(stack) - remaining == CHARGE_TICKS)
             level.playSound(null, entity.blockPosition(), ModSounds.SLINGSHOT.get(), SoundSource.PLAYERS, .7f, 1);
     }
     @Override public java.util.Optional<net.minecraft.world.inventory.tooltip.TooltipComponent> getTooltipImage(ItemStack stack) {
         return java.util.Optional.of(new com.stardew.craft.tooltip.SlingshotAmmoTooltip(ammunition(stack)));
     }
-    @Override public void appendHoverText(ItemStack stack, TooltipContext context,
-            List<net.minecraft.network.chat.Component> lines, TooltipFlag flag) {
+    @Override public void appendHoverText(ItemStack stack,
+            @javax.annotation.Nullable Level level,
+            List<net.minecraft.network.chat.Component> lines,
+            TooltipFlag flag) {
         lines.add(net.minecraft.network.chat.Component.translatable("tooltip.stardewcraft.slingshot.description"));
     }
-    @Override public int getUseDuration(ItemStack stack, LivingEntity entity) { return 72000; }
+    @Override public int getUseDuration(ItemStack stack) { return 72000; }
     @Override public UseAnim getUseAnimation(ItemStack stack) { return UseAnim.BOW; }
     @Override public void releaseUsing(ItemStack stack, Level level, LivingEntity entity, int remaining) {
         if(level.isClientSide || !(entity instanceof ServerPlayer player)
-                || getUseDuration(stack, entity) - remaining < CHARGE_TICKS) return;
+                || getUseDuration(stack) - remaining < CHARGE_TICKS) return;
         ItemStack ammo = ammunition(stack); if(!accepts(ammo)) return;
         var equipment = EquipmentResolver.getMergedStats(player);
         int damage = SlingshotAmmo.rollDamage(ammo, player.getRandom(), equipment.getAttackMultiplier(), damageMultiplier());

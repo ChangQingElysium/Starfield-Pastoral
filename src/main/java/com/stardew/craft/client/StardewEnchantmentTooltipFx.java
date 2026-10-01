@@ -1,5 +1,6 @@
 package com.stardew.craft.client;
 
+import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.combat.ForgeEnchantmentGuard;
 import java.util.HashMap;
@@ -14,7 +15,7 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import com.stardew.craft.port.net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 
 @EventBusSubscriber(modid = StardewCraft.MODID, value = Dist.CLIENT)
@@ -30,8 +31,8 @@ public final class StardewEnchantmentTooltipFx {
         }
 
         Map<String, Component> protectedLabels = new HashMap<>();
-        collectProtectedLabels(stack.get(DataComponents.ENCHANTMENTS), protectedLabels);
-        collectProtectedLabels(stack.get(DataComponents.STORED_ENCHANTMENTS), protectedLabels);
+        collectProtectedLabels(PortItemData.get(stack, DataComponents.ENCHANTMENTS), protectedLabels);
+        collectProtectedLabels(PortItemData.get(stack, DataComponents.STORED_ENCHANTMENTS), protectedLabels);
         if (protectedLabels.isEmpty()) {
             return;
         }
@@ -54,7 +55,10 @@ public final class StardewEnchantmentTooltipFx {
             if (!ForgeEnchantmentGuard.isProtectedForgeEnchantment(enchantment)) {
                 continue;
             }
-            Component label = Enchantment.getFullname(enchantment, entry.getIntValue())
+            if (!enchantment.isBound()) {
+                continue; // PORT(1.20.1): id not registered on 1.20.1, vanilla shows no tooltip line for it
+            }
+            Component label = enchantment.value().getFullname(entry.getIntValue())
                     .copy()
                     .withStyle(ChatFormatting.LIGHT_PURPLE);
             labels.put(label.getString(), label);

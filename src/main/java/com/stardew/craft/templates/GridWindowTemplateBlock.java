@@ -32,12 +32,12 @@ public final class GridWindowTemplateBlock extends MaterialTemplateBlock {
         return state == null ? null : connect(state, context.getLevel(), context.getClickedPos());
     }
 
-    @Override protected BlockState updateShape(BlockState state, Direction side, BlockState neighbor,
+    @Override public BlockState updateShape(BlockState state, Direction side, BlockState neighbor,
             LevelAccessor level, BlockPos pos, BlockPos other) {
         return connect(state, level, pos);
     }
 
-    @Override protected BlockState mirror(BlockState state, Mirror mirror) {
+    @Override public BlockState mirror(BlockState state, Mirror mirror) {
         if (mirror == Mirror.NONE) return state;
         int mask = state.getValue(CONNECTIONS);
         return super.mirror(state, mirror).setValue(CONNECTIONS, (mask & 5) | ((mask & 2) << 2) | ((mask & 8) >> 2));

@@ -37,12 +37,12 @@ public class CalicoStatueBlock extends TallMasteryBlock {
     }
 
     @Override
-    protected List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
+    public List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
         return List.of();
     }
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+    public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         if (state.getValue(PART) == Part.EXTENSION) {
             pos = TallMasteryBlock.getMainPos(pos, state);
             state = level.getBlockState(pos);
@@ -61,7 +61,7 @@ public class CalicoStatueBlock extends TallMasteryBlock {
     }
 
     @Override
-    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         InteractionResult result = useWithoutItem(state, level, pos, player, hit);
         return switch (result) {
             case SUCCESS -> ItemInteractionResult.sidedSuccess(level.isClientSide());

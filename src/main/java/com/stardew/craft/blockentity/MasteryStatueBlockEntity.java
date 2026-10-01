@@ -73,8 +73,8 @@ public class MasteryStatueBlockEntity extends BlockEntity {
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
+    protected void saveAdditional(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        super.saveAdditional(tag);
         if (ownerUUID != null) {
             tag.putUUID(TAG_OWNER_UUID, ownerUUID);
             tag.putString(TAG_OWNER_NAME, ownerName);
@@ -83,8 +83,8 @@ public class MasteryStatueBlockEntity extends BlockEntity {
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
+    public void load(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        super.load(tag);
         if (tag.hasUUID(TAG_OWNER_UUID)) {
             ownerUUID = tag.getUUID(TAG_OWNER_UUID);
             ownerName = tag.getString(TAG_OWNER_NAME);
@@ -96,9 +96,9 @@ public class MasteryStatueBlockEntity extends BlockEntity {
     }
 
     @Override
-    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
-        CompoundTag tag = super.getUpdateTag(registries);
-        saveAdditional(tag, registries);
+    public CompoundTag getUpdateTag() { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        CompoundTag tag = super.getUpdateTag();
+        saveAdditional(tag);
         return tag;
     }
 

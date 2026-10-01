@@ -55,7 +55,7 @@ public class AutoPetterBlock extends Block implements EntityBlock {
 
     @SuppressWarnings("null")
     @Override
-    protected List<ItemStack> getDrops(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") LootParams.Builder params) {
+    public List<ItemStack> getDrops(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") LootParams.Builder params) {
         return List.of(new ItemStack(ModBlocks.AUTO_PETTER.get()));
     }
 

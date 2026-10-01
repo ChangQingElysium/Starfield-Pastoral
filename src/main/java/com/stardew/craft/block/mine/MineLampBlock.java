@@ -1,5 +1,6 @@
 package com.stardew.craft.block.mine;
 
+import com.stardew.craft.port.PortItemData;
 import com.mojang.serialization.MapCodec;
 import com.stardew.craft.block.shape.ModelVoxelShapeCache;
 import com.stardew.craft.blockentity.MineLampBlockEntity;
@@ -20,10 +21,13 @@ import net.minecraft.world.level.block.state.properties.*;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.*;
 import javax.annotation.Nullable;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.Level;
+import com.stardew.craft.port.PortBlockInteraction;
 
 /** One wall-mounted lamp family; theme survives picking, dropping and placement. */
-public final class MineLampBlock extends BaseEntityBlock {
-    public static final MapCodec<MineLampBlock> CODEC = simpleCodec(MineLampBlock::new);
+public final class MineLampBlock extends BaseEntityBlock implements PortBlockInteraction {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final BooleanProperty LIT = BlockStateProperties.LIT;
     public static final EnumProperty<Theme> THEME = EnumProperty.create("theme", Theme.class);
@@ -45,13 +49,12 @@ public final class MineLampBlock extends BaseEntityBlock {
         super(properties);
         registerDefaultState(defaultBlockState().setValue(FACING, Direction.NORTH).setValue(LIT, true).setValue(THEME, Theme.EARTH));
     }
-    @Override public MapCodec<MineLampBlock> codec() { return CODEC; }
     @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) { builder.add(FACING, LIT, THEME); }
-    @Override protected RenderShape getRenderShape(BlockState state) { return RenderShape.MODEL; }
+    @Override public RenderShape getRenderShape(BlockState state) { return RenderShape.MODEL; }
     @Override public BlockEntity newBlockEntity(BlockPos pos, BlockState state) { return new MineLampBlockEntity(pos, state); }
 
     @Nullable @Override public BlockState getStateForPlacement(BlockPlaceContext context) {
-        Theme fixed = context.getItemInHand().getOrDefault(DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY).get(THEME);
+        Theme fixed = PortItemData.getOrDefault(context.getItemInHand(), DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY).get(THEME);
         java.util.List<Direction> attachmentDirections = new java.util.ArrayList<>();
         if (context.getClickedFace().getAxis().isHorizontal()) attachmentDirections.add(context.getClickedFace().getOpposite());
         attachmentDirections.addAll(java.util.Arrays.asList(context.getNearestLookingDirections()));
@@ -72,29 +75,36 @@ public final class MineLampBlock extends BaseEntityBlock {
         }
         return null;
     }
-    @Override protected boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
+    @Override public boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
         Direction face = state.getValue(FACING);
         BlockPos wall = pos.relative(face.getOpposite());
         return level.getBlockState(wall).isFaceSturdy(level, wall, face);
     }
-    @Override protected BlockState updateShape(BlockState state, Direction direction, BlockState neighbor, LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
+    @Override public BlockState updateShape(BlockState state, Direction direction, BlockState neighbor, LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
         return state.canSurvive(level, pos) ? state : Blocks.AIR.defaultBlockState();
     }
-    @Override protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+    // PORT(1.20.1): replay the 1.21 useItemOn/useWithoutItem dispatch.
+    @Override
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player,
+            InteractionHand hand, BlockHitResult hit) {
+        return PortBlockInteraction.dispatch(this, state, level, pos, player, hand, hit);
+    }
+
+    @Override public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         if (!level.isClientSide) {
             level.setBlock(pos, state.cycle(LIT), Block.UPDATE_ALL);
             level.playSound(null, pos, net.minecraft.sounds.SoundEvents.LEVER_CLICK, net.minecraft.sounds.SoundSource.BLOCKS, .3F, state.getValue(LIT) ? .5F : .7F);
         }
         return InteractionResult.sidedSuccess(level.isClientSide);
     }
-    @Override protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+    @Override public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return SHAPES.computeIfAbsent(state.getValue(THEME), theme -> ModelVoxelShapeCache.horizontalShapes("stardewcraft:block/mine/lantern/" + theme.id, Direction.NORTH))[state.getValue(FACING).get2DDataValue()];
     }
-    @Override public ItemStack getCloneItemStack(LevelReader level, BlockPos pos, BlockState state) {
+    @Override public ItemStack getCloneItemStack(net.minecraft.world.level.BlockGetter level, BlockPos pos, BlockState state) {
         ItemStack stack = new ItemStack(this);
-        stack.set(DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY.with(THEME, state));
+        PortItemData.set(stack, DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY.with(THEME, state));
         return stack;
     }
-    @Override protected BlockState rotate(BlockState state, Rotation rotation) { return state.setValue(FACING, rotation.rotate(state.getValue(FACING))); }
-    @Override protected BlockState mirror(BlockState state, Mirror mirror) { return state.rotate(mirror.getRotation(state.getValue(FACING))); }
+    @Override public BlockState rotate(BlockState state, Rotation rotation) { return state.setValue(FACING, rotation.rotate(state.getValue(FACING))); }
+    @Override public BlockState mirror(BlockState state, Mirror mirror) { return state.rotate(mirror.getRotation(state.getValue(FACING))); }
 }

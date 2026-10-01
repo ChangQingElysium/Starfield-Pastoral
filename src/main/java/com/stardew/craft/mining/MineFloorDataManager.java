@@ -38,10 +38,13 @@ public class MineFloorDataManager extends SavedData {
      */
     public static MineFloorDataManager get(ServerLevel level) {
         return level.getDataStorage().computeIfAbsent(
-            new SavedData.Factory<>(
+            com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(
                 MineFloorDataManager::new,
                 MineFloorDataManager::load
-            ),
+            )), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(
+                MineFloorDataManager::new,
+                MineFloorDataManager::load
+            )),
             DATA_NAME
         );
     }

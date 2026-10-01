@@ -48,12 +48,12 @@ public class GeoFestivalDecorBlock extends MapDecorStaticBlock implements Entity
     }
 
     @Override
-    protected boolean isPathfindable(@Nonnull BlockState state, @Nonnull PathComputationType type) {
+    public boolean isPathfindable(@Nonnull BlockState state, net.minecraft.world.level.BlockGetter level, BlockPos pos, @Nonnull PathComputationType type) {
         return false;
     }
 
     @Override
-    protected InteractionResult useWithoutItem(@Nonnull BlockState state, @Nonnull Level level, @Nonnull BlockPos pos,
+    public InteractionResult useWithoutItem(@Nonnull BlockState state, @Nonnull Level level, @Nonnull BlockPos pos,
                                                @Nonnull Player player, @Nonnull BlockHitResult hit) {
         if (letterTextKey == null) {
             return super.useWithoutItem(state, level, pos, player, hit);

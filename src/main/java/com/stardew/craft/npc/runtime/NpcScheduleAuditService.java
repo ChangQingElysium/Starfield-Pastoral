@@ -1,5 +1,6 @@
 package com.stardew.craft.npc.runtime;
 
+import com.stardew.craft.port.PortLevels;
 import com.google.gson.GsonBuilder;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.core.ModDimensions;
@@ -147,7 +148,7 @@ public final class NpcScheduleAuditService {
                         + " stage=" + snapshot.stage + " point=" + snapshot.pointId
                         + " path=" + snapshot.pathIndex + "/" + snapshot.pathSize + " target=" + snapshot.target
                         + " reason=" + snapshot.repathReason + " route=" + snapshot.routeDiagnosticReason
-                        + " ground=" + npc.onGround() + " clear=" + npc.level().noBlockCollision(npc, npc.getBoundingBox())
+                        + " ground=" + npc.onGround() + " clear=" + PortLevels.noBlockCollision(npc.level(), npc, npc.getBoundingBox())
                         + " navTarget=" + npc.getNavigation().getTargetPos()
                         + " nav=" + (npc.getNavigation().getPath() == null ? "null" : npc.getNavigation().getPath()
                             + " reach=" + npc.getNavigation().getPath().canReach()

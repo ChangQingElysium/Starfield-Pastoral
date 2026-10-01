@@ -95,7 +95,7 @@ public final class DwarfRuneGuardSkillHandler
                             DwarfRuneGuardExecutionState.class
                     );
             context.player().addEffect(new MobEffectInstance(
-                    ModMobEffects.SHELTER,
+                    ModMobEffects.SHELTER.get(),
                     SHELTER_DURATION_TICKS,
                     SHELTER_AMPLIFIER,
                     false,

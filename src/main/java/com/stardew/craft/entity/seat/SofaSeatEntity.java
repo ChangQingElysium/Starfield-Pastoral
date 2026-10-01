@@ -89,7 +89,7 @@ public class SofaSeatEntity extends Entity {
     }
 
     @Override
-    protected void defineSynchedData(net.minecraft.network.syncher.SynchedEntityData.Builder builder) {
+    protected void defineSynchedData() {
     }
 
     @Override
@@ -110,7 +110,10 @@ public class SofaSeatEntity extends Entity {
         tag.putDouble(TAG_OFFSET, seatYOffset);
     }
 
-    @Override
+    // PORT(1.20.1): 1.20.1 has no getPassengerRidingPosition; replay the 1.21 positionRider with it.
+    @Override protected void positionRider(Entity passenger, Entity.MoveFunction callback) {
+        if (hasPassenger(passenger)) com.stardew.craft.port.PortEntities.positionRider(passenger, getPassengerRidingPosition(passenger), callback);
+    }
     public Vec3 getPassengerRidingPosition(Entity passenger) {
         return new Vec3(getX(), getY(), getZ());
     }

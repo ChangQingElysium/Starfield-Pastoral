@@ -55,7 +55,7 @@ public class MineMonsterHpBarRenderer {
         RenderSystem.enableDepthTest();
 
         for (Mob mob : mobs) {
-            float partialTick = event.getPartialTick().getGameTimeDeltaPartialTick(false);
+            float partialTick = event.getPartialTick();
             double x = mob.xOld + (mob.getX() - mob.xOld) * partialTick - cam.x;
             double y = mob.yOld + (mob.getY() - mob.yOld) * partialTick - cam.y + mob.getBbHeight() + 0.5;
             double z = mob.zOld + (mob.getZ() - mob.zOld) * partialTick - cam.z;

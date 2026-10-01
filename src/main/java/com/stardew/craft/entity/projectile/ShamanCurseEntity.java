@@ -25,7 +25,7 @@ public final class ShamanCurseEntity extends Projectile {
     private int frames,bounces=4,tailCounter=50,floor;private boolean owned;private java.util.UUID generation;
     private final java.util.ArrayDeque<Vec3> tail=new java.util.ArrayDeque<>();
     public ShamanCurseEntity(EntityType<? extends ShamanCurseEntity> type,Level level){super(type,level);setNoGravity(true);}
-    @Override protected void defineSynchedData(SynchedEntityData.Builder b){}
+    @Override protected void defineSynchedData(){}
     public void launch(MineShadowShamanEntity owner,Player player){setOwner(owner);var c=owner.monsterState().context();owned=c.generation()!=null;generation=c.generation();floor=c.floor();setPos(owner.getX(),owner.getY()+.85,owner.getZ());setDeltaMovement(MonsterSpace.aim(position(),player.getBoundingBox(),45./64));}
     public int bouncesLeft(){return bounces;}public int sourceFrames(){return frames;}public java.util.List<Vec3> tail(){return java.util.List.copyOf(tail);}
     public static Vec3 sourceStep(Vec3 velocity,long tick,int substep){double phase=((int)(Math.floorMod(tick,20)*50+substep*1000./60)%1000)*Math.PI/128;return velocity.scale(1./3).add(Math.sin(phase)/8,0,Math.cos(phase)/8);}
@@ -56,8 +56,8 @@ public final class ShamanCurseEntity extends Projectile {
     public boolean hitPlayer(ServerPlayer player){
         if(level().isClientSide||isRemoved())return false;
         var protection=EquipmentNegativeStatusProtection.decideMilliseconds(player,8000);
-        if(protection.resisted()||player.hasEffect(ModMobEffects.SQUID_INK_RAVIOLI)||TrinketEffectHandler.blocksNegativeEffects(player))return false;
-        EquipmentMobEffectHandler.addPreAdjustedEffect(player,new MobEffectInstance(ModMobEffects.JINXED,protection.durationTicks(),0));
+        if(protection.resisted()||player.hasEffect(ModMobEffects.SQUID_INK_RAVIOLI.get())||TrinketEffectHandler.blocksNegativeEffects(player))return false;
+        EquipmentMobEffectHandler.addPreAdjustedEffect(player,new MobEffectInstance(ModMobEffects.JINXED.get(),protection.durationTicks(),0));
         explode();playSound(ModSounds.DEBUFF_HIT.get(),1,(float)Math.pow(2,-.1+random.nextDouble()*.353));discard();return true;
     }
     public void breakByWeapon(){if(!level().isClientSide&&!isRemoved()){explode();discard();}}

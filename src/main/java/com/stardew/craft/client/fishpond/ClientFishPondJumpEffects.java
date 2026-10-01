@@ -133,7 +133,7 @@ public final class ClientFishPondJumpEffects {
             if (effect.ageTicks < 0) {
                 continue;
             }
-            float partialTick = event.getPartialTick().getGameTimeDeltaPartialTick(false);
+            float partialTick = event.getPartialTick();
             float ageSeconds = (effect.ageTicks + partialTick) / 20.0F;
             float progress = Mth.clamp(ageSeconds / JUMP_TIME_SECONDS, 0.0F, 1.0F);
             Vec3 linearPosition = effect.startPosition.lerp(effect.endPosition, progress);

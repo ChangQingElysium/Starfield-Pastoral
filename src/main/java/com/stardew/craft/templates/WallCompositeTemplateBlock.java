@@ -8,12 +8,6 @@ public class WallCompositeTemplateBlock extends CompositeTemplateBlock {
     public WallCompositeTemplateBlock(TemplateShape shape, Properties properties) { super(shape,properties); }
 
     @Override
-    protected com.mojang.serialization.MapCodec<? extends net.minecraft.world.level.block.BaseEntityBlock> codec() {
-        return simpleCodec(p -> templateShape().isWindow() || templateShape()==TemplateShape.WALL_JUNCTION
-                ? new ConnectedFacadeTemplateBlock(templateShape(),p) : new WallCompositeTemplateBlock(templateShape(),p));
-    }
-
-    @Override
     public boolean targetsFill(BlockState state, BlockHitResult hit) {
         double x=hit.getLocation().x-hit.getBlockPos().getX(),z=hit.getLocation().z-hit.getBlockPos().getZ();
         for(int i=0,n=TemplateShapeCache.turnsFrom(templateShape().baseFacing(),state.getValue(FACING));i<n;i++) {

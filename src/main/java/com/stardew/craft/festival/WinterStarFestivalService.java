@@ -663,7 +663,7 @@ public final class WinterStarFestivalService {
         for (ItemStack inventoryStack : player.getInventory().items) {
             if (inventoryStack.isEmpty()) {
                 remaining -= stack.getMaxStackSize();
-            } else if (ItemStack.isSameItemSameComponents(inventoryStack, stack)) {
+            } else if (ItemStack.isSameItemSameTags(inventoryStack, stack)) {
                 remaining -= Math.max(0, inventoryStack.getMaxStackSize() - inventoryStack.getCount());
             }
             if (remaining <= 0) return true;

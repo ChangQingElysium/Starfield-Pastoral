@@ -8,7 +8,7 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.ViewArea;
-import com.stardew.craft.port.net.minecraft.client.renderer.chunk.SectionRenderDispatcher;
+import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
@@ -28,7 +28,7 @@ public final class TownDoorVanillaVisibility {
     private TownDoorVanillaVisibility() {}
 
     public static void discover(ClientLevel level, ViewArea viewArea, Camera camera, Frustum sourceFrustum,
-                                ObjectArrayList<SectionRenderDispatcher.RenderSection> result) {
+                                ObjectArrayList<ChunkRenderDispatcher.RenderChunk> result) {
         result.clear();
         QUEUE.clear();
         VISITED.clear();
@@ -55,7 +55,7 @@ public final class TownDoorVanillaVisibility {
 
             BlockPos origin = new BlockPos(SectionPos.sectionToBlockCoord(sectionX),
                     SectionPos.sectionToBlockCoord(sectionY), SectionPos.sectionToBlockCoord(sectionZ));
-            SectionRenderDispatcher.RenderSection section =
+            ChunkRenderDispatcher.RenderChunk section =
                     ((TownDoorViewAreaAccessor) viewArea).stardewcraft$getRenderSectionAt(origin);
             if (section == null || !section.getOrigin().equals(origin)) continue;
             boolean cameraSection = sectionX == cameraX && sectionY == cameraY && sectionZ == cameraZ;

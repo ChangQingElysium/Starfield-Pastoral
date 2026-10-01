@@ -27,7 +27,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import com.stardew.craft.port.net.neoforged.neoforge.common.ItemAbilities;
+import net.minecraftforge.common.ToolActions;
 import net.minecraftforge.event.level.BlockEvent;
 
 import java.util.ArrayList;
@@ -346,6 +346,6 @@ public final class PrefabTreeChopHandler {
 		if (tool.getItem() instanceof StardewAxeItem) {
 			return true;
 		}
-		return tool.canPerformAction(ItemAbilities.AXE_DIG);
+		return tool.canPerformAction(ToolActions.AXE_DIG);
 	}
 }

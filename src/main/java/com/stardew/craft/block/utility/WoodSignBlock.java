@@ -45,7 +45,7 @@ public final class WoodSignBlock extends MapDecorStaticBlock implements EntityBl
     }
 
     @Override
-    protected boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
+    public boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
         if (state.getValue(PART) == Part.EXTENSION) return super.canSurvive(state, level, pos);
         Direction support = wall ? state.getValue(FACING).getOpposite() : Direction.DOWN;
         BlockPos supportPos = pos.relative(support);
@@ -59,7 +59,7 @@ public final class WoodSignBlock extends MapDecorStaticBlock implements EntityBl
     }
 
     @Override
-    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level,
+    public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level,
                                               BlockPos pos, Player player, InteractionHand hand,
                                               BlockHitResult hit) {
         if (stack.isEmpty() || !player.mayBuild()) return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;

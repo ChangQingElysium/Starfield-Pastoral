@@ -19,7 +19,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import net.minecraftforge.client.event.RenderGuiEvent;
 import com.mojang.blaze3d.platform.NativeImage;
 
@@ -64,7 +64,7 @@ public final class FishingCastHud {
     }
     @SubscribeEvent public static void chargeSoundTick(com.stardew.craft.port.net.neoforged.neoforge.client.event.ClientTickEvent.Post event) {
         var mc=Minecraft.getInstance();if(mc.player==null||!mc.player.isUsingItem()||!(mc.player.getUseItem().getItem() instanceof com.stardew.craft.item.tool.FishingRodItem)){stopSinWave(mc);return;}
-        int used=mc.player.getUseItem().getUseDuration(mc.player)-mc.player.getUseItemRemainingTicks();
+        int used=mc.player.getUseItem().getUseDuration()-mc.player.getUseItemRemainingTicks();
         ensureSinWavePlaying(mc,.8f+.6f*FishingCastPower.getCastPower01FromUsedTicks(used));
     }
 	@SubscribeEvent
@@ -96,7 +96,7 @@ public final class FishingCastHud {
 		float progress = 0f;
 		if (usingRod) {
 			ItemStack using = player.getUseItem();
-			int usedTicks = using.getUseDuration(player) - player.getUseItemRemainingTicks();
+			int usedTicks = using.getUseDuration() - player.getUseItemRemainingTicks();
 			progress = FishingCastPower.getCastPower01FromUsedTicks(usedTicks);
 			if (progress > 0.99f) {
 			}

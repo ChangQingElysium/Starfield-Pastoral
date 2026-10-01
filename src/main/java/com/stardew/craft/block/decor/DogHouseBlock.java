@@ -75,7 +75,7 @@ public final class DogHouseBlock extends MapDecorStaticBlock {
         });
     }
 
-    @Override protected boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
+    @Override public boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
         return super.canSurvive(state, level, pos)
                 && level.getBlockState(pos.below()).isFaceSturdy(level, pos.below(), Direction.UP);
     }

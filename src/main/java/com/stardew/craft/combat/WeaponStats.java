@@ -1,5 +1,6 @@
 package com.stardew.craft.combat;
 
+import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.port.net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
@@ -70,7 +71,7 @@ public class WeaponStats {
         }
         
         @SuppressWarnings("null")
-        CustomData data = stack.get(DataComponents.CUSTOM_DATA);
+        CustomData data = PortItemData.get(stack, DataComponents.CUSTOM_DATA);
         if (data == null) {
             return fromApiData(stack);
         }
@@ -107,7 +108,7 @@ public class WeaponStats {
             return false;
         }
         @SuppressWarnings("null")
-        CustomData data = stack.get(DataComponents.CUSTOM_DATA);
+        CustomData data = PortItemData.get(stack, DataComponents.CUSTOM_DATA);
         if (data == null) {
             return false;
         }
@@ -251,7 +252,7 @@ public class WeaponStats {
     @SuppressWarnings("null")
     public void writeToItemStack(ItemStack stack) {
         @SuppressWarnings("null")
-        CustomData existingData = stack.get(DataComponents.CUSTOM_DATA);
+        CustomData existingData = PortItemData.get(stack, DataComponents.CUSTOM_DATA);
         CompoundTag tag = existingData != null ? existingData.copyTag() : new CompoundTag();
         
         CompoundTag weaponTag = new CompoundTag();
@@ -268,7 +269,7 @@ public class WeaponStats {
         weaponTag.putFloat(TAG_KNOCKBACK, knockback);
         
         tag.put(TAG_STARDEW_WEAPON, weaponTag);
-        stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+        PortItemData.set(stack, DataComponents.CUSTOM_DATA, CustomData.of(tag));
     }
     
     /**

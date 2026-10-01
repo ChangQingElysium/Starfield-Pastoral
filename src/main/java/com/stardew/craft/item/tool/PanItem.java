@@ -93,7 +93,7 @@ public class PanItem extends Item implements IStardewItem {
      * matching SDV's {@code FarmerSprite.animateOnce(303, 50f, 4)} panning
      * animation (~200ms sprite) padded to feel physical in MC.
      */
-    @Override public int getUseDuration(@javax.annotation.Nonnull ItemStack stack, @javax.annotation.Nonnull LivingEntity entity) { return 40; }
+    @Override public int getUseDuration(@javax.annotation.Nonnull ItemStack stack) { return 40; }
 
     /**
      * Render the "brush" animation — closest vanilla motion to panning
@@ -155,7 +155,7 @@ public class PanItem extends Item implements IStardewItem {
         if (level.isClientSide) return;
         if (!(entity instanceof ServerPlayer sp) || !(level instanceof ServerLevel sl)) return;
         // Emit ripple particles every 5 ticks around the player's active pan point.
-        int elapsed = getUseDuration(stack, entity) - remainingUseTicks;
+        int elapsed = getUseDuration(stack) - remainingUseTicks;
         if (elapsed % 5 != 0) return;
 
         BlockPos point = OrePanPointManager.get(sl).getPoint(sp.getUUID(), sl);
@@ -186,9 +186,11 @@ public class PanItem extends Item implements IStardewItem {
 
     @Override
     @SuppressWarnings("null")
-    public void appendHoverText(ItemStack stack, TooltipContext context,
-                                 List<Component> tooltip, TooltipFlag flag) {
-        super.appendHoverText(stack, context, tooltip, flag);
+    public void appendHoverText(ItemStack stack,
+                                 @javax.annotation.Nullable Level level,
+                                 List<Component> tooltip,
+                                 TooltipFlag flag) {
+        super.appendHoverText(stack, level, tooltip, flag);
         String base = "item.stardewcraft." + tier.name().toLowerCase() + "_pan";
         tooltip.add(Component.translatable(base + ".tooltip").withStyle(ChatFormatting.GRAY));
         tooltip.add(Component.translatable(base + ".desc").withStyle(ChatFormatting.DARK_GRAY));
@@ -216,7 +218,7 @@ public class PanItem extends Item implements IStardewItem {
                 itemEntity.setDeltaMovement(dx / dist * speed, dy / dist * speed + 0.2, dz / dist * speed);
             }
             itemEntity.setPickUpDelay(0);
-            itemEntity.setThrower(player);
+            itemEntity.setThrower(player.getUUID());
             level.addFreshEntity(itemEntity);
         }
 
@@ -246,7 +248,7 @@ public class PanItem extends Item implements IStardewItem {
                 itemEntity.setDeltaMovement(dx / dist * speed, dy / dist * speed + 0.2, dz / dist * speed);
             }
             itemEntity.setPickUpDelay(0); // 立即可拾取
-            itemEntity.setThrower(player);
+            itemEntity.setThrower(player.getUUID());
             level.addFreshEntity(itemEntity);
         }
 

@@ -23,7 +23,7 @@ public final class SingularityCoreEffectClient {
     private SingularityCoreEffectClient() {}
 
     public static void add(float x, float y, float z, float radius, int durationTicks, int color) {
-        if (!Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()) {
+        if (!Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()) {
             return;
         }
         if (durationTicks <= 0 || radius <= 0.0f) {
@@ -64,7 +64,7 @@ public final class SingularityCoreEffectClient {
         Vec3 camPos = event.getCamera().getPosition();
         PoseStack poseStack = event.getPoseStack();
         MultiBufferSource.BufferSource buffer = mc.renderBuffers().bufferSource();
-        float partial = event.getPartialTick().getGameTimeDeltaPartialTick(false);
+        float partial = event.getPartialTick();
         RenderType coreType = WeaponEffectRenderTypes.MOLTEN_GLOW;
         VertexConsumer consumer = buffer.getBuffer(coreType);
 

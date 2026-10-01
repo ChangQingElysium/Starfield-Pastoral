@@ -14,7 +14,7 @@ import net.minecraft.network.chat.FormattedText;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import net.minecraftforge.client.event.RenderTooltipEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 
@@ -63,7 +63,7 @@ public final class WeaponTooltipEvents {
         String language = minecraft.getLanguageManager().getSelected();
         panel.measure(font);
         var model = panel.model();
-        if (!ItemStack.isSameItemSameComponents(previousStack, model.stack())
+        if (!ItemStack.isSameItemSameTags(previousStack, model.stack())
                 || previousExpanded != model.expanded() || !language.equals(previousLanguage)
                 || minecraft.screen != previousScreen || Util.getMillis() - lastRendered > 250
                 || Math.abs(event.getX() - lastMouseX) > 3 || Math.abs(event.getY() - lastMouseY) > 3) {
@@ -88,9 +88,10 @@ public final class WeaponTooltipEvents {
     @SubscribeEvent
     public static void scroll(ScreenEvent.MouseScrolled.Pre event) {
         if (!Screen.hasShiftDown() || maximumScroll <= 0 || event.getScreen() != previousScreen
-                || Util.getMillis() - lastRendered > 250 || event.getScrollDeltaY() == 0
+                // PORT(1.20.1): Forge exposes the vertical scroll as getScrollDelta().
+                || Util.getMillis() - lastRendered > 250 || event.getScrollDelta() == 0
                 || Math.abs(event.getMouseX() - lastMouseX) > 3 || Math.abs(event.getMouseY() - lastMouseY) > 3) return;
-        scroll = Math.max(0, Math.min(maximumScroll, scroll - (int) Math.round(event.getScrollDeltaY() * 24)));
+        scroll = Math.max(0, Math.min(maximumScroll, scroll - (int) Math.round(event.getScrollDelta() * 24)));
         event.setCanceled(true);
     }
 }

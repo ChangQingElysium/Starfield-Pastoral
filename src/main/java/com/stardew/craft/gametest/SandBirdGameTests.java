@@ -1,5 +1,7 @@
 package com.stardew.craft.gametest;
 
+import com.stardew.craft.port.PortGameTests;
+import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.block.decor.PlaygroundBlock;
 import com.stardew.craft.block.terrain.PlaygroundSandConnections;
@@ -59,10 +61,10 @@ public final class SandBirdGameTests {
         level.setBlock(pos.east(),ModBlocks.ASPHALT_ROAD.get().defaultBlockState(),3);
         level.setBlock(pos.east().above(),base,3);
         h.assertTrue((PlaygroundSandConnections.mask(level,pos)&2)==0,"Sand joins road or another elevation");
-        var player=h.makeMockPlayer(GameType.CREATIVE);player.setPos(Vec3.atBottomCenterOf(pos.offset(7,0,7)));
+        var player=PortGameTests.makeMockPlayer(h, GameType.CREATIVE);player.setPos(Vec3.atBottomCenterOf(pos.offset(7,0,7)));
         for(int v=0;v<4;v++) {
             var source=base.setValue(TerrainVariants.SAND,v);var plain=new ItemStack(block,16);
-            var fixed=TerrainVariants.fixedCopy(plain,source);h.assertTrue(!plain.has(DataComponents.BLOCK_STATE),"Copy mutates normal inventory");
+            var fixed=TerrainVariants.fixedCopy(plain,source);h.assertTrue(!PortItemData.has(plain, DataComponents.BLOCK_STATE),"Copy mutates normal inventory");
             player.setItemInHand(InteractionHand.MAIN_HAND,fixed);
             for(int repeat=0;repeat<5;repeat++) {
                 level.setBlock(pos,Blocks.AIR.defaultBlockState(),2);
@@ -92,7 +94,7 @@ public final class SandBirdGameTests {
     }
     @GameTest(templateNamespace="stardewcraft_sand_bird",template="ring_utilities",timeoutTicks=200)
     public static void birdRotatesReservesSpaceAndDropsOnce(GameTestHelper h) {
-        var main=prepare(h);var level=h.getLevel();var block=ModBlocks.BIRD_SPRING_RIDER.get();var player=h.makeMockPlayer(GameType.SURVIVAL);
+        var main=prepare(h);var level=h.getLevel();var block=ModBlocks.BIRD_SPRING_RIDER.get();var player=PortGameTests.makeMockPlayer(h, GameType.SURVIVAL);
         h.assertTrue(StardewItemCatalog.tabForItem(block.asItem())==StardewCatalogTab.BUILDING,"Bird catalog classification");
         for(var facing:Direction.Plane.HORIZONTAL) {
             player.setPos(Vec3.atBottomCenterOf(main.offset(7,0,7)));player.setYRot(facing.getOpposite().toYRot());

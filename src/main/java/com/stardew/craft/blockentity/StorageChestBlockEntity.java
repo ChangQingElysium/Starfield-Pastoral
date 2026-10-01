@@ -28,7 +28,7 @@ public final class StorageChestBlockEntity extends WoodenChestBlockEntity {
         if (owner == null) owner = FarmInstanceRegistry.get(server.getServer()).getOwnerForPlayer(player.getUUID());
         if (owner == null) owner = player.getUUID();
         setChanged();
-        level.invalidateCapabilities(worldPosition);
+        com.stardew.craft.port.PortCapabilities.invalidateCapabilities(level, worldPosition);
     }
     public boolean mayAccess(Player player) {
         if (!isSharedStorage()) return true;
@@ -66,12 +66,12 @@ public final class StorageChestBlockEntity extends WoodenChestBlockEntity {
     @Override public void dropAllContents(Level level, BlockPos pos) {
         if (!isSharedStorage()) super.dropAllContents(level, pos);
     }
-    @Override protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
+    @Override protected void saveAdditional(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        super.saveAdditional(tag);
         if (owner != null) tag.putUUID("SharedOwner", owner);
     }
-    @Override protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
+    @Override public void load(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        super.load(tag);
         owner = tag.hasUUID("SharedOwner") ? tag.getUUID("SharedOwner") : null;
     }
 }

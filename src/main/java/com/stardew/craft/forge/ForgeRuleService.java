@@ -1,5 +1,6 @@
 package com.stardew.craft.forge;
 
+import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.combat.ForgeEnchantmentGuard;
 import com.stardew.craft.combat.StardewWeaponSpeedRules;
@@ -656,9 +657,9 @@ public final class ForgeRuleService {
     }
 
     private static <T> void copyComponent(ItemStack source, ItemStack target, DataComponentType<T> type) {
-        T value = source.get(type);
+        T value = PortItemData.get(source, type);
         if (value != null) {
-            target.set(type, value);
+            PortItemData.set(target, type, value);
         }
     }
 
@@ -705,24 +706,24 @@ public final class ForgeRuleService {
         ) - 4.0F;
         float attackRangeBonus = stats.getWeaponType().getAttackRange() - BASE_ATTACK_RANGE;
 
-        stack.set(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.builder()
+        PortItemData.set(stack, DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.builder()
                 .add(Attributes.ATTACK_DAMAGE,
-                        new AttributeModifier(
+                        com.stardew.craft.port.PortAttributeModifiers.create(
                                 new ResourceLocation(StardewCraft.MODID, modifierId + ".attack_damage"),
                                 avgDamage,
-                                AttributeModifier.Operation.ADD_VALUE),
+                                AttributeModifier.Operation.ADDITION),
                         EquipmentSlotGroup.MAINHAND)
                 .add(Attributes.ATTACK_SPEED,
-                        new AttributeModifier(
+                        com.stardew.craft.port.PortAttributeModifiers.create(
                                 new ResourceLocation(StardewCraft.MODID, modifierId + ".attack_speed"),
                                 attackSpeed,
-                                AttributeModifier.Operation.ADD_VALUE),
+                                AttributeModifier.Operation.ADDITION),
                         EquipmentSlotGroup.MAINHAND)
-                .add(Attributes.ENTITY_INTERACTION_RANGE,
-                        new AttributeModifier(
+                .add(net.minecraftforge.common.ForgeMod.ENTITY_REACH.get(), // PORT(1.20.1): Forge entity interaction range
+                        com.stardew.craft.port.PortAttributeModifiers.create(
                                 new ResourceLocation(StardewCraft.MODID, modifierId + ".attack_range"),
                                 attackRangeBonus,
-                                AttributeModifier.Operation.ADD_VALUE),
+                                AttributeModifier.Operation.ADDITION),
                         EquipmentSlotGroup.MAINHAND)
                 .build()
                 .withTooltip(false));
@@ -808,7 +809,7 @@ public final class ForgeRuleService {
         if (carried.isEmpty()) {
             return true;
         }
-        return ItemStack.isSameItemSameComponents(carried, result)
+        return ItemStack.isSameItemSameTags(carried, result)
                 && carried.getCount() + result.getCount() <= carried.getMaxStackSize();
     }
 
@@ -907,7 +908,7 @@ public final class ForgeRuleService {
     }
 
     private static void applyPrismaticEnchantment(ItemStack stack, ResourceKey<Enchantment> enchantment, ServerPlayer player) {
-        ItemEnchantments currentEnchantments = stack.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY);
+        ItemEnchantments currentEnchantments = PortItemData.getOrDefault(stack, DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY);
         ItemEnchantments.Mutable mutable = new ItemEnchantments.Mutable(currentEnchantments);
         var lookup = player.level().registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
         for (ResourceKey<Enchantment> prismatic : PRISMATIC_ENCHANTMENTS) {
@@ -915,7 +916,7 @@ public final class ForgeRuleService {
         }
         Holder.Reference<Enchantment> holder = lookup.getOrThrow(enchantment);
         mutable.set(holder, 1);
-        stack.set(DataComponents.ENCHANTMENTS, mutable.toImmutable());
+        PortItemData.set(stack, DataComponents.ENCHANTMENTS, mutable.toImmutable());
 
         WeaponForgeData.State oldState = WeaponForgeData.read(stack);
         List<String> previous = new ArrayList<>();

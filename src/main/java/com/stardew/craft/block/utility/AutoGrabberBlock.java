@@ -40,9 +40,10 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
+import com.stardew.craft.port.PortBlockInteraction;
 
 @SuppressWarnings("null")
-public class AutoGrabberBlock extends Block implements EntityBlock {
+public class AutoGrabberBlock extends Block implements EntityBlock, PortBlockInteraction {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final BooleanProperty FULL = BooleanProperty.create("full");
     public static final EnumProperty<Part> PART = EnumProperty.create("part", Part.class);
@@ -85,7 +86,7 @@ public class AutoGrabberBlock extends Block implements EntityBlock {
     }
 
     @Override
-    protected List<ItemStack> getDrops(@Nonnull BlockState state, @Nonnull LootParams.Builder params) {
+    public List<ItemStack> getDrops(@Nonnull BlockState state, @Nonnull LootParams.Builder params) {
         if (state.getValue(PART) == Part.EXTENSION) {
             return List.of();
         }
@@ -179,8 +180,15 @@ public class AutoGrabberBlock extends Block implements EntityBlock {
         return state.setValue(FACING, mirror.mirror(state.getValue(FACING)));
     }
 
+    // PORT(1.20.1): replay the 1.21 useItemOn/useWithoutItem dispatch.
     @Override
-    protected ItemInteractionResult useItemOn(@Nonnull ItemStack stack,
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player,
+            InteractionHand hand, BlockHitResult hit) {
+        return PortBlockInteraction.dispatch(this, state, level, pos, player, hand, hit);
+    }
+
+    @Override
+    public ItemInteractionResult useItemOn(@Nonnull ItemStack stack,
                                               @Nonnull BlockState state,
                                               @Nonnull Level level,
                                               @Nonnull BlockPos pos,
@@ -197,7 +205,7 @@ public class AutoGrabberBlock extends Block implements EntityBlock {
     }
 
     @Override
-    protected InteractionResult useWithoutItem(@Nonnull BlockState state,
+    public InteractionResult useWithoutItem(@Nonnull BlockState state,
                                                @Nonnull Level level,
                                                @Nonnull BlockPos pos,
                                                @Nonnull Player player,
@@ -241,18 +249,18 @@ public class AutoGrabberBlock extends Block implements EntityBlock {
     }
 
     @Override
-    public BlockState playerWillDestroy(@Nonnull Level level,
+    public void playerWillDestroy(@Nonnull Level level,
                                         @Nonnull BlockPos pos,
                                         @Nonnull BlockState state,
                                         @Nonnull Player player) {
         if (!level.isClientSide && state.getValue(PART) == Part.EXTENSION && !player.isCreative()) {
             popResource(level, pos, new ItemStack(ModBlocks.AUTO_GRABBER.get()));
         }
-        return super.playerWillDestroy(level, pos, state, player);
+        super.playerWillDestroy(level, pos, state, player);
     }
 
     @Override
-    protected BlockState updateShape(@Nonnull BlockState state,
+    public BlockState updateShape(@Nonnull BlockState state,
                                      @Nonnull Direction direction,
                                      @Nonnull BlockState neighborState,
                                      @Nonnull LevelAccessor level,

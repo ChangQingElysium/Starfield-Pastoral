@@ -7,7 +7,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import com.stardew.craft.port.net.neoforged.neoforge.common.util.TriState;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 
@@ -22,8 +22,8 @@ public final class SpiritEveFestivalInteractionEvents {
             return;
         }
         if (SpiritEveFestivalService.tryOpenGoldenPumpkinChest(player, event.getPos())) {
-            event.setUseBlock(TriState.FALSE);
-            event.setUseItem(TriState.FALSE);
+            event.setUseBlock(TriState.FALSE.toResult());
+            event.setUseItem(TriState.FALSE.toResult());
             event.setCanceled(true);
             event.setCancellationResult(InteractionResult.SUCCESS);
         }

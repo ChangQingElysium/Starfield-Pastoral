@@ -32,8 +32,9 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import com.stardew.craft.port.PortBlockInteraction;
 
-public class LuckyPurpleShortsBlock extends Block implements EntityBlock {
+public class LuckyPurpleShortsBlock extends Block implements EntityBlock, PortBlockInteraction {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
 
     private static final VoxelShape[] SHAPES = ModelVoxelShapeCache.horizontalShapes(
@@ -80,7 +81,7 @@ public class LuckyPurpleShortsBlock extends Block implements EntityBlock {
 
     @SuppressWarnings("null")
     @Override
-    protected List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
+    public List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
         return List.of(new ItemStack(ModItems.LUCKY_PURPLE_SHORTS.get()));
     }
 
@@ -96,9 +97,16 @@ public class LuckyPurpleShortsBlock extends Block implements EntityBlock {
         return state.setValue(FACING, mirror.mirror(state.getValue(FACING)));
     }
 
+    // PORT(1.20.1): replay the 1.21 useItemOn/useWithoutItem dispatch.
+    @Override
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player,
+            InteractionHand hand, BlockHitResult hit) {
+        return PortBlockInteraction.dispatch(this, state, level, pos, player, hand, hit);
+    }
+
     @SuppressWarnings("null")
     @Override
-    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         if (LuckyPurpleShortsWorldEvents.isSpecialShortsPosition(level, pos)) {
             if (!level.isClientSide) {
                 LuckyPurpleShortsWorldEvents.useSpecialShorts(level, pos, player);
@@ -110,7 +118,7 @@ public class LuckyPurpleShortsBlock extends Block implements EntityBlock {
 
     @SuppressWarnings("null")
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+    public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         if (LuckyPurpleShortsWorldEvents.isSpecialShortsPosition(level, pos)) {
             return LuckyPurpleShortsWorldEvents.useSpecialShorts(level, pos, player);
         }

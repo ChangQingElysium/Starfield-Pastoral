@@ -1,5 +1,6 @@
 package com.stardew.craft.npc.runtime;
 
+import com.stardew.craft.port.PortLevels;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.entity.ModEntities;
 import com.stardew.craft.entity.npc.StardewNpcEntity;
@@ -826,7 +827,7 @@ public final class NpcCentralMovementService {
         if (plan.allowNearestReachableFinal && !aligningWorkpoint
                 && now - plan.lastCollisionRecoveryTick >= 20
                 && now - plan.lastProgressTick >= 40
-                && !level.noBlockCollision(npc, npc.getBoundingBox().deflate(1.0E-5D))) {
+                && !PortLevels.noBlockCollision(level, npc, npc.getBoundingBox().deflate(1.0E-5D))) {
             plan.lastCollisionRecoveryTick = now;
             Vec3 clearStart = nearestClearStart(level, npc);
             if (clearStart != null) {
@@ -883,7 +884,7 @@ public final class NpcCentralMovementService {
         }
         if (plan.fallbackStep == plan.currentStepIndex && plan.fallbackEndpoint != null
                 && npc.position().distanceToSqr(plan.fallbackEndpoint) <= .64
-                && npc.onGround() && sameRegion && level.noBlockCollision(npc, npc.getBoundingBox())) {
+                && npc.onGround() && sameRegion && PortLevels.noBlockCollision(level, npc, npc.getBoundingBox())) {
             npc.getNavigation().stop();
             stopHorizontalMotionPreserveGravity(npc);
             plan.currentStepIndex++;
@@ -917,7 +918,7 @@ public final class NpcCentralMovementService {
                     && sameRegion
                     && now - plan.destinationWaitStartTick >= DESTINATION_WAIT_TICKS
                     && npc.onGround()
-                    && level.noBlockCollision(npc, npc.getBoundingBox());
+                    && PortLevels.noBlockCollision(level, npc, npc.getBoundingBox());
             if (safelyWaitingBesideTarget) {
                 plan.currentStepIndex++;
                 plan.stagedPath = null;
@@ -978,13 +979,13 @@ public final class NpcCentralMovementService {
         boolean targetStandingCellUnavailable = !hasUsableStandingCellAt(level, npc, target);
         boolean stalledBesideBlockedTarget = targetStandingCellUnavailable
                 && npc.onGround()
-                && level.noBlockCollision(npc, npc.getBoundingBox())
+                && PortLevels.noBlockCollision(level, npc, npc.getBoundingBox())
                 && (plan.stuckCheckCount >= STUCK_REPATH_CHECKS || now - plan.localProgressTick >= 100);
         boolean completedNearestPath = completedPath != null && completedPath.isDone()
                 && completedAtPathEnd;
         boolean finishedAtUnsupportedEdge = completedNearestPath
                 && now - plan.localProgressTick >= 100 && npc.onGround()
-                && level.noBlockCollision(npc, npc.getBoundingBox())
+                && PortLevels.noBlockCollision(level, npc, npc.getBoundingBox())
                 && !hasSupportedApproach(level, npc, target);
         boolean nearestReachableFinal = plan.allowNearestReachableFinal && !plan.exactWorkpoint
                 && finalStep && sameRegion
@@ -1438,7 +1439,7 @@ public final class NpcCentralMovementService {
 
     private static boolean hasBodyClearanceAt(ServerLevel level, StardewNpcEntity npc, Vec3 target) {
         Vec3 delta = target.subtract(npc.position());
-        return level.noBlockCollision(npc, npc.getBoundingBox().move(delta));
+        return PortLevels.noBlockCollision(level, npc, npc.getBoundingBox().move(delta));
     }
 
     /** Recover only an embedded start, on a supported cell within the same room. */
@@ -1474,8 +1475,8 @@ public final class NpcCentralMovementService {
     private static boolean hasUsableStandingCellAt(ServerLevel level, StardewNpcEntity npc, Vec3 target) {
         Vec3 delta = target.subtract(npc.position());
         AABB targetBody = npc.getBoundingBox().move(delta);
-        if (!level.noBlockCollision(npc, targetBody)) return false;
-        return !level.noBlockCollision(npc, targetBody.move(0.0D, -0.08D, 0.0D));
+        if (!PortLevels.noBlockCollision(level, npc, targetBody)) return false;
+        return !PortLevels.noBlockCollision(level, npc, targetBody.move(0.0D, -0.08D, 0.0D));
     }
 
     private static double movementSpeedForStep(boolean tightStep, double distSqr) {
@@ -1534,7 +1535,7 @@ public final class NpcCentralMovementService {
         for (Vec3 offset : offsets) {
             Vec3 candidate = npc.position().add(offset);
             if (!hasSupportedApproach(level, npc, candidate)
-                    || !level.noBlockCollision(npc, npc.getBoundingBox()
+                    || !PortLevels.noBlockCollision(level, npc, npc.getBoundingBox()
                         .expandTowards(offset.x, 0.0D, offset.z).deflate(1.0E-7D))) {
                 continue;
             }
@@ -2138,7 +2139,7 @@ public final class NpcCentralMovementService {
             return false;
         }
         AABB settledBody = npc.getBoundingBox().move(0.0D, bestSurfaceY - feetY, 0.0D).deflate(1.0E-7D);
-        if (!level.noBlockCollision(npc, settledBody)) {
+        if (!PortLevels.noBlockCollision(level, npc, settledBody)) {
             return false;
         }
         npc.setPos(npc.getX(), bestSurfaceY, npc.getZ());

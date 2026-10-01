@@ -1,5 +1,6 @@
 package com.stardew.craft.block.mine;
 
+import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.block.decor.MapDecorStaticBlock;
 import net.minecraft.core.BlockPos;
@@ -59,7 +60,7 @@ public final class MineCoalBackpackBlock extends MapDecorStaticBlock {
     @Override public BlockState getStateForPlacement(BlockPlaceContext context) {
         BlockState state = super.getStateForPlacement(context);
         if (state == null) return null;
-        var saved = context.getItemInHand().getOrDefault(DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY);
+        var saved = PortItemData.getOrDefault(context.getItemInHand(), DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY);
         Boolean dark = saved.get(DARK);
         if (dark == null) dark = MineBuildingTheme.FROST_DARK.rank(context.getLevel().getBlockState(context.getClickedPos().below())) >= 0;
         Boolean desert = saved.get(DESERT);
@@ -71,13 +72,13 @@ public final class MineCoalBackpackBlock extends MapDecorStaticBlock {
         return state.setValue(DARK, dark).setValue(DESERT, desert).setValue(OPEN, Boolean.TRUE.equals(open));
     }
 
-    @Override public ItemStack getCloneItemStack(LevelReader level, BlockPos pos, BlockState state) {
+    @Override public ItemStack getCloneItemStack(net.minecraft.world.level.BlockGetter level, BlockPos pos, BlockState state) {
         var stack = new ItemStack(this);
-        stack.set(DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY.with(DARK, state).with(DESERT, state).with(OPEN, state));
+        PortItemData.set(stack, DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY.with(DARK, state).with(DESERT, state).with(OPEN, state));
         return stack;
     }
 
-    @Override protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos,
+    @Override public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos,
                                                          Player player, BlockHitResult hit) {
         BlockPos anchor = findMainPos(level, pos, state);
         if (anchor == null) return InteractionResult.PASS;
@@ -104,22 +105,22 @@ public final class MineCoalBackpackBlock extends MapDecorStaticBlock {
     }
 
     // Structures can place the strap before the body when rotated west or south.
-    @Override protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState old, boolean moving) {
+    @Override public void onPlace(BlockState state, Level level, BlockPos pos, BlockState old, boolean moving) {
         super.onPlace(state, level, pos, old, moving);
         if (!level.isClientSide) level.scheduleTick(pos, this, 1);
     }
 
-    @Override protected BlockState updateShape(BlockState state, Direction direction, BlockState neighbor,
+    @Override public BlockState updateShape(BlockState state, Direction direction, BlockState neighbor,
                                                LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
         level.scheduleTick(pos, this, 1);
         return state;
     }
 
-    @Override protected void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+    @Override public void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
         if (!super.canSurvive(state, level, pos)) runWithDropsSuppressed(() -> level.removeBlock(pos, false));
     }
 
-    @Override protected java.util.List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
+    @Override public java.util.List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
         return java.util.List.of();
     }
 

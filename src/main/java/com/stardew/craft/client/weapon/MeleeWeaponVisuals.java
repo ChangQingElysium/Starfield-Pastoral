@@ -31,7 +31,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import com.stardew.craft.port.net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import org.jetbrains.annotations.Nullable;
@@ -405,7 +405,7 @@ public final class MeleeWeaponVisuals {
     public static void chargeTip(int entityId, Action action, Vec3 tip) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null || mc.isPaused() || !FEMUR_CHARGE.equals(action.skillId)
-                || !Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()
+                || !Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()
                 || tip.distanceToSqr(mc.gameRenderer.getMainCamera().getPosition()) > 24 * 24) return;
         ensureLevel(mc.level);
         long now = mc.level.getGameTime();
@@ -422,7 +422,7 @@ public final class MeleeWeaponVisuals {
         Vec3 point = new Vec3(payload.x(), payload.y(), payload.z());
         if (mc.player.distanceToSqr(point) > RANGE_SQR) return;
         if (payload.kind() == Kind.GROUND) {
-            if (Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()) addGroundPulse(point);
+            if (Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()) addGroundPulse(point);
             return;
         }
         if(payload.kind()==Kind.CRESCENT_SLASH||payload.kind()==Kind.FALCHION_DOT||payload.kind()==Kind.FALCHION_BURST){
@@ -668,7 +668,7 @@ public final class MeleeWeaponVisuals {
                     SoundSource.PLAYERS, bone ? 0.5f : 0.32f, bone ? 0.65f : 1.5f, false);
             if (payload.casterId() == mc.player.getId()) freezeHit(payload, bone, strong);
         }
-        if (!Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()) return;
+        if (!Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()) return;
         if (IMPACTS.size() >= 48) IMPACTS.removeFirst();
         IMPACTS.add(new Impact(point, mc.level.getGameTime(), bone, strong, sword, material));
         Vec3 direction = mc.level.getEntity(payload.casterId()) instanceof LivingEntity caster
@@ -697,7 +697,7 @@ public final class MeleeWeaponVisuals {
         boolean pound=com.stardew.craft.combat.skill.handler.HeavyHammerRules.POUND.equals(payload.skill());
         boolean finalHit=payload.skill().endsWith("_final");
         CameraShakeState.kick(finalHit?.17f:pound?.045f:.11f,pound?2:3,finalHit?.25f:0);
-        float partial=mc.getTimer().getGameTimeDeltaPartialTick(false);
+        float partial=com.stardew.craft.port.net.minecraft.client.DeltaTracker.client().getGameTimeDeltaPartialTick(false);
         Action current=action(mc.player,partial);
         // Automatic echoes must not freeze a later swing or another skill.
         if(current==null || !current.skillId.equals(payload.skill()))return;
@@ -712,7 +712,7 @@ public final class MeleeWeaponVisuals {
     static void authoredHeavyContact(String damageId,float holdTicks) {
         Minecraft mc=Minecraft.getInstance();
         if(mc.level==null||mc.player==null)return;
-        float partial=mc.getTimer().getGameTimeDeltaPartialTick(false);
+        float partial=com.stardew.craft.port.net.minecraft.client.DeltaTracker.client().getGameTimeDeltaPartialTick(false);
         Action current=action(mc.player,partial);
         if(current==null||current.progress>=.94f
                 || !(damageId.equals(current.skillId)||damageId.startsWith(current.skillId+"_")))return;
@@ -722,7 +722,7 @@ public final class MeleeWeaponVisuals {
 
     private static void freezeHit(MeleeImpactPayload payload, boolean bone, boolean strong) {
         Minecraft mc = Minecraft.getInstance();
-        float partial = mc.getTimer().getGameTimeDeltaPartialTick(false);
+        float partial = com.stardew.craft.port.net.minecraft.client.DeltaTracker.client().getGameTimeDeltaPartialTick(false);
         Action current = action(mc.player, partial);
         if (current == null || !(mc.player.getMainHandItem().getItem() instanceof IStardewWeapon held)
                 || !held.getWeaponId().equals(payload.weaponId()) || !matchesAction(payload.kind(), current.skillId)
@@ -883,7 +883,7 @@ public final class MeleeWeaponVisuals {
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_PARTICLES) return;
         Minecraft mc = Minecraft.getInstance();
         ensureLevel(mc.level);
-        if (mc.level == null || !Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()
+        if (mc.level == null || !Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()
                 || (IMPACTS.isEmpty() && GROUND.isEmpty())) return;
         var stack = event.getPoseStack();
         Vec3 camera = event.getCamera().getPosition();
@@ -892,7 +892,7 @@ public final class MeleeWeaponVisuals {
         var matrix = stack.last().pose();
         var buffers = mc.renderBuffers().bufferSource();
         var out = buffers.getBuffer(WeaponEffectRenderTypes.MOLTEN_GLOW);
-        double now = mc.level.getGameTime() + event.getPartialTick().getGameTimeDeltaPartialTick(false);
+        double now = mc.level.getGameTime() + event.getPartialTick();
         for (Impact impact : IMPACTS) {
             float age = (float) (now - impact.start);
             if (age < 0 || age > 8 || impact.point.distanceToSqr(camera) > RANGE_SQR) continue;

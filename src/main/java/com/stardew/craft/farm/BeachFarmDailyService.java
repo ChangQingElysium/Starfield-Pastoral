@@ -173,7 +173,7 @@ public final class BeachFarmDailyService {
 
         static CounterData get(ServerLevel level) {
             return level.getServer().overworld().getDataStorage().computeIfAbsent(
-                    new Factory<>(CounterData::new, CounterData::load), NAME);
+                    com.stardew.craft.port.PortSavedData.loader(new Factory<>(CounterData::new, CounterData::load)), com.stardew.craft.port.PortSavedData.constructor(new Factory<>(CounterData::new, CounterData::load)), NAME);
         }
 
         int next() {
@@ -182,7 +182,7 @@ public final class BeachFarmDailyService {
             return count;
         }
 
-        @Override public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
+        @Override public CompoundTag save(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
             tag.putInt("Count", count);
             return tag;
         }

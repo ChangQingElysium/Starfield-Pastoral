@@ -1,5 +1,6 @@
 package com.stardew.craft.combat.skill;
 
+import com.stardew.craft.port.PortItemStacks;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.combat.equipment.EquipmentNegativeStatusProtection;
 import com.stardew.craft.combat.network.LavaKatanaMarkPayload;
@@ -17,7 +18,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import com.stardew.craft.port.net.neoforged.neoforge.event.tick.EntityTickEvent;
 import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
@@ -545,7 +546,7 @@ public final class LavaKatanaMarkTracker {
         );
         tag.put(
             TAG_RELEASE_WEAPON,
-            weaponSnapshot.weapon().saveOptional(
+            PortItemStacks.saveOptional(weaponSnapshot.weapon(), 
                 target.level().registryAccess()
             )
         );
@@ -565,7 +566,7 @@ public final class LavaKatanaMarkTracker {
         if (weaponId == null) {
             return null;
         }
-        ItemStack weapon = ItemStack.parse(
+        ItemStack weapon = PortItemStacks.parse(
             target.level().registryAccess(),
             tag.getCompound(TAG_RELEASE_WEAPON)
         ).orElse(ItemStack.EMPTY);

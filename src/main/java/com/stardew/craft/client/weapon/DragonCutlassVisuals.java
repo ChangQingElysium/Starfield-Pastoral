@@ -15,7 +15,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import com.stardew.craft.port.net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import static com.stardew.craft.client.weapon.WeaponGlowGeometry.*;
@@ -55,7 +55,7 @@ public final class DragonCutlassVisuals {
                 || !(mc.level.getEntity(entry.getKey()) instanceof Player player) || !player.isAlive()
                 || !(player.getMainHandItem().getItem() instanceof IStardewWeapon weapon)
                 || !"dragontooth_cutlass".equals(weapon.getWeaponId()));
-        if (!Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean() || mc.player == null) return;
+        if (!Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get() || mc.player == null) return;
         for (var entry : CASTS.entrySet()) {
             var player = mc.level.getEntity(entry.getKey());
             if (player == null || player.distanceToSqr(mc.player) > 24 * 24
@@ -77,8 +77,8 @@ public final class DragonCutlassVisuals {
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_PARTICLES) return;
         Minecraft mc = Minecraft.getInstance();
         ensureLevel(mc.level);
-        if (mc.level == null || CASTS.isEmpty() || !Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()) return;
-        float partial = event.getPartialTick().getGameTimeDeltaPartialTick(false);
+        if (mc.level == null || CASTS.isEmpty() || !Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()) return;
+        float partial = event.getPartialTick();
         Vec3 camera = event.getCamera().getPosition();
         var stack = event.getPoseStack();
         stack.pushPose(); stack.translate(-camera.x, -camera.y, -camera.z);

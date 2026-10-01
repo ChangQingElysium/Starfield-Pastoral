@@ -14,7 +14,7 @@ public final class BobberStyleMachineBlock extends MapDecorStaticBlock {
         super(properties.lightLevel(state->state.getValue(PART)==Part.EXTENSION?10:0),"stardewcraft:block/decor/bobber_style_machine",0,0,3,16,32,13);
     }
     @Override
-    protected InteractionResult useWithoutItem(BlockState state,Level level,BlockPos pos,Player player,BlockHitResult hit){
+    public InteractionResult useWithoutItem(BlockState state,Level level,BlockPos pos,Player player,BlockHitResult hit){
         BlockPos main=findMainPos(level,pos,state);
         if(main==null)return InteractionResult.PASS;
         if(player instanceof ServerPlayer server)BobberStyleService.open(server,main);

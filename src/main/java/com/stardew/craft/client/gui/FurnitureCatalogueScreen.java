@@ -476,8 +476,7 @@ public class FurnitureCatalogueScreen extends Screen {
 
         List<Component> lines = new ArrayList<>();
         if (!stack.isEmpty()) {
-            lines.addAll(stack.getTooltipLines(
-                Item.TooltipContext.EMPTY, mc.player,
+            lines.addAll(stack.getTooltipLines(mc.player,
                 net.minecraft.world.item.TooltipFlag.Default.NORMAL));
         } else {
             lines.add(Component.literal(resolveItemName(item)));
@@ -601,7 +600,7 @@ public class FurnitureCatalogueScreen extends Screen {
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double hScroll, double vScroll) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double vScroll) {
         int dir = vScroll > 0 ? -1 : 1;
         int ni = Math.max(0, Math.min(filteredItems.size() - ROWS, currentIndex + dir));
         if (ni != currentIndex) {

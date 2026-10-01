@@ -14,16 +14,10 @@ import javax.annotation.Nullable;
 
 /** Map-only Dark Talisman seal; access is enforced per player by the cave service. */
 public final class DarkTalismanSealBlock extends HorizontalDirectionalBlock {
-    public static final MapCodec<DarkTalismanSealBlock> CODEC = simpleCodec(DarkTalismanSealBlock::new);
 
     public DarkTalismanSealBlock(Properties properties) {
         super(properties);
         registerDefaultState(stateDefinition.any().setValue(FACING, Direction.SOUTH));
-    }
-
-    @Override
-    protected MapCodec<? extends HorizontalDirectionalBlock> codec() {
-        return CODEC;
     }
 
     @Override

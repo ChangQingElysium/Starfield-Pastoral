@@ -1,5 +1,6 @@
 package com.stardew.craft.item.catalog;
 
+import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.fishing.data.SpawnFishRule;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -134,7 +135,7 @@ public final class StardewItemComparator {
     }
 
     private static int themeOrder(ItemStack stack) {
-        var state = stack.get(com.stardew.craft.port.net.minecraft.core.component.DataComponents.BLOCK_STATE);
+        var state = PortItemData.get(stack, com.stardew.craft.port.net.minecraft.core.component.DataComponents.BLOCK_STATE);
         return state == null ? -1 : orderIndex(MINE_THEME_ORDER, state.properties().getOrDefault("theme", ""));
     }
 

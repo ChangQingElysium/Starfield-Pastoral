@@ -46,10 +46,15 @@ public class ShippingBinMenu extends AbstractContainerMenu {
                 return super.safeInsert(stack, increment);
             }
 
+            // PORT(1.20.1): 1.21 Slot#setByPlayer(stack) forwards to setByPlayer(stack, getItem()).
             @Override
+            public void setByPlayer(ItemStack stack) {
+                setByPlayer(stack, getItem());
+            }
+
             public void setByPlayer(ItemStack stack, ItemStack oldStack) {
                 if (container instanceof ShippingBinBlockEntity bin && !stack.isEmpty()) {
-                    int oldCount = ItemStack.isSameItemSameComponents(stack, oldStack) ? oldStack.getCount() : 0;
+                    int oldCount = ItemStack.isSameItemSameTags(stack, oldStack) ? oldStack.getCount() : 0;
                     int inserted = stack.getCount() - oldCount;
                     if (inserted > 0) {
                         // Drag distribution passes the combined stack. Only this player's
@@ -58,7 +63,7 @@ public class ShippingBinMenu extends AbstractContainerMenu {
                         return;
                     }
                 }
-                super.setByPlayer(stack, oldStack);
+                super.setByPlayer(stack);
             }
         });
 

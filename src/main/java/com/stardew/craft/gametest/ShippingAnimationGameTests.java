@@ -106,15 +106,15 @@ public final class ShippingAnimationGameTests {
             h.assertTrue(!bin.depositFromPlayer(player, new ItemStack(Items.BARRIER)) && bin.shipmentItem().isEmpty(), "Rejected shipment animated");
             var incoming = new ItemStack(ModItems.PARSNIP.get(), 4);
             h.assertTrue(bin.depositFromPlayer(player, incoming), "Valid shipment rejected");
-            var first = bin.getUpdateTag(level.registryAccess());
+            var first = bin.getUpdateTag();
             h.assertTrue(bin.shipmentItem().is(ModItems.PARSNIP.get()) && bin.shipmentItem().getCount() == 1
                     && bin.getItem(0).getCount() == 4 && incoming.getCount() == 4, "Visual prop altered actual inventory");
             bin.depositFromPlayer(player, new ItemStack(ModItems.PARSNIP.get(), 2));
-            long serial = bin.getUpdateTag(level.registryAccess()).getLong("ShipmentSerial");
+            long serial = bin.getUpdateTag().getLong("ShipmentSerial");
             h.assertTrue(serial > first.getLong("ShipmentSerial"), "Repeated same-item deposit did not restart motion");
             bin.removeItem(0, 1);
-            h.assertTrue(serial == bin.getUpdateTag(level.registryAccess()).getLong("ShipmentSerial"), "Withdrawal replayed shipment");
-            var saved = bin.saveWithoutMetadata(level.registryAccess());
+            h.assertTrue(serial == bin.getUpdateTag().getLong("ShipmentSerial"), "Withdrawal replayed shipment");
+            var saved = bin.saveWithoutMetadata();
             h.assertTrue(!saved.contains("ShipmentItem") && !saved.contains("ShipmentTick"), "Visual event leaked into persistent save");
             bin.clearContent();
         } finally { player.remove(Entity.RemovalReason.DISCARDED); }

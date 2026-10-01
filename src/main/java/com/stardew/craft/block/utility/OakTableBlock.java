@@ -41,9 +41,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import com.stardew.craft.port.PortBlockInteraction;
 
 @SuppressWarnings("null")
-public class OakTableBlock extends Block implements EntityBlock {
+public class OakTableBlock extends Block implements EntityBlock, PortBlockInteraction {
     public static final BooleanProperty NORTH_CONNECTED = BooleanProperty.create("north_connected");
     public static final BooleanProperty EAST_CONNECTED = BooleanProperty.create("east_connected");
     public static final BooleanProperty SOUTH_CONNECTED = BooleanProperty.create("south_connected");
@@ -127,7 +128,7 @@ public class OakTableBlock extends Block implements EntityBlock {
     }
 
     @Override
-    protected List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
+    public List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
         // Connected tables are independent blocks, so each broken table drops
         // exactly its own registered block item once.
         return List.of(new ItemStack(this));
@@ -159,7 +160,7 @@ public class OakTableBlock extends Block implements EntityBlock {
     }
 
     @Override
-    protected BlockState updateShape(BlockState state,
+    public BlockState updateShape(BlockState state,
                                      Direction direction,
                                      BlockState neighborState,
                                      LevelAccessor level,
@@ -190,8 +191,15 @@ public class OakTableBlock extends Block implements EntityBlock {
         return null;
     }
 
+    // PORT(1.20.1): replay the 1.21 useItemOn/useWithoutItem dispatch.
     @Override
-    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player,
+            InteractionHand hand, BlockHitResult hit) {
+        return PortBlockInteraction.dispatch(this, state, level, pos, player, hand, hit);
+    }
+
+    @Override
+    public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         ItemInteractionResult fairResult = FairFestivalService.handleFairSpruceTableUseItem(stack, state, level, pos, player);
         if (fairResult != ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION) {
             return fairResult;
@@ -235,7 +243,7 @@ public class OakTableBlock extends Block implements EntityBlock {
     }
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+    public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         InteractionResult fairResult = FairFestivalService.handleFairSpruceTableUse(state, level, pos, player);
         if (fairResult != InteractionResult.PASS) {
             return fairResult;

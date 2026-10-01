@@ -40,9 +40,11 @@ public final class ShopStockTracker extends SavedData {
     ) {
         return player.server.overworld().getDataStorage()
                 .computeIfAbsent(
-                        new SavedData.Factory<>(
+                        com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(
                                 ShopStockTracker::new,
-                                ShopStockTracker::load),
+                                ShopStockTracker::load)), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(
+                                ShopStockTracker::new,
+                                ShopStockTracker::load)),
                         DATA_NAME);
     }
 
@@ -130,9 +132,11 @@ public final class ShopStockTracker extends SavedData {
         }
         ShopStockTracker data = server.overworld()
                 .getDataStorage().computeIfAbsent(
-                        new SavedData.Factory<>(
+                        com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(
                                 ShopStockTracker::new,
-                                ShopStockTracker::load),
+                                ShopStockTracker::load)), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(
+                                ShopStockTracker::new,
+                                ShopStockTracker::load)),
                         DATA_NAME);
         data.pruneExpired();
     }

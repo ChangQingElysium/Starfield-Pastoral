@@ -91,7 +91,7 @@ public final class BuildingWorldData extends SavedData {
     public static BuildingWorldData get(MinecraftServer server) {
         if (!server.isSameThread()) throw new IllegalStateException("Building access requires the server thread");
         BuildingWorldData data = server.overworld().getDataStorage().computeIfAbsent(
-                new Factory<>(BuildingWorldData::new, BuildingWorldData::load), DATA_NAME);
+                com.stardew.craft.port.PortSavedData.loader(new Factory<>(BuildingWorldData::new, BuildingWorldData::load)), com.stardew.craft.port.PortSavedData.constructor(new Factory<>(BuildingWorldData::new, BuildingWorldData::load)), DATA_NAME);
         // Reconcile deletion even if a shutdown saved farms before the building file.
         Set<UUID> liveFarms = FarmInstanceRegistry.get(server).getAllFarms().stream()
                 .map(farm -> farm.getInstanceId()).collect(Collectors.toSet());
@@ -441,7 +441,7 @@ public final class BuildingWorldData extends SavedData {
     }
 
     @Override
-    public synchronized CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
+    public synchronized CompoundTag save(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
         tag.putInt("Format", FORMAT);
         var imported = new CompoundTag(); legacyImports.forEach(imported::putUUID); tag.put("LegacyImports", imported);
         ListTag list = new ListTag();

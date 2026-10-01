@@ -36,7 +36,6 @@ import net.minecraft.world.entity.Interaction;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import com.stardew.craft.port.net.minecraft.world.scores.ScoreHolder;
 import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.ArrayList;
@@ -1219,10 +1218,10 @@ public final class EggFestivalService {
             return;
         }
         for (ServerPlayer participant : onlineParticipants(level)) {
-            var score = scoreboard.getOrCreatePlayerScore(
-                    ScoreHolder.forNameOnly(participant.getStringUUID()), objective);
-            score.set(EGG_HUNT_COUNTS.getOrDefault(participant.getUUID(), 0));
-            score.display(Component.literal(PlayerDisplayName.get(participant)));
+            // PORT(1.20.1): no ScoreHolder / ScoreAccess#display before 1.20.3; the 1.20.1 sidebar prints the holder
+            // name, so the display name the 1.21 entry showed becomes the holder.
+            var score = scoreboard.getOrCreatePlayerScore(PlayerDisplayName.get(participant), objective);
+            score.setScore(EGG_HUNT_COUNTS.getOrDefault(participant.getUUID(), 0));
         }
     }
 

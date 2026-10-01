@@ -44,7 +44,7 @@ public class SprinklerBlock extends Block {
 
     @Override
     @SuppressWarnings("null")
-    protected void onPlace(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") Level level,
+    public void onPlace(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") Level level,
                            @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") BlockState oldState, boolean isMoving) {
         if (!state.is(oldState.getBlock())) {
             if (level instanceof ServerLevel serverLevel) {
@@ -56,7 +56,7 @@ public class SprinklerBlock extends Block {
 
     @Override
     @SuppressWarnings("null")
-    protected void onRemove(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") Level level,
+    public void onRemove(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") Level level,
                             @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") BlockState newState, boolean isMoving) {
         if (!state.is(newState.getBlock())) {
             if (level instanceof ServerLevel serverLevel) {
@@ -68,7 +68,7 @@ public class SprinklerBlock extends Block {
 
     @SuppressWarnings("null")
     @Override
-    protected List<ItemStack> getDrops(@SuppressWarnings("null") BlockState state,
+    public List<ItemStack> getDrops(@SuppressWarnings("null") BlockState state,
                                        @SuppressWarnings("null") LootParams.Builder params) {
         return List.of(new ItemStack(this));
     }

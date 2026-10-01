@@ -52,7 +52,7 @@ final class MineralFieldClient {
         if (phase != 0 || existing != null || duration <= 0 || duration > 100 || size <= 0 || size > 16
                 || !Float.isFinite(size) || !Double.isFinite(center.lengthSqr()) || !Float.isFinite(yaw)
                 || mc.player == null || mc.player.distanceToSqr(center) > 48*48
-                || !Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()) return;
+                || !Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()) return;
         var segments = new ArrayList<Segment>();
         Vec3 forward = Vec3.directionFromRotation(0, yaw), side = new Vec3(forward.z, 0, -forward.x);
         int count = bone ? 36 : 24;
@@ -99,9 +99,9 @@ final class MineralFieldClient {
     void render(RenderLevelStageEvent event) {
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_PARTICLES) return;
         ensureLevel();
-        if (level == null || fields.isEmpty() || !Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()) return;
+        if (level == null || fields.isEmpty() || !Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()) return;
         var mc = Minecraft.getInstance(); var camera = event.getCamera().getPosition();
-        double now = level.getGameTime() + event.getPartialTick().getGameTimeDeltaPartialTick(false);
+        double now = level.getGameTime() + event.getPartialTick();
         var stack = event.getPoseStack(); var buffers = mc.renderBuffers().bufferSource();
         stack.pushPose(); stack.translate(-camera.x, -camera.y, -camera.z);
         for (boolean edge : new boolean[]{true, false}) {

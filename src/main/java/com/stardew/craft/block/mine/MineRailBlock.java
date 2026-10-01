@@ -21,7 +21,6 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 /** Flat mine track, using vanilla rail routing with automatic timber end stops. */
 @SuppressWarnings("null")
 public final class MineRailBlock extends RailBlock {
-    public static final MapCodec<RailBlock> CODEC = simpleCodec(MineRailBlock::new);
     public static final BooleanProperty END_NORTH = BooleanProperty.create("end_north");
     public static final BooleanProperty END_SOUTH = BooleanProperty.create("end_south");
     private static final VoxelShape OUTLINE = Block.box(0, 0, 0, 16, 4, 16);
@@ -31,7 +30,6 @@ public final class MineRailBlock extends RailBlock {
         registerDefaultState(defaultBlockState().setValue(END_NORTH, true).setValue(END_SOUTH, true));
     }
 
-    @Override public MapCodec<RailBlock> codec() { return CODEC; }
     @Override public boolean canMakeSlopes(BlockState state, BlockGetter level, BlockPos pos) { return false; }
     @Override public boolean isFlexibleRail(BlockState state, BlockGetter level, BlockPos pos) { return false; }
     @Override public boolean isValidRailShape(RailShape shape) { return shape == RailShape.NORTH_SOUTH || shape == RailShape.EAST_WEST; }
@@ -62,26 +60,26 @@ public final class MineRailBlock extends RailBlock {
     }
 
     @Override
-    protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState old, boolean moving) {
+    public void onPlace(BlockState state, Level level, BlockPos pos, BlockState old, boolean moving) {
         super.onPlace(state, level, pos, old, moving);
         if (!level.isClientSide) level.scheduleTick(pos, this, 1);
     }
 
     @Override
-    protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, BlockPos from, boolean moving) {
+    public void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, BlockPos from, boolean moving) {
         super.neighborChanged(state, level, pos, block, from, moving);
         if (!level.isClientSide) level.scheduleTick(pos, this, 1);
     }
 
     @Override
-    protected BlockState updateShape(BlockState state, Direction direction, BlockState neighbor,
+    public BlockState updateShape(BlockState state, Direction direction, BlockState neighbor,
                                      LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
         level.scheduleTick(pos, this, 1);
         return super.updateShape(state, direction, neighbor, level, pos, neighborPos);
     }
 
     @Override
-    protected void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+    public void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
         BlockState routed = updateDir(level, pos, state, false);
         RailShape shape = routed.getValue(SHAPE);
         boolean straight = shape == RailShape.NORTH_SOUTH || shape == RailShape.EAST_WEST;
@@ -92,7 +90,7 @@ public final class MineRailBlock extends RailBlock {
     }
 
     @Override
-    protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+    public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return OUTLINE;
     }
 }

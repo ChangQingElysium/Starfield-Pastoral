@@ -22,7 +22,7 @@ public class NewTreeLogBlock extends RotatedPillarBlock implements EntityBlock {
 
 	@SuppressWarnings("null")
 	@Override
-	protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
+	public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
 		if (!level.isClientSide && !isMoving && !state.equals(newState)
 				&& level.getBlockEntity(pos) instanceof NewTreePartBlockEntity treePart) {
 			treePart.clearGeneratedTreeMarker();

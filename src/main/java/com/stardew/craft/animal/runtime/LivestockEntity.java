@@ -30,19 +30,24 @@ public final class LivestockEntity extends PathfinderMob implements GeoEntity {
     public static AttributeSupplier.Builder attributes() {
         return Mob.createMobAttributes().add(Attributes.MAX_HEALTH, 10).add(Attributes.MOVEMENT_SPEED, .176).add(Attributes.STEP_HEIGHT, 1).add(Attributes.FOLLOW_RANGE, 16);
     }
-    @Override protected void defineSynchedData(SynchedEntityData.Builder builder) { super.defineSynchedData(builder); builder.define(BABY, true); builder.define(EATING, false); builder.define(SPECIES, "white_chicken"); builder.define(SHEARED, false); }
+    @Override protected void defineSynchedData() { super.defineSynchedData(); this.entityData.define(BABY, true); this.entityData.define(EATING, false); this.entityData.define(SPECIES, "white_chicken"); this.entityData.define(SHEARED, false); }
     @Override public boolean isBaby() { return entityData.get(BABY); }
     public void refresh(LivestockRecord record) { entityData.set(BABY, record.baby()); entityData.set(SPECIES, record.species().id()); entityData.set(SHEARED, record.produce().isEmpty()); refreshDimensions(); setCustomName(Component.literal(record.name())); }
     public LivestockSpecies species() { return LivestockSpecies.parse(entityData.get(SPECIES)); }
     public com.stardew.craft.entity.animal.CoopAnimalVariant asset() { return species() == LivestockSpecies.SHEEP && !isBaby() && entityData.get(SHEARED) ? com.stardew.craft.entity.animal.CoopAnimalVariant.SHEARED_SHEEP : species().asset(); }
-    @Override public EntityDimensions getDefaultDimensions(Pose pose) {
+    // PORT(1.20.1): 1.21 LivingEntity#getDimensions is sleeping ? SLEEPING_DIMENSIONS : getDefaultDimensions(pose)
+    // (times the 1.20.5+ scale attribute, always 1 here); 1.20.1 only has getDimensions.
+    @Override public net.minecraft.world.entity.EntityDimensions getDimensions(net.minecraft.world.entity.Pose pose) {
+        return pose == net.minecraft.world.entity.Pose.SLEEPING ? SLEEPING_DIMENSIONS : getDefaultDimensions(pose);
+    }
+    public EntityDimensions getDefaultDimensions(Pose pose) {
         return species().dimensions(isBaby());
     }
     @Override public void onSyncedDataUpdated(EntityDataAccessor<?> accessor) { super.onSyncedDataUpdated(accessor); if (accessor.equals(BABY) || accessor.equals(SPECIES)) refreshDimensions(); }
     @Override public boolean shouldBeSaved() { return false; }
     @Override public boolean removeWhenFarAway(double distance) { return false; }
     @Override public boolean hurt(DamageSource source, float amount) { return false; }
-    @Override public boolean canBeLeashed() { return false; }
+    @Override public boolean canBeLeashed(Player player) { return false; }
     @Override protected InteractionResult mobInteract(Player player, InteractionHand hand) {
         if (hand != InteractionHand.MAIN_HAND) return InteractionResult.PASS;
         if (player instanceof ServerPlayer serverPlayer) { if (player.isShiftKeyDown()) LivestockManagement.open(serverPlayer,getUUID().toString()); else if (!LivestockProducts.interact(serverPlayer, this)) LivestockService.pet(serverPlayer, this); }

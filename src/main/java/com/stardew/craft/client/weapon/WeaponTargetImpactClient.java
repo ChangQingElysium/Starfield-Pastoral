@@ -19,7 +19,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import com.stardew.craft.port.net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 
@@ -142,7 +142,7 @@ public final class WeaponTargetImpactClient {
                     SoundSource.PLAYERS, 0.65f, 0.7f, false);
             if (style == Style.MOLTEN_FINISHER && casterId == mc.player.getId()) CameraShakeState.kick(0.23f, 3, 0.7f);
         }
-        if (!Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()) return;
+        if (!Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()) return;
         if (IMPACTS.size() >= 48) IMPACTS.removeFirst();
         IMPACTS.add(new Impact(casterId, targetId, serverTick, point, mc.level.getGameTime(), style));
         RandomSource random = RandomSource.create(serverTick * 31 + targetId);
@@ -177,8 +177,8 @@ public final class WeaponTargetImpactClient {
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_PARTICLES) return;
         Minecraft mc = Minecraft.getInstance();
         ensureLevel(mc.level);
-        if (mc.level == null || IMPACTS.isEmpty() || !Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()) return;
-        float partial = event.getPartialTick().getGameTimeDeltaPartialTick(false);
+        if (mc.level == null || IMPACTS.isEmpty() || !Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()) return;
+        float partial = event.getPartialTick();
         double now = mc.level.getGameTime() + partial;
         Vec3 camera = event.getCamera().getPosition();
         var stack = event.getPoseStack();

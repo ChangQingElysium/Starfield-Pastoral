@@ -901,7 +901,7 @@ public final class StardewValleyMapBootstrap {
 
         static MapSavedData get(ServerLevel level) {
             return level.getDataStorage().computeIfAbsent(
-                new SavedData.Factory<>(MapSavedData::new, MapSavedData::load),
+                com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(MapSavedData::new, MapSavedData::load)), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(MapSavedData::new, MapSavedData::load)),
                 NAME
             );
         }

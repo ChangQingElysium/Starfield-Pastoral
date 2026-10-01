@@ -84,7 +84,7 @@ public class PlayerDataManager extends SavedData {
     
     @SuppressWarnings("null")
     @Override
-    public CompoundTag save(@SuppressWarnings("null") CompoundTag tag, @SuppressWarnings("null") net.minecraft.core.HolderLookup.Provider provider) {
+    public CompoundTag save(@SuppressWarnings("null") CompoundTag tag) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
         // 保存玩家数量
         tag.putInt("PlayerCount", playerDataMap.size());
         
@@ -143,11 +143,15 @@ public class PlayerDataManager extends SavedData {
         }
         
         return overworld.getDataStorage().computeIfAbsent(
-            new SavedData.Factory<>(
+            com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(
                 PlayerDataManager::new,
                 PlayerDataManager::load,
                 null
-            ),
+            )), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(
+                PlayerDataManager::new,
+                PlayerDataManager::load,
+                null
+            )),
             DATA_NAME
         );
     }

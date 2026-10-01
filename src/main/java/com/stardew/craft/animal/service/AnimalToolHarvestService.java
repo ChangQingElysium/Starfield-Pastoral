@@ -137,7 +137,7 @@ public final class AnimalToolHarvestService {
             ItemStack existing = inventory.getItem(slot);
             if (existing.isEmpty()) {
                 remaining -= candidate.getMaxStackSize();
-            } else if (ItemStack.isSameItemSameComponents(existing, candidate)) {
+            } else if (ItemStack.isSameItemSameTags(existing, candidate)) {
                 remaining -= Math.max(0, existing.getMaxStackSize() - existing.getCount());
             }
             if (remaining <= 0) {

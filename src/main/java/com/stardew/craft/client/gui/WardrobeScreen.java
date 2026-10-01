@@ -397,7 +397,8 @@ public class WardrobeScreen extends Screen {
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollY) {
+        double scrollX = 0.0D; // PORT(1.20.1): no horizontal scroll before 1.20.2
         int max = maxScroll();
         if (max > 0) {
             int next = Math.max(0, Math.min(max, currentItemIndex - (int) Math.signum(scrollY)));
@@ -408,7 +409,7 @@ public class WardrobeScreen extends Screen {
             }
             return true;
         }
-        return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
+        return super.mouseScrolled(mouseX, mouseY, scrollY);
     }
 
     @Override
@@ -579,7 +580,7 @@ public class WardrobeScreen extends Screen {
             ItemStack inSlot = inventory.getItem(slot);
             if (inSlot.isEmpty()) {
                 remaining -= Math.min(stack.getMaxStackSize(), remaining);
-            } else if (ItemStack.isSameItemSameComponents(inSlot, stack)) {
+            } else if (ItemStack.isSameItemSameTags(inSlot, stack)) {
                 remaining -= Math.max(0, inSlot.getMaxStackSize() - inSlot.getCount());
             }
             if (remaining <= 0) {

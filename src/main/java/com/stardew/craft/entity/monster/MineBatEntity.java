@@ -50,9 +50,9 @@ public final class MineBatEntity extends StardewMonsterEntity {
     @Override protected net.minecraft.world.entity.ai.navigation.PathNavigation createNavigation(Level level) { return new MonsterFlightRoute(this,level); }
     private MonsterFlightRoute route() { return (MonsterFlightRoute)getNavigation(); }
     public BatFlight flight() { return flight; }
-    @Override protected void defineSynchedData(net.minecraft.network.syncher.SynchedEntityData.Builder builder) {
-        super.defineSynchedData(builder);
-        builder.define(DEEP_RED, false);
+    @Override protected void defineSynchedData() {
+        super.defineSynchedData();
+        this.entityData.define(DEEP_RED, false);
     }
     public boolean deepRed() { return entityData.get(DEEP_RED); }
     @Override public boolean isPushable() { return false; }
@@ -114,7 +114,7 @@ public final class MineBatEntity extends StardewMonsterEntity {
     }
     private boolean validTarget(Player player) {
         return player.isAlive() && !player.isCreative() && !player.isSpectator()
-                && !player.hasEffect(ModMobEffects.AVOID_MONSTERS)
+                && !player.hasEffect(ModMobEffects.AVOID_MONSTERS.get())
                 && (monsterState().context().generation() == null
                     || com.stardew.craft.mining.OrdinaryMineRuntime.floorAt(player.blockPosition()) == monsterState().context().floor());
     }

@@ -41,7 +41,7 @@ public final class SmartRidgeTemplateBlock extends RoofTemplateBlock {
     }
 
     @Override
-    protected BlockState updateShape(BlockState state, Direction direction, BlockState neighborState,
+    public BlockState updateShape(BlockState state, Direction direction, BlockState neighborState,
                                      LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
         BooleanProperty property = property(direction);
         if (property != null) {
@@ -64,7 +64,7 @@ public final class SmartRidgeTemplateBlock extends RoofTemplateBlock {
     }
 
     @Override
-    protected BlockState rotate(BlockState state, net.minecraft.world.level.block.Rotation rotation) {
+    public BlockState rotate(BlockState state, net.minecraft.world.level.block.Rotation rotation) {
         BlockState result = super.rotate(state, rotation);
         for (Direction direction : Direction.Plane.HORIZONTAL)
             result = result.setValue(property(rotation.rotate(direction)), state.getValue(property(direction)));
@@ -72,7 +72,7 @@ public final class SmartRidgeTemplateBlock extends RoofTemplateBlock {
     }
 
     @Override
-    protected BlockState mirror(BlockState state, net.minecraft.world.level.block.Mirror mirror) {
+    public BlockState mirror(BlockState state, net.minecraft.world.level.block.Mirror mirror) {
         BlockState result = super.mirror(state, mirror);
         for (Direction direction : Direction.Plane.HORIZONTAL)
             result = result.setValue(property(mirror.mirror(direction)), state.getValue(property(direction)));

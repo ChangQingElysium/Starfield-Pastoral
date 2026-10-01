@@ -47,14 +47,14 @@ public final class FishMarketCrateBlock extends MapDecorStaticBlock implements E
         return state.getValue(PART) == Part.MAIN ? new FishMarketCrateBlockEntity(pos, state) : null;
     }
 
-    @Override protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
+    @Override public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
             Player player, InteractionHand hand, BlockHitResult hit) {
         if (hand != InteractionHand.MAIN_HAND) return ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION;
         return interact(stack, state, level, pos, player, hit) == InteractionResult.FAIL
                 ? ItemInteractionResult.FAIL : ItemInteractionResult.sidedSuccess(level.isClientSide);
     }
 
-    @Override protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+    @Override public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         return interact(player.getMainHandItem(), state, level, pos, player, hit);
     }
 
@@ -74,7 +74,7 @@ public final class FishMarketCrateBlock extends MapDecorStaticBlock implements E
                 }
                 changed(level, main, player, true);
             } else if (crate.insert(slot, held) >= 0) {
-                held.consume(1, player);
+                com.stardew.craft.port.PortItemStacks.consume(held, 1, player);
                 changed(level, main, player, false);
             }
         }

@@ -37,7 +37,7 @@ public class LargeFireplaceDecorBlock extends MapDecorStaticBlock implements Ent
 
     /** 壁炉所有格都不可通行，防止 Junimo 等实体寻路穿过 */
     @Override
-    protected boolean isPathfindable(@Nonnull BlockState state, @Nonnull PathComputationType type) {
+    public boolean isPathfindable(@Nonnull BlockState state, BlockGetter level, BlockPos pos, @Nonnull PathComputationType type) {
         return false;
     }
 

@@ -1,5 +1,6 @@
 package com.stardew.craft.lostandfound;
 
+import com.stardew.craft.port.PortItemStacks;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -25,7 +26,7 @@ public final class LostAndFoundData extends SavedData {
     public static LostAndFoundData get(ServerLevel level) {
         ServerLevel overworld = level.getServer().getLevel(Level.OVERWORLD);
         ServerLevel storageLevel = overworld == null ? level : overworld;
-        return storageLevel.getDataStorage().computeIfAbsent(factory(), DATA_NAME);
+        return storageLevel.getDataStorage().computeIfAbsent(com.stardew.craft.port.PortSavedData.loader(factory()), com.stardew.craft.port.PortSavedData.constructor(factory()), DATA_NAME);
     }
 
     TeamReturns returns(UUID farmId) {
@@ -54,7 +55,7 @@ public final class LostAndFoundData extends SavedData {
 
     @Override
     @Nonnull
-    public CompoundTag save(@Nonnull CompoundTag tag, @Nonnull HolderLookup.Provider registries) {
+    public CompoundTag save(@Nonnull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
         CompoundTag farms = new CompoundTag();
         for (Map.Entry<UUID, TeamReturns> farmEntry : returnsByFarm.entrySet()) {
             TeamReturns returns = farmEntry.getValue();
@@ -71,7 +72,7 @@ public final class LostAndFoundData extends SavedData {
                 CompoundTag itemTag = new CompoundTag();
                 itemTag.putInt("AvailableDay", stored.availableDay);
                 itemTag.putBoolean("Announced", stored.announced);
-                itemTag.put("Stack", stored.stack.saveOptional(registries));
+                itemTag.put("Stack", PortItemStacks.saveOptional(stored.stack, registries));
                 items.add(itemTag);
             }
             returnsTag.put("Items", items);
@@ -93,7 +94,7 @@ public final class LostAndFoundData extends SavedData {
                 ListTag items = returnsTag.getList("Items", Tag.TAG_COMPOUND);
                 for (int i = 0; i < items.size(); i++) {
                     CompoundTag itemTag = items.getCompound(i);
-                    ItemStack stack = ItemStack.parseOptional(registries, itemTag.getCompound("Stack"));
+                    ItemStack stack = PortItemStacks.parseOptional(registries, itemTag.getCompound("Stack"));
                     if (!stack.isEmpty()) {
                         returns.items.add(new StoredReturn(
                             stack,
@@ -110,8 +111,8 @@ public final class LostAndFoundData extends SavedData {
         return data;
     }
 
-    private static SavedData.Factory<LostAndFoundData> factory() {
-        return new SavedData.Factory<>(LostAndFoundData::new, LostAndFoundData::load);
+    private static com.stardew.craft.port.PortSavedData.Factory<LostAndFoundData> factory() {
+        return new com.stardew.craft.port.PortSavedData.Factory<>(LostAndFoundData::new, LostAndFoundData::load);
     }
 
     static final class TeamReturns {

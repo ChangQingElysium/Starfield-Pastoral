@@ -1,5 +1,6 @@
 package com.stardew.craft.client.fishing;
 
+import com.stardew.craft.port.PortItemData;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.client.fishpond.ClientFishPondFishRenderer;
@@ -17,7 +18,7 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import net.minecraftforge.client.event.RenderHandEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import org.joml.Matrix4f;
@@ -34,7 +35,7 @@ public final class FishingPresentationRenderer {
     }
     @SubscribeEvent public static void world(RenderLevelStageEvent event) {
         if(event.getStage()!=RenderLevelStageEvent.Stage.AFTER_ENTITIES)return;
-        var mc=Minecraft.getInstance();if(mc.level==null)return;float partial=event.getPartialTick().getGameTimeDeltaPartialTick(false);
+        var mc=Minecraft.getInstance();if(mc.level==null)return;float partial=event.getPartialTick();
         // The world player renderer stays vanilla; this pass only replaces the local first-person hands.
         if(event.getCamera().getEntity() instanceof AbstractClientPlayer player&&FishingPresentationClient.firstPerson(player)) {
             var s=FishingPresentationClient.state(player);if(s==null)return;s.sample();
@@ -104,7 +105,7 @@ public final class FishingPresentationRenderer {
         if(s.phase==FishingPresentationPhase.CAST&&(t<.35||s.hook<0))return FishingPresentationClient.world(actor,s.pose.anchor("rod_anchor_bobber_line"));
         if(s.phase==FishingPresentationPhase.CAST||s.phase==FishingPresentationPhase.BITE||s.phase==FishingPresentationPhase.HOOK||s.phase==FishingPresentationPhase.MINIGAME) {
             var mc=Minecraft.getInstance();var hook=mc.level==null?null:mc.level.getEntity(s.hook);
-            Vec3 at=s.phase!=FishingPresentationPhase.MINIGAME&&hook!=null?hook.getPosition(mc.getTimer().getGameTimeDeltaPartialTick(false)):FishingPresentationClient.visualBobber(s);
+            Vec3 at=s.phase!=FishingPresentationPhase.MINIGAME&&hook!=null?hook.getPosition(com.stardew.craft.port.net.minecraft.client.DeltaTracker.client().getGameTimeDeltaPartialTick(false)):FishingPresentationClient.visualBobber(s);
             if(s.phase==FishingPresentationPhase.BITE)at=at.add(0,-.10*Math.sin(Math.PI*Math.min(t/.5,1)),0);
             return at.add(0,.14,0);
         }
@@ -127,7 +128,7 @@ public final class FishingPresentationRenderer {
         attachEquipment(pose,actor,bobberMatrix,mounted,attached);
         Vec3 mainLine=FishingBobberModels.anchor(bobberMatrix,bobber.mainLine());
         Vec3 leader=FishingBobberModels.anchor(bobberMatrix,bobber.leader());
-        boolean slim=player.getSkin().model()==com.stardew.craft.port.net.minecraft.client.resources.PlayerSkin.Model.SLIM;
+        boolean slim=com.stardew.craft.port.net.minecraft.client.resources.PlayerSkin.of(player).model()==com.stardew.craft.port.net.minecraft.client.resources.PlayerSkin.Model.SLIM;
         stack.pushPose();stack.mulPose(actor);
         for(var face:pose.rig.faces()) {
             if(face.part().startsWith("rod_bobber"))continue;
@@ -135,7 +136,7 @@ public final class FishingPresentationRenderer {
             boolean arm=face.part().startsWith("player_continuous_");
             if(face.part().startsWith("player_")&&!arm)continue;
             if(hideHands && !face.part().contains("bobber")&&!face.part().contains("hook"))continue;
-            ResourceLocation texture=face.texture()==0?player.getSkin().texture():FishingRigAssets.resource("textures/entity/fishing_native/"+face.texture()+".png");
+            ResourceLocation texture=face.texture()==0?com.stardew.craft.port.net.minecraft.client.resources.PlayerSkin.of(player).texture():FishingRigAssets.resource("textures/entity/fishing_native/"+face.texture()+".png");
             var consumer=buffers.getBuffer(face.cull()?RenderType.entityCutout(texture):RenderType.entityCutoutNoCull(texture));
             float shift=0;
             if(arm&&slim) {
@@ -165,11 +166,11 @@ public final class FishingPresentationRenderer {
                     for(int layerIndex=0;layerIndex<layers.size();layerIndex++) {
                         var material=layers.get(layerIndex);int color=extensions.getArmorLayerTintColor(chest,player,material,layerIndex,extensions.getDefaultDyeColor(chest));
                         if(color==0)continue;
-                        var armorTexture=com.stardew.craft.port.net.neoforged.neoforge.client.ClientHooks.getArmorTexture(player,chest,material,false,net.minecraft.world.entity.EquipmentSlot.CHEST);
+                        var armorTexture=net.minecraftforge.client.ForgeHooksClient.getArmorTexture(player,chest,material,false,net.minecraft.world.entity.EquipmentSlot.CHEST);
                         var armorConsumer=buffers.getBuffer(RenderType.armorCutoutNoCull(armorTexture));
                         armorFace(pose,face,stack,armorConsumer,light,normal,left,color);
                     }
-                    var trim=chest.get(com.stardew.craft.port.net.minecraft.core.component.DataComponents.TRIM);
+                    var trim=PortItemData.get(chest, com.stardew.craft.port.net.minecraft.core.component.DataComponents.TRIM);
                     if(trim!=null){var atlas=Minecraft.getInstance().getModelManager().getAtlas(net.minecraft.client.renderer.Sheets.ARMOR_TRIMS_SHEET);var sprite=atlas.getSprite(trim.outerTexture(armor.getMaterial()));armorFace(pose,face,stack,sprite.wrap(buffers.getBuffer(net.minecraft.client.renderer.Sheets.armorTrimsSheet(trim.pattern().value().decal()))),light,normal,left,-1);}
                     if(chest.hasFoil())armorFace(pose,face,stack,buffers.getBuffer(RenderType.armorEntityGlint()),light,normal,left,-1);
                 }

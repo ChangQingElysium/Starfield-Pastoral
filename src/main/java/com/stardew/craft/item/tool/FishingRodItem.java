@@ -1,5 +1,6 @@
 package com.stardew.craft.item.tool;
 
+import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.fishing.server.FishingSessionManager;
 import com.stardew.craft.fishing.FishingCastPower;
 import com.stardew.craft.enchantment.StardewEnchantments;
@@ -26,8 +27,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.level.Level;
-import com.stardew.craft.port.net.neoforged.neoforge.common.ItemAbilities;
-import com.stardew.craft.port.net.neoforged.neoforge.common.ItemAbility;
+import net.minecraftforge.common.ToolActions;
+import net.minecraftforge.common.ToolAction;
 
 import java.util.function.Consumer;
 
@@ -109,9 +110,9 @@ public class FishingRodItem extends net.minecraft.world.item.FishingRodItem impl
 	}
 
 	@Override
-	public boolean canPerformAction(@SuppressWarnings("null") ItemStack stack, @SuppressWarnings("null") ItemAbility ability) {
+	public boolean canPerformAction(@SuppressWarnings("null") ItemStack stack, @SuppressWarnings("null") ToolAction ability) {
 		// 关键：让原版FishingHook识别我们的钓竿，不会自动discard
-		return ItemAbilities.DEFAULT_FISHING_ROD_ACTIONS.contains(ability);
+		return ToolActions.DEFAULT_FISHING_ROD_ACTIONS.contains(ability);
 	}
 
 	@Override
@@ -571,7 +572,7 @@ public class FishingRodItem extends net.minecraft.world.item.FishingRodItem impl
 	}
 
 	@Override
-	public int getUseDuration(@SuppressWarnings("null") ItemStack stack, @SuppressWarnings("null") LivingEntity entity) {
+	public int getUseDuration(@SuppressWarnings("null") ItemStack stack) {
 		return 72000;
 	}
 
@@ -597,7 +598,7 @@ public class FishingRodItem extends net.minecraft.world.item.FishingRodItem impl
 			return;
 		}
 
-		int usedTicks = getUseDuration(stack, livingEntity) - timeLeft;
+		int usedTicks = getUseDuration(stack) - timeLeft;
 		float castPower01 = FishingCastPower.getCastPower01FromUsedTicks(usedTicks);
 		float staminaCost = player.isCreative()
 				|| player.level().dimension() != ModDimensions.STARDEW_VALLEY
@@ -687,17 +688,17 @@ public class FishingRodItem extends net.minecraft.world.item.FishingRodItem impl
 
 	private static CompoundTag getCustomDataCopy(ItemStack stack) {
 		@SuppressWarnings("null")
-		CustomData data = stack.get(DataComponents.CUSTOM_DATA);
+		CustomData data = PortItemData.get(stack, DataComponents.CUSTOM_DATA);
 		return data != null ? data.copyTag() : new CompoundTag();
 	}
 
 	@SuppressWarnings("null")
 	private static void setCustomData(ItemStack stack, CompoundTag tag) {
 		if (tag == null || tag.isEmpty()) {
-			stack.remove(DataComponents.CUSTOM_DATA);
+			PortItemData.remove(stack, DataComponents.CUSTOM_DATA);
 			return;
 		}
-		stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+		PortItemData.set(stack, DataComponents.CUSTOM_DATA, CustomData.of(tag));
 	}
 
 	private static CompoundTag getRootOrNull(ItemStack rodStack) {
@@ -728,7 +729,7 @@ public class FishingRodItem extends net.minecraft.world.item.FishingRodItem impl
 		int count = stored.contains("count", CompoundTag.TAG_INT) ? stored.getInt("count") : 1;
 		ItemStack stack = new ItemStack(item, Math.max(1, count));
 		if (stored.contains(TAG_CUSTOM_DATA, CompoundTag.TAG_COMPOUND)) {
-			stack.set(DataComponents.CUSTOM_DATA, CustomData.of(stored.getCompound(TAG_CUSTOM_DATA)));
+			PortItemData.set(stack, DataComponents.CUSTOM_DATA, CustomData.of(stored.getCompound(TAG_CUSTOM_DATA)));
 		}
 		if (stack.isDamageableItem() && stored.contains(TAG_DAMAGE, CompoundTag.TAG_INT)) {
 			int dmg = stored.getInt(TAG_DAMAGE);
@@ -759,7 +760,7 @@ public class FishingRodItem extends net.minecraft.world.item.FishingRodItem impl
 		CompoundTag saved = new CompoundTag();
 		saved.putString("id", id.toString());
 		saved.putInt("count", stack.getCount());
-		CustomData customData = stack.get(DataComponents.CUSTOM_DATA);
+		CustomData customData = PortItemData.get(stack, DataComponents.CUSTOM_DATA);
 		if (customData != null) {
 			CompoundTag customDataTag = customData.copyTag();
 			if (!customDataTag.isEmpty()) {
@@ -871,7 +872,7 @@ public class FishingRodItem extends net.minecraft.world.item.FishingRodItem impl
 			return true;
 		}
 		// Same bait: merge counts into the rod.
-		if (ItemStack.isSameItemSameComponents(existing, incoming)) {
+		if (ItemStack.isSameItemSameTags(existing, incoming)) {
 			int total = existing.getCount() + incoming.getCount();
 			existing.setCount(total);
 			writeStack(rodStack, TAG_BAIT, existing);

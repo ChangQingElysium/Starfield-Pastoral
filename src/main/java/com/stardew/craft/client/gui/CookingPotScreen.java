@@ -330,15 +330,16 @@ public class CookingPotScreen extends AbstractContainerScreen<CookingPotMenu> {
         else renderTooltip(g, mouseX, mouseY);
     }
     private boolean inside(double x, double y, int rx, int ry, int w, int h) { return x >= rx && x < rx + w && y >= ry && y < ry + h; }
-    @Override public boolean mouseScrolled(double x, double y, double horizontal, double vertical) {
-        if (vertical == 0) return super.mouseScrolled(x, y, horizontal, vertical);
+    @Override public boolean mouseScrolled(double x, double y, double vertical) {
+        double horizontal = 0.0D; // PORT(1.20.1): no horizontal scroll before 1.20.2
+        if (vertical == 0) return super.mouseScrolled(x, y, vertical);
         if (catalogueVisible() && inside(x, y, page.listX(), gridTop, page.listWidth(), listBottom - gridTop)) {
             listScroll += vertical < 0 ? 1 : -1; buildControls(); return true;
         }
         if (recipeVisible() && inside(x, y, page.detailX(), page.bodyTop(), page.detailWidth(), detailBottom - page.bodyTop())) {
             detailScroll = Math.max(0, Math.min(detailScroll + (vertical < 0 ? 24 : -24), detailHeight - (detailBottom - page.bodyTop()))); return true;
         }
-        return super.mouseScrolled(x, y, horizontal, vertical);
+        return super.mouseScrolled(x, y, vertical);
     }
     @Override public boolean mouseClicked(double x, double y, int button) {
         if (trashCan.click(menu, trashX(), trashY(), x, y, button)) return true;

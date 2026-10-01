@@ -1,5 +1,6 @@
 package com.stardew.craft.item.catalog;
 
+import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.api.v1.item.StardewItemDataApi;
 import com.stardew.craft.core.ModTags;
 import com.stardew.craft.item.ModItems;
@@ -43,7 +44,7 @@ public final class StardewItemDisplayStacks {
             List<ItemStack> variants = new ArrayList<>();
             for (int i = 0; i < plant.kind().variants; i++) {
                 ItemStack stack = new ItemStack(item);
-                stack.set(DataComponents.BLOCK_STATE, com.stardew.craft.port.net.minecraft.world.item.component.BlockItemStateProperties.EMPTY
+                PortItemData.set(stack, DataComponents.BLOCK_STATE, com.stardew.craft.port.net.minecraft.world.item.component.BlockItemStateProperties.EMPTY
                         .with(com.stardew.craft.block.decor.NaturalPlantBlock.VARIANT,
                                 plant.defaultBlockState().setValue(com.stardew.craft.block.decor.NaturalPlantBlock.VARIANT, i)));
                 variants.add(stack);
@@ -53,16 +54,16 @@ public final class StardewItemDisplayStacks {
 
         if (item == ModItems.MINE_CHEST.get()) {
             ItemStack special = new ItemStack(item);
-            special.set(DataComponents.BLOCK_STATE, new com.stardew.craft.port.net.minecraft.world.item.component.BlockItemStateProperties(
+            PortItemData.set(special, DataComponents.BLOCK_STATE, new com.stardew.craft.port.net.minecraft.world.item.component.BlockItemStateProperties(
                     java.util.Map.of("special", "true")));
-            special.set(DataComponents.ITEM_NAME, net.minecraft.network.chat.Component.translatable("item.stardewcraft.special_mine_chest"));
+            PortItemData.set(special, DataComponents.ITEM_NAME, net.minecraft.network.chat.Component.translatable("item.stardewcraft.special_mine_chest"));
             return List.of(new ItemStack(item), special);
         }
         if (item == ModItems.MINE_COAL_BACKPACK.get()) {
             List<ItemStack> variants = new ArrayList<>();
             for (int theme = 0; theme < 3; theme++) for (boolean open : new boolean[]{false, true}) {
                 ItemStack stack = new ItemStack(item);
-                stack.set(DataComponents.BLOCK_STATE, new com.stardew.craft.port.net.minecraft.world.item.component.BlockItemStateProperties(
+                PortItemData.set(stack, DataComponents.BLOCK_STATE, new com.stardew.craft.port.net.minecraft.world.item.component.BlockItemStateProperties(
                         java.util.Map.of("dark", Boolean.toString(theme == 1), "desert", Boolean.toString(theme == 2),
                                 "open", Boolean.toString(open))));
                 variants.add(stack);
@@ -74,7 +75,7 @@ public final class StardewItemDisplayStacks {
             List<ItemStack> variants = new ArrayList<>();
             for (int i = 0; i < 2; i++) {
                 ItemStack stack = new ItemStack(item);
-                stack.set(DataComponents.BLOCK_STATE, new com.stardew.craft.port.net.minecraft.world.item.component.BlockItemStateProperties(
+                PortItemData.set(stack, DataComponents.BLOCK_STATE, new com.stardew.craft.port.net.minecraft.world.item.component.BlockItemStateProperties(
                         java.util.Map.of("variant", Integer.toString(i))));
                 variants.add(stack);
             }
@@ -90,7 +91,7 @@ public final class StardewItemDisplayStacks {
                 if (themedItem.getBlock() instanceof com.stardew.craft.block.mine.MineTimberSupportBlock
                         && (theme.id().startsWith("frost") || theme.id().startsWith("desert"))) continue;
                 ItemStack stack = new ItemStack(item);
-                stack.set(DataComponents.BLOCK_STATE, new com.stardew.craft.port.net.minecraft.world.item.component.BlockItemStateProperties(
+                PortItemData.set(stack, DataComponents.BLOCK_STATE, new com.stardew.craft.port.net.minecraft.world.item.component.BlockItemStateProperties(
                         java.util.Map.of("theme", theme.id())));
                 variants.add(stack);
             }
@@ -101,13 +102,13 @@ public final class StardewItemDisplayStacks {
             List<ItemStack> variants = new ArrayList<>();
             for (var theme : com.stardew.craft.block.mine.MineLadderBlock.Theme.values()) {
                 ItemStack stack = new ItemStack(item);
-                stack.set(DataComponents.BLOCK_STATE, new com.stardew.craft.port.net.minecraft.world.item.component.BlockItemStateProperties(
+                PortItemData.set(stack, DataComponents.BLOCK_STATE, new com.stardew.craft.port.net.minecraft.world.item.component.BlockItemStateProperties(
                         java.util.Map.of("theme", theme.getSerializedName())));
                 variants.add(stack);
             }
             if (item == ModItems.MINE_LADDER.get()) for (String theme : java.util.List.of("desert", "desert_dark")) {
                 ItemStack stack = new ItemStack(item);
-                stack.set(DataComponents.BLOCK_STATE, new com.stardew.craft.port.net.minecraft.world.item.component.BlockItemStateProperties(java.util.Map.of("theme", theme, "shaft", "true")));
+                PortItemData.set(stack, DataComponents.BLOCK_STATE, new com.stardew.craft.port.net.minecraft.world.item.component.BlockItemStateProperties(java.util.Map.of("theme", theme, "shaft", "true")));
                 variants.add(stack);
             }
             return variants;
@@ -117,7 +118,7 @@ public final class StardewItemDisplayStacks {
             List<ItemStack> variants = new ArrayList<>();
             for (var theme : com.stardew.craft.block.mine.MineLampBlock.Theme.values()) {
                 ItemStack stack = new ItemStack(item);
-                stack.set(DataComponents.BLOCK_STATE, new com.stardew.craft.port.net.minecraft.world.item.component.BlockItemStateProperties(
+                PortItemData.set(stack, DataComponents.BLOCK_STATE, new com.stardew.craft.port.net.minecraft.world.item.component.BlockItemStateProperties(
                         java.util.Map.of("theme", theme.getSerializedName())));
                 variants.add(stack);
             }
@@ -211,7 +212,7 @@ public final class StardewItemDisplayStacks {
         List<ItemStack> stacks = new ArrayList<>();
         for (int area = 0; area <= 6; area++) {
             ItemStack stack = new ItemStack(ModItems.JUNIMO_NOTE.get());
-            stack.set(DataComponents.BLOCK_STATE,
+            PortItemData.set(stack, DataComponents.BLOCK_STATE,
                     new com.stardew.craft.port.net.minecraft.world.item.component.BlockItemStateProperties(
                             java.util.Map.of("area", String.valueOf(area))));
             stacks.add(stack);
@@ -243,7 +244,7 @@ public final class StardewItemDisplayStacks {
     }
 
     public static Integer getFlowerColor(ItemStack stack) {
-        CustomData customData = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY);
+        CustomData customData = PortItemData.getOrDefault(stack, DataComponents.CUSTOM_DATA, CustomData.EMPTY);
         var tag = customData.copyTag();
         if (tag.contains("FlowerColor")) {
             return tag.getInt("FlowerColor");
@@ -293,11 +294,11 @@ public final class StardewItemDisplayStacks {
         ItemStack stack = new ItemStack(item);
         QualityHelper.setQuality(stack, quality);
         if (flowerColor != null) {
-            CustomData customData = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY);
+            CustomData customData = PortItemData.getOrDefault(stack, DataComponents.CUSTOM_DATA, CustomData.EMPTY);
             var tag = customData.copyTag();
             tag.putInt("FlowerColor", Math.max(0, flowerColor));
-            stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
-            stack.set(DataComponents.CUSTOM_MODEL_DATA,
+            PortItemData.set(stack, DataComponents.CUSTOM_DATA, CustomData.of(tag));
+            PortItemData.set(stack, DataComponents.CUSTOM_MODEL_DATA,
                     new CustomModelData(100 + (quality * 10) + Math.max(0, flowerColor)));
         }
         return stack;

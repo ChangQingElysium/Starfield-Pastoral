@@ -141,7 +141,7 @@ public final class WindSpireThrustSkillHandler implements RuntimeWeaponSkillHand
             return;
         }
         player.addEffect(new MobEffectInstance(
-                ModMobEffects.SPEED,
+                ModMobEffects.SPEED.get(),
                 GALE_DURATION_TICKS,
                 SPEED_AMPLIFIER,
                 false,

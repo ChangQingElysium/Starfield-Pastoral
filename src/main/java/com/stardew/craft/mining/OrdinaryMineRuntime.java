@@ -17,7 +17,7 @@ import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import com.stardew.craft.port.net.neoforged.neoforge.event.tick.LevelTickEvent;
 import java.util.*;
 
@@ -271,7 +271,7 @@ public final class OrdinaryMineRuntime {
         if(luckOwner==null) luckOwner=level.players().stream().filter(p->!p.isSpectator()&&floorAt(p.blockPosition())==floor)
                 .min(java.util.Comparator.comparingDouble(p->p.distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(pos)))).orElse(null);
         double chance=LadderProbabilityCalculator.calculateProbability(data.getStonesLeft(),player==null?0:PlayerStardewDataAPI.getLuckBuffLevel(player),
-                luckOwner==null?0:PlayerStardewDataAPI.getDailyLuck(luckOwner),data.getEnemyCount(),player!=null && player.hasEffect(com.stardew.craft.effect.ModMobEffects.DWARF_STATUE_1));
+                luckOwner==null?0:PlayerStardewDataAPI.getDailyLuck(luckOwner),data.getEnemyCount(),player!=null && player.hasEffect(com.stardew.craft.effect.ModMobEffects.DWARF_STATUE_1.get()));
         if(!data.hasStoneLadderSpawned() && floor!=120 && !data.isMonsterArea() && (player==null || !player.isCreative()) && (data.getStonesLeft()==0 || r.nextDouble()<chance)) {
             level.getServer().tell(new net.minecraft.server.TickTask(level.getServer().getTickCount()+1,()->{
                 if(manager.getFloorData(floor)==data && !data.hasStoneLadderSpawned()) placeLadder(level,floor,pos,data);
@@ -284,7 +284,7 @@ public final class OrdinaryMineRuntime {
         int floor=floorAt(pos);var data=MineFloorDataManager.get(level).getFloorData(floor);
         if(!handles(floor) || data==null || data.getGenerationVersion()!=VERSION) return false;
         if(floor==120) return true;
-        double chance=.15+(player.hasEffect(com.stardew.craft.effect.ModMobEffects.DWARF_STATUE_1)?.07:0);
+        double chance=.15+(player.hasEffect(com.stardew.craft.effect.ModMobEffects.DWARF_STATUE_1.get())?.07:0);
         if(level.random.nextDouble()<chance) {
             var layout=OrdinaryMineLayout.load(level,floor);var o=layout.origin(floor);
             // Original normal floors use the kill tile, not a random nearby room or a ceiling.

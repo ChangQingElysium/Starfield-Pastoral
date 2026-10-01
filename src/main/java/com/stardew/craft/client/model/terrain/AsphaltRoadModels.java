@@ -1,5 +1,6 @@
 package com.stardew.craft.client.model.terrain;
 
+import com.stardew.craft.port.PortItemData;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.block.ModBlocks;
@@ -30,7 +31,7 @@ import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import net.minecraftforge.client.event.ModelEvent;
 import net.minecraftforge.client.model.BakedModelWrapper;
 import net.minecraftforge.client.model.IDynamicBakedModel;
@@ -187,7 +188,7 @@ public final class AsphaltRoadModels {
                 @Override public BakedModel resolve(BakedModel model, ItemStack stack, @Nullable ClientLevel level,
                         @Nullable LivingEntity entity, int seed) {
                     if (icons != null) return icons[TerrainSeasonTextures.currentTextureSet()];
-                    Integer v = stack.getOrDefault(DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY).get(TerrainVariants.ASPHALT);
+                    Integer v = PortItemData.getOrDefault(stack, DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY).get(TerrainVariants.ASPHALT);
                     return Objects.requireNonNull(variants)[v == null ? 0 : v];
                 }
             };

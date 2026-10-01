@@ -24,10 +24,10 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.CriticalHitEvent;
-import net.minecraftforge.event.entity.living.LivingDamageEvent;
+import com.stardew.craft.port.net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.entity.PartEntity;
 
 /**
@@ -71,32 +71,32 @@ public final class CrossDimensionNativeAttackHandler {
         EquipmentStats equipment = EquipmentResolver.getMergedStats(player);
         WeaponStats weaponStats = WeaponStats.fromItemStack(weapon);
         PlayerStardewData playerData = PlayerDataManager.getPlayerData(player);
-        if (!event.isCriticalHit()) {
+        if (!isCriticalHit(event)) {
             float luckLevel = playerData.getLuckLevel()
                     + equipment.getLuck();
             float chance = CrossDimensionAttributeRules.minecraftCriticalChance(
                     weaponStats.getCritChance(),
                     weaponStats.getBonusCritChance(),
                     equipment.getCritChance(),
-                    player.hasEffect(ModMobEffects.STATUE_OF_BLESSINGS_5)
+                    player.hasEffect(ModMobEffects.STATUE_OF_BLESSINGS_5.get())
                             ? 0.10F
                             : 0.0F,
                     playerData.hasProfession(ProfessionType.SCOUT),
                     luckLevel
             );
             if (player.getRandom().nextFloat() < chance) {
-                event.setCriticalHit(true);
-                event.setDisableSweep(true);
-                event.setDamageMultiplier(
+                // PORT(1.20.1): Forge forces a crit with ALLOW; a Forge crit always disables the sweep.
+                event.setResult(net.minecraftforge.eventbus.api.Event.Result.ALLOW);
+                event.setDamageModifier(
                         MINECRAFT_CRITICAL_MULTIPLIER
                 );
             }
         }
 
-        if (event.isCriticalHit()) {
-            event.setDamageMultiplier(
+        if (isCriticalHit(event)) {
+            event.setDamageModifier(
                     CrossDimensionAttributeRules.minecraftCriticalMultiplier(
-                            event.getDamageMultiplier(),
+                            event.getDamageModifier(),
                             weaponStats.getBonusCritPower(),
                             equipment.getCritPower(),
                             playerData.hasProfession(ProfessionType.DESPERADO)
@@ -107,8 +107,14 @@ public final class CrossDimensionNativeAttackHandler {
                 player.getUUID(),
                 combatTargetId(event.getTarget()),
                 player.level().getGameTime(),
-                event.isCriticalHit()
+                isCriticalHit(event)
         );
+    }
+
+    /** PORT(1.20.1): NeoForge's CriticalHitEvent#isCriticalHit, as decided by Forge's ForgeHooks#getCriticalHit. */
+    private static boolean isCriticalHit(CriticalHitEvent event) {
+        return event.getResult() == net.minecraftforge.eventbus.api.Event.Result.ALLOW
+                || event.isVanillaCritical() && event.getResult() == net.minecraftforge.eventbus.api.Event.Result.DEFAULT;
     }
 
     /**

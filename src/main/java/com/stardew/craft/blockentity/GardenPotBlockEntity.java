@@ -1,5 +1,6 @@
 package com.stardew.craft.blockentity;
 
+import com.stardew.craft.port.PortItemStacks;
 import com.stardew.craft.api.v1.agriculture.StardewCropRuntime;
 import com.stardew.craft.api.v1.agriculture.StardewCropState;
 import com.stardew.craft.block.FertilizerType;
@@ -47,6 +48,7 @@ import net.minecraftforge.items.IItemHandler;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import com.stardew.craft.port.PortBlockInteraction;
 
 /** Persistent water and automation state; the planted crop remains the real block above the pot. */
 public final class GardenPotBlockEntity extends BlockEntity
@@ -123,7 +125,7 @@ public final class GardenPotBlockEntity extends BlockEntity
         return StardewCropRuntime.inspect(level, cropPos()) == null
                 && crop.getBlock() instanceof net.minecraft.world.level.block.BonemealableBlock bonemealable
                 && level instanceof ServerLevel serverLevel
-                && bonemealable.isValidBonemealTarget(serverLevel, cropPos(), crop);
+                && bonemealable.isValidBonemealTarget(serverLevel, cropPos(), crop, false /* PORT(1.20.1): isClient arg */);
     }
 
     public boolean applyBoneMeal() {
@@ -133,7 +135,7 @@ public final class GardenPotBlockEntity extends BlockEntity
         BlockState crop = cropState();
         if (StardewCropRuntime.inspect(serverLevel, cropPos()) != null
                 || !(crop.getBlock() instanceof net.minecraft.world.level.block.BonemealableBlock bonemealable)
-                || !bonemealable.isValidBonemealTarget(serverLevel, cropPos(), crop)
+                || !bonemealable.isValidBonemealTarget(serverLevel, cropPos(), crop, false /* PORT(1.20.1): isClient arg */)
                 || !bonemealable.isBonemealSuccess(serverLevel, serverLevel.random, cropPos(), crop)) {
             return false;
         }
@@ -150,7 +152,7 @@ public final class GardenPotBlockEntity extends BlockEntity
         }
         if (crop.getBlock() instanceof com.stardew.craft.block.nature.ForageBlock) {
             BlockHitResult hit = new BlockHitResult(Vec3.atCenterOf(cropPos), Direction.UP, cropPos, false);
-            return crop.useWithoutItem(level, player, hit).consumesAction();
+            return PortBlockInteraction.stateUseWithoutItem(crop, level, player, hit).consumesAction();
         }
         if (crop.getBlock() instanceof com.stardew.craft.block.nature.TeaBushBlock teaBush) {
             return teaBush.interact(player, player.serverLevel(), cropPos);
@@ -175,7 +177,7 @@ public final class GardenPotBlockEntity extends BlockEntity
             for (int i = 0; i < days; i++) {
                 BlockState crop = cropState();
                 if (!(crop.getBlock() instanceof net.minecraft.world.level.block.BonemealableBlock bonemealable)
-                        || !bonemealable.isValidBonemealTarget(serverLevel, cropPos(), crop)) {
+                        || !bonemealable.isValidBonemealTarget(serverLevel, cropPos(), crop, false /* PORT(1.20.1): isClient arg */)) {
                     break;
                 }
                 bonemealable.performBonemeal(serverLevel, serverLevel.random, cropPos(), crop);
@@ -260,7 +262,7 @@ public final class GardenPotBlockEntity extends BlockEntity
         }
         ItemStack remainder = stack.copy();
         for (ItemStack existing : outputs) {
-            if (ItemStack.isSameItemSameComponents(existing, remainder)) {
+            if (ItemStack.isSameItemSameTags(existing, remainder)) {
                 int transfer = Math.min(existing.getMaxStackSize() - existing.getCount(), remainder.getCount());
                 existing.grow(transfer);
                 remainder.shrink(transfer);
@@ -487,32 +489,32 @@ public final class GardenPotBlockEntity extends BlockEntity
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
+    protected void saveAdditional(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        super.saveAdditional(tag);
         tag.putInt("Water", waterAmount);
         ListTag list = new ListTag();
         for (ItemStack output : outputs) {
             if (!output.isEmpty()) {
-                list.add(output.save(registries));
+                list.add(PortItemStacks.save(output, registries));
             }
         }
         tag.put("Outputs", list);
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
+    public void load(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        super.load(tag);
         waterAmount = Math.max(0, Math.min(tag.getInt("Water"), WATER_PER_WATERING - 1));
         outputs.clear();
         ListTag list = tag.getList("Outputs", Tag.TAG_COMPOUND);
         for (int i = 0; i < list.size(); i++) {
-            ItemStack.parse(registries, list.getCompound(i)).ifPresent(this::addOutput);
+            PortItemStacks.parse(registries, list.getCompound(i)).ifPresent(this::addOutput);
         }
     }
 
     @Override
-    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
-        return saveWithoutMetadata(registries);
+    public CompoundTag getUpdateTag() { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        return saveWithoutMetadata();
     }
 
     @Nullable

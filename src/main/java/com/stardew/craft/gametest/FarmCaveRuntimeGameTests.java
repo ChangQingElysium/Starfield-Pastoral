@@ -151,12 +151,12 @@ public final class FarmCaveRuntimeGameTests {
         return prepared.getLegacyCaveOrigin(owner);
     }
     private static ServerPlayer player(ServerLevel level,UUID id) {
-        ServerPlayer p=new ServerPlayer(level.getServer(),level,new GameProfile(id,"Cave visitor"),ClientInformation.createDefault()) {
+        ServerPlayer p=new ServerPlayer(level.getServer(),level,new GameProfile(id,"Cave visitor")) {
             @Override public void teleportTo(ServerLevel target,double x,double y,double z,float yaw,float pitch) {
                 setServerLevel(target);setPos(x,y,z);setYRot(yaw);setXRot(pitch);
             }
         };
-        p.connection=new ServerGamePacketListenerImpl(level.getServer(),new Connection(PacketFlow.SERVERBOUND),p,CommonListenerCookie.createInitial(p.getGameProfile(),false)) {
+        p.connection=new ServerGamePacketListenerImpl(level.getServer(),new Connection(PacketFlow.SERVERBOUND),p) {
             @Override public void send(Packet<?> packet) {}
         };
         return p;

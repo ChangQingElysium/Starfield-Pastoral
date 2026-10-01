@@ -44,7 +44,7 @@ public class FarmPermissionManager extends SavedData {
     public static FarmPermissionManager get() {
         var server = ServerLifecycleHooks.getCurrentServer();
         if (server == null) return new FarmPermissionManager();
-        return server.overworld().getDataStorage().computeIfAbsent(factory(), DATA_NAME);
+        return server.overworld().getDataStorage().computeIfAbsent(com.stardew.craft.port.PortSavedData.loader(factory()), com.stardew.craft.port.PortSavedData.constructor(factory()), DATA_NAME);
     }
 
     // ── 查询 ──
@@ -189,7 +189,7 @@ public class FarmPermissionManager extends SavedData {
 
     @Override
     @Nonnull
-    public CompoundTag save(@Nonnull CompoundTag tag, @Nonnull HolderLookup.Provider registries) {
+    public CompoundTag save(@Nonnull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
         // 默认权限
         CompoundTag defaultsTag = new CompoundTag();
         for (var entry : defaultPermissions.entrySet()) {
@@ -248,7 +248,7 @@ public class FarmPermissionManager extends SavedData {
         return mgr;
     }
 
-    public static SavedData.Factory<FarmPermissionManager> factory() {
-        return new SavedData.Factory<>(FarmPermissionManager::new, FarmPermissionManager::load);
+    public static com.stardew.craft.port.PortSavedData.Factory<FarmPermissionManager> factory() {
+        return new com.stardew.craft.port.PortSavedData.Factory<>(FarmPermissionManager::new, FarmPermissionManager::load);
     }
 }

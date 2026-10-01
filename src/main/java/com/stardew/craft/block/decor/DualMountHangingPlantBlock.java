@@ -99,7 +99,7 @@ public class DualMountHangingPlantBlock extends MapDecorStaticBlock {
     }
 
     @Override
-    protected boolean canSurvive(@Nonnull BlockState state, @Nonnull LevelReader level, @Nonnull BlockPos pos) {
+    public boolean canSurvive(@Nonnull BlockState state, @Nonnull LevelReader level, @Nonnull BlockPos pos) {
         if (!super.canSurvive(state, level, pos)) {
             return false;
         }
@@ -116,7 +116,7 @@ public class DualMountHangingPlantBlock extends MapDecorStaticBlock {
     }
 
     @Override
-    protected BlockState updateShape(@Nonnull BlockState state,
+    public BlockState updateShape(@Nonnull BlockState state,
                                      @Nonnull Direction direction,
                                      @Nonnull BlockState neighborState,
                                      @Nonnull LevelAccessor level,

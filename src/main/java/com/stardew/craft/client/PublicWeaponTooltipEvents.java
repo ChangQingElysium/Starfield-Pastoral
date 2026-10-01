@@ -8,7 +8,7 @@ import com.stardew.craft.item.weapon.WeaponTooltipBuilder;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 
 /** Adds the shared combat-stat presentation to public API weapons. */

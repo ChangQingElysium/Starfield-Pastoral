@@ -38,13 +38,13 @@ public final class MineDustSpiritEntity extends StardewMonsterEntity {
     @Override protected void registerGoals(){}
     @Override protected ResourceLocation definitionId(){return new ResourceLocation("stardewcraft:dust_sprite");}
     @Override protected void configureSpawn(MonsterDefinition d,MonsterSpawnContext c){var r=MonsterStatResolver.base(d,c,random);setInitialHealth(r.initialHealth());replaceCombatStats(r.combat());getAttribute(Attributes.SCALE).setBaseValue((75+random.nextInt(26))/100.);motion.voice(1+random.nextInt(23));groundY=getY();anchored=true;}
-    @Override protected void defineSynchedData(SynchedEntityData.Builder b){super.defineSynchedData(b);b.define(OFFSET,0F);b.define(HIT,-100L);}
+    @Override protected void defineSynchedData(){super.defineSynchedData();this.entityData.define(OFFSET,0F);this.entityData.define(HIT,-100L);}
     public double sourceOffset(){return entityData.get(OFFSET);}
     public double hitTime(float p){return (level().getGameTime()-entityData.get(HIT)+p)/20.;}
     public DustSpiritMotion motion(){return motion;}
     public void sourceChargingConstructor(boolean charging){motion.voice(0);if(charging){motion.see();motion.charge();}}
     public void stunFor(int milliseconds){stunMilliseconds=Math.max(stunMilliseconds,milliseconds);}
-    private boolean valid(Player p){return p.isAlive()&&!p.isCreative()&&!p.isSpectator()&&!p.hasEffect(ModMobEffects.AVOID_MONSTERS)&&(monsterState().context().generation()==null||OrdinaryMineRuntime.floorAt(p.blockPosition())==monsterState().context().floor());}
+    private boolean valid(Player p){return p.isAlive()&&!p.isCreative()&&!p.isSpectator()&&!p.hasEffect(ModMobEffects.AVOID_MONSTERS.get())&&(monsterState().context().generation()==null||OrdinaryMineRuntime.floorAt(p.blockPosition())==monsterState().context().floor());}
     @Override protected void customServerAiStep(){
         if(!initialized())initialize(MonsterSpawnContext.capture((ServerLevel)level(),MonsterSpawnContext.Source.WORLD,1));
         if(!anchored){groundY=getY();anchored=true;}

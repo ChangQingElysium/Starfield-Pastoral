@@ -20,7 +20,6 @@ import com.stardew.craft.port.net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketFlow;
 import com.stardew.craft.port.net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
-import com.stardew.craft.port.net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ServerPlayer;
 import com.stardew.craft.port.net.minecraft.server.network.CommonListenerCookie;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
@@ -111,11 +110,10 @@ public final class PetInitialAdoptionGameTests {
     }
     static ServerPlayer player(GameTestHelper h, String name, List<CompoundTag> offers) {
         var server = h.getLevel().getServer();
-        var player = new ServerPlayer(server, h.getLevel(), new GameProfile(UUID.randomUUID(), name), ClientInformation.createDefault());
-        player.connection = new ServerGamePacketListenerImpl(server, new Connection(PacketFlow.SERVERBOUND), player,
-                CommonListenerCookie.createInitial(player.getGameProfile(), false)) {
+        var player = new ServerPlayer(server, h.getLevel(), new GameProfile(UUID.randomUUID(), name));
+        player.connection = new ServerGamePacketListenerImpl(server, new Connection(PacketFlow.SERVERBOUND), player) {
             @Override public void send(Packet<?> packet) {
-                if (!(packet instanceof ClientboundCustomPayloadPacket custom) || !(custom.payload() instanceof PetScreenPayload pet)) return;
+                if (!(ClientboundCustomPayloadPacket.unwrap(packet) instanceof ClientboundCustomPayloadPacket custom) || !(custom.payload() instanceof PetScreenPayload pet)) return;
                 var buffer = new RegistryFriendlyByteBuf(Unpooled.buffer(), server.registryAccess(), ConnectionType.NEOFORGE);
                 try { PetScreenPayload.CODEC.encode(buffer, pet); offers.add(PetScreenPayload.CODEC.decode(buffer).data()); h.assertTrue(!buffer.isReadable(), "Pet questionnaire left unread wire data"); }
                 finally { buffer.release(); }

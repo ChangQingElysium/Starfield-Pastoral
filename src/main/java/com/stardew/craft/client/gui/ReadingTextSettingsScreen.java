@@ -100,13 +100,14 @@ public final class ReadingTextSettingsScreen extends Screen {
         super.render(g, mx, my, pt);
     }
 
-    @Override public boolean mouseScrolled(double mx, double my, double dx, double dy) {
+    @Override public boolean mouseScrolled(double mx, double my, double dy) {
+        double dx = 0.0D; // PORT(1.20.1): no horizontal scroll before 1.20.2
         if (mx >= x + 16 && mx < x + panelW - 16 && my >= previewY && my < previewBottom) {
             previewScroll = Math.clamp(previewScroll - (int) (dy * 16), 0,
                     Math.max(0, previewHeight - (previewBottom - previewY - 12)));
             return true;
         }
-        return super.mouseScrolled(mx, my, dx, dy);
+        return super.mouseScrolled(mx, my, dy);
     }
 
     @Override public void onClose() { minecraft.setScreen(parent); }

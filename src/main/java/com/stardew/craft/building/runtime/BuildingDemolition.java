@@ -39,7 +39,7 @@ public final class BuildingDemolition {
             var nativeCells=BuildingTransfer.nativeCells(level,record,record.tier()); var floors=SurfaceFloorData.get(level);
             for(var pos:nativeCells.keySet()) {
                 var be=level.getBlockEntity(pos);
-                if(be != null && BuildingRemovalChecks.containsItems(be.saveWithFullMetadata(level.registryAccess()))) { BuildingPlacementService.message(player,"demolish_contents"); return false; }
+                if(be != null && BuildingRemovalChecks.containsItems(be.saveWithFullMetadata())) { BuildingPlacementService.message(player,"demolish_contents"); return false; }
                 if(floors.at(pos)!=null) { BuildingPlacementService.message(player,"demolish_attachments"); return false; }
             }
             for(var entity:level.getEntitiesOfClass(HangingEntity.class,BuildingPlacementService.aabb(record.claim()).inflate(1))) {

@@ -1,5 +1,6 @@
 package com.stardew.craft.api.v1.agriculture;
 
+import com.stardew.craft.port.PortItemStacks;
 import com.stardew.craft.animal.data.AnimalWorldData;
 import com.stardew.craft.animal.model.FarmAnimalRecord;
 import com.stardew.craft.animal.service.AnimalProducePlacementService;
@@ -172,7 +173,7 @@ public final class StardewAnimalDailyContext {
         if(livestock!=null){
             livestock.state=livestock.state.withCurrentProduceId(itemId.toString()).withProduceQuality(QualityHelper.getQuality(produceStack));
             livestock.record=livestock.record.produce(itemId.toString());
-            var extra=livestock.record.extra();extra.put("HeldProduce",produceStack.save(level.registryAccess()));livestock.record=livestock.record.extra(extra);return true;
+            var extra=livestock.record.extra();extra.put("HeldProduce",PortItemStacks.save(produceStack, level.registryAccess()));livestock.record=livestock.record.extra(extra);return true;
         }
         record.setCurrentProduceId(itemId.toString());
         record.setProduceQuality(QualityHelper.getQuality(produceStack));

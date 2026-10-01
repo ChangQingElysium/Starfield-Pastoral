@@ -1,5 +1,6 @@
 package com.stardew.craft.client.render;
 
+import com.stardew.craft.port.PortItemData;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
@@ -44,7 +45,7 @@ public class SmokedFishItemRenderer extends BlockEntityWithoutLevelRenderer {
         ItemStack sourceStack = new ItemStack(smokedItem.getSourceItem());
         QualityHelper.setQuality(sourceStack, quality);
         if (quality != QualityHelper.NORMAL) {
-            sourceStack.set(com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_MODEL_DATA,
+            PortItemData.set(sourceStack, com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_MODEL_DATA,
                 new com.stardew.craft.port.net.minecraft.world.item.component.CustomModelData(quality));
         }
 

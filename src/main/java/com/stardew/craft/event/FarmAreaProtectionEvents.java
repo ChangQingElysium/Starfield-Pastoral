@@ -18,8 +18,8 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FlowerPotBlock;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
-import com.stardew.craft.port.net.neoforged.neoforge.common.ItemAbilities;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
+import net.minecraftforge.common.ToolActions;
 import com.stardew.craft.port.net.neoforged.neoforge.common.util.TriState;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.level.BlockEvent;
@@ -134,7 +134,7 @@ public class FarmAreaProtectionEvents {
                 level,
                 player,
                 pos,
-                event.getBlockSnapshot().getState())) {
+                event.getBlockSnapshot().getReplacedBlock())) { // PORT(1.20.1): Forge name of BlockSnapshot#getState
             return;
         }
 
@@ -251,7 +251,7 @@ public class FarmAreaProtectionEvents {
     public static void onBlockToolModification(BlockEvent.BlockToolModificationEvent event) {
         if (!(event.getLevel() instanceof ServerLevel level)) return;
         if (level.dimension() != ModDimensions.STARDEW_VALLEY) return;
-        if (event.getItemAbility() != ItemAbilities.HOE_TILL) return;
+        if (event.getToolAction() != ToolActions.HOE_TILL) return;
         if (event.getPlayer() instanceof ServerPlayer sp && sp.isCreative()) return;
 
         // 草方块始终禁止被锄（无论什么工具）
@@ -369,7 +369,7 @@ public class FarmAreaProtectionEvents {
         // Document services authorize the eventual build/upgrade on the server.
         if (event.getItemStack().getItem() instanceof com.stardew.craft.building.runtime.BuildingBlueprintItem
                 || event.getItemStack().getItem() instanceof com.stardew.craft.building.runtime.BuildingUpgradePermitItem) {
-            event.setUseBlock(TriState.FALSE);
+            event.setUseBlock(TriState.FALSE.toResult());
             return;
         }
 
@@ -395,7 +395,7 @@ public class FarmAreaProtectionEvents {
         net.minecraft.world.item.ItemStack heldItem = event.getItemStack();
         if(event.getEntity() instanceof ServerPlayer actor && (heldItem.getItem() instanceof BlockItem || heldItem.getItem() instanceof net.minecraft.world.item.BucketItem)
                 && com.stardew.craft.building.runtime.BuildingProtection.protects(actor.serverLevel(),placePos)) {
-            event.setUseItem(TriState.FALSE);denyBuilding(actor);return;
+            event.setUseItem(TriState.FALSE.toResult());denyBuilding(actor);return;
         }
         if (!event.getEntity().isCreative()
                 && !event.getLevel().getGameRules().getBoolean(ModGameRules.RULE_STARDEW_ALLOW_PUBLIC_BUILDING)
@@ -404,7 +404,7 @@ public class FarmAreaProtectionEvents {
                 && !isPublicCrabPotItem(blockItem)) {
             // Deny only the held item's use. The clicked public block may still handle its
             // own interaction (for example, a door can open while a block is held).
-            event.setUseItem(TriState.FALSE);
+            event.setUseItem(TriState.FALSE.toResult());
             if (event.getEntity() instanceof ServerPlayer player) {
                 com.stardew.craft.network.GlobalHudMessagePayload.sendTo(player,
                         Component.translatable(

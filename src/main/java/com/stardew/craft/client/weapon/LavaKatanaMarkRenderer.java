@@ -23,12 +23,12 @@ public final class LavaKatanaMarkRenderer {
         var camera = event.getCamera().getPosition();
         var buffers = mc.renderBuffers().bufferSource();
         var out = buffers.getBuffer(MATERIAL);
-        double now = mc.level.getGameTime() + event.getPartialTick().getGameTimeDeltaPartialTick(false);
+        double now = mc.level.getGameTime() + event.getPartialTick();
         for (int id : ids) {
             if (!(mc.level.getEntity(id) instanceof LivingEntity target) || !target.isAlive()
                     || target.distanceToSqr(camera) > 32 * 32
                     || !LavaKatanaMarkClientState.isMarked(id, mc.level.getGameTime())) continue;
-            double partial = event.getPartialTick().getGameTimeDeltaPartialTick(false);
+            double partial = event.getPartialTick();
             Vec3 position = target.getPosition((float) partial).add(0, target.getBbHeight() * 0.64, 0);
             Vec3 offset = camera.subtract(position).normalize().scale(target.getBbWidth() * 0.52 + 0.025);
             position = position.add(offset).subtract(camera);

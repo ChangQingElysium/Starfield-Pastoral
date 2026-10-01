@@ -40,12 +40,12 @@ public class UncertaintyStatueBlock extends MapDecorStaticBlock implements Entit
     }
 
     @Override
-    protected boolean isPathfindable(@Nonnull BlockState state, @Nonnull PathComputationType type) {
+    public boolean isPathfindable(@Nonnull BlockState state, net.minecraft.world.level.BlockGetter level, BlockPos pos, @Nonnull PathComputationType type) {
         return false;
     }
 
     @Override
-    protected InteractionResult useWithoutItem(@Nonnull BlockState state, @Nonnull Level level, @Nonnull BlockPos pos,
+    public InteractionResult useWithoutItem(@Nonnull BlockState state, @Nonnull Level level, @Nonnull BlockPos pos,
                                                @Nonnull Player player, @Nonnull BlockHitResult hit) {
         if (level.isClientSide) {
             return InteractionResult.SUCCESS;
@@ -57,7 +57,7 @@ public class UncertaintyStatueBlock extends MapDecorStaticBlock implements Entit
     }
 
     @Override
-    protected ItemInteractionResult useItemOn(@Nonnull ItemStack stack, @Nonnull BlockState state, @Nonnull Level level,
+    public ItemInteractionResult useItemOn(@Nonnull ItemStack stack, @Nonnull BlockState state, @Nonnull Level level,
                                              @Nonnull BlockPos pos, @Nonnull Player player, @Nonnull InteractionHand hand,
                                              @Nonnull BlockHitResult hit) {
         if (level.isClientSide) {
@@ -79,7 +79,7 @@ public class UncertaintyStatueBlock extends MapDecorStaticBlock implements Entit
     }
 
     @Override
-    protected List<ItemStack> getDrops(@Nonnull BlockState state, @Nonnull LootParams.Builder params) {
+    public List<ItemStack> getDrops(@Nonnull BlockState state, @Nonnull LootParams.Builder params) {
         return List.of();
     }
 }

@@ -12,7 +12,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import net.minecraftforge.client.event.RenderGuiEvent;
 
 import java.util.Random;
@@ -56,7 +56,7 @@ public class QuestIconHud {
                 || mc.level.dimension() == ModMiningDimensions.STARDEW_MINING;
         if (!isStardew) return;
 
-        int elapsed = (int) (mc.getTimer().getRealtimeDeltaTicks() * 50);
+        int elapsed = (int) (com.stardew.craft.port.net.minecraft.client.DeltaTracker.client().getRealtimeDeltaTicks() * 50);
         if (questPulseTimer > 0) questPulseTimer = Math.max(0, questPulseTimer - elapsed);
         if (questPingTimer > 0) questPingTimer = Math.max(0, questPingTimer - elapsed);
 

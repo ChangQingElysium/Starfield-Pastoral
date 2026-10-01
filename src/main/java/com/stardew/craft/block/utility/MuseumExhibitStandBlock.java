@@ -44,7 +44,7 @@ public class MuseumExhibitStandBlock extends MapUtilityStaticBlock implements En
 
     @SuppressWarnings("null")
     @Override
-    protected List<ItemStack> getDrops(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") LootParams.Builder params) {
+    public List<ItemStack> getDrops(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") LootParams.Builder params) {
         return List.of();
     }
 
@@ -67,7 +67,7 @@ public class MuseumExhibitStandBlock extends MapUtilityStaticBlock implements En
 
     @SuppressWarnings("null")
     @Override
-    protected InteractionResult useWithoutItem(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") Level level, @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") Player player, @SuppressWarnings("null") BlockHitResult hit) {
+    public InteractionResult useWithoutItem(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") Level level, @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") Player player, @SuppressWarnings("null") BlockHitResult hit) {
         if (state.getValue(PART) == Part.EXTENSION) {
             BlockPos mainPos = getMainPos(level, pos, state);
             if (mainPos == null) {
@@ -117,7 +117,7 @@ public class MuseumExhibitStandBlock extends MapUtilityStaticBlock implements En
 
     @SuppressWarnings("null")
     @Override
-    protected com.stardew.craft.port.net.minecraft.world.ItemInteractionResult useItemOn(@SuppressWarnings("null") ItemStack stack, @SuppressWarnings("null") BlockState state, @SuppressWarnings("null") Level level, @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") Player player, @SuppressWarnings("null") InteractionHand hand, @SuppressWarnings("null") BlockHitResult hit) {
+    public com.stardew.craft.port.net.minecraft.world.ItemInteractionResult useItemOn(@SuppressWarnings("null") ItemStack stack, @SuppressWarnings("null") BlockState state, @SuppressWarnings("null") Level level, @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") Player player, @SuppressWarnings("null") InteractionHand hand, @SuppressWarnings("null") BlockHitResult hit) {
         if (state.getValue(PART) == Part.EXTENSION) {
             BlockPos mainPos = getMainPos(level, pos, state);
             if (mainPos == null) {

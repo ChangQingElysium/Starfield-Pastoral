@@ -1,5 +1,6 @@
 package com.stardew.craft.festival;
 
+import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.core.ModDimensions;
 import com.stardew.craft.core.ModMiningDimensions;
 import com.stardew.craft.block.ModBlocks;
@@ -207,12 +208,12 @@ public final class FairFestivalService {
     }
 
     private static final List<FairAnimalSpawn> FAIR_ANIMALS = List.of(
-        new FairAnimalSpawn(ModEntities.COW, "cow", new BlockPos(53, 64, 13), 180.0F),
-        new FairAnimalSpawn(ModEntities.COW, "cow", new BlockPos(55, 64, 13), 180.0F),
-        new FairAnimalSpawn(ModEntities.PIG, "pig", new BlockPos(59, 64, 9), 270.0F),
-        new FairAnimalSpawn(ModEntities.PIG, "pig", new BlockPos(59, 64, 6), 270.0F),
-        new FairAnimalSpawn(ModEntities.WHITE_CHICKEN, "white_chicken", new BlockPos(53, 64, 5), 0.0F),
-        new FairAnimalSpawn(ModEntities.WHITE_CHICKEN, "white_chicken", new BlockPos(55, 64, 5), 0.0F)
+        new FairAnimalSpawn(ModEntities.COW::get, "cow", new BlockPos(53, 64, 13), 180.0F),
+        new FairAnimalSpawn(ModEntities.COW::get, "cow", new BlockPos(55, 64, 13), 180.0F),
+        new FairAnimalSpawn(ModEntities.PIG::get, "pig", new BlockPos(59, 64, 9), 270.0F),
+        new FairAnimalSpawn(ModEntities.PIG::get, "pig", new BlockPos(59, 64, 6), 270.0F),
+        new FairAnimalSpawn(ModEntities.WHITE_CHICKEN::get, "white_chicken", new BlockPos(53, 64, 5), 0.0F),
+        new FairAnimalSpawn(ModEntities.WHITE_CHICKEN::get, "white_chicken", new BlockPos(55, 64, 5), 0.0F)
     );
 
     private FairFestivalService() {
@@ -1057,8 +1058,7 @@ public final class FairFestivalService {
             return GRANGE_CATEGORY_FRUIT;
         }
         if (path.endsWith("_wool") || isAny(stack, Items.EGG, Items.TURTLE_EGG, Items.MILK_BUCKET, Items.LEATHER, Items.RABBIT_HIDE,
-            Items.RABBIT_FOOT, Items.FEATHER, Items.HONEYCOMB, Items.HONEY_BOTTLE, Items.TURTLE_SCUTE,
-            Items.ARMADILLO_SCUTE)) {
+            Items.RABBIT_FOOT, Items.FEATHER, Items.HONEYCOMB, Items.HONEY_BOTTLE, Items.SCUTE)) { // PORT(1.20.1): no armadillo scute before 1.20.5
             return GRANGE_CATEGORY_ANIMAL_PRODUCT;
         }
         if (isAny(stack, Items.COD, Items.SALMON, Items.TROPICAL_FISH, Items.PUFFERFISH)) {
@@ -1130,12 +1130,10 @@ public final class FairFestivalService {
             if (stack.is(Items.TURTLE_EGG) || stack.is(Items.RABBIT_FOOT)) {
                 return 200;
             }
-            if (stack.is(Items.TURTLE_SCUTE) || stack.is(Items.MILK_BUCKET) || stack.is(Items.HONEY_BOTTLE)) {
+            if (stack.is(Items.SCUTE) || stack.is(Items.MILK_BUCKET) || stack.is(Items.HONEY_BOTTLE)) {
                 return 125;
             }
-            if (stack.is(Items.ARMADILLO_SCUTE)) {
-                return 80;
-            }
+            // PORT(1.20.1): the 1.20.5 armadillo scute (80) does not exist.
             if (path.endsWith("_wool")) {
                 return 80;
             }
@@ -1303,8 +1301,8 @@ public final class FairFestivalService {
     }
 
     private static EnchantmentScore enchantmentScore(ItemStack stack) {
-        EnchantmentScore direct = enchantmentScore(stack.get(DataComponents.ENCHANTMENTS));
-        EnchantmentScore stored = enchantmentScore(stack.get(DataComponents.STORED_ENCHANTMENTS));
+        EnchantmentScore direct = enchantmentScore(PortItemData.get(stack, DataComponents.ENCHANTMENTS));
+        EnchantmentScore stored = enchantmentScore(PortItemData.get(stack, DataComponents.STORED_ENCHANTMENTS));
         return new EnchantmentScore(
             direct.count() + stored.count(),
             direct.weight() + stored.weight(),

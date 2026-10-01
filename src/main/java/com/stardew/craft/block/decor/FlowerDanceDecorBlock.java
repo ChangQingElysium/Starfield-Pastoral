@@ -66,12 +66,12 @@ public class FlowerDanceDecorBlock extends Block implements EntityBlock {
     }
 
     @Override
-    protected List<ItemStack> getDrops(@Nonnull BlockState state, @Nonnull LootParams.Builder params) {
+    public List<ItemStack> getDrops(@Nonnull BlockState state, @Nonnull LootParams.Builder params) {
         return List.of(new ItemStack(this));
     }
 
     @Override
-    protected boolean canBeReplaced(@Nonnull BlockState state, @Nonnull Fluid fluid) {
+    public boolean canBeReplaced(@Nonnull BlockState state, @Nonnull Fluid fluid) {
         return false;
     }
 }

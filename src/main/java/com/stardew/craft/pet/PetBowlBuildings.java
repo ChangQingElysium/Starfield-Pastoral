@@ -1,5 +1,6 @@
 package com.stardew.craft.pet;
 
+import com.stardew.craft.port.PortEntities;
 import com.stardew.craft.building.runtime.*;
 import com.stardew.craft.core.ModDimensions;
 import net.minecraft.core.BlockPos;
@@ -42,7 +43,7 @@ public final class PetBowlBuildings {
 
     public static boolean beginMove(ServerPlayer player, BlockPos pos) {
         var level = player.serverLevel();
-        if (!player.canInteractWithBlock(pos, 1)) return false;
+        if (!PortEntities.canInteractWithBlock(player, pos, 1)) return false;
         var record = ensure(level, pos);
         if (record == null) return false;
         var data = BuildingWorldData.get(player.server);

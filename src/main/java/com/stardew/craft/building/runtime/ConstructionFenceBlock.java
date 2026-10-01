@@ -34,7 +34,7 @@ public final class ConstructionFenceBlock extends Block {
     @Override public BlockState rotate(BlockState state, Rotation rotation) {
         return state.setValue(BlockStateProperties.HORIZONTAL_FACING, rotation.rotate(state.getValue(BlockStateProperties.HORIZONTAL_FACING)));
     }
-    @Override protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+    @Override public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return shapes[state.getValue(PART)][ModelVoxelShapeCache.horizontalIndex(state.getValue(BlockStateProperties.HORIZONTAL_FACING))];
     }
 }

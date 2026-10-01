@@ -1,5 +1,6 @@
 package com.stardew.craft.item;
 
+import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.port.net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
@@ -15,7 +16,7 @@ public class HoneyItem extends SimpleStardewItem {
 	@Override
 	@SuppressWarnings("null")
 	public int getSellPrice(ItemStack stack) {
-		CustomData data = stack.get(DataComponents.CUSTOM_DATA);
+		CustomData data = PortItemData.get(stack, DataComponents.CUSTOM_DATA);
 		if (data == null) {
 			return super.getSellPrice(stack);
 		}

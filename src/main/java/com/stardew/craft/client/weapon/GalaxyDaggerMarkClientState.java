@@ -79,7 +79,7 @@ public final class GalaxyDaggerMarkClientState {
                 it.remove();
                 continue;
             }
-            if (!com.stardew.craft.Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean() || mc.isPaused()) continue;
+            if (!com.stardew.craft.Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get() || mc.isPaused()) continue;
             Entity entity = level.getEntity(entry.getKey());
             if (!(entity instanceof LivingEntity living) || !living.isAlive() || mc.player == null || living.distanceToSqr(mc.player) > 32 * 32) {
                 continue;

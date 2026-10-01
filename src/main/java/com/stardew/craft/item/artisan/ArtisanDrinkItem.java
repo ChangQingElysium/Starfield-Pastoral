@@ -155,7 +155,7 @@ public class ArtisanDrinkItem extends Item implements IStardewItem {
 
             if (speedBonus != 0 && speedDurationTicks > 0) {
                 if (speedBonus > 0) {
-                    serverPlayer.addEffect(new MobEffectInstance(ModMobEffects.SPEED, speedDurationTicks, speedBonus - 1));
+                    serverPlayer.addEffect(new MobEffectInstance(ModMobEffects.SPEED.get(), speedDurationTicks, speedBonus - 1));
                 } else {
                     int amplifier = Math.max(0, Math.abs(speedBonus) - 1);
                     serverPlayer.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, speedDurationTicks, amplifier));

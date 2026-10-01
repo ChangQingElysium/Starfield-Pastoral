@@ -39,7 +39,7 @@ public abstract class CompositeTemplateBlock extends MaterialTemplateBlock {
 
     void interact(PlayerInteractEvent.RightClickBlock event) {
         // All composite interactions pass through this hook, including shift-clicks.
-        event.setUseBlock(TriState.FALSE);
+        event.setUseBlock(TriState.FALSE.toResult());
         if (event.getHand() != InteractionHand.MAIN_HAND
                 || !(event.getLevel().getBlockEntity(event.getPos()) instanceof TemplateBlockEntity template)) return;
         ItemStack held = event.getItemStack();
@@ -78,11 +78,11 @@ public abstract class CompositeTemplateBlock extends MaterialTemplateBlock {
     }
 
     @Override
-    protected List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
+    public List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
         List<ItemStack> drops = super.getDrops(state, params);
         if (params.getOptionalParameter(LootContextParams.BLOCK_ENTITY) instanceof TemplateBlockEntity template) {
             for (ItemStack stack : drops) {
-                if (stack.is(asItem())) template.saveToItem(stack, params.getLevel().registryAccess());
+                if (stack.is(asItem())) template.saveToItem(stack);
             }
         }
         return drops;

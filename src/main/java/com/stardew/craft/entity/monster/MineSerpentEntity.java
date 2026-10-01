@@ -30,10 +30,10 @@ public final class MineSerpentEntity extends StardewMonsterEntity {
  private MonsterFlightRoute flightRoute(){return (MonsterFlightRoute)getNavigation();}
  @Override protected ResourceLocation definitionId(){return new ResourceLocation("stardewcraft:serpent");}
  @Override protected void configureSpawn(MonsterDefinition d,MonsterSpawnContext c){var r=MonsterStatResolver.base(d,c,random);setInitialHealth(r.initialHealth());replaceCombatStats(r.combat());steering.initialize(random);setPos(getX(),getY()+LIFT,getZ());MonsterFlightPlacement.ensureSpawnAir(this);idleAnchor=position();idleWait=20;}
- @Override protected void defineSynchedData(SynchedEntityData.Builder b){super.defineSynchedData(b);b.define(HIT,-100L);b.define(DEATH_SPIN,3);}
+ @Override protected void defineSynchedData(){super.defineSynchedData();this.entityData.define(HIT,-100L);this.entityData.define(DEATH_SPIN,3);}
  public int deathSpin(){return entityData.get(DEATH_SPIN);}
  public double hitTime(float p){return (level().getGameTime()-entityData.get(HIT)+p)/20.;}public SerpentFlightMotion steering(){return steering;}public void stunFor(int ms){stunMilliseconds=Math.max(stunMilliseconds,ms);}
- private boolean valid(Player p){return p.isAlive()&&!p.isCreative()&&!p.isSpectator()&&!p.hasEffect(ModMobEffects.AVOID_MONSTERS)&&(monsterState().context().generation()==null||OrdinaryMineRuntime.floorAt(p.blockPosition())==monsterState().context().floor());}
+ private boolean valid(Player p){return p.isAlive()&&!p.isCreative()&&!p.isSpectator()&&!p.hasEffect(ModMobEffects.AVOID_MONSTERS.get())&&(monsterState().context().generation()==null||OrdinaryMineRuntime.floorAt(p.blockPosition())==monsterState().context().floor());}
  @Override protected void customServerAiStep(){
   if(!initialized())initialize(MonsterSpawnContext.capture((ServerLevel)level(),MonsterSpawnContext.Source.WORLD,1));
   if(isRemoved())return;

@@ -95,7 +95,7 @@ public final class FarmTwigGameTests {
                 h.assertTrue(level.getBlockState(pos.below()).is(Blocks.DIRT), "Clearing changed soil");
                 drops.forEach(ItemEntity::discard);
                 var efficient = new ItemStack(ModItems.AXE.get());
-                efficient.enchant(level.registryAccess().registryOrThrow(Registries.ENCHANTMENT).getHolderOrThrow(StardewEnchantments.EFFICIENT), 1);
+                com.stardew.craft.port.PortItemStacks.enchant(efficient, level.registryAccess().registryOrThrow(Registries.ENCHANTMENT).getHolderOrThrow(StardewEnchantments.EFFICIENT), 1);
                 player.setItemInHand(InteractionHand.MAIN_HAND, efficient);
                 data.setEnergy(0);
                 level.setBlock(pos, state, 3);

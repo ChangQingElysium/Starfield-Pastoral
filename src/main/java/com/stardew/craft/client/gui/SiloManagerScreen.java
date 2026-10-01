@@ -154,9 +154,10 @@ public class SiloManagerScreen extends AbstractContainerScreen<SiloManagerMenu> 
         });
     }
     private boolean inside(double x,double y,int rx,int ry,int w,int h){return x>=rx&&x<rx+w&&y>=ry&&y<ry+h;}
-    @Override public boolean mouseScrolled(double x,double y,double horizontal,double vertical) {
+    @Override public boolean mouseScrolled(double x, double y, double vertical) {
+        double horizontal = 0.0D; // PORT(1.20.1): no horizontal scroll before 1.20.2
         if(vertical!=0&&inside(x,y,page.contentX(),page.top(),page.contentWidth(),page.bottom()-page.top())){scroll=SiloLayout.clampScroll(scroll+(vertical<0?24:-24),contentHeight,page.bottom()-page.top());return true;}
-        return super.mouseScrolled(x,y,horizontal,vertical);
+        return super.mouseScrolled(x, y, vertical);
     }
     private void drag(double y){int view=page.bottom()-page.top(),max=Math.max(0,contentHeight-view),thumb=Math.min(view,Math.max(12,view*view/Math.max(1,contentHeight)));scroll=(int)Math.round(Math.max(0,Math.min(1,(y-page.top()-thumb/2.0)/Math.max(1,view-thumb)))*max);}
     @Override public boolean mouseClicked(double x,double y,int b){if(b==0&&contentHeight>page.bottom()-page.top()&&inside(x,y,page.x()+page.width()-17,page.top(),9,page.bottom()-page.top())){dragging=true;drag(y);return true;}return super.mouseClicked(x,y,b);}

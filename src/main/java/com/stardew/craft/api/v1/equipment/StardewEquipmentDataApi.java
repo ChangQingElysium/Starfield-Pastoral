@@ -45,7 +45,7 @@ public final class StardewEquipmentDataApi {
                         registered.id(), BuiltInRegistries.ITEM.getKey(stack.getItem()), exception);
             }
         }
-        return stack.getItem().builtInRegistryHolder().getData(StardewDataMaps.EQUIPMENT_DATA);
+        return com.stardew.craft.port.PortDataMaps.getData(stack.getItem().builtInRegistryHolder(), StardewDataMaps.EQUIPMENT_DATA);
     }
 
     private record Registered(ResourceLocation id, int priority, StardewEquipmentDataProvider provider) {

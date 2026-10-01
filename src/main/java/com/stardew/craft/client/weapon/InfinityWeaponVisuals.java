@@ -17,7 +17,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import com.stardew.craft.port.net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import static com.stardew.craft.client.weapon.MeleeWeaponVisuals.*;
@@ -94,8 +94,8 @@ public final class InfinityWeaponVisuals {
     @SubscribeEvent public static void render(RenderLevelStageEvent event) {
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_PARTICLES) return;
         var mc = Minecraft.getInstance(); ensureLevel(mc.level);
-        if (mc.level == null || !Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean() || FIELDS.isEmpty() && BURSTS.isEmpty()) return;
-        float partial = event.getPartialTick().getGameTimeDeltaPartialTick(false);
+        if (mc.level == null || !Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get() || FIELDS.isEmpty() && BURSTS.isEmpty()) return;
+        float partial = event.getPartialTick();
         double now = mc.level.getGameTime() + partial;
         var stack = event.getPoseStack(); var camera = event.getCamera().getPosition();
         stack.pushPose(); stack.translate(-camera.x, -camera.y, -camera.z);

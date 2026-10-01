@@ -63,13 +63,13 @@ public class PrismaticButterflyEntity extends Entity {
     }
 
     @Override
-    protected void defineSynchedData(SynchedEntityData.Builder builder) {
-        builder.define(OWNER, Optional.empty());
-        builder.define(CAPTURING, false);
-        builder.define(VISUAL_ONLY, false);
-        builder.define(POWDER_VISUAL, false);
-        builder.define(BASE_FRAME, 394);
-        builder.define(BURST_TICKS, 0);
+    protected void defineSynchedData() {
+        this.entityData.define(OWNER, Optional.empty());
+        this.entityData.define(CAPTURING, false);
+        this.entityData.define(VISUAL_ONLY, false);
+        this.entityData.define(POWDER_VISUAL, false);
+        this.entityData.define(BASE_FRAME, 394);
+        this.entityData.define(BURST_TICKS, 0);
     }
 
     public static PrismaticButterflyEntity createBlessingVisual(Level level, double x, double y, double z) {
@@ -166,7 +166,7 @@ public class PrismaticButterflyEntity extends Entity {
         }
 
         ServerPlayer owner = getOwnerPlayer();
-        if (owner == null || (!debugSpawn && !owner.hasEffect(ModMobEffects.STATUE_OF_BLESSINGS_6))) {
+        if (owner == null || (!debugSpawn && !owner.hasEffect(ModMobEffects.STATUE_OF_BLESSINGS_6.get()))) {
             discard();
             return;
         }
@@ -257,7 +257,7 @@ public class PrismaticButterflyEntity extends Entity {
     }
 
     private void reward(ServerPlayer owner) {
-        owner.removeEffect(ModMobEffects.STATUE_OF_BLESSINGS_6);
+        owner.removeEffect(ModMobEffects.STATUE_OF_BLESSINGS_6.get());
         owner.playNotifySound(ModSounds.YOBA.get(), SoundSource.PLAYERS, 1.0f, 1.0f);
 
         PlayerStardewData data = PlayerStardewDataAPI.getData(owner);
@@ -320,7 +320,7 @@ public class PrismaticButterflyEntity extends Entity {
     }
 
     @Override
-    public Packet<ClientGamePacketListener> getAddEntityPacket(ServerEntity serverEntity) {
-        return new ClientboundAddEntityPacket(this, serverEntity);
+    public Packet<ClientGamePacketListener> getAddEntityPacket() {
+        return new ClientboundAddEntityPacket(this);
     }
 }

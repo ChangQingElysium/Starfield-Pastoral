@@ -1,5 +1,6 @@
 package com.stardew.craft.player;
 
+import com.stardew.craft.port.PortItemStacks;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -34,7 +35,7 @@ public final class PassOutRecoveryData extends SavedData {
 
     public static PassOutRecoveryData get(MinecraftServer server) {
         return server.overworld().getDataStorage().computeIfAbsent(
-                new SavedData.Factory<>(PassOutRecoveryData::new, PassOutRecoveryData::load),
+                com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(PassOutRecoveryData::new, PassOutRecoveryData::load)), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(PassOutRecoveryData::new, PassOutRecoveryData::load)),
                 DATA_NAME
         );
     }
@@ -94,7 +95,7 @@ public final class PassOutRecoveryData extends SavedData {
     }
 
     @Override
-    public CompoundTag save(CompoundTag tag, HolderLookup.Provider provider) {
+    public CompoundTag save(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
         ListTag list = new ListTag();
         for (Map.Entry<UUID, Entry> mapEntry : entries.entrySet()) {
             CompoundTag raw = mapEntry.getValue().save(provider);
@@ -229,7 +230,7 @@ public final class PassOutRecoveryData extends SavedData {
             ListTag items = new ListTag();
             for (ItemStack stack : lostItems) {
                 if (!stack.isEmpty()) {
-                    items.add(stack.save(provider));
+                    items.add(PortItemStacks.save(stack, provider));
                 }
             }
             tag.put("LostItems", items);
@@ -242,7 +243,7 @@ public final class PassOutRecoveryData extends SavedData {
             List<ItemStack> items = new ArrayList<>();
             ListTag list = tag.getList("LostItems", Tag.TAG_COMPOUND);
             for (int i = 0; i < list.size(); i++) {
-                ItemStack stack = ItemStack.parse(provider, list.getCompound(i)).orElse(ItemStack.EMPTY);
+                ItemStack stack = PortItemStacks.parse(provider, list.getCompound(i)).orElse(ItemStack.EMPTY);
                 if (!stack.isEmpty()) {
                     items.add(stack);
                 }

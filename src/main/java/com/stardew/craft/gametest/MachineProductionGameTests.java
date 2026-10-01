@@ -50,11 +50,11 @@ public final class MachineProductionGameTests {
             time.setCurrentTime(480);
             SolarPanelBlockEntity.serverTick(level, pos, state, solar);
             helper.assertTrue(solar.getRemainingAbsMinutes() == 60, "Panel did not charge during the same day");
-            var saved = solar.saveWithoutMetadata(level.registryAccess());
+            var saved = solar.saveWithoutMetadata();
             MachineProductionData.reload(Map.of(id("solar_panel"), json("{\"minutes\":5}")));
             var restored = new SolarPanelBlockEntity(pos, state);
             restored.setLevel(level);
-            restored.loadWithComponents(saved, level.registryAccess());
+            restored.load(saved);
             helper.assertTrue(restored.getRemainingAbsMinutes() == 60, "Reload changed an existing panel's progress");
             time.setCurrentTime(540);
             SolarPanelBlockEntity.serverTick(level, pos, state, restored);
@@ -104,7 +104,7 @@ public final class MachineProductionGameTests {
                 "Real tapper did not use the configured output");
             helper.assertTrue(tapper.getRemainingAbsMinutes() == 30, "Tapper must allow a sub-day cycle");
             long deadline = tapper.stardewReadyAtAbsoluteMinute();
-            var saved = tapper.saveWithoutMetadata(level.registryAccess());
+            var saved = tapper.saveWithoutMetadata();
 
             var worm = new WormBinBlockEntity(tree, ModBlocks.WORM_BIN.get().defaultBlockState());
             worm.setLevel(level);
@@ -140,7 +140,7 @@ public final class MachineProductionGameTests {
                 "Reload must not rewrite an in-flight product or deadline");
             var restored = new TapperBlockEntity(tapperPos, tapperState);
             restored.setLevel(level);
-            restored.loadWithComponents(saved, level.registryAccess());
+            restored.load(saved);
             helper.assertTrue(restored.stardewReadyAtAbsoluteMinute() == deadline && restored.getProduct().getCount() == 2,
                 "Save/load must preserve the already selected cycle");
             tapper.advanceDays(1);

@@ -1,5 +1,6 @@
 package com.stardew.craft.gametest;
-import com.stardew.craft.entity.ModEntities;
+
+import com.stardew.craft.port.PortGameTests;import com.stardew.craft.entity.ModEntities;
 import com.stardew.craft.entity.monster.MineMummyEntity;
 import com.stardew.craft.event.MineMonsterSpawnHandler;
 import com.stardew.craft.monster.*;
@@ -25,10 +26,10 @@ public final class NativeMummyGameTests {
  public static void standingBombOnlyCollapsesButDownedBombFinishesAndCrusaderNeedsMelee(GameTestHelper h){var level=h.getLevel();var m=spawn(h,0,false);m.hurt(level.damageSources().explosion(null,null),100000);h.assertTrue(m.collapsed()&&m.isAlive(),"Standing bomb skipped collapse");m.hurt(level.damageSources().explosion(null,null),0);h.assertTrue(m.isDeadOrDying()&&m.monsterState().life()==MonsterState.Life.DEAD,"Downed bomb did not finish independently of input damage");
   // A plain GameTest player exercises melee qualification without the absent
   // Stardew world required by a ServerPlayer's book/progression sync.
-  var player=h.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);player.setPos(m.position().add(0,0,3));
+  var player=PortGameTests.makeMockPlayer(h, net.minecraft.world.level.GameType.SURVIVAL);player.setPos(m.position().add(0,0,3));
   var enchant=level.registryAccess().registryOrThrow(net.minecraft.core.registries.Registries.ENCHANTMENT).getHolderOrThrow(com.stardew.craft.enchantment.StardewEnchantments.CRUSADER);
-  var sword=new net.minecraft.world.item.ItemStack(com.stardew.craft.item.ModItems.RUSTY_SWORD.get());sword.enchant(enchant,1);player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,sword);var crusader=spawn(h,2,false);crusader.setHealth(1);crusader.hurt(level.damageSources().playerAttack(player),20);h.assertTrue(crusader.isDeadOrDying()&&crusader.monsterState().life()==MonsterState.Life.DEAD,"Crusader lethal melee collapsed instead of killed");
-  var stick=new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.STICK);stick.enchant(enchant,1);player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,stick);var ordinary=spawn(h,-2,false);ordinary.setHealth(1);ordinary.hurt(level.damageSources().playerAttack(player),20);h.assertTrue(ordinary.collapsed()&&ordinary.isAlive(),"Non-melee enchanted item permanently killed mummy");player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,sword);h.assertTrue(!ordinary.hurt(level.damageSources().playerAttack(player),20)&&ordinary.isAlive(),"Crusader melee killed already collapsed pile");
+  var sword=new net.minecraft.world.item.ItemStack(com.stardew.craft.item.ModItems.RUSTY_SWORD.get());com.stardew.craft.port.PortItemStacks.enchant(sword, enchant,1);player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,sword);var crusader=spawn(h,2,false);crusader.setHealth(1);crusader.hurt(level.damageSources().playerAttack(player),20);h.assertTrue(crusader.isDeadOrDying()&&crusader.monsterState().life()==MonsterState.Life.DEAD,"Crusader lethal melee collapsed instead of killed");
+  var stick=new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.STICK);com.stardew.craft.port.PortItemStacks.enchant(stick, enchant,1);player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,stick);var ordinary=spawn(h,-2,false);ordinary.setHealth(1);ordinary.hurt(level.damageSources().playerAttack(player),20);h.assertTrue(ordinary.collapsed()&&ordinary.isAlive(),"Non-melee enchanted item permanently killed mummy");player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,sword);h.assertTrue(!ordinary.hurt(level.damageSources().playerAttack(player),20)&&ordinary.isAlive(),"Crusader melee killed already collapsed pile");
   m.discard();crusader.discard();ordinary.discard();player.discard();h.succeed();
  }
 }

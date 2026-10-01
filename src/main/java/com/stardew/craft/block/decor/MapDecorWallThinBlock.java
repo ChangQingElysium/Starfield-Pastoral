@@ -60,7 +60,7 @@ public class MapDecorWallThinBlock extends Block {
     }
 
     @Override
-    protected BlockState updateShape(@Nonnull BlockState state,
+    public BlockState updateShape(@Nonnull BlockState state,
                                      @Nonnull Direction direction,
                                      @Nonnull BlockState neighborState,
                                      @Nonnull LevelAccessor level,
@@ -73,7 +73,7 @@ public class MapDecorWallThinBlock extends Block {
     }
 
     @Override
-    protected boolean canSurvive(@Nonnull BlockState state, @Nonnull LevelReader level, @Nonnull BlockPos pos) {
+    public boolean canSurvive(@Nonnull BlockState state, @Nonnull LevelReader level, @Nonnull BlockPos pos) {
         Direction supportDir = state.getValue(FACING).getOpposite();
         BlockPos supportPos = pos.relative(supportDir);
         BlockState support = level.getBlockState(supportPos);
@@ -106,7 +106,7 @@ public class MapDecorWallThinBlock extends Block {
     }
 
     @Override
-    protected boolean canBeReplaced(@Nonnull BlockState state, @Nonnull Fluid fluid) {
+    public boolean canBeReplaced(@Nonnull BlockState state, @Nonnull Fluid fluid) {
         return false;
     }
 

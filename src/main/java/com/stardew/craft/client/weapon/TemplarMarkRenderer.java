@@ -14,8 +14,8 @@ public final class TemplarMarkRenderer {
     public static void onRenderLevel(RenderLevelStageEvent event) {
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_PARTICLES) return;
         var mc = Minecraft.getInstance();
-        if (mc.level == null || !Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()) return;
-        float partial = event.getPartialTick().getGameTimeDeltaPartialTick(false);
+        if (mc.level == null || !Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()) return;
+        float partial = event.getPartialTick();
         double now = mc.level.getGameTime() + partial;
         var camera = event.getCamera().getPosition(); var stack = event.getPoseStack();
         var entities = mc.level.getEntitiesOfClass(LivingEntity.class, new AABB(camera, camera).inflate(48),

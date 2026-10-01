@@ -9,7 +9,7 @@ import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import com.stardew.craft.port.net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.minecraftforge.client.event.InputEvent;
 import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
@@ -112,6 +112,7 @@ public final class FishingInteractionState {
 
 	@SubscribeEvent
 	public static void scroll(InputEvent.MouseScrollingEvent event) {
-		if (useId != null && Minecraft.getInstance().screen == null && (event.getScrollDeltaY() != 0 || event.getScrollDeltaX() != 0)) cancel(true);
+		// PORT(1.20.1): 1.20.1 only reports vertical scrolling (getScrollDelta).
+		if (useId != null && Minecraft.getInstance().screen == null && event.getScrollDelta() != 0) cancel(true);
 	}
 }

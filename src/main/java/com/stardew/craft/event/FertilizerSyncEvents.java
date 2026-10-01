@@ -6,7 +6,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.level.ChunkWatchEvent;
 
@@ -47,8 +47,9 @@ public class FertilizerSyncEvents {
         }
     }
 
+    // PORT(1.20.1): Forge fires ChunkWatchEvent.Watch after the chunk packet was sent (NeoForge: Sent).
     @SubscribeEvent
-    public static void onChunkSent(ChunkWatchEvent.Sent event) {
+    public static void onChunkSent(ChunkWatchEvent.Watch event) {
         ServerPlayer player = event.getPlayer();
         ServerLevel level = event.getLevel();
         if (player.serverLevel() != level) {

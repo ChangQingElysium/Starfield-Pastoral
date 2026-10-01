@@ -1,5 +1,6 @@
 package com.stardew.craft.block.decor;
 
+import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.block.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -47,7 +48,7 @@ public class NaturalPlantBlock extends Block implements SimpleWaterloggedBlock {
         var level = context.getLevel(); var pos = context.getClickedPos();
         var fluid = level.getFluidState(pos);
         if (kind.habitat != NaturalDecorKind.Habitat.UNDERWATER && !fluid.isEmpty()) return null;
-        Integer fixed = context.getItemInHand().getOrDefault(DataComponents.BLOCK_STATE,
+        Integer fixed = PortItemData.getOrDefault(context.getItemInHand(), DataComponents.BLOCK_STATE,
                 BlockItemStateProperties.EMPTY).get(VARIANT);
         int variant = fixed == null ? (level.isClientSide ? 0 : level.random.nextInt(kind.variants))
                 : Math.min(fixed, kind.variants - 1);
@@ -76,7 +77,7 @@ public class NaturalPlantBlock extends Block implements SimpleWaterloggedBlock {
     }
 
     @Override
-    protected BlockState updateShape(BlockState state, Direction direction, BlockState neighbor,
+    public BlockState updateShape(BlockState state, Direction direction, BlockState neighbor,
             LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
         if (state.getValue(WATERLOGGED)) level.scheduleTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
         if (!canSurvive(state, level, pos)) return state.getValue(WATERLOGGED)
@@ -91,10 +92,10 @@ public class NaturalPlantBlock extends Block implements SimpleWaterloggedBlock {
     }
 
     @Override
-    public boolean canPlaceLiquid(net.minecraft.world.entity.player.Player player, BlockGetter level,
+    public boolean canPlaceLiquid(BlockGetter level,
             BlockPos pos, BlockState state, net.minecraft.world.level.material.Fluid fluid) {
         return kind.habitat == NaturalDecorKind.Habitat.UNDERWATER
-                && SimpleWaterloggedBlock.super.canPlaceLiquid(player, level, pos, state, fluid);
+                && SimpleWaterloggedBlock.super.canPlaceLiquid(level, pos, state, fluid);
     }
 
     @Override
@@ -111,7 +112,7 @@ public class NaturalPlantBlock extends Block implements SimpleWaterloggedBlock {
     public static ItemStack fixedCopy(ItemStack stack, BlockState state) {
         if (!(state.getBlock() instanceof NaturalPlantBlock block) || block.kind.variants == 1) return stack;
         ItemStack copy = stack.copy();
-        copy.set(DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY.with(VARIANT, state));
+        PortItemData.set(copy, DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY.with(VARIANT, state));
         return copy;
     }
 }

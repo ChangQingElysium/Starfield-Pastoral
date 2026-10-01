@@ -1,5 +1,6 @@
 package com.stardew.craft.block.crop;
 
+import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.block.shape.ModelVoxelShapeCache;
 import com.stardew.craft.item.ModItems;
 import com.stardew.craft.item.quality.QualityHelper;
@@ -98,11 +99,11 @@ public class FairyRoseCropBlock extends StardewCropBlock {
             int blockColor = state.getValue(COLOR);
             int itemColor = BLOCK_TO_ITEM_COLOR[blockColor];
             @SuppressWarnings("null")
-            var customData = stack.getOrDefault(com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_DATA,
+            var customData = PortItemData.getOrDefault(stack, com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_DATA,
                     com.stardew.craft.port.net.minecraft.world.item.component.CustomData.EMPTY);
             var tag = customData.copyTag();
             tag.putInt("FlowerColor", itemColor);
-            stack.set(com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_DATA,
+            PortItemData.set(stack, com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_DATA,
                     com.stardew.craft.port.net.minecraft.world.item.component.CustomData.of(tag));
             setFlowerVariantModelData(stack, itemColor);
         }
@@ -147,7 +148,7 @@ public class FairyRoseCropBlock extends StardewCropBlock {
     }
 
     @Override
-    protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+    public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         VoxelShape modelShape = CropModelShapes.shape(state, level, pos);
         if (modelShape != null) return modelShape;
         if (com.stardew.craft.block.utility.GardenPotBlock.isPottedPlant(level, pos, state)) return net.minecraft.world.phys.shapes.Shapes.empty();
@@ -155,7 +156,7 @@ public class FairyRoseCropBlock extends StardewCropBlock {
     }
 
     @Override
-    protected VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+    public VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return net.minecraft.world.phys.shapes.Shapes.empty();
     }
 
@@ -175,7 +176,7 @@ public class FairyRoseCropBlock extends StardewCropBlock {
 
     @SuppressWarnings({ "null", "deprecation" })
     @Override
-    protected boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
+    public boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
         if (state.getValue(HALF) == DoubleBlockHalf.UPPER) {
             BlockState below = level.getBlockState(pos.below());
             return below.getBlock() == this && below.getValue(HALF) == DoubleBlockHalf.LOWER;
@@ -195,7 +196,7 @@ public class FairyRoseCropBlock extends StardewCropBlock {
 
     @SuppressWarnings("null")
     @Override
-    protected BlockState updateShape(BlockState state, Direction direction, BlockState neighborState, net.minecraft.world.level.LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
+    public BlockState updateShape(BlockState state, Direction direction, BlockState neighborState, net.minecraft.world.level.LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
         if (!state.canSurvive(level, pos)) {
             return net.minecraft.world.level.block.Blocks.AIR.defaultBlockState();
         }
@@ -204,7 +205,7 @@ public class FairyRoseCropBlock extends StardewCropBlock {
 
     @SuppressWarnings("null")
     @Override
-    protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean isMoving) {
+    public void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean isMoving) {
         if (state.getValue(HALF) == DoubleBlockHalf.UPPER) return;
         if (state.is(oldState.getBlock())) { super.onPlace(state, level, pos, oldState, isMoving); return; }
         if (level instanceof ServerLevel) {
@@ -219,7 +220,7 @@ public class FairyRoseCropBlock extends StardewCropBlock {
 
     @SuppressWarnings("null")
     @Override
-    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
+    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
         if (state.is(newState.getBlock())) { super.onRemove(state, level, pos, newState, isMoving); return; }
         if (state.getValue(HALF) == DoubleBlockHalf.LOWER) {
             BlockPos above = pos.above();

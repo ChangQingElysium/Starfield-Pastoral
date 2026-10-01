@@ -679,14 +679,15 @@ public class QuestLogScreen extends Screen {
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollY) {
+        double scrollX = 0.0D; // PORT(1.20.1): no horizontal scroll before 1.20.2
         if (needsScroll()) {
             float maxScroll = Math.max(0, contentHeight - scissorRectHeight);
             float delta = (float) (-Math.signum(scrollY) * 32);
             scrollAmount = Math.max(0, Math.min(scrollAmount + delta, maxScroll));
             return true;
         }
-        return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
+        return super.mouseScrolled(mouseX, mouseY, scrollY);
     }
 
     private void playSound(com.stardew.craft.port.net.neoforged.neoforge.registries.DeferredHolder<net.minecraft.sounds.SoundEvent, net.minecraft.sounds.SoundEvent> sound) {

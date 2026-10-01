@@ -55,8 +55,7 @@ public class WarpWandItem extends Item implements IStardewItem {
     }
 
     @Override
-    public boolean canBeHurtBy(@javax.annotation.Nonnull ItemStack stack,
-                               @javax.annotation.Nonnull net.minecraft.world.damagesource.DamageSource source) {
+    public boolean canBeHurtBy(@javax.annotation.Nonnull net.minecraft.world.damagesource.DamageSource source) {
         return false;
     }
 

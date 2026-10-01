@@ -29,7 +29,7 @@ public class CasinoInteractiveBlock extends IntegratedAabbDecorBlock {
     }
 
     @Override
-    protected InteractionResult useWithoutItem(
+    public InteractionResult useWithoutItem(
             @Nonnull BlockState state,
             @Nonnull Level level,
             @Nonnull BlockPos pos,

@@ -168,7 +168,7 @@ public final class DwarfFortressSkillHandler
                 PlayerStardewDataAPI.getEnergy(context.player()),
                 context.player().getAbilities().instabuild,
                 context.player().hasEffect(
-                        ModMobEffects.STATUE_OF_BLESSINGS_2
+                        ModMobEffects.STATUE_OF_BLESSINGS_2.get()
                 )
         );
     }

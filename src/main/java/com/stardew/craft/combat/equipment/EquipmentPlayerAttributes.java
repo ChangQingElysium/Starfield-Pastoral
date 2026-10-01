@@ -154,7 +154,7 @@ public final class EquipmentPlayerAttributes {
                 + mainHandStats.getDefense()
                 + data.getTempDefenseBonus()
                 + BookPowerEffects.getDefenseBonus(data)
-                - (player.hasEffect(com.stardew.craft.effect.ModMobEffects.JINXED) ? 8 : 0);
+                - (player.hasEffect(com.stardew.craft.effect.ModMobEffects.JINXED.get()) ? 8 : 0);
         syncModifier(
                 player.getAttribute(Attributes.ARMOR),
                 DEFENSE_ID,
@@ -215,8 +215,7 @@ public final class EquipmentPlayerAttributes {
 
     static MainHandAttackSpeed mainHandAttackSpeed(ItemStack stack) {
         double[] parts = {4.0D, 0.0D, 0.0D, 1.0D};
-        stack.forEachModifier(
-                EquipmentSlot.MAINHAND,
+        com.stardew.craft.port.PortItemStacks.forEachModifier(stack, EquipmentSlot.MAINHAND,
                 (attribute, modifier) -> {
                     if (!attribute.equals(Attributes.ATTACK_SPEED)) {
                         return;
@@ -243,8 +242,7 @@ public final class EquipmentPlayerAttributes {
             ItemStack stack
     ) {
         double[] parts = {3.0D, 0.0D, 0.0D, 1.0D};
-        stack.forEachModifier(
-                EquipmentSlot.MAINHAND,
+        com.stardew.craft.port.PortItemStacks.forEachModifier(stack, EquipmentSlot.MAINHAND,
                 (attribute, modifier) -> {
                     if (!attribute.equals(Attributes.ENTITY_INTERACTION_RANGE)) {
                         return;

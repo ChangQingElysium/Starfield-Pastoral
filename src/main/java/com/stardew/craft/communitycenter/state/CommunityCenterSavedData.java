@@ -59,14 +59,14 @@ public class CommunityCenterSavedData extends SavedData {
 
         ServerLevel overworld = server.overworld();
         return overworld.getDataStorage().computeIfAbsent(
-                new SavedData.Factory<>(CommunityCenterSavedData::new, CommunityCenterSavedData::load),
+                com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(CommunityCenterSavedData::new, CommunityCenterSavedData::load)), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(CommunityCenterSavedData::new, CommunityCenterSavedData::load)),
                 DATA_NAME
         );
     }
 
     public static CommunityCenterSavedData get(ServerLevel level) {
         return level.getServer().overworld().getDataStorage().computeIfAbsent(
-                new SavedData.Factory<>(CommunityCenterSavedData::new, CommunityCenterSavedData::load),
+                com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(CommunityCenterSavedData::new, CommunityCenterSavedData::load)), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(CommunityCenterSavedData::new, CommunityCenterSavedData::load)),
                 DATA_NAME
         );
     }

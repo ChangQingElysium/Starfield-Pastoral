@@ -15,7 +15,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import com.stardew.craft.port.net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import static com.stardew.craft.client.weapon.MeleeWeaponVisuals.*;
@@ -74,7 +74,7 @@ public final class DwarfWeaponVisuals {
         var actor = level.getEntity(p.caster());
         if (actor == null) actor = mc.player;
         List<Path> paths = new ArrayList<>();
-        if (Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()) for (int band = 0; band < 4; band++) for (int side = 0; side < 4; side++) {
+        if (Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()) for (int band = 0; band < 4; band++) for (int side = 0; side < 4; side++) {
             Vec3[] points = DwarfWeaponGeometry.perimeterSide(center, p.radius() * (band + 1) / 4, side);
             for (int i = 0; i < points.length; i++) {
                 var hit = WeaponGroundContact.find(level, actor, points[i]);
@@ -108,7 +108,7 @@ public final class DwarfWeaponVisuals {
         CASTS.values().removeIf(c -> now - c.start > 50 || !(level.getEntity(c.key.caster) instanceof LivingEntity actor) || !actor.isAlive());
         SHOCKS.values().removeIf(s -> now - s.start >= 12); STEPS.removeIf(s -> now - s.tick >= 6);
         Set<Integer> walking = new HashSet<>();
-        if (Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()) for (var player : level.players()) {
+        if (Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()) for (var player : level.players()) {
             if (!player.isAlive() || player.distanceToSqr(mc.player) > 32 * 32
                     || !(player.getMainHandItem().getItem() instanceof IStardewWeapon weapon) || !"dwarf_dagger".equals(weapon.getWeaponId())) continue;
             if (!active(player.getId(), DWARF_THRUST, 6) && !(player == mc.player && DwarfDaggerRushClientState.isActive(player))) continue;
@@ -133,8 +133,8 @@ public final class DwarfWeaponVisuals {
     }
     @SubscribeEvent public static void render(RenderLevelStageEvent event) {
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_PARTICLES) return;
-        ensureLevel(); var mc = Minecraft.getInstance(); if (level == null || !Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()) return;
-        Vec3 camera = event.getCamera().getPosition(); float partial = event.getPartialTick().getGameTimeDeltaPartialTick(false);
+        ensureLevel(); var mc = Minecraft.getInstance(); if (level == null || !Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()) return;
+        Vec3 camera = event.getCamera().getPosition(); float partial = event.getPartialTick();
         var buffers = mc.renderBuffers().bufferSource(); var out = buffers.getBuffer(WeaponEffectRenderTypes.MOLTEN_GLOW);
         var pose = event.getPoseStack().last().pose();
         for (Shock s : SHOCKS.values()) {

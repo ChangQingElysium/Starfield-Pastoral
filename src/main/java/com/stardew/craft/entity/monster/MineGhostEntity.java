@@ -36,11 +36,11 @@ public final class MineGhostEntity extends StardewMonsterEntity {
     public boolean slowed(){return entityData.get(SLOWED);}
     @Override protected ResourceLocation definitionId(){return new ResourceLocation("stardewcraft:"+(carbon?"carbon_ghost":"ghost"));}
     @Override protected void configureSpawn(MonsterDefinition d,MonsterSpawnContext c){var r=MonsterStatResolver.base(d,c,random);setInitialHealth(r.initialHealth());replaceCombatStats(r.combat());groundY=getY();setPos(getX(),groundY+LIFT,getZ());}
-    @Override protected void defineSynchedData(SynchedEntityData.Builder b){super.defineSynchedData(b);b.define(HIT,-100L);b.define(SLOWED,false);}
+    @Override protected void defineSynchedData(){super.defineSynchedData();this.entityData.define(HIT,-100L);this.entityData.define(SLOWED,false);}
     public double hitTime(float p){return (level().getGameTime()-entityData.get(HIT)+p)/20.;}
     public GhostSteering steering(){return steering;}
     public void stunFor(int ms){stunMilliseconds=Math.max(stunMilliseconds,ms);}
-    private boolean valid(Player p){return p.isAlive()&&!p.isCreative()&&!p.isSpectator()&&!p.hasEffect(ModMobEffects.AVOID_MONSTERS)&&(monsterState().context().generation()==null||OrdinaryMineRuntime.floorAt(p.blockPosition())==monsterState().context().floor());}
+    private boolean valid(Player p){return p.isAlive()&&!p.isCreative()&&!p.isSpectator()&&!p.hasEffect(ModMobEffects.AVOID_MONSTERS.get())&&(monsterState().context().generation()==null||OrdinaryMineRuntime.floorAt(p.blockPosition())==monsterState().context().floor());}
     @Override protected void customServerAiStep(){
         if(!initialized())initialize(MonsterSpawnContext.capture((ServerLevel)level(),MonsterSpawnContext.Source.WORLD,1));
         var target=level().getNearestPlayer(getX(),groundY,getZ(),128,e->e instanceof Player p&&valid(p));setTarget(target);
@@ -86,7 +86,7 @@ public final class MineGhostEntity extends StardewMonsterEntity {
     @Override public void push(Entity e){}
     @Override public void travel(Vec3 input){setDeltaMovement(Vec3.ZERO);}
     @Override public boolean causeFallDamage(float d,float m,DamageSource s){return false;}
-    @Override public void lerpTo(double x,double y,double z,float yaw,float pitch,int steps){if(position().distanceToSqr(new Vec3(x,y,z))>9){setPos(x,y,z);xo=x;yo=y;zo=z;}super.lerpTo(x,y,z,yaw,pitch,steps);}
+    @Override public void lerpTo(double x, double y, double z, float yaw, float pitch, int steps, boolean teleport){if(position().distanceToSqr(new Vec3(x,y,z))>9){setPos(x,y,z);xo=x;yo=y;zo=z;}super.lerpTo(x, y, z, yaw, pitch, steps, teleport);}
     @Override protected SoundEvent getHurtSound(DamageSource s){return null;}
     @Override protected SoundEvent getDeathSound(){return ModSounds.GHOST.get();}
     @Override public void addAdditionalSaveData(CompoundTag t){super.addAdditionalSaveData(t);t.put("GhostSteering",steering.save());t.putDouble("GhostGround",groundY);t.putBoolean("GhostSlowed",slowed());t.putInt("GhostStun",stunMilliseconds);}

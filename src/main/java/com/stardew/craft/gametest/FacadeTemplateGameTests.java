@@ -1,5 +1,6 @@
 package com.stardew.craft.gametest;
 
+import com.stardew.craft.port.PortGameTests;
 import com.stardew.craft.templates.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -47,9 +48,9 @@ public final class FacadeTemplateGameTests {
             level.setBlock(p,Blocks.AIR.defaultBlockState(),3);level.setBlock(p,block.defaultBlockState(),3);
             var entity=(TemplateBlockEntity)level.getBlockEntity(p);
             entity.setMaterial(Blocks.OAK_PLANKS.defaultBlockState());entity.setFillMaterial(Blocks.BLUE_STAINED_GLASS.defaultBlockState());
-            var copied=new net.minecraft.world.item.ItemStack(block);entity.saveToItem(copied,level.registryAccess());
+            var copied=new net.minecraft.world.item.ItemStack(block);entity.saveToItem(copied);
             var drops=net.minecraft.world.level.block.Block.getDrops(level.getBlockState(p),level,p,entity);
-            h.assertTrue(drops.size()==1 && net.minecraft.world.item.ItemStack.isSameItemSameComponents(copied,drops.getFirst()),"Composite drop lost or duplicated a material: "+shape);
+            h.assertTrue(drops.size()==1 && net.minecraft.world.item.ItemStack.isSameItemSameTags(copied,drops.getFirst()),"Composite drop lost or duplicated a material: "+shape);
             level.setBlock(p,Blocks.AIR.defaultBlockState(),3);level.setBlock(p,block.defaultBlockState(),3);
             h.assertTrue(net.minecraft.world.item.BlockItem.updateCustomBlockEntityTag(level,null,p,copied),"Item data rejected");
             entity=(TemplateBlockEntity)level.getBlockEntity(p);
@@ -64,7 +65,7 @@ public final class FacadeTemplateGameTests {
     @GameTest(templateNamespace="stardewcraft_roof_templates", template="roof_templates")
     public static void facadeInteractionFillsPrimaryBeforeBacking(GameTestHelper h) {
         var level=h.getLevel();var p=h.absolutePos(new BlockPos(8,3,8));
-        var player=h.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);var hand=net.minecraft.world.InteractionHand.MAIN_HAND;
+        var player=PortGameTests.makeMockPlayer(h, net.minecraft.world.level.GameType.SURVIVAL);var hand=net.minecraft.world.InteractionHand.MAIN_HAND;
         for(var shape:new TemplateShape[]{TemplateShape.WALL_BEAM,TemplateShape.WINDOW_FRAME})for(Direction front:Direction.Plane.HORIZONTAL) {
             var block=TemplateContent.TEMPLATE_BLOCKS.get(shape).get();
             level.setBlock(p,Blocks.AIR.defaultBlockState(),3);
@@ -100,7 +101,7 @@ public final class FacadeTemplateGameTests {
         for(var shape:TemplateShape.values()) {
             var block=TemplateContent.TEMPLATE_BLOCKS.get(shape).get();
             if(!(block instanceof CompositeTemplateBlock)) continue;
-            var player=h.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
+            var player=PortGameTests.makeMockPlayer(h, net.minecraft.world.level.GameType.SURVIVAL);
             level.setBlock(p,Blocks.AIR.defaultBlockState(),3);
             level.setBlock(p,block.defaultBlockState(),3);
             var entity=(TemplateBlockEntity)level.getBlockEntity(p);

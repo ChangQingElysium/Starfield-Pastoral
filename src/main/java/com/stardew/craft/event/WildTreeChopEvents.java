@@ -19,7 +19,7 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import com.stardew.craft.port.net.neoforged.neoforge.common.ItemAbilities;
+import net.minecraftforge.common.ToolActions;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.level.BlockEvent;
@@ -145,7 +145,7 @@ public final class WildTreeChopEvents {
 			return true;
 		}
 		// Recognize any other modded axe-like tool via MinecraftForge tool ability.
-		return tool.canPerformAction(ItemAbilities.AXE_DIG);
+		return tool.canPerformAction(ToolActions.AXE_DIG);
 	}
 
 	private static boolean isModernWood(WildTrees.Def def, BlockState state) {

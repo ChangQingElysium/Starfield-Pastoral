@@ -22,9 +22,13 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.*;
 import javax.annotation.Nullable;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.Level;
+import com.stardew.craft.port.PortBlockInteraction;
 
 /** Fixed native-model assemblies for the Skull Cavern entrance hall. */
-public final class SkullLobbyAssemblyBlock extends BaseEntityBlock {
+public final class SkullLobbyAssemblyBlock extends BaseEntityBlock implements PortBlockInteraction {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final IntegerProperty SECTION = IntegerProperty.create("section", 0, 9);
     public static final BooleanProperty LIT = BlockStateProperties.LIT;
@@ -52,13 +56,10 @@ public final class SkullLobbyAssemblyBlock extends BaseEntityBlock {
         registerDefaultState(defaultBlockState().setValue(FACING, Direction.NORTH).setValue(SECTION, 0)
                 .setValue(LIT, kind == Kind.SKULL_WALL_BRAZIER));
     }
-    @Override public MapCodec<SkullLobbyAssemblyBlock> codec() {
-        return simpleCodec(properties -> new SkullLobbyAssemblyBlock(properties, kind));
-    }
     @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(FACING, SECTION, LIT);
     }
-    @Override protected RenderShape getRenderShape(BlockState state) { return RenderShape.MODEL; }
+    @Override public RenderShape getRenderShape(BlockState state) { return RenderShape.MODEL; }
     @Override @Nullable public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return kind.emitters.length == 0 ? null : new SkullLobbyLightBlockEntity(pos, state);
     }
@@ -98,16 +99,16 @@ public final class SkullLobbyAssemblyBlock extends BaseEntityBlock {
         }
     }
     // Templates can place an extension before its root. Check after the entire placement.
-    @Override protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState old, boolean moving) {
+    @Override public void onPlace(BlockState state, Level level, BlockPos pos, BlockState old, boolean moving) {
         super.onPlace(state, level, pos, old, moving);
         if (!level.isClientSide) level.scheduleTick(pos, this, 1);
     }
-    @Override protected BlockState updateShape(BlockState state, Direction direction, BlockState neighbor,
+    @Override public BlockState updateShape(BlockState state, Direction direction, BlockState neighbor,
             LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
         level.scheduleTick(pos, this, 1);
         return state;
     }
-    @Override protected void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+    @Override public void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
         BlockPos root = anchor(state, pos);
         for (int i = 0; i < kind.offsets.length; i++) {
             BlockState other = level.getBlockState(root.offset(rotateOffset(kind.offsets[i], state.getValue(FACING))));
@@ -117,7 +118,7 @@ public final class SkullLobbyAssemblyBlock extends BaseEntityBlock {
             }
         }
     }
-    @Override protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState replacement, boolean moving) {
+    @Override public void onRemove(BlockState state, Level level, BlockPos pos, BlockState replacement, boolean moving) {
         if (!replacement.is(this) && !level.isClientSide) {
             BlockPos root = anchor(state, pos);
             for (int i = 0; i < kind.offsets.length; i++) {
@@ -129,17 +130,17 @@ public final class SkullLobbyAssemblyBlock extends BaseEntityBlock {
         }
         super.onRemove(state, level, pos, replacement, moving);
     }
-    @Override protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+    @Override public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         BlockPos offset = offset(state);
         return kind.shapes[state.getValue(FACING).get2DDataValue()].move(-offset.getX(), -offset.getY(), -offset.getZ());
     }
-    @Override protected VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+    @Override public VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return Shapes.join(getShape(state, level, pos, context), Shapes.block(), BooleanOp.AND);
     }
-    @Override protected BlockState rotate(BlockState state, Rotation rotation) { return state.setValue(FACING, rotation.rotate(state.getValue(FACING))); }
-    @Override protected BlockState mirror(BlockState state, Mirror mirror) { return state.rotate(mirror.getRotation(state.getValue(FACING))); }
-    @Override public ItemStack getCloneItemStack(LevelReader level, BlockPos pos, BlockState state) { return new ItemStack(this); }
-    @Override protected int getLightBlock(BlockState state, BlockGetter level, BlockPos pos) { return 0; }
+    @Override public BlockState rotate(BlockState state, Rotation rotation) { return state.setValue(FACING, rotation.rotate(state.getValue(FACING))); }
+    @Override public BlockState mirror(BlockState state, Mirror mirror) { return state.rotate(mirror.getRotation(state.getValue(FACING))); }
+    @Override public ItemStack getCloneItemStack(net.minecraft.world.level.BlockGetter level, BlockPos pos, BlockState state) { return new ItemStack(this); }
+    @Override public int getLightBlock(BlockState state, BlockGetter level, BlockPos pos) { return 0; }
     public static int emission(BlockState state) {
         return state.getBlock() instanceof SkullLobbyAssemblyBlock block ? emission(block.kind, state) : 0;
     }
@@ -169,8 +170,15 @@ public final class SkullLobbyAssemblyBlock extends BaseEntityBlock {
             if (matches(state, other) && other.getValue(SECTION) == i) level.setBlock(q, other.setValue(LIT, lit), 3);
         }
     }
+    // PORT(1.20.1): replay the 1.21 useItemOn/useWithoutItem dispatch.
+    @Override
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player,
+            InteractionHand hand, BlockHitResult hit) {
+        return PortBlockInteraction.dispatch(this, state, level, pos, player, hand, hit);
+    }
+
     /** Creative authoring switch only; dangerous-floor progression remains a separate system. */
-    @Override protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+    @Override public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         if(kind==Kind.SKULL_CAVERN_DOOR && level.dimension()==com.stardew.craft.core.ModMiningDimensions.STARDEW_MINING) {
             if(player instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
                 if(!com.stardew.craft.player.PlayerDataManager.getPlayerData(serverPlayer).hasMailFlag(com.stardew.craft.communitycenter.state.CCStoryFlags.HAS_SKULL_KEY)) {

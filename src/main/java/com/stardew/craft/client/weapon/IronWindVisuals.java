@@ -16,7 +16,7 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import com.stardew.craft.port.net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import static com.stardew.craft.client.weapon.MeleeWeaponVisuals.*;
@@ -84,7 +84,7 @@ public final class IronWindVisuals {
                     || !(player.getMainHandItem().getItem() instanceof IStardewWeapon weapon) || !"wind_spire".equals(weapon.getWeaponId())
                     || (player==mc.player && !DashMovementClientState.isActive(player))) {iterator.remove();continue;}
             Vec3 current=player.position().add(0,.65,0);
-            if(Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean() && IronWindGeometry.validSegment(dash.previous,current)
+            if(Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get() && IronWindGeometry.validSegment(dash.previous,current)
                     && level.clip(new ClipContext(dash.previous,current,ClipContext.Block.COLLIDER,ClipContext.Fluid.NONE,player)).getType()==HitResult.Type.MISS) {
                 WAKES.add(new Wake(dash.previous,current,now));while(WAKES.size()>96) WAKES.removeFirst();
             }
@@ -93,8 +93,8 @@ public final class IronWindVisuals {
     }
     @SubscribeEvent public static void render(RenderLevelStageEvent event) {
         if(event.getStage()!=RenderLevelStageEvent.Stage.AFTER_PARTICLES) return;
-        ensureLevel();var mc=Minecraft.getInstance();if(level==null || !Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()) return;
-        float partial=event.getPartialTick().getGameTimeDeltaPartialTick(false);Vec3 camera=event.getCamera().getPosition();
+        ensureLevel();var mc=Minecraft.getInstance();if(level==null || !Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()) return;
+        float partial=event.getPartialTick();Vec3 camera=event.getCamera().getPosition();
         var buffers=mc.renderBuffers().bufferSource();var out=buffers.getBuffer(WeaponEffectRenderTypes.MOLTEN_GLOW);var pose=event.getPoseStack().last().pose();
         for(Blink b:BLINKS) if(b.point.distanceToSqr(camera)<=48*48) IronWindGeometry.blink(out,pose,b.point.subtract(camera),b.direction,fade(level.getGameTime()-b.start+partial),b.wind);
         for(Wake w:WAKES) if(w.from.distanceToSqr(camera)<=32*32) IronWindGeometry.wake(out,pose,w.from.subtract(camera),w.to.subtract(camera),fade(level.getGameTime()-w.start+partial));

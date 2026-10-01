@@ -37,9 +37,9 @@ public final class NativeShadowShamanGameTests {
         try{
             p.invulnerableTime=100;float health=p.getHealth();
             h.assertTrue(curse.hitPlayer(p)&&curse.isRemoved(),"I-frames incorrectly blocked status-only curse");h.assertTrue(p.getHealth()==health,"Curse directly damaged HP");
-            h.assertTrue(p.hasEffect(ModMobEffects.JINXED)&&p.getEffect(ModMobEffects.JINXED).getDuration()==160,"Jinx is not eight seconds");
-            p.removeEffect(ModMobEffects.JINXED);p.addEffect(new net.minecraft.world.effect.MobEffectInstance(ModMobEffects.SQUID_INK_RAVIOLI,3600));
-            var second=ModEntities.SHAMAN_CURSE.get().create(level);second.setPos(at);h.assertTrue(!second.hitPlayer(p)&&!second.isRemoved()&&!p.hasEffect(ModMobEffects.JINXED),"Ravioli should let the curse pass through");second.discard();h.succeed();
+            h.assertTrue(p.hasEffect(ModMobEffects.JINXED.get())&&p.getEffect(ModMobEffects.JINXED.get()).getDuration()==160,"Jinx is not eight seconds");
+            p.removeEffect(ModMobEffects.JINXED.get());p.addEffect(new net.minecraft.world.effect.MobEffectInstance(ModMobEffects.SQUID_INK_RAVIOLI.get(),3600));
+            var second=ModEntities.SHAMAN_CURSE.get().create(level);second.setPos(at);h.assertTrue(!second.hitPlayer(p)&&!second.isRemoved()&&!p.hasEffect(ModMobEffects.JINXED.get()),"Ravioli should let the curse pass through");second.discard();h.succeed();
         }finally{p.removeAllEffects();p.discard();curse.discard();}
     }
     @GameTest(templateNamespace="stardewcraft_bug",template="ring_utilities",timeoutTicks=25)

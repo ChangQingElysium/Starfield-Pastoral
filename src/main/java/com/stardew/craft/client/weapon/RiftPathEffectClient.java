@@ -24,7 +24,7 @@ public final class RiftPathEffectClient {
     private RiftPathEffectClient() {}
 
     public static void add(float x, float y, float z, float yaw, float length, int durationTicks, int color) {
-        if (!Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()) {
+        if (!Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()) {
             return;
         }
         if (durationTicks <= 0 || length <= 0.0f) {
@@ -64,7 +64,7 @@ public final class RiftPathEffectClient {
         Vec3 camPos = event.getCamera().getPosition();
         PoseStack poseStack = event.getPoseStack();
         MultiBufferSource.BufferSource buffer = mc.renderBuffers().bufferSource();
-        float partial = event.getPartialTick().getGameTimeDeltaPartialTick(false);
+        float partial = event.getPartialTick();
         RenderType riftType = WeaponEffectRenderTypes.MOLTEN_GLOW;
         VertexConsumer consumer = buffer.getBuffer(riftType);
 

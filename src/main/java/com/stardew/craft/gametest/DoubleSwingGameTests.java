@@ -1,5 +1,6 @@
 package com.stardew.craft.gametest;
 
+import com.stardew.craft.port.PortGameTests;
 import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.block.decor.DoubleSwingBlock;
 import com.stardew.craft.block.decor.DoubleSwingMotion;
@@ -22,6 +23,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.gametest.GameTestHolder;
 import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import com.stardew.craft.port.PortBlockInteraction;
 
 @GameTestHolder("stardewcraft_swing")
 @PrefixGameTestTemplate(false)
@@ -45,7 +47,7 @@ public final class DoubleSwingGameTests {
     }
     @GameTest(templateNamespace="stardewcraft_swing",template="ring_utilities")
     public static void placementClearanceAndSingleDrop(GameTestHelper h) {
-        var main=prepare(h);var level=h.getLevel();var block=ModBlocks.DOUBLE_SWING.get();var player=h.makeMockPlayer(GameType.SURVIVAL);
+        var main=prepare(h);var level=h.getLevel();var block=ModBlocks.DOUBLE_SWING.get();var player=PortGameTests.makeMockPlayer(h, GameType.SURVIVAL);
         player.setPos(Vec3.atBottomCenterOf(main.offset(8,0,7)));
         for(var facing:Direction.Plane.HORIZONTAL){
             player.setYRot(facing.getOpposite().toYRot());var ctx=context(player,main);
@@ -72,7 +74,7 @@ public final class DoubleSwingGameTests {
     }
     @GameTest(templateNamespace="stardewcraft_swing",template="ring_utilities")
     public static void obstructedPlacementIsAtomic(GameTestHelper h) {
-        var main=prepare(h);var level=h.getLevel();var block=ModBlocks.DOUBLE_SWING.get();var player=h.makeMockPlayer(GameType.SURVIVAL);
+        var main=prepare(h);var level=h.getLevel();var block=ModBlocks.DOUBLE_SWING.get();var player=PortGameTests.makeMockPlayer(h, GameType.SURVIVAL);
         player.setPos(Vec3.atBottomCenterOf(main.offset(8,0,7)));player.setYRot(Direction.SOUTH.toYRot());
         for(var obstacle:new BlockPos[]{main.offset(1,2,1),main.offset(3,5,0)}){
             level.setBlock(obstacle,Blocks.STONE.defaultBlockState(),3);var ctx=context(player,main);
@@ -88,14 +90,14 @@ public final class DoubleSwingGameTests {
     public static void independentSeatsFollowMotionAndCleanUp(GameTestHelper h) {
         var main=prepare(h);var level=h.getLevel();var block=ModBlocks.DOUBLE_SWING.get();
         for(var facing:Direction.Plane.HORIZONTAL){
-            var one=h.makeMockPlayer(GameType.SURVIVAL);var two=h.makeMockPlayer(GameType.SURVIVAL);
+            var one=PortGameTests.makeMockPlayer(h, GameType.SURVIVAL);var two=PortGameTests.makeMockPlayer(h, GameType.SURVIVAL);
             one.setPos(Vec3.atBottomCenterOf(main.offset(8,0,7)));one.setYRot(facing.getOpposite().toYRot());
             var ctx=context(one,main);h.assertTrue(((BlockItem)ctx.getItemInHand().getItem()).place(ctx).consumesAction(),"Setup failed");
             for(int slot=0;slot<2;slot++){
                 var player=slot==0?one:two;var off=DoubleSwingBlock.rotateOffset(new BlockPos(slot==0?-1:1,0,0),facing);var pos=main.offset(off);
                 var hit=new BlockHitResult(Vec3.atCenterOf(pos),facing,pos,false);
-                player.setShiftKeyDown(true);level.getBlockState(pos).useWithoutItem(level,player,hit);h.assertTrue(!player.isPassenger(),"Sneak unexpectedly mounted");
-                player.setShiftKeyDown(false);level.getBlockState(pos).useWithoutItem(level,player,hit);
+                player.setShiftKeyDown(true);PortBlockInteraction.stateUseWithoutItem(level.getBlockState(pos), level,player,hit);h.assertTrue(!player.isPassenger(),"Sneak unexpectedly mounted");
+                player.setShiftKeyDown(false);PortBlockInteraction.stateUseWithoutItem(level.getBlockState(pos), level,player,hit);
                 h.assertTrue(player.getVehicle() instanceof DoubleSwingSeatEntity,"Could not mount seat");
                 var seat=(DoubleSwingSeatEntity)player.getVehicle();h.assertTrue(seat.slot()==slot,"Click selected wrong seat");
                 for(int i=0;i<3;i++)level.tickNonPassenger(seat);
@@ -104,8 +106,8 @@ public final class DoubleSwingGameTests {
                 h.assertTrue(player.position().add(0,.75-1.0/16,0).distanceTo(surface)<.0001,"Hips detached from moving seat");
             }
             h.assertTrue(one.getVehicle()!=two.getVehicle(),"Two players share same entity");
-            var third=h.makeMockPlayer(GameType.SURVIVAL);var firstPos=main.offset(DoubleSwingBlock.rotateOffset(new BlockPos(-1,0,0),facing));
-            level.getBlockState(firstPos).useWithoutItem(level,third,new BlockHitResult(Vec3.atCenterOf(firstPos),facing,firstPos,false));
+            var third=PortGameTests.makeMockPlayer(h, GameType.SURVIVAL);var firstPos=main.offset(DoubleSwingBlock.rotateOffset(new BlockPos(-1,0,0),facing));
+            PortBlockInteraction.stateUseWithoutItem(level.getBlockState(firstPos), level,third,new BlockHitResult(Vec3.atCenterOf(firstPos),facing,firstPos,false));
             h.assertTrue(!third.isPassenger(),"Occupied seat stolen");
             var firstSeat=one.getVehicle();one.stopRiding();level.tickNonPassenger(firstSeat);level.tickNonPassenger(firstSeat);
             h.assertTrue(firstSeat.isRemoved()&&two.isPassenger(),"Dismount removed wrong seat or leaked entity");

@@ -21,6 +21,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.gametest.GameTestHolder;
 import net.minecraftforge.gametest.PrefixGameTestTemplate;
 import java.util.UUID;
+import com.stardew.craft.port.PortBlockInteraction;
 
 @GameTestHolder("stardewcraft_skull_lobby")
 @PrefixGameTestTemplate(false)
@@ -73,7 +74,7 @@ public final class SkullLobbyAssemblyGameTests {
         h.runAtTickTime(3,()->{
             var p=player(h);var hit=new BlockHitResult(Vec3.atCenterOf(root),Direction.SOUTH,root,false);
             for(boolean lit:new boolean[]{true,false}){
-                level.getBlockState(root).useWithoutItem(level,p,hit);
+                PortBlockInteraction.stateUseWithoutItem(level.getBlockState(root), level,p,hit);
                 for(int kind=0;kind<2;kind++){
                     var block=kind==0?altar:wall;var r=kind==0?root:wallRoot;var offsets=kind==0?ALTAR:WALL;int emitters=0;
                     for(int[] offset:offsets){

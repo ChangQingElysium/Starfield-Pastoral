@@ -40,8 +40,8 @@ public class StardewBlockItem extends BlockItem implements IStardewItem {
 	}
 
 	@Override
-	public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-		super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
+	public void appendHoverText(ItemStack stack, @javax.annotation.Nullable net.minecraft.world.level.Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
+		super.appendHoverText(stack, level, tooltipComponents, tooltipFlag);
 		if (descriptionKey != null && !descriptionKey.isBlank()) {
 			tooltipComponents.add(Component.translatable(descriptionKey).withStyle(ChatFormatting.DARK_GRAY));
 		}

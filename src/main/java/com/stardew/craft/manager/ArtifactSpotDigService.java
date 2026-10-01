@@ -21,8 +21,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
-import com.stardew.craft.port.net.neoforged.neoforge.common.ItemAbilities;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
+import net.minecraftforge.common.ToolActions;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import java.util.ArrayList;
 import java.util.List;
@@ -65,7 +65,7 @@ public final class ArtifactSpotDigService {
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onHoeUse(PlayerInteractEvent.RightClickBlock event) {
         ItemStack tool = event.getItemStack();
-        if (tool.getItem() instanceof HoeItem || !tool.canPerformAction(ItemAbilities.HOE_TILL)) return;
+        if (tool.getItem() instanceof HoeItem || !tool.canPerformAction(ToolActions.HOE_TILL)) return;
         BlockPos pos = target(event.getLevel(), event.getPos());
         if (!isSpot(event.getLevel().getBlockState(pos))) return;
         if (event.getEntity() instanceof ServerPlayer player && dig(player.serverLevel(), pos, player, tool))

@@ -66,7 +66,7 @@ public class MoneyDial {
         }
         
         // 更新闪光计时器 - 原版每帧减少
-        int elapsedMillis = Math.max(1, Math.round(mc.getTimer().getRealtimeDeltaTicks() * 50.0F));
+        int elapsedMillis = Math.max(1, Math.round(com.stardew.craft.port.net.minecraft.client.DeltaTracker.client().getRealtimeDeltaTicks() * 50.0F));
         if (moneyShineTimer > 0 && currentValue == targetMoney) {
             moneyShineTimer = Math.max(0, moneyShineTimer - elapsedMillis);
         }
@@ -119,7 +119,7 @@ public class MoneyDial {
         }
         
         // 更新粒子（使用游戏tick时间）
-        float deltaTime = mc.getTimer().getRealtimeDeltaTicks() * 50.0f; // tick转毫秒
+        float deltaTime = com.stardew.craft.port.net.minecraft.client.DeltaTracker.client().getRealtimeDeltaTicks() * 50.0f; // tick转毫秒
         particles.removeIf(particle -> particle.update(deltaTime));
         
         // 先渲染粒子（在数字后面）

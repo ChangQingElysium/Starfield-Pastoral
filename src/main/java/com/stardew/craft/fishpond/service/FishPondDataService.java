@@ -1,5 +1,6 @@
 package com.stardew.craft.fishpond.service;
 
+import com.stardew.craft.port.PortItemData;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -107,7 +108,7 @@ public final class FishPondDataService {
                 continue;
             }
             if (rule.copyFromInput()) {
-                DyedItemColor dyed = inputStack.get(DataComponents.DYED_COLOR);
+                DyedItemColor dyed = PortItemData.get(inputStack, DataComponents.DYED_COLOR);
                 return dyed != null ? (dyed.rgb() & 0xFFFFFF) : NO_OVERRIDE_WATER_COLOR;
             }
             return rule.rgb();

@@ -1,5 +1,6 @@
 package com.stardew.craft.mixin;
 
+import com.stardew.craft.port.PortItemData;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import com.stardew.craft.client.FishingRodCastAnimationState;
@@ -429,7 +430,7 @@ public class ItemInHandRendererScytheSwingMixin {
 		float tTz;
 
 		if (phase == FishingRodCastAnimationState.Phase.CHARGING) {
-			int activeTicks = stack.getUseDuration(player) - player.getUseItemRemainingTicks();
+			int activeTicks = stack.getUseDuration() - player.getUseItemRemainingTicks();
 			float t = (activeTicks + partialTick) / ROD_CHARGE_RAISE_TICKS;
 			t = Mth.clamp(t, 0.0F, 1.0F);
 			float inv = 1.0F - t;
@@ -503,7 +504,7 @@ public class ItemInHandRendererScytheSwingMixin {
 		}
 
 		@SuppressWarnings("null")
-		CustomData data = used.get(DataComponents.CUSTOM_DATA);
+		CustomData data = PortItemData.get(used, DataComponents.CUSTOM_DATA);
 		if (data == null) {
 			return false;
 		}
@@ -530,9 +531,9 @@ public class ItemInHandRendererScytheSwingMixin {
 			tag.remove(HoeItem.NBT_STRIKE_DURATION_TICKS);
 			tag.remove(HoeItem.NBT_STRIKE_FROM_P1);
 			if (tag.isEmpty()) {
-				used.remove(DataComponents.CUSTOM_DATA);
+				PortItemData.remove(used, DataComponents.CUSTOM_DATA);
 			} else {
-				used.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+				PortItemData.set(used, DataComponents.CUSTOM_DATA, CustomData.of(tag));
 			}
 		}
 
@@ -563,7 +564,7 @@ public class ItemInHandRendererScytheSwingMixin {
 			return false;
 		}
 
-		int activeTicks = stack.getUseDuration(player) - player.getUseItemRemainingTicks();
+		int activeTicks = stack.getUseDuration() - player.getUseItemRemainingTicks();
 		// ?
 		if (activeTicks < HoeItem.TAP_THRESHOLD_TICKS) {
 			return false;

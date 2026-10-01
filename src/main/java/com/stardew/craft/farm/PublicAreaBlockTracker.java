@@ -35,7 +35,7 @@ public class PublicAreaBlockTracker extends SavedData {
     public static PublicAreaBlockTracker get() {
         var server = ServerLifecycleHooks.getCurrentServer();
         if (server == null) return new PublicAreaBlockTracker();
-        return server.overworld().getDataStorage().computeIfAbsent(factory(), DATA_NAME);
+        return server.overworld().getDataStorage().computeIfAbsent(com.stardew.craft.port.PortSavedData.loader(factory()), com.stardew.craft.port.PortSavedData.constructor(factory()), DATA_NAME);
     }
 
     /**
@@ -73,7 +73,7 @@ public class PublicAreaBlockTracker extends SavedData {
 
     @Override
     @Nonnull
-    public CompoundTag save(@Nonnull CompoundTag tag, @Nonnull HolderLookup.Provider registries) {
+    public CompoundTag save(@Nonnull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
         ListTag list = new ListTag();
         for (var entry : removedBlocks.entrySet()) {
             CompoundTag blockTag = new CompoundTag();
@@ -106,7 +106,7 @@ public class PublicAreaBlockTracker extends SavedData {
         return tracker;
     }
 
-    public static SavedData.Factory<PublicAreaBlockTracker> factory() {
-        return new SavedData.Factory<>(PublicAreaBlockTracker::new, PublicAreaBlockTracker::load);
+    public static com.stardew.craft.port.PortSavedData.Factory<PublicAreaBlockTracker> factory() {
+        return new com.stardew.craft.port.PortSavedData.Factory<>(PublicAreaBlockTracker::new, PublicAreaBlockTracker::load);
     }
 }

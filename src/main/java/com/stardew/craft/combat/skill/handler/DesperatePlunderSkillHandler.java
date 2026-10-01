@@ -155,7 +155,7 @@ public final class DesperatePlunderSkillHandler implements RuntimeWeaponSkillHan
 
     private static void grantFury(SkillExecutionContext context) {
         context.player().addEffect(new MobEffectInstance(
-                ModMobEffects.FURY,
+                ModMobEffects.FURY.get(),
                 FURY_DURATION_TICKS,
                 FURY_AMPLIFIER,
                 false,

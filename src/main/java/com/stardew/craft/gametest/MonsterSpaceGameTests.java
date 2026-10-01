@@ -1,5 +1,6 @@
 package com.stardew.craft.gametest;
 
+import com.stardew.craft.port.PortGameTests;
 import com.stardew.craft.entity.ModEntities;
 import com.stardew.craft.entity.monster.MineSerpentEntity;
 import com.stardew.craft.event.MineMonsterSpawnHandler;
@@ -32,7 +33,7 @@ public final class MonsterSpaceGameTests {
                 Vec3.atBottomCenterOf(h.absolutePos(new BlockPos(4,2,4))),0,
                 new MonsterSpawnContext(MonsterSpawnContext.Source.COMMAND,id.equals("iridium_bat")?171:id.equals("lava_bat")?90:50,false,null),m->m.setPersistenceRequired());
         if(mob instanceof com.stardew.craft.entity.monster.MineBatEntity bat)bat.startPursuit();
-        var player=h.makeMockPlayer(GameType.SURVIVAL);
+        var player=PortGameTests.makeMockPlayer(h, GameType.SURVIVAL);
         player.setPos(Vec3.atBottomCenterOf(h.absolutePos(new BlockPos(12,6,4))));mob.setTarget(player);
         h.onEachTick(()->{if(!mob.isRemoved())h.assertTrue(h.getLevel().noCollision(mob,mob.getBoundingBox()),id+" entered wall/ceiling");});
         h.runAtTickTime(300,()->{
@@ -100,7 +101,7 @@ public final class MonsterSpaceGameTests {
     public static void serpentClimbsAndRoutesAroundSolidWall(GameTestHelper h) {
         room(h);
         for(int y=1;y<=10;y++)for(int z=1;z<=10;z++)h.setBlock(new BlockPos(8,y,z),Blocks.STONE);
-        var mob=serpent(h,4,2,4);var player=h.makeMockPlayer(GameType.SURVIVAL);
+        var mob=serpent(h,4,2,4);var player=PortGameTests.makeMockPlayer(h, GameType.SURVIVAL);
         player.setPos(Vec3.atBottomCenterOf(h.absolutePos(new BlockPos(12,6,4))));mob.setTarget(player);
         h.onEachTick(()->{if(!mob.isRemoved())h.assertTrue(h.getLevel().noCollision(mob,mob.getBoundingBox()),"Flight body entered wall or ceiling");});
         h.runAtTickTime(300,()->{
@@ -132,7 +133,7 @@ public final class MonsterSpaceGameTests {
     @GameTest(template="flight_room",timeoutTicks=20)
     public static void sightAndProjectileSweepUseActualCeiling(GameTestHelper h) {
         room(h);var mob=serpent(h,6,2,6);mob.setNoAi(true);
-        var player=h.makeMockPlayer(GameType.SURVIVAL);
+        var player=PortGameTests.makeMockPlayer(h, GameType.SURVIVAL);
         player.setPos(Vec3.atBottomCenterOf(h.absolutePos(new BlockPos(6,7,6))));
         for(int x=3;x<=10;x++)for(int z=3;z<=10;z++)h.setBlock(new BlockPos(x,5,z),Blocks.STONE);
         h.assertTrue(!MineMonsterSight.sees(mob,player,13),"Sight ignored the floor between vertically stacked bodies");

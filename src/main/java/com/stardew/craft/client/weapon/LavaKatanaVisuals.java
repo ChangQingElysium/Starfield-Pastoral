@@ -23,7 +23,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import com.stardew.craft.port.net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import org.joml.Matrix4f;
@@ -133,7 +133,7 @@ public final class LavaKatanaVisuals {
                     SoundSource.PLAYERS, payload.brand() ? 0.65f : 0.32f, 0.85f, false);
         }
         if (firstSound && payload.casterId() == mc.player.getId()) {
-            Action current = action(mc.player, mc.getTimer().getGameTimeDeltaPartialTick(false));
+            Action current = action(mc.player, com.stardew.craft.port.net.minecraft.client.DeltaTracker.client().getGameTimeDeltaPartialTick(false));
             if (current != null && (payload.brand() == BRAND.equals(current.skillId()))
                     && Math.abs(payload.gameTick() - current.startTick()) <= 2) {
                 frozenStart = current.startTick();
@@ -150,7 +150,7 @@ public final class LavaKatanaVisuals {
                     WeaponTargetImpactClient.Style.MOLTEN_STRIKE);
             return;
         }
-        if (!Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()) return;
+        if (!Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()) return;
         if (IMPACTS.size() >= MAX_IMPACTS) IMPACTS.removeFirst();
         IMPACTS.add(new Impact(point, mc.level.getGameTime(),
                 payload.brand() ? 1.25f : payload.critical() ? 1.0f : 0.68f));
@@ -178,7 +178,7 @@ public final class LavaKatanaVisuals {
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_PARTICLES) return;
         Minecraft mc = Minecraft.getInstance();
         ensureLevel(mc.level);
-        if (mc.level == null || !Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()) return;
+        if (mc.level == null || !Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()) return;
         LavaKatanaMarkRenderer.onRenderLevel(event);
         if (IMPACTS.isEmpty()) return;
         var stack = event.getPoseStack();
@@ -188,7 +188,7 @@ public final class LavaKatanaVisuals {
         Matrix4f pose = stack.last().pose();
         var buffers = mc.renderBuffers().bufferSource();
         var consumer = buffers.getBuffer(WeaponEffectRenderTypes.MOLTEN_GLOW);
-        double now = mc.level.getGameTime() + event.getPartialTick().getGameTimeDeltaPartialTick(false);
+        double now = mc.level.getGameTime() + event.getPartialTick();
         for (Impact impact : IMPACTS) {
             float age = (float) (now - impact.startTick);
             if (age < 0 || age > 8 || impact.point.distanceToSqr(camera) > RANGE_SQR) continue;

@@ -65,7 +65,7 @@ public class ShippingBinBlock extends com.stardew.craft.block.decor.MapDecorStat
     }
 
     @Override
-    protected List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
+    public List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
         return state.getValue(PART) == Part.EXTENSION ? List.of() : List.of(new ItemStack(ModBlocks.SHIPPING_BIN.get()));
     }
 
@@ -123,7 +123,7 @@ public class ShippingBinBlock extends com.stardew.craft.block.decor.MapDecorStat
     }
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState state,
+    public InteractionResult useWithoutItem(BlockState state,
                                                Level level,
                                                BlockPos pos,
                                                Player player,

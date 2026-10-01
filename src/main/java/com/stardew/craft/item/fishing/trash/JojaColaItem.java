@@ -106,7 +106,7 @@ public class JojaColaItem extends Item implements IStardewItem {
             }
 
             // Speed +1 for 21s
-            serverPlayer.addEffect(new MobEffectInstance(com.stardew.craft.effect.ModMobEffects.SPEED, SPEED_DURATION_TICKS, SPEED_BONUS - 1));
+            serverPlayer.addEffect(new MobEffectInstance(com.stardew.craft.effect.ModMobEffects.SPEED.get(), SPEED_DURATION_TICKS, SPEED_BONUS - 1));
         }
         return result;
     }

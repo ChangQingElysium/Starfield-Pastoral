@@ -157,7 +157,7 @@ public final class InventoryOrganizeService {
 
             for (int j = i + 1; j < stacks.size() && current.getCount() < max; ) {
                 ItemStack other = stacks.get(j);
-                if (!ItemStack.isSameItemSameComponents(current, other)) {
+                if (!ItemStack.isSameItemSameTags(current, other)) {
                     j++;
                     continue;
                 }

@@ -24,7 +24,7 @@ public class MagicRockCandyItem extends CookingDishItem {
     }
 
     @Override
-    public boolean canBeHurtBy(@Nonnull ItemStack stack, @Nonnull net.minecraft.world.damagesource.DamageSource source) {
+    public boolean canBeHurtBy(@Nonnull net.minecraft.world.damagesource.DamageSource source) {
         return false;
     }
 
@@ -34,8 +34,10 @@ public class MagicRockCandyItem extends CookingDishItem {
     }
 
     @Override
-    public void appendHoverText(@Nonnull ItemStack stack, @Nonnull TooltipContext context,
-            @Nonnull List<Component> tooltipComponents, @Nonnull TooltipFlag tooltipFlag) {
+    public void appendHoverText(@Nonnull ItemStack stack,
+            @javax.annotation.Nullable net.minecraft.world.level.Level level,
+            @Nonnull List<Component> tooltipComponents,
+            @Nonnull TooltipFlag tooltipFlag) {
         tooltipComponents.add(GalaxySoulItem.prismaticText(
             Component.translatable("stardewcraft.item.magic_rock_candy.tooltip.flavor").getString(), false, 0.00F));
         tooltipComponents.add(GalaxySoulItem.prismaticText(

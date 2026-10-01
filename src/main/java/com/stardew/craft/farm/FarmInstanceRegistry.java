@@ -64,7 +64,7 @@ public class FarmInstanceRegistry extends SavedData {
 
     public static FarmInstanceRegistry get(MinecraftServer server) {
         return Objects.requireNonNull(server, "server")
-                .overworld().getDataStorage().computeIfAbsent(factory(), DATA_NAME);
+                .overworld().getDataStorage().computeIfAbsent(com.stardew.craft.port.PortSavedData.loader(factory()), com.stardew.craft.port.PortSavedData.constructor(factory()), DATA_NAME);
     }
 
     /**
@@ -586,7 +586,7 @@ public class FarmInstanceRegistry extends SavedData {
 
     @Override
     @Nonnull
-    public CompoundTag save(@Nonnull CompoundTag tag, @Nonnull HolderLookup.Provider registries) {
+    public CompoundTag save(@Nonnull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
         tag.putInt("NextSlotIndex", nextSlotIndex);
 
         // 保存回收槽位
@@ -678,8 +678,8 @@ public class FarmInstanceRegistry extends SavedData {
         return registry;
     }
 
-    public static SavedData.Factory<FarmInstanceRegistry> factory() {
-        return new SavedData.Factory<>(FarmInstanceRegistry::new, FarmInstanceRegistry::load);
+    public static com.stardew.craft.port.PortSavedData.Factory<FarmInstanceRegistry> factory() {
+        return new com.stardew.craft.port.PortSavedData.Factory<>(FarmInstanceRegistry::new, FarmInstanceRegistry::load);
     }
 
     private static int maxFarmersPerFarm() {

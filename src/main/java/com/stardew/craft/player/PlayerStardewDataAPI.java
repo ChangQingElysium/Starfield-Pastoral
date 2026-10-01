@@ -327,7 +327,7 @@ public class PlayerStardewDataAPI {
      * @return 是否成功（能量是否足够）
      */
     public static boolean consumeEnergy(ServerPlayer player, float amount) {
-        if (amount > 0.0f && player.hasEffect(ModMobEffects.STATUE_OF_BLESSINGS_2)) {
+        if (amount > 0.0f && player.hasEffect(ModMobEffects.STATUE_OF_BLESSINGS_2.get())) {
             return true;
         }
         PlayerStardewData data = getData(player);
@@ -340,7 +340,7 @@ public class PlayerStardewDataAPI {
 
     /** Returns whether the complete cost can be paid without mutating player data. */
     public static boolean canConsumeEnergy(ServerPlayer player, float amount) {
-        if (amount <= 0.0F || player.hasEffect(ModMobEffects.STATUE_OF_BLESSINGS_2)) {
+        if (amount <= 0.0F || player.hasEffect(ModMobEffects.STATUE_OF_BLESSINGS_2.get())) {
             return true;
         }
         return getData(player).getEnergy() >= amount;
@@ -361,18 +361,18 @@ public class PlayerStardewDataAPI {
     }
 
     public static boolean consumeBlessingOfWatersUse(ServerPlayer player) {
-        if (!player.hasEffect(ModMobEffects.STATUE_OF_BLESSINGS_3)) {
+        if (!player.hasEffect(ModMobEffects.STATUE_OF_BLESSINGS_3.get())) {
             return false;
         }
         PlayerStardewData data = getData(player);
         if (data.getBlessingOfWatersRemaining() <= 0) {
-            player.removeEffect(ModMobEffects.STATUE_OF_BLESSINGS_3);
+            player.removeEffect(ModMobEffects.STATUE_OF_BLESSINGS_3.get());
             PlayerDataEventHandler.syncPlayerData(player, data);
             return false;
         }
         int remaining = data.consumeBlessingOfWatersUse();
         if (remaining <= 0) {
-            player.removeEffect(ModMobEffects.STATUE_OF_BLESSINGS_3);
+            player.removeEffect(ModMobEffects.STATUE_OF_BLESSINGS_3.get());
         }
         PlayerDataEventHandler.syncPlayerData(player, data);
         return true;
@@ -465,7 +465,7 @@ public class PlayerStardewDataAPI {
 
         // 以 MobEffect 形式显示（支持等级/图标）
         player.addEffect(new net.minecraft.world.effect.MobEffectInstance(
-                com.stardew.craft.effect.ModMobEffects.SEA_KING_BLESSING,
+                com.stardew.craft.effect.ModMobEffects.SEA_KING_BLESSING.get(),
                 durationTicks,
                 Math.max(0, bonus - 1)
         ));
@@ -484,7 +484,7 @@ public class PlayerStardewDataAPI {
 
         // 以 MobEffect 形式显示（支持等级/图标）
         player.addEffect(new net.minecraft.world.effect.MobEffectInstance(
-                com.stardew.craft.effect.ModMobEffects.SPIRIT_BLESSING,
+                com.stardew.craft.effect.ModMobEffects.SPIRIT_BLESSING.get(),
                 durationTicks,
                 Math.max(0, bonus - 1)
         ));
@@ -505,7 +505,7 @@ public class PlayerStardewDataAPI {
         if (bonus > 0 && bonus % 30 == 0) {
             int amplifier = Math.max(0, (bonus / 30) - 1);
             player.addEffect(new net.minecraft.world.effect.MobEffectInstance(
-                    com.stardew.craft.effect.ModMobEffects.VIGOROUS,
+                    com.stardew.craft.effect.ModMobEffects.VIGOROUS.get(),
                     durationTicks,
                     amplifier
             ));
@@ -523,7 +523,7 @@ public class PlayerStardewDataAPI {
             return;
         }
         player.addEffect(new net.minecraft.world.effect.MobEffectInstance(
-                com.stardew.craft.effect.ModMobEffects.FARMER_BLESSING,
+                com.stardew.craft.effect.ModMobEffects.FARMER_BLESSING.get(),
                 durationTicks,
                 Math.max(0, bonus - 1)
         ));
@@ -539,7 +539,7 @@ public class PlayerStardewDataAPI {
             return;
         }
         player.addEffect(new net.minecraft.world.effect.MobEffectInstance(
-                com.stardew.craft.effect.ModMobEffects.FORAGER_BLESSING,
+                com.stardew.craft.effect.ModMobEffects.FORAGER_BLESSING.get(),
                 durationTicks,
                 Math.max(0, bonus - 1)
         ));
@@ -555,7 +555,7 @@ public class PlayerStardewDataAPI {
             return;
         }
         player.addEffect(new net.minecraft.world.effect.MobEffectInstance(
-                com.stardew.craft.effect.ModMobEffects.MINER_BLESSING,
+                com.stardew.craft.effect.ModMobEffects.MINER_BLESSING.get(),
                 durationTicks,
                 Math.max(0, bonus - 1)
         ));
@@ -571,7 +571,7 @@ public class PlayerStardewDataAPI {
             return;
         }
         player.addEffect(new net.minecraft.world.effect.MobEffectInstance(
-                com.stardew.craft.effect.ModMobEffects.WARRIOR_BLESSING,
+                com.stardew.craft.effect.ModMobEffects.WARRIOR_BLESSING.get(),
                 durationTicks,
                 Math.max(0, bonus - 1)
         ));
@@ -587,7 +587,7 @@ public class PlayerStardewDataAPI {
             return;
         }
         player.addEffect(new net.minecraft.world.effect.MobEffectInstance(
-                com.stardew.craft.effect.ModMobEffects.GUARDIAN_BLESSING,
+                com.stardew.craft.effect.ModMobEffects.GUARDIAN_BLESSING.get(),
                 durationTicks,
                 Math.max(0, bonus - 1)
         ));
@@ -604,7 +604,7 @@ public class PlayerStardewDataAPI {
         }
         int amplifier = Math.max(0, bonus - 1);
         player.addEffect(new net.minecraft.world.effect.MobEffectInstance(
-                com.stardew.craft.effect.ModMobEffects.MAGNETISM,
+                com.stardew.craft.effect.ModMobEffects.MAGNETISM.get(),
                 durationTicks,
                 amplifier
         ));

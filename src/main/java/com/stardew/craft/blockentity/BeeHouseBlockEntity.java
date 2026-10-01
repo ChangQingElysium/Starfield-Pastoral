@@ -1,5 +1,6 @@
 package com.stardew.craft.blockentity;
 
+import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.production.MachineProductionData;
 import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.block.crop.StardewCropBlock;
@@ -243,17 +244,17 @@ public class BeeHouseBlockEntity extends TimedProductionBlockEntity {
 		int honeyValue = WILD_HONEY_VALUE;
 		if (flower != null) {
 			ItemStack flowerStack = new ItemStack(flower.item());
-			stack.set(DataComponents.CUSTOM_NAME, Component.translatable(
+			PortItemData.set(stack, DataComponents.CUSTOM_NAME, Component.translatable(
 				"stardewcraft.honey.flavored",
 				flowerStack.getHoverName()
 			).withStyle(style -> style.withItalic(false)));
 			honeyValue = flower.value();
 		}
 
-		CustomData data = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY);
+		CustomData data = PortItemData.getOrDefault(stack, DataComponents.CUSTOM_DATA, CustomData.EMPTY);
 		CompoundTag tag = data.copyTag();
 		tag.putInt("HoneyValue", honeyValue);
-		stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+		PortItemData.set(stack, DataComponents.CUSTOM_DATA, CustomData.of(tag));
 
 		return stack;
 	}
@@ -346,24 +347,24 @@ public class BeeHouseBlockEntity extends TimedProductionBlockEntity {
 
 	@SuppressWarnings("null")
 	@Override
-	protected void saveAdditional(@SuppressWarnings("null") CompoundTag tag, @SuppressWarnings("null") net.minecraft.core.HolderLookup.Provider registries) {
-		super.saveAdditional(tag, registries);
+	protected void saveAdditional(@SuppressWarnings("null") CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+		super.saveAdditional(tag);
 		tag.putLong(TAG_READY_AT, readyAtAbsMinute);
 		tag.putBoolean(TAG_READY, ready);
 	}
 
 	@SuppressWarnings("null")
 	@Override
-	protected void loadAdditional(@SuppressWarnings("null") CompoundTag tag, @SuppressWarnings("null") net.minecraft.core.HolderLookup.Provider registries) {
-		super.loadAdditional(tag, registries);
+	public void load(@SuppressWarnings("null") CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+		super.load(tag);
 		readyAtAbsMinute = tag.getLong(TAG_READY_AT);
 		ready = tag.getBoolean(TAG_READY);
 	}
 
 	@Override
-	public CompoundTag getUpdateTag(@SuppressWarnings("null") net.minecraft.core.HolderLookup.Provider registries) {
+	public CompoundTag getUpdateTag() { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
 		CompoundTag tag = new CompoundTag();
-		saveAdditional(tag, registries);
+		saveAdditional(tag);
 		return tag;
 	}
 

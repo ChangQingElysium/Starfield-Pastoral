@@ -47,17 +47,17 @@ public final class MineRockClumpGameTests {
                     && MineRockClumpMining.breakTicks(752, tool) == ticks[i], "Wrong 8 HP fractional clump damage");
             h.assertTrue(MineRockClumpMining.energyCost(752, tool, 0) == swings[i] * 2
                     && MineRockClumpMining.energyCost(752, tool, 10) == swings[i], "Clump energy used fractional swings");
-            tool.enchant(registry.getHolderOrThrow(StardewEnchantments.POWERFUL), 1);
+            com.stardew.craft.port.PortItemStacks.enchant(tool, registry.getHolderOrThrow(StardewEnchantments.POWERFUL), 1);
             h.assertTrue(MineRockClumpMining.requiredSwings(752, tool) == swings[i], "Powerful incorrectly affects ResourceClump");
         }
         var foreign = new ItemStack(Items.NETHERITE_PICKAXE);
         foreign.enchant(registry.getHolderOrThrow(Enchantments.EFFICIENCY), 5);
-        foreign.enchant(registry.getHolderOrThrow(StardewEnchantments.SWIFT), 1);
-        foreign.enchant(registry.getHolderOrThrow(StardewEnchantments.EFFICIENT), 1);
+        com.stardew.craft.port.PortItemStacks.enchant(foreign, registry.getHolderOrThrow(StardewEnchantments.SWIFT), 1);
+        com.stardew.craft.port.PortItemStacks.enchant(foreign, registry.getHolderOrThrow(StardewEnchantments.EFFICIENT), 1);
         h.assertTrue(MineRockClumpMining.breakTicks(752, foreign) == 96
                 && MineRockClumpMining.energyCost(752, foreign, 0) == 16, "Foreign pickaxe was not normalized");
         var swift = new ItemStack(ModItems.IRIDIUM_PICKAXE.get());
-        swift.enchant(registry.getHolderOrThrow(StardewEnchantments.SWIFT), 1);
+        com.stardew.craft.port.PortItemStacks.enchant(swift, registry.getHolderOrThrow(StardewEnchantments.SWIFT), 1);
         h.assertTrue(MineRockClumpMining.breakTicks(752, swift) == 16, "Iridium Swift clump must take 16 ticks");
         h.assertTrue(MineRockClumpMining.stateForSource("C999").isEmpty(), "Missing clump silently substituted");
         try (var stream = MineRockClumpGameTests.class.getClassLoader().getResourceAsStream(
@@ -106,12 +106,12 @@ public final class MineRockClumpGameTests {
                         && MineRockClumpMining.energyCost(source, tool, 0) == expectedHits * 2
                         && MineRockClumpMining.energyCost(source, tool, 10) == expectedHits,
                         "Hard boulder source damage/time/energy mismatch");
-                tool.enchant(registry.getHolderOrThrow(StardewEnchantments.POWERFUL), 1);
+                com.stardew.craft.port.PortItemStacks.enchant(tool, registry.getHolderOrThrow(StardewEnchantments.POWERFUL), 1);
                 h.assertTrue(MineRockClumpMining.requiredSwings(source, tool) == expectedHits, "Powerful changed clump damage");
-                tool.enchant(registry.getHolderOrThrow(StardewEnchantments.SWIFT), 1);
+                com.stardew.craft.port.PortItemStacks.enchant(tool, registry.getHolderOrThrow(StardewEnchantments.SWIFT), 1);
                 h.assertTrue(MineRockClumpMining.breakTicks(source, tool) == (int) Math.ceil(expectedTicks * 0.66),
                         "Swift clump timing mismatch");
-                tool.enchant(registry.getHolderOrThrow(StardewEnchantments.EFFICIENT), 1);
+                com.stardew.craft.port.PortItemStacks.enchant(tool, registry.getHolderOrThrow(StardewEnchantments.EFFICIENT), 1);
                 h.assertTrue(MineRockClumpMining.energyCost(source, tool, 0) == 0, "Efficient clump consumed energy");
             }
         }
@@ -221,7 +221,7 @@ public final class MineRockClumpGameTests {
             var hit = main.east();
             ItemStack tool = new ItemStack(mode == 2 ? ModItems.PICKAXE.get() : Items.WOODEN_PICKAXE);
             if (mode == 1) tool.setDamageValue(tool.getMaxDamage() - 1);
-            if (mode == 2) tool.enchant(level.registryAccess().registryOrThrow(Registries.ENCHANTMENT)
+            if (mode == 2) com.stardew.craft.port.PortItemStacks.enchant(tool, level.registryAccess().registryOrThrow(Registries.ENCHANTMENT)
                     .getHolderOrThrow(StardewEnchantments.EFFICIENT), 1);
             player.setItemInHand(InteractionHand.MAIN_HAND, tool);
             data.setEnergy(mode == 2 ? 0 : 100);

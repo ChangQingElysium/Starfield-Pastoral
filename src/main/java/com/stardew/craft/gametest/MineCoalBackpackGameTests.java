@@ -17,6 +17,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.util.FakePlayerFactory;
 import net.minecraftforge.gametest.GameTestHolder;
 import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import com.stardew.craft.port.PortBlockInteraction;
 
 @GameTestHolder("stardewcraft_backpacks")
 @PrefixGameTestTemplate(false)
@@ -43,15 +44,15 @@ public final class MineCoalBackpackGameTests {
             var whole = state.getShape(level, pos).bounds();
             var fromStrap = second.getShape(level, strap).bounds().move(strap.getX()-pos.getX(), 0, strap.getZ()-pos.getZ());
             helper.assertTrue(whole.equals(fromStrap), "Parts do not share the full outline");
-            second.useWithoutItem(level, player, new BlockHitResult(Vec3.atCenterOf(strap), Direction.UP, strap, false));
-            state.useWithoutItem(level, player, new BlockHitResult(Vec3.atCenterOf(pos), Direction.UP, pos, false));
+            PortBlockInteraction.stateUseWithoutItem(second, level, player, new BlockHitResult(Vec3.atCenterOf(strap), Direction.UP, strap, false));
+            PortBlockInteraction.stateUseWithoutItem(state, level, player, new BlockHitResult(Vec3.atCenterOf(pos), Direction.UP, pos, false));
             var opened = level.getBlockState(pos);
             helper.assertTrue(opened.getValue(MineCoalBackpackBlock.OPEN)
                     && level.getBlockState(strap).getValue(MineCoalBackpackBlock.OPEN), "Opening did not update both cells");
             var restored = NbtUtils.readBlockState(level.holderLookup(Registries.BLOCK), NbtUtils.writeBlockState(opened));
             helper.assertTrue(restored.equals(opened), "NBT lost facing, theme or depleted state");
             level.setBlock(pos, restored, 3);
-            restored.useWithoutItem(level, player, new BlockHitResult(Vec3.atCenterOf(pos), Direction.UP, pos, false));
+            PortBlockInteraction.stateUseWithoutItem(restored, level, player, new BlockHitResult(Vec3.atCenterOf(pos), Direction.UP, pos, false));
             var drops = level.getEntitiesOfClass(ItemEntity.class, whole.move(pos).inflate(2));
             helper.assertTrue(drops.stream().allMatch(e -> e.getItem().is(ModItems.COAL.get())), "Non-mod coal dropped");
             helper.assertTrue(drops.stream().mapToInt(e -> e.getItem().getCount()).sum() == 6, "Coal claim duplicated or default quantity changed");

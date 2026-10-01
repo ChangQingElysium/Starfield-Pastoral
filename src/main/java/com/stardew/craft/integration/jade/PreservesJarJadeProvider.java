@@ -1,5 +1,6 @@
 package com.stardew.craft.integration.jade;
 
+import com.stardew.craft.port.PortItemStacks;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.blockentity.PreservesJarBlockEntity;
 import net.minecraft.ChatFormatting;
@@ -53,7 +54,7 @@ public enum PreservesJarJadeProvider implements IBlockComponentProvider, IServer
 			if (inputId != null) {
 				tag.putString(NBT_INPUT_ITEM, inputId.toString());
 			}
-			tag.put(NBT_INPUT_STACK, input.save(accessor.getLevel().registryAccess()));
+			tag.put(NBT_INPUT_STACK, PortItemStacks.save(input, accessor.getLevel().registryAccess()));
 		}
 
 		if (!product.isEmpty()) {
@@ -61,7 +62,7 @@ public enum PreservesJarJadeProvider implements IBlockComponentProvider, IServer
 			if (productId != null) {
 				tag.putString(NBT_PRODUCT_ITEM, productId.toString());
 			}
-			tag.put(NBT_PRODUCT_STACK, product.save(accessor.getLevel().registryAccess()));
+			tag.put(NBT_PRODUCT_STACK, PortItemStacks.save(product, accessor.getLevel().registryAccess()));
 		}
 
 		PreservesJarBlockEntity.RemainingTime rt = jar.getRemainingTime();
@@ -145,7 +146,7 @@ public enum PreservesJarJadeProvider implements IBlockComponentProvider, IServer
 		if (tag == null || tag.isEmpty()) {
 			return ItemStack.EMPTY;
 		}
-		return ItemStack.parse(accessor.getLevel().registryAccess(), tag).orElse(ItemStack.EMPTY);
+		return PortItemStacks.parse(accessor.getLevel().registryAccess(), tag).orElse(ItemStack.EMPTY);
 	}
 
 	@SuppressWarnings("null")

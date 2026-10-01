@@ -1,5 +1,6 @@
 package com.stardew.craft.item.artisan;
 
+import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.api.v1.item.StardewItemDataApi;
 import com.stardew.craft.item.quality.QualityHelper;
@@ -184,7 +185,7 @@ public final class FlavoredArtisanDrinkItem extends PlaceableArtisanDrinkItem {
         tag.putInt(TAG_PRICE, values.price());
         tag.putInt(TAG_EDIBILITY, values.edibility());
         tag.putInt(TAG_COLOR, color);
-        resultStack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+        PortItemData.set(resultStack, DataComponents.CUSTOM_DATA, CustomData.of(tag));
         QualityHelper.setQuality(resultStack, QualityHelper.NORMAL);
         return resultStack;
     }
@@ -274,7 +275,7 @@ public final class FlavoredArtisanDrinkItem extends PlaceableArtisanDrinkItem {
     }
 
     private static CompoundTag getOrCreateTag(ItemStack stack) {
-        return stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
+        return PortItemData.getOrDefault(stack, DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
     }
 
     private static int getIntTag(ItemStack stack, String key, int fallback) {

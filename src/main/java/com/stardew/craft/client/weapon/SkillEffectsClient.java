@@ -99,7 +99,7 @@ public final class SkillEffectsClient {
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null) return;
         player.playSound(SoundEvents.AMETHYST_BLOCK_CHIME, 0.35f, 1.65f);
-        if (!com.stardew.craft.Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()) return;
+        if (!com.stardew.craft.Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()) return;
         Vec3 point = player.getEyePosition().add(player.getLookAngle().scale(0.8)).add(0, -0.35, 0);
         for (int i = 0; i < 8; i++) {
             double angle = i * Math.PI / 4;

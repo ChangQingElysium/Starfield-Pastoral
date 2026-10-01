@@ -25,7 +25,7 @@ public final class NpcFriendshipDataManager extends SavedData {
             persistentLevel = level;
         }
         return persistentLevel.getDataStorage().computeIfAbsent(
-            new SavedData.Factory<>(NpcFriendshipDataManager::new, NpcFriendshipDataManager::load),
+            com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(NpcFriendshipDataManager::new, NpcFriendshipDataManager::load)), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(NpcFriendshipDataManager::new, NpcFriendshipDataManager::load)),
             DATA_NAME
         );
     }

@@ -8,7 +8,7 @@ import net.minecraft.client.renderer.entity.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 /** Source sprite10 is shared with SquidKid; BreathProjectile has no trail or reflected variants. */
 @SuppressWarnings({"null","removal"})

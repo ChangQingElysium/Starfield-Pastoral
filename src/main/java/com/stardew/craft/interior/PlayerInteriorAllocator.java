@@ -46,7 +46,7 @@ public class PlayerInteriorAllocator extends SavedData {
     public static PlayerInteriorAllocator get(ServerLevel level) {
         ServerLevel overworld = level.getServer().overworld();
         return overworld.getDataStorage().computeIfAbsent(
-            new Factory<>(PlayerInteriorAllocator::new, PlayerInteriorAllocator::load),
+            com.stardew.craft.port.PortSavedData.loader(new Factory<>(PlayerInteriorAllocator::new, PlayerInteriorAllocator::load)), com.stardew.craft.port.PortSavedData.constructor(new Factory<>(PlayerInteriorAllocator::new, PlayerInteriorAllocator::load)),
             DATA_NAME
         );
     }

@@ -19,7 +19,7 @@ public final class TravelingCartManager extends SavedData {
 
     public static TravelingCartManager get(ServerLevel level) {
         return level.getDataStorage().computeIfAbsent(
-                new SavedData.Factory<>(TravelingCartManager::new, TravelingCartManager::load),
+                com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(TravelingCartManager::new, TravelingCartManager::load)), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(TravelingCartManager::new, TravelingCartManager::load)),
                 DATA_NAME
         );
     }

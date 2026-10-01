@@ -36,9 +36,11 @@ public final class WorldEventSavedData extends SavedData {
     public static WorldEventSavedData get(MinecraftServer server) {
         Objects.requireNonNull(server, "server");
         return server.overworld().getDataStorage().computeIfAbsent(
-                new SavedData.Factory<>(
+                com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(
                         WorldEventSavedData::new,
-                        WorldEventSavedData::load),
+                        WorldEventSavedData::load)), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(
+                        WorldEventSavedData::new,
+                        WorldEventSavedData::load)),
                 DATA_NAME);
     }
 
@@ -76,10 +78,7 @@ public final class WorldEventSavedData extends SavedData {
 
     @Override
     @Nonnull
-    public CompoundTag save(
-            @Nonnull CompoundTag tag,
-            @Nonnull HolderLookup.Provider registries
-    ) {
+    public CompoundTag save(@Nonnull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
         tag.putInt("FormatVersion", FORMAT_VERSION);
         ListTag entries = new ListTag();
         for (ActiveEvent event : snapshot()) {

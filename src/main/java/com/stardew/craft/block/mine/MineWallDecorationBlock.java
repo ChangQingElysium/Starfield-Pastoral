@@ -1,5 +1,6 @@
 package com.stardew.craft.block.mine;
 
+import com.stardew.craft.port.PortItemData;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -16,7 +17,6 @@ import javax.annotation.Nullable;
 
 /** One independently supported wall cell, with persistent variation and vertical end caps. */
 public final class MineWallDecorationBlock extends Block {
-    public static final MapCodec<MineWallDecorationBlock> CODEC = simpleCodec(MineWallDecorationBlock::new);
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final IntegerProperty VARIANT = IntegerProperty.create("variant", 0, 3);
     public static final BooleanProperty ABOVE = BooleanProperty.create("above");
@@ -28,14 +28,13 @@ public final class MineWallDecorationBlock extends Block {
                 .setValue(ABOVE, false).setValue(BELOW, false));
     }
 
-    @Override public MapCodec<MineWallDecorationBlock> codec() { return CODEC; }
     @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(FACING, VARIANT, ABOVE, BELOW);
     }
 
     @Nullable
     @Override public BlockState getStateForPlacement(BlockPlaceContext context) {
-        Integer fixed = context.getItemInHand().getOrDefault(DataComponents.BLOCK_STATE,
+        Integer fixed = PortItemData.getOrDefault(context.getItemInHand(), DataComponents.BLOCK_STATE,
                 BlockItemStateProperties.EMPTY).get(VARIANT);
         int variant = fixed == null ? context.getLevel().getRandom().nextInt(4) : fixed;
         // Extending an existing strip from its top/bottom retains the same wall orientation.
@@ -63,24 +62,24 @@ public final class MineWallDecorationBlock extends Block {
         return other.is(this) && other.getValue(FACING) == state.getValue(FACING);
     }
 
-    @Override protected boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
+    @Override public boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
         Direction facing = state.getValue(FACING);
         BlockPos wall = pos.relative(facing.getOpposite());
         return level.getBlockState(wall).isFaceSturdy(level, wall, facing);
     }
 
-    @Override protected BlockState updateShape(BlockState state, Direction direction, BlockState neighbor,
+    @Override public BlockState updateShape(BlockState state, Direction direction, BlockState neighbor,
             LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
         return state.canSurvive(level, pos) ? connections(state, level, pos) : Blocks.AIR.defaultBlockState();
     }
 
-    @Override public ItemStack getCloneItemStack(LevelReader level, BlockPos pos, BlockState state) {
+    @Override public ItemStack getCloneItemStack(net.minecraft.world.level.BlockGetter level, BlockPos pos, BlockState state) {
         ItemStack stack = new ItemStack(this);
-        stack.set(DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY.with(VARIANT, state));
+        PortItemData.set(stack, DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY.with(VARIANT, state));
         return stack;
     }
 
-    @Override protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+    @Override public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return switch (state.getValue(FACING)) {
             case SOUTH -> box(0, 0, 0, 16, 16, 2);
             case EAST -> box(0, 0, 0, 2, 16, 16);
@@ -89,11 +88,11 @@ public final class MineWallDecorationBlock extends Block {
         };
     }
 
-    @Override protected BlockState rotate(BlockState state, Rotation rotation) {
+    @Override public BlockState rotate(BlockState state, Rotation rotation) {
         return state.setValue(FACING, rotation.rotate(state.getValue(FACING)));
     }
 
-    @Override protected BlockState mirror(BlockState state, Mirror mirror) {
+    @Override public BlockState mirror(BlockState state, Mirror mirror) {
         return state.rotate(mirror.getRotation(state.getValue(FACING)));
     }
 }

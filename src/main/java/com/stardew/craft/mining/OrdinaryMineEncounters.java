@@ -9,7 +9,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import com.stardew.craft.port.net.neoforged.neoforge.event.tick.LevelTickEvent;
 import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 import java.util.*;
@@ -24,7 +24,7 @@ public final class OrdinaryMineEncounters {
     public static void performTenMinuteUpdate(MinecraftServer server) {
         var level=server.getLevel(ModMiningDimensions.STARDEW_MINING);if(level==null)return;
         var manager=MineFloorDataManager.get(level);
-        boolean garlic=server.getPlayerList().getPlayers().stream().anyMatch(p->p.hasEffect(ModMobEffects.AVOID_MONSTERS));
+        boolean garlic=server.getPlayerList().getPlayers().stream().anyMatch(p->p.hasEffect(ModMobEffects.AVOID_MONSTERS.get()));
         var current=swarms.computeIfAbsent(level,k->new HashMap<>());
         for(int floor:manager.floorNumbers()) {
             if(floor<=0 || floor==120)continue;

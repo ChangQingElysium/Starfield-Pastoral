@@ -51,7 +51,7 @@ public class ElevatorBlock extends MapDecorStaticBlock {
         return state == null ? null : state.setValue(MineBuildingTheme.PROPERTY, MineBuildingTheme.forPlacement(context));
     }
 
-    @Override public net.minecraft.world.item.ItemStack getCloneItemStack(net.minecraft.world.level.LevelReader level, BlockPos pos, BlockState state) {
+    @Override public net.minecraft.world.item.ItemStack getCloneItemStack(BlockGetter level, BlockPos pos, BlockState state) {
         return MineBuildingTheme.picked(this, state);
     }
 
@@ -91,7 +91,7 @@ public class ElevatorBlock extends MapDecorStaticBlock {
     }
 
     @Override
-    protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean moving) {
+    public void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean moving) {
         super.onPlace(state, level, pos, oldState, moving);
         if (!level.isClientSide && !oldState.is(this) && state.getValue(PART) == Part.MAIN) {
             // Commands and structure placement do not invoke BlockItem.setPlacedBy.
@@ -100,7 +100,7 @@ public class ElevatorBlock extends MapDecorStaticBlock {
     }
 
     @Override
-    protected void tick(BlockState state, net.minecraft.server.level.ServerLevel level, BlockPos pos,
+    public void tick(BlockState state, net.minecraft.server.level.ServerLevel level, BlockPos pos,
                         net.minecraft.util.RandomSource random) {
         if (state.getValue(PART) == Part.MAIN) placeExtensions(level, pos, state);
     }
@@ -129,7 +129,7 @@ public class ElevatorBlock extends MapDecorStaticBlock {
      */
     @SuppressWarnings("null")
     @Override
-    protected InteractionResult useWithoutItem(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") Level level, @SuppressWarnings("null") BlockPos pos,
+    public InteractionResult useWithoutItem(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") Level level, @SuppressWarnings("null") BlockPos pos,
                                                @SuppressWarnings("null")    Player player, @SuppressWarnings("null")    BlockHitResult hitResult) {
         if (state.getValue(PART) == Part.EXTENSION) {
             return super.useWithoutItem(state, level, pos, player, hitResult);

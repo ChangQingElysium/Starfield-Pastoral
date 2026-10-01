@@ -7,8 +7,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
-import com.stardew.craft.port.net.neoforged.neoforge.common.ItemAbilities;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
+import net.minecraftforge.common.ToolActions;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.level.ChunkWatchEvent;
 import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
@@ -17,7 +17,8 @@ import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 public final class SurfaceFloorEvents {
     private SurfaceFloorEvents() {}
 
-    @SubscribeEvent public static void sent(ChunkWatchEvent.Sent event) {
+    // PORT(1.20.1): Forge fires ChunkWatchEvent.Watch after the chunk packet was sent (NeoForge: Sent).
+    @SubscribeEvent public static void sent(ChunkWatchEvent.Watch event) {
         SurfaceFloorData.get(event.getLevel()).sendChunk(event.getLevel(), event.getPos(), event.getPlayer());
     }
     @SubscribeEvent public static void unwatch(ChunkWatchEvent.UnWatch event) {
@@ -30,7 +31,7 @@ public final class SurfaceFloorEvents {
     public static void remove(PlayerInteractEvent.RightClickBlock event) {
         if (!event.getEntity().isShiftKeyDown() || event.getFace() != Direction.UP) return;
         var stack = event.getItemStack();
-        if (!stack.canPerformAction(ItemAbilities.AXE_DIG) && !stack.canPerformAction(ItemAbilities.PICKAXE_DIG)) return;
+        if (!stack.canPerformAction(ToolActions.AXE_DIG) && !stack.canPerformAction(ToolActions.PICKAXE_DIG)) return;
         if (event.getEntity() instanceof ServerPlayer player) {
             if (!SurfaceFloorItem.mayEdit(player, event.getPos())) return;
             if (SurfaceFloorData.get(player.serverLevel()).remove(player.serverLevel(), event.getPos(), !player.isCreative())) {

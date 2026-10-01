@@ -84,7 +84,7 @@ public record BuildingTransfer(BuildingRecord before, BuildingRecord after, List
                 if (baseline != null) {
                     baseline.setLevel(level);
                     if (entry.getValue().data() != null) baseline.loadWithComponents(entry.getValue().data().copy(), level.registryAccess());
-                    if (actual.data().equals(baseline.saveWithFullMetadata(level.registryAccess()))) continue;
+                    if (actual.data().equals(baseline.saveWithFullMetadata())) continue;
                 }
             }
             BlockPos destination = available.stream().filter(pos -> nextNative.get(pos).state().getBlock() instanceof net.minecraft.world.level.block.EntityBlock entityBlock
@@ -156,7 +156,7 @@ public record BuildingTransfer(BuildingRecord before, BuildingRecord after, List
     }
     private static Cell capture(ServerLevel level, BlockPos pos) {
         var entity = level.getBlockEntity(pos);
-        return new Cell(pos.immutable(), level.getBlockState(pos), entity == null ? null : entity.saveWithFullMetadata(level.registryAccess()));
+        return new Cell(pos.immutable(), level.getBlockState(pos), entity == null ? null : entity.saveWithFullMetadata());
     }
 
     public void project(ServerLevel level) {
@@ -175,7 +175,7 @@ public record BuildingTransfer(BuildingRecord before, BuildingRecord after, List
                     CompoundTag tag = cell.data().copy();
                     tag.putInt("x", cell.pos().getX()); tag.putInt("y", cell.pos().getY()); tag.putInt("z", cell.pos().getZ());
                     var entity = level.getBlockEntity(cell.pos());
-                    entity.loadWithComponents(tag, level.registryAccess()); entity.setChanged();
+                    entity.load(tag); entity.setChanged();
                 }
             }
             BuildingTransferExtras.project(level, before, after, extras);

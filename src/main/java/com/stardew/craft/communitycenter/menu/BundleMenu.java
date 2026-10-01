@@ -426,7 +426,7 @@ public class BundleMenu extends AbstractContainerMenu {
             // Try to merge with existing components
             boolean merged = false;
             for (ItemStack existing : partialDonationComponents) {
-                if (ItemStack.isSameItemSameComponents(existing, carried)) {
+                if (ItemStack.isSameItemSameTags(existing, carried)) {
                     existing.grow(toTake);
                     merged = true;
                     break;
@@ -479,7 +479,7 @@ public class BundleMenu extends AbstractContainerMenu {
 
         if (cursor.isEmpty()) {
             this.setCarried(oneItem);
-        } else if (ItemStack.isSameItemSameComponents(cursor, oneItem)) {
+        } else if (ItemStack.isSameItemSameTags(cursor, oneItem)) {
             cursor.grow(1);
         } else {
             return; // Can't merge with current cursor item

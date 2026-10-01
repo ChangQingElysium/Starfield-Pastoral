@@ -1,5 +1,6 @@
 package com.stardew.craft.blockentity;
 
+import com.stardew.craft.port.PortItemStacks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
@@ -133,8 +134,8 @@ public class FridgeBlockEntity extends net.minecraft.world.level.block.entity.Bl
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
+    protected void saveAdditional(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        super.saveAdditional(tag);
 
         net.minecraft.nbt.ListTag list = new net.minecraft.nbt.ListTag();
         for (int i = 0; i < items.size(); i++) {
@@ -144,15 +145,15 @@ public class FridgeBlockEntity extends net.minecraft.world.level.block.entity.Bl
             }
             CompoundTag entry = new CompoundTag();
             entry.putInt("Slot", i);
-            entry.put("Stack", stack.save(registries));
+            entry.put("Stack", PortItemStacks.save(stack, registries));
             list.add(entry);
         }
         tag.put("items", list);
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
+    public void load(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        super.load(tag);
 
         for (int i = 0; i < items.size(); i++) {
             items.set(i, ItemStack.EMPTY);
@@ -166,7 +167,7 @@ public class FridgeBlockEntity extends net.minecraft.world.level.block.entity.Bl
                 if (slot < 0 || slot >= items.size()) {
                     continue;
                 }
-                ItemStack parsed = ItemStack.parse(registries, entry.getCompound("Stack")).orElse(ItemStack.EMPTY);
+                ItemStack parsed = PortItemStacks.parse(registries, entry.getCompound("Stack")).orElse(ItemStack.EMPTY);
                 items.set(slot, parsed);
             }
         }

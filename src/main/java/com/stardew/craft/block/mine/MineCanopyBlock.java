@@ -1,5 +1,6 @@
 package com.stardew.craft.block.mine;
 
+import com.stardew.craft.port.PortItemData;
 import com.mojang.serialization.MapCodec;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
@@ -28,7 +29,6 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 /** Independently ceiling-supported foliage; neighbors join only at the same height. */
 public final class MineCanopyBlock extends Block {
-    public static final MapCodec<MineCanopyBlock> CODEC = simpleCodec(MineCanopyBlock::new);
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final IntegerProperty VARIANT = IntegerProperty.create("variant", 0, 1);
     public static final BooleanProperty NORTH = BlockStateProperties.NORTH;
@@ -43,7 +43,6 @@ public final class MineCanopyBlock extends Block {
                 .setValue(NORTH, false).setValue(EAST, false).setValue(SOUTH, false).setValue(WEST, false));
     }
 
-    @Override public MapCodec<MineCanopyBlock> codec() { return CODEC; }
     @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(FACING, VARIANT, NORTH, EAST, SOUTH, WEST);
     }
@@ -66,7 +65,7 @@ public final class MineCanopyBlock extends Block {
 
     @Nullable
     @Override public BlockState getStateForPlacement(BlockPlaceContext context) {
-        Integer fixed = context.getItemInHand().getOrDefault(DataComponents.BLOCK_STATE,
+        Integer fixed = PortItemData.getOrDefault(context.getItemInHand(), DataComponents.BLOCK_STATE,
                 BlockItemStateProperties.EMPTY).get(VARIANT);
         BlockState state = defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite())
                 .setValue(VARIANT, fixed == null ? context.getLevel().getRandom().nextInt(2) : fixed);
@@ -75,23 +74,23 @@ public final class MineCanopyBlock extends Block {
                 ? connections(state, context.getLevel(), context.getClickedPos()) : null;
     }
 
-    @Override protected boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
+    @Override public boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
         BlockPos ceiling = pos.above();
         return level.getBlockState(ceiling).isFaceSturdy(level, ceiling, Direction.DOWN);
     }
 
-    @Override protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState old, boolean moving) {
+    @Override public void onPlace(BlockState state, Level level, BlockPos pos, BlockState old, boolean moving) {
         if (!level.isClientSide) level.scheduleTick(pos, this, 1);
     }
 
-    @Override protected BlockState updateShape(BlockState state, Direction direction, BlockState neighbor,
+    @Override public BlockState updateShape(BlockState state, Direction direction, BlockState neighbor,
             LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
         // Structure templates can place foliage before the ceiling in the same tick.
         level.scheduleTick(pos, this, 1);
         return connections(state, level, pos);
     }
 
-    @Override protected void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+    @Override public void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
         if (!state.canSurvive(level, pos)) {
             level.destroyBlock(pos, true);
         } else {
@@ -100,24 +99,24 @@ public final class MineCanopyBlock extends Block {
         }
     }
 
-    @Override protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+    @Override public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return OUTLINE;
     }
 
-    @Override public ItemStack getCloneItemStack(LevelReader level, BlockPos pos, BlockState state) {
+    @Override public ItemStack getCloneItemStack(BlockGetter level, BlockPos pos, BlockState state) {
         ItemStack stack = new ItemStack(this);
-        stack.set(DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY.with(VARIANT, state));
+        PortItemData.set(stack, DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY.with(VARIANT, state));
         return stack;
     }
 
-    @Override protected BlockState rotate(BlockState state, Rotation rotation) {
+    @Override public BlockState rotate(BlockState state, Rotation rotation) {
         BlockState result = state.setValue(FACING, rotation.rotate(state.getValue(FACING)));
         for (Direction direction : Direction.Plane.HORIZONTAL)
             result = result.setValue(connection(rotation.rotate(direction)), state.getValue(connection(direction)));
         return result;
     }
 
-    @Override protected BlockState mirror(BlockState state, Mirror mirror) {
+    @Override public BlockState mirror(BlockState state, Mirror mirror) {
         BlockState result = state.setValue(FACING, mirror.mirror(state.getValue(FACING)));
         for (Direction direction : Direction.Plane.HORIZONTAL)
             result = result.setValue(connection(mirror.mirror(direction)), state.getValue(connection(direction)));

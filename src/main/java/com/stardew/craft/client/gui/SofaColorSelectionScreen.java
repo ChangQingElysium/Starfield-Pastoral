@@ -68,7 +68,7 @@ public class SofaColorSelectionScreen extends Screen {
     @Override public boolean mouseClicked(double x, double y, int button) { return wheel.click(x, y, button, false); }
     @Override public boolean mouseReleased(double x, double y, int button) { return wheel.release(button); }
     @Override public boolean mouseDragged(double x, double y, int button, double dx, double dy) { return true; }
-    @Override public boolean mouseScrolled(double x, double y, double horizontal, double vertical) { return wheel.scroll(vertical); }
+    @Override public boolean mouseScrolled(double x, double y, double vertical) { return wheel.scroll(vertical); }
     @Override public boolean keyPressed(int key, int scan, int modifiers) { return wheel.key(key); }
     @Override public boolean keyReleased(int key, int scan, int modifiers) { return wheel.keyReleased(key); }
     @Override public boolean charTyped(char character, int modifiers) { return true; }

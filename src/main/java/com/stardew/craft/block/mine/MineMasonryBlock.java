@@ -1,5 +1,6 @@
 package com.stardew.craft.block.mine;
 
+import com.stardew.craft.port.PortItemData;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -22,7 +23,6 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 /** A one-pixel stone layer; the underlying soil remains a separate block. */
 @SuppressWarnings("null")
 public final class MineMasonryBlock extends Block {
-    public static final MapCodec<MineMasonryBlock> CODEC = simpleCodec(MineMasonryBlock::new);
     public static final IntegerProperty CONNECTIONS = IntegerProperty.create("connections", 0, 255);
     public static final IntegerProperty VARIANT = IntegerProperty.create("variant", 0, 1);
     private static final VoxelShape SHAPE = Block.box(0, 0, 0, 16, 1, 16);
@@ -32,9 +32,6 @@ public final class MineMasonryBlock extends Block {
         super(properties);
         registerDefaultState(defaultBlockState().setValue(CONNECTIONS, 0).setValue(VARIANT, 0).setValue(MineBuildingTheme.PROPERTY, MineBuildingTheme.EARTH));
     }
-
-    @Override
-    public MapCodec<MineMasonryBlock> codec() { return CODEC; }
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
@@ -67,7 +64,7 @@ public final class MineMasonryBlock extends Block {
 
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
-        Integer fixed = context.getItemInHand().getOrDefault(DataComponents.BLOCK_STATE,
+        Integer fixed = PortItemData.getOrDefault(context.getItemInHand(), DataComponents.BLOCK_STATE,
                 BlockItemStateProperties.EMPTY).get(VARIANT);
         int variant = fixed != null ? fixed : (!context.getLevel().isClientSide && context.getLevel().getRandom().nextInt(4) == 0 ? 1 : 0);
         var theme = MineBuildingTheme.forPlacement(context);
@@ -76,19 +73,19 @@ public final class MineMasonryBlock extends Block {
     }
 
     @Override
-    public ItemStack getCloneItemStack(LevelReader level, BlockPos pos, BlockState state) {
+    public ItemStack getCloneItemStack(BlockGetter level, BlockPos pos, BlockState state) {
         ItemStack stack = new ItemStack(this);
-        stack.set(DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY.with(VARIANT, state).with(MineBuildingTheme.PROPERTY, state));
+        PortItemData.set(stack, DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY.with(VARIANT, state).with(MineBuildingTheme.PROPERTY, state));
         return stack;
     }
 
     @Override
-    protected boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
+    public boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
         return level.getBlockState(pos.below()).isFaceSturdy(level, pos.below(), Direction.UP);
     }
 
     @Override
-    protected BlockState updateShape(BlockState state, Direction direction, BlockState neighbor,
+    public BlockState updateShape(BlockState state, Direction direction, BlockState neighbor,
                                      LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
         return canSurvive(state, level, pos) ? state.setValue(CONNECTIONS, connections(level, pos)) : Blocks.AIR.defaultBlockState();
     }
@@ -106,7 +103,7 @@ public final class MineMasonryBlock extends Block {
     }
 
     @Override
-    protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean moving) {
+    public void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean moving) {
         super.onPlace(state, level, pos, oldState, moving);
         if (!oldState.is(this) || oldState.getValue(MineBuildingTheme.PROPERTY) != state.getValue(MineBuildingTheme.PROPERTY)) refreshAround(level, pos);
     }

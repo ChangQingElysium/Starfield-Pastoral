@@ -1,5 +1,6 @@
 package com.stardew.craft.gametest;
 
+import com.stardew.craft.port.PortGameTests;
 import com.stardew.craft.templates.*;
 import com.stardew.craft.workbench.TemplateWorkbenchRecipes;
 import net.minecraft.core.BlockPos;
@@ -89,13 +90,13 @@ public final class RoofTemplateGameTests {
             h.assertTrue(state.getValue(RoofTemplateBlock.FILLED), "Fill collision state missing: " + shape);
             // Thick lower/ridge pieces leave a smaller but still usable infill cavity.
             h.assertTrue(volume(state.getCollisionShape(level, pos)) > hollowVolume + 1E-6, "Hollow eave still solid: " + shape);
-            var saved = entity.saveWithFullMetadata(level.registryAccess());
+            var saved = entity.saveWithFullMetadata();
             // Both Ctrl+pick and survival drops use the standard block-entity item component.
             var copied = new net.minecraft.world.item.ItemStack(block);
-            entity.saveToItem(copied, level.registryAccess());
+            entity.saveToItem(copied);
             var drops = net.minecraft.world.level.block.Block.getDrops(state, level, pos, entity);
             h.assertTrue(drops.size() == 1 && drops.getFirst().is(block.asItem()), "Roof drop duplicated or missing: " + shape);
-            h.assertTrue(net.minecraft.world.item.ItemStack.isSameItemSameComponents(copied, drops.getFirst()), "Dropped roof lost a slot: " + shape);
+            h.assertTrue(net.minecraft.world.item.ItemStack.isSameItemSameTags(copied, drops.getFirst()), "Dropped roof lost a slot: " + shape);
             level.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
             level.setBlock(pos, block.defaultBlockState(), 3);
             h.assertTrue(net.minecraft.world.item.BlockItem.updateCustomBlockEntityTag(level, null, pos, copied), "Item placement rejected data");
@@ -105,7 +106,7 @@ public final class RoofTemplateGameTests {
             entity.setFillMaterial(null);
             h.assertTrue(!level.getBlockState(pos).getValue(RoofTemplateBlock.FILLED)
                     && Math.abs(volume(level.getBlockState(pos).getCollisionShape(level,pos))-hollowVolume) < 1E-6, "Removing fill left solid collision");
-            entity.loadWithComponents(saved, level.registryAccess());
+            entity.load(saved);
             h.assertTrue(entity.fillMaterial().is(Blocks.BRICKS) && level.getBlockState(pos).getValue(RoofTemplateBlock.FILLED), "Structure restoration lost infill");
             entity.setFillMaterial(null);
             entity.setFillMaterial(Blocks.CHEST.defaultBlockState());
@@ -123,7 +124,7 @@ public final class RoofTemplateGameTests {
         var block = TemplateContent.TEMPLATE_BLOCKS.get(TemplateShape.ROOF_SLOPE).get();
         level.setBlock(pos, block.defaultBlockState().setValue(MaterialTemplateBlock.FACING,Direction.NORTH), 3);
         var entity = (TemplateBlockEntity) level.getBlockEntity(pos);
-        var player = h.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
+        var player = PortGameTests.makeMockPlayer(h, net.minecraft.world.level.GameType.SURVIVAL);
         var hand = net.minecraft.world.InteractionHand.MAIN_HAND;
         var top = new net.minecraft.world.phys.BlockHitResult(new net.minecraft.world.phys.Vec3(pos.getX()+0.5,pos.getY()+0.5,pos.getZ()+0.5),Direction.UP,pos,false);
         var bottom = new net.minecraft.world.phys.BlockHitResult(new net.minecraft.world.phys.Vec3(pos.getX()+0.5,pos.getY()+0.375,pos.getZ()+0.5),Direction.DOWN,pos,false);

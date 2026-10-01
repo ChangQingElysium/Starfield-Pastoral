@@ -17,7 +17,7 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import net.minecraftforge.client.event.RenderGuiEvent;
 
 /**
@@ -362,7 +362,7 @@ public class StardewTimeHud {
         );
         
         if (timeShakeTimer > 0) {
-            timeShakeTimer -= (int)(Minecraft.getInstance().getTimer().getRealtimeDeltaTicks() * 50);
+            timeShakeTimer -= (int)(com.stardew.craft.port.net.minecraft.client.DeltaTracker.client().getRealtimeDeltaTicks() * 50);
         }
         float timeShakeX = timeShakeTimer > 0 ? (float)(Math.random() * 5.0D - 2.0D) / 4.0F : 0.0F;
         float timeShakeY = timeShakeTimer > 0 ? (float)(Math.random() * 5.0D - 2.0D) / 4.0F : 0.0F;
@@ -373,7 +373,7 @@ public class StardewTimeHud {
         drawHudTextWithShadow(graphics, clockFont, timeStr, timeX, timeY, timeColor, korean || isLongWordLanguage(language), timeScale);
 
         if (moneyShakeTimer > 0) {
-            moneyShakeTimer -= (int)(Minecraft.getInstance().getTimer().getRealtimeDeltaTicks() * 50);
+            moneyShakeTimer -= (int)(com.stardew.craft.port.net.minecraft.client.DeltaTracker.client().getRealtimeDeltaTicks() * 50);
         }
         float shakeX = moneyShakeTimer > 0 ? (float)(Math.random() * 7.0D - 3.0D) / 4.0F : 0.0F;
         float shakeY = moneyShakeTimer > 0 ? (float)(Math.random() * 7.0D - 3.0D) / 4.0F : 0.0F;
@@ -574,7 +574,7 @@ public class StardewTimeHud {
             return;
         }
         if (desertFestivalMineRatingShakeTimer > 0) {
-            desertFestivalMineRatingShakeTimer -= (int)(mc.getTimer().getRealtimeDeltaTicks() * 50);
+            desertFestivalMineRatingShakeTimer -= (int)(com.stardew.craft.port.net.minecraft.client.DeltaTracker.client().getRealtimeDeltaTicks() * 50);
         }
 
         int iconW = CALICO_RATING_ICON_WIDTH;

@@ -23,10 +23,10 @@ public final class PetWorldData extends SavedData {
 
     public static PetWorldData get(MinecraftServer server) {
         if (!server.isSameThread()) throw new IllegalStateException("Pet state requires server thread");
-        return server.overworld().getDataStorage().computeIfAbsent(new Factory<>(PetWorldData::new, PetWorldData::load), "stardew_pets");
+        return server.overworld().getDataStorage().computeIfAbsent(com.stardew.craft.port.PortSavedData.loader(new Factory<>(PetWorldData::new, PetWorldData::load)), com.stardew.craft.port.PortSavedData.constructor(new Factory<>(PetWorldData::new, PetWorldData::load)), "stardew_pets");
     }
     public static PetWorldData peek(MinecraftServer server) {
-        return server.overworld() == null ? null : server.overworld().getDataStorage().get(new Factory<>(PetWorldData::new, PetWorldData::load), "stardew_pets");
+        return server.overworld() == null ? null : server.overworld().getDataStorage().get(com.stardew.craft.port.PortSavedData.loader(new Factory<>(PetWorldData::new, PetWorldData::load)), "stardew_pets");
     }
     public Collection<PetRecord> all() { return Collections.unmodifiableCollection(pets.values()); }
     public List<PetRecord> forFarm(UUID farm) { return byFarm.getOrDefault(farm, Set.of()).stream().map(pets::get).toList(); }
@@ -56,7 +56,7 @@ public final class PetWorldData extends SavedData {
         initialChoices.remove(farm); lovedFarms.remove(farm); preparedFarms.remove(farm); squareBowlFarms.remove(farm); setDirty();
     }
 
-    @Override public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
+    @Override public CompoundTag save(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
         tag.putInt("Format", 1);
         var rows = new ListTag(); pets.values().forEach(p -> rows.add(p.save())); tag.put("Pets", rows);
         var dishes = new ListTag(); bowls.values().forEach(b -> { var row = new CompoundTag(); row.putUUID("Farm", b.farm()); row.putLong("Pos", b.position().asLong()); row.putString("Style", b.style()); row.putInt("Watered", b.wateredDay()); row.putBoolean("Outdoors", b.outdoors()); dishes.add(row); }); tag.put("Bowls", dishes);

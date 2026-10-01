@@ -19,11 +19,12 @@ import net.minecraft.world.phys.BlockHitResult;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Objects;
+import com.stardew.craft.port.PortBlockInteraction;
 
 /**
  * 直接采集矿物节点：右键可拾取，左键可正常破坏。
  */
-public class MineralNodeBlock extends Block {
+public class MineralNodeBlock extends Block implements PortBlockInteraction {
     public static final BooleanProperty PLACED_BY_PLAYER = BooleanProperty.create("placed_by_player");
 
     @SuppressWarnings("null")
@@ -42,8 +43,15 @@ public class MineralNodeBlock extends Block {
         return this.defaultBlockState().setValue(PLACED_BY_PLAYER, Boolean.TRUE);
     }
 
+    // PORT(1.20.1): replay the 1.21 useItemOn/useWithoutItem dispatch.
     @Override
-    protected InteractionResult useWithoutItem(@Nonnull BlockState state,
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player,
+            InteractionHand hand, BlockHitResult hit) {
+        return PortBlockInteraction.dispatch(this, state, level, pos, player, hand, hit);
+    }
+
+    @Override
+    public InteractionResult useWithoutItem(@Nonnull BlockState state,
                                                @Nonnull Level level,
                                                @Nonnull BlockPos pos,
                                                @Nonnull Player player,
@@ -52,7 +60,7 @@ public class MineralNodeBlock extends Block {
     }
 
     @Override
-    protected ItemInteractionResult useItemOn(@Nonnull ItemStack stack,
+    public ItemInteractionResult useItemOn(@Nonnull ItemStack stack,
                                               @Nonnull BlockState state,
                                               @Nonnull Level level,
                                               @Nonnull BlockPos pos,

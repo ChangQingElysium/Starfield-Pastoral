@@ -52,7 +52,7 @@ public final class CasinoNpcVisibilityClient {
                 && entityHit.getEntity() instanceof StardewNpcEntity npc
                 && CasinoAccessService.BOUNCER_NPC_ID.equals(npc.getNpcId())) {
             minecraft.hitResult = minecraft.player.pick(
-                    minecraft.player.blockInteractionRange(), 1.0F, false);
+                    minecraft.player.getBlockReach(), 1.0F, false);
         }
     }
 }

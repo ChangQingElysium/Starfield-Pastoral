@@ -71,8 +71,8 @@ public class DecorBlockEntity extends net.minecraft.world.level.block.entity.Blo
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, net.minecraft.core.HolderLookup.Provider provider) {
-        super.saveAdditional(tag, provider);
+    protected void saveAdditional(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
+        super.saveAdditional(tag);
         tag.putString(TAG_STYLE_ID, styleId);
         if (segmentOverride >= 0) {
             tag.putInt(TAG_SEGMENT_OVERRIDE, segmentOverride);
@@ -80,8 +80,8 @@ public class DecorBlockEntity extends net.minecraft.world.level.block.entity.Blo
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, net.minecraft.core.HolderLookup.Provider provider) {
-        super.loadAdditional(tag, provider);
+    public void load(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
+        super.load(tag);
         styleId = tag.contains(TAG_STYLE_ID)
             ? tag.getString(TAG_STYLE_ID)
             : resolveStyleIdFromBlockState(getBlockState());
@@ -98,13 +98,13 @@ public class DecorBlockEntity extends net.minecraft.world.level.block.entity.Blo
     }
 
     @Override
-    public CompoundTag getUpdateTag(HolderLookup.Provider provider) {
-        return saveWithoutMetadata(provider);
+    public CompoundTag getUpdateTag() { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
+        return saveWithoutMetadata();
     }
 
     @Override
-    public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider provider) {
-        loadAdditional(tag, provider);
+    public void handleUpdateTag(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
+        load(tag);
     }
 
     @Override

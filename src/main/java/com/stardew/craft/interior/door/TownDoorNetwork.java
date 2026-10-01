@@ -69,9 +69,9 @@ public final class TownDoorNetwork {
         public static final Type<Cross> TYPE = TownDoorNetwork.type("town_door_cross");
         public static final StreamCodec<FriendlyByteBuf, Cross> CODEC = StreamCodec.of((buf, p) -> {
             buf.writeVarInt(p.sequence); buf.writeVarInt(p.doorId); buf.writeVarInt(p.revision); buf.writeBoolean(p.entering);
-            buf.writeVec3(p.before); buf.writeVec3(p.after);
+            com.stardew.craft.port.PortCodecs.writeVec3(buf, p.before); com.stardew.craft.port.PortCodecs.writeVec3(buf, p.after);
         }, buf -> new Cross(buf.readVarInt(), buf.readVarInt(), buf.readVarInt(), buf.readBoolean(),
-                buf.readVec3(), buf.readVec3()));
+                com.stardew.craft.port.PortCodecs.readVec3(buf), com.stardew.craft.port.PortCodecs.readVec3(buf)));
         @Override public Type<Cross> type() { return TYPE; }
     }
 
@@ -84,14 +84,14 @@ public final class TownDoorNetwork {
     }
 
     private static void writeConnection(FriendlyByteBuf buf, DoorConnection connection) {
-        buf.writeVec3(connection.outside());
-        buf.writeVec3(connection.inside());
+        com.stardew.craft.port.PortCodecs.writeVec3(buf, connection.outside());
+        com.stardew.craft.port.PortCodecs.writeVec3(buf, connection.inside());
         buf.writeDouble(connection.width());
         buf.writeByte(connection.outsideDirectionZ());
         buf.writeByte(connection.insideDirectionZ());
     }
 
     private static DoorConnection readConnection(FriendlyByteBuf buf) {
-        return new DoorConnection(buf.readVec3(), buf.readVec3(), buf.readDouble(), buf.readByte(), buf.readByte());
+        return new DoorConnection(com.stardew.craft.port.PortCodecs.readVec3(buf), com.stardew.craft.port.PortCodecs.readVec3(buf), buf.readDouble(), buf.readByte(), buf.readByte());
     }
 }

@@ -1,5 +1,6 @@
 package com.stardew.craft.blockentity;
 
+import com.stardew.craft.port.PortItemStacks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
@@ -103,12 +104,12 @@ public class TableDisplayBlockEntity extends BlockEntity {
     }
 
     @Override
-    protected void saveAdditional(@Nonnull CompoundTag tag, @Nonnull net.minecraft.core.HolderLookup.Provider provider) {
-        super.saveAdditional(tag, provider);
+    protected void saveAdditional(@Nonnull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
+        super.saveAdditional(tag);
         tag.putInt(TAG_CLOTH_COLOR, clothColor);
         tag.putBoolean(TAG_HAS_DISPLAY_ITEM, !displayItem.isEmpty());
         if (!displayItem.isEmpty()) {
-            net.minecraft.nbt.Tag saved = displayItem.save(provider);
+            net.minecraft.nbt.Tag saved = PortItemStacks.save(displayItem, provider);
             if (saved != null) {
                 tag.put(TAG_DISPLAY_ITEM, saved);
                 tag.putFloat(TAG_DISPLAY_YAW, displayYawDegrees);
@@ -117,8 +118,8 @@ public class TableDisplayBlockEntity extends BlockEntity {
     }
 
     @Override
-    protected void loadAdditional(@Nonnull CompoundTag tag, @Nonnull net.minecraft.core.HolderLookup.Provider provider) {
-        super.loadAdditional(tag, provider);
+    public void load(@Nonnull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
+        super.load(tag);
         clothColor = tag.contains(TAG_CLOTH_COLOR, Tag.TAG_INT)
             ? OakTableBlock.normalizeClothColor(tag.getInt(TAG_CLOTH_COLOR))
             : OakTableBlock.DEFAULT_CLOTH_COLOR;
@@ -131,7 +132,7 @@ public class TableDisplayBlockEntity extends BlockEntity {
             if (tag.contains(TAG_DISPLAY_ITEM, CompoundTag.TAG_COMPOUND)) {
                 CompoundTag itemTag = tag.getCompound(TAG_DISPLAY_ITEM);
                 if (itemTag.contains("id", Tag.TAG_STRING)) {
-                    displayItem = ItemStack.parse(provider, itemTag).orElse(ItemStack.EMPTY);
+                    displayItem = PortItemStacks.parse(provider, itemTag).orElse(ItemStack.EMPTY);
                     displayYawDegrees = normalizeYaw(tag.getFloat(TAG_DISPLAY_YAW));
                 } else {
                     displayItem = ItemStack.EMPTY;
@@ -148,7 +149,7 @@ public class TableDisplayBlockEntity extends BlockEntity {
         if (tag.contains(TAG_DISPLAY_ITEM, CompoundTag.TAG_COMPOUND)) {
             CompoundTag itemTag = tag.getCompound(TAG_DISPLAY_ITEM);
             if (itemTag.contains("id", Tag.TAG_STRING)) {
-                displayItem = ItemStack.parse(provider, itemTag).orElse(ItemStack.EMPTY);
+                displayItem = PortItemStacks.parse(provider, itemTag).orElse(ItemStack.EMPTY);
                 displayYawDegrees = normalizeYaw(tag.getFloat(TAG_DISPLAY_YAW));
             } else {
                 displayItem = ItemStack.EMPTY;
@@ -169,9 +170,9 @@ public class TableDisplayBlockEntity extends BlockEntity {
     }
 
     @Override
-    public CompoundTag getUpdateTag(@Nonnull net.minecraft.core.HolderLookup.Provider provider) {
+    public CompoundTag getUpdateTag() { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
         CompoundTag tag = new CompoundTag();
-        saveAdditional(tag, provider);
+        saveAdditional(tag);
         return tag;
     }
 

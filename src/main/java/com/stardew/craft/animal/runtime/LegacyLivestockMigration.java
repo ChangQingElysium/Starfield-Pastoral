@@ -1,5 +1,6 @@
 package com.stardew.craft.animal.runtime;
 
+import com.stardew.craft.port.PortItemStacks;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.animal.model.*;
 import com.stardew.craft.blockentity.AnimalProduceSpotBlockEntity;
@@ -21,7 +22,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
 
@@ -50,7 +51,7 @@ public final class LegacyLivestockMigration extends SavedData {
 
     public static LegacyLivestockMigration get(MinecraftServer server) {
         return server.overworld().getDataStorage().computeIfAbsent(
-                new Factory<>(LegacyLivestockMigration::new, LegacyLivestockMigration::load), DATA_NAME);
+                com.stardew.craft.port.PortSavedData.loader(new Factory<>(LegacyLivestockMigration::new, LegacyLivestockMigration::load)), com.stardew.craft.port.PortSavedData.constructor(new Factory<>(LegacyLivestockMigration::new, LegacyLivestockMigration::load)), DATA_NAME);
     }
 
     @SubscribeEvent public static void started(ServerStartedEvent event) { LivestockService.recover(event.getServer()); }
@@ -327,7 +328,7 @@ public final class LegacyLivestockMigration extends SavedData {
                     id == null ? stableId("animal:" + spot.getAnimalId()) : id, home, false,
                     com.stardew.craft.item.quality.QualityHelper.getQuality(stack),
                     net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(stack.getItem()).toString(), stack.getCount(),
-                    relocated ? null : spot.getBlockPos(), (CompoundTag) stack.save(level.registryAccess())));
+                    relocated ? null : spot.getBlockPos(), (CompoundTag) PortItemStacks.save(stack, level.registryAccess())));
             // Retry a failed checkpoint even when its in-memory receipt already exists.
             checkpointAnimals(level.getServer());
             level.removeBlock(spot.getBlockPos(), false); return true;
@@ -336,7 +337,7 @@ public final class LegacyLivestockMigration extends SavedData {
         level.removeBlock(spot.getBlockPos(), false); return true;
     }
 
-    @Override public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
+    @Override public CompoundTag save(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
         tag.putInt("Format", 1); tag.putBoolean("Initialized", initialized); tag.putBoolean("Complete", complete); tag.put("Source", source.copy());
         var report = new CompoundTag(); issues.forEach(report::putString); tag.put("Issues", report); return tag;
     }

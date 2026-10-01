@@ -32,7 +32,7 @@ public class GalaxySoulItem extends Item implements IStardewItem {
     }
 
     @Override
-    public boolean canBeHurtBy(@Nonnull ItemStack stack, @Nonnull net.minecraft.world.damagesource.DamageSource source) {
+    public boolean canBeHurtBy(@Nonnull net.minecraft.world.damagesource.DamageSource source) {
         return false;
     }
 

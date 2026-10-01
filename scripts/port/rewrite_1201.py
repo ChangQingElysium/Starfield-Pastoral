@@ -25,7 +25,8 @@ ROOT = Path(__file__).resolve().parents[2]
 SHIM_PREFIX = "com.stardew.craft.port."
 
 SPECIAL_CLASSES = {
-    "net.neoforged.fml.common.EventBusSubscriber": "net.minecraftforge.fml.common.Mod.EventBusSubscriber",
+    # NeoForge routes @EventBusSubscriber listeners by event type (bus is ignored); the port annotation keeps that.
+    "net.neoforged.fml.common.EventBusSubscriber": SHIM_PREFIX + "net.neoforged.fml.common.EventBusSubscriber",
     "net.neoforged.neoforge.common.NeoForge": "net.minecraftforge.common.MinecraftForge",
     "net.neoforged.neoforge.common.ModConfigSpec": "net.minecraftforge.common.ForgeConfigSpec",
     "net.minecraft.world.level.chunk.status.ChunkStatus": "net.minecraft.world.level.chunk.ChunkStatus",
@@ -61,6 +62,22 @@ IDENTIFIER_RENAMES = {
     "ModConfigSpec": "ForgeConfigSpec",
 }
 IDENTIFIER_RENAMES.update({old.rsplit(".", 1)[1]: new.rsplit(".", 1)[1] for old, new in FORGE_EQUIVALENTS.items()})
+
+# Vanilla 1.20.5+/1.21 classes with a renamed 1.20.1 counterpart that has the members the mod uses
+# (vanilla-API owner). Already-shimmed FQNs are mapped too so re-running stays idempotent.
+VANILLA_EQUIVALENTS = {
+    "net.minecraft.world.level.block.TransparentBlock": "net.minecraft.world.level.block.GlassBlock",
+    "net.minecraft.client.gui.screens.options.controls.KeyBindsScreen": "net.minecraft.client.gui.screens.controls.KeyBindsScreen",
+    "net.minecraft.client.renderer.chunk.SectionRenderDispatcher": "net.minecraft.client.renderer.chunk.ChunkRenderDispatcher",
+    "net.minecraft.client.renderer.SectionBufferBuilderPack": "net.minecraft.client.renderer.ChunkBufferBuilderPack",
+    "com.mojang.blaze3d.vertex.MeshData": "com.mojang.blaze3d.vertex.BufferBuilder.RenderedBuffer",
+    "net.minecraft.world.level.pathfinder.PathType": "net.minecraft.world.level.pathfinder.BlockPathTypes",
+}
+for _old, _new in VANILLA_EQUIVALENTS.items():
+    SPECIAL_CLASSES[_old] = _new
+    SPECIAL_CLASSES[SHIM_PREFIX + _old] = _new
+    if _old.rsplit(".", 1)[1] != _new.rsplit(".", 1)[1]:
+        IDENTIFIER_RENAMES[_old.rsplit(".", 1)[1]] = _new.rsplit(".", 1)[1]
 
 PACKAGE_RENAMES = [
     ("net.neoforged.neoforge.", "net.minecraftforge."),
@@ -112,10 +129,93 @@ CODE_RULES = [
     (re.compile(r"\bbus\s*=\s*Bus\.GAME\b"), "bus = Bus.FORGE"),
     (re.compile(r"^import software\.bernie\.geckolib\.animation\.\*;", re.M),
      "import software.bernie.geckolib.core.animation.*;\nimport software.bernie.geckolib.core.object.PlayState;"),
+    # The whole codec package is shimmed, so its wildcard import moves with it.
+    (re.compile(r"^import net\.minecraft\.network\.codec\.\*;", re.M),
+     "import " + SHIM_PREFIX + "net.minecraft.network.codec.*;"),
 ]
 for key, field in VANILLA_CODECS.items():
     cls, member = key.split(".")
     CODE_RULES.append((re.compile(r"(?<![\w])(?:[a-z_][\w]*\.)*" + cls + r"\." + member + r"\b"), CODECS_CLASS + "." + field))
+
+# Vanilla 1.20.5+/1.21 call shapes (vanilla-API owner). Helpers are emitted by simple name and imported.
+VANILLA_HELPERS = ("PortBlockProperties", "PortEntities", "PortGameTests", "PortLevels")
+CODE_RULES += [
+    # SectionRenderDispatcher.RenderSection is 1.20.1 ChunkRenderDispatcher.RenderChunk.
+    (re.compile(r"\bChunkRenderDispatcher\.RenderSection\b"), "ChunkRenderDispatcher.RenderChunk"),
+    # 1.20.1 ServerPlayer(server, level, profile) has no ClientInformation; drop the default-options argument.
+    (re.compile(r",\s*(?:[\w.]+\.)?ClientInformation\.createDefault\(\)"), ""),
+    (re.compile(r"^import (?:" + re.escape(SHIM_PREFIX) + r")?net\.minecraft\.server\.level\.ClientInformation;\n", re.M), ""),
+    # Properties.ofLegacyCopy is 1.20.1 Properties.copy; ofFullCopy additionally copies predicates/jump/drops.
+    (re.compile(r"(?<![\w.])((?:[\w.]*\.)?Properties)\.ofLegacyCopy\("), r"\1.copy("),
+    (re.compile(r"(?<![\w.])(?:[\w.]*\.)?Properties\.ofFullCopy\("), "PortBlockProperties.ofFullCopy("),
+    # GameTestHelper#makeMockPlayer(GameType) / #assertValueEqual are 1.20.5+.
+    (re.compile(r"(?<![\w.])(?!PortGameTests\b)(\w+)\.makeMockPlayer\((?=\s*[^\s)])"), r"PortGameTests.makeMockPlayer(\1, "),
+    (re.compile(r"(?<![\w.])(?!PortGameTests\b)(\w+)\.assertValueEqual\("), r"PortGameTests.assertValueEqual(\1, "),
+    # CollisionGetter#noBlockCollision (1.20.2+); simple receivers only, complex ones by hand.
+    (re.compile(r"(?<![\w.)\]])(?!PortLevels\.)((?:[A-Za-z_]\w*(?:\([^()\"]*\))?)(?:\.[A-Za-z_]\w*(?:\([^()\"]*\))?)*)\.noBlockCollision\("),
+     r"PortLevels.noBlockCollision(\1, "),
+    # AbstractClientPlayer/PlayerInfo#getSkin() (1.20.2+) -> PlayerSkin.of(x); simple receivers only.
+    (re.compile(r"(?<![\w.)\]])((?:[A-Za-z_]\w*(?:\([^()\"]*\))?)(?:\.[A-Za-z_]\w*(?:\([^()\"]*\))?)*)\.getSkin\(\)"),
+     SHIM_PREFIX + r"net.minecraft.client.resources.PlayerSkin.of(\1)"),
+    # Minecraft#getTimer() returns a DeltaTracker in 1.21; the shim's live client view replaces it.
+    (re.compile(r"(?<![\w.])(?:(?:net\.minecraft\.client\.)?Minecraft\.getInstance\(\)|mc|minecraft|this\.minecraft)\.getTimer\(\)"),
+     SHIM_PREFIX + "net.minecraft.client.DeltaTracker.client()"),
+    # ItemStack#getTooltipLines(Item.TooltipContext, player, flag) is getTooltipLines(player, flag) in 1.20.1.
+    (re.compile(r"\bgetTooltipLines\(\s*(?:[\w.]*\.)?TooltipContext\.(?:EMPTY|of\([^()]*(?:\([^()]*\))?[^()]*\))\s*,\s*"), "getTooltipLines("),
+    # Registry entries renamed in 1.20.3 (short_grass) / 1.20.5 (turtle_scute).
+    (re.compile(r"\b(Blocks|Items)\.SHORT_GRASS\b"), r"\1.GRASS"),
+    (re.compile(r"\bItems\.TURTLE_SCUTE\b"), "Items.SCUTE"),
+    # Player interaction range API (1.20.5+): Forge 1.20.1 reach attributes.
+    (re.compile(r"(?<![\w.)\]])(?!PortEntities\.)((?:[A-Za-z_]\w*(?:\([^()\"]*\))?)(?:\.[A-Za-z_]\w*(?:\([^()\"]*\))?)*)\.canInteractWith(Block|Entity)\("), r"PortEntities.canInteractWith\2(\1, "),
+    (re.compile(r"\.blockInteractionRange\(\)"), ".getBlockReach()"),
+    (re.compile(r"\.entityInteractionRange\(\)"), ".getEntityReach()"),
+    # ItemEntity#setThrower(Entity) (1.20.5+) is setThrower(UUID) in 1.20.1; simple non-null receivers only.
+    (re.compile(r"\.setThrower\(\s*(?!null\b)([A-Za-z_]\w*(?:\([^()]*\))?)\s*\)"), r".setThrower(\1.getUUID())"),
+    # Player.DEFAULT_VEHICLE_ATTACHMENT (1.20.5+ entity attachments).
+    (re.compile(r"(?<![\w.])(?:[\w.]*\.)?Player\.DEFAULT_VEHICLE_ATTACHMENT\b"), "PortEntities.PLAYER_VEHICLE_ATTACHMENT"),
+]
+
+
+# Item data components: 1.20.1 ItemStack has no get/set/has/remove/update/getOrDefault, so calls whose
+# receiver is a simple expression (identifier / field / call chain with flat arguments) become static
+# PortItemData calls. Complex receivers are converted by hand. Idempotent: the rewritten form no longer
+# has a DataComponents argument directly after the opening parenthesis.
+ITEM_DATA_CLASS = SHIM_PREFIX + "PortItemData"
+ITEM_STACKS_CLASS = SHIM_PREFIX + "PortItemStacks"
+_RECEIVER = r"(?<![\w.)\]])((?:[A-Za-z_]\w*(?:\([^()\"]*\))?)(?:\.[A-Za-z_]\w*(?:\([^()\"]*\))?)*)"
+_COMPONENTS = r"(?:com\.stardew\.craft\.port\.net\.minecraft\.core\.component\.)?DataComponents\."
+ITEM_DATA_RULES = [
+    (re.compile(_RECEIVER + r"\.(get|set|has|remove|getOrDefault|update)\(\s*(?=" + _COMPONENTS + ")"),
+     r"PortItemData.\2(\1, "),
+    (re.compile(r"(?<![\w.])((?:net\.minecraft\.world\.item\.)?ItemStack)(\.|::)isSameItemSameComponents\b"),
+     r"\1\2isSameItemSameTags"),
+    (re.compile(r"(?<![\w.])(?:net\.minecraft\.world\.item\.)?ItemStack\.(parseOptional|parse)\("),
+     r"PortItemStacks.\1("),
+    (re.compile(r"(?!(?:com\.stardew\.craft\.port\.)?PortItemStacks\.)" + _RECEIVER + r"\.saveOptional\("),
+     r"PortItemStacks.saveOptional(\1, "),
+]
+_PACKAGE_LINE = re.compile(r"^package [\w.]+;\n", re.M)
+
+
+def _ensure_import(text: str, simple: str, fqn: str) -> str:
+    if not re.search(r"(?<![\w.])" + simple + r"\.", text) or re.search(r"^import " + re.escape(fqn) + ";", text, re.M):
+        return text
+    if re.search(r"^package " + re.escape(fqn.rsplit(".", 1)[0]) + ";", text, re.M):
+        return text
+    match = _PACKAGE_LINE.search(text)
+    if not match:
+        return text
+    return text[:match.end()] + "\nimport " + fqn + ";" + text[match.end():]
+
+
+def rewrite_item_data(text: str) -> str:
+    updated = text
+    for pattern, repl in ITEM_DATA_RULES:
+        updated = pattern.sub(repl, updated)
+    if updated == text:
+        return text
+    updated = _ensure_import(updated, "PortItemData", ITEM_DATA_CLASS)
+    return _ensure_import(updated, "PortItemStacks", ITEM_STACKS_CLASS)
 
 
 def rewrite(text: str, rules) -> str:
@@ -126,7 +226,9 @@ def rewrite(text: str, rules) -> str:
         text = pattern.sub(repl, text)
     for pattern, repl in CODE_RULES:
         text = pattern.sub(repl, text)
-    return text
+    for simple in VANILLA_HELPERS:
+        text = _ensure_import(text, simple, SHIM_PREFIX + simple)
+    return rewrite_item_data(text)
 
 
 def main(argv: list[str]) -> int:

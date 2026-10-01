@@ -50,8 +50,8 @@ public final class ImportedModelGeometry extends SimpleUnbakedGeometry<ImportedM
             BlockElement element = new BlockElement(ModelGeometry.vector(part.getAsJsonArray("from")),
                 ModelGeometry.vector(part.getAsJsonArray("to")), faces, null,
                 !part.has("shade") || part.get("shade").getAsBoolean(),
-                com.stardew.craft.port.net.neoforged.neoforge.client.model.ExtraFaceData.read(part.get("neoforge_data"),
-                    com.stardew.craft.port.net.neoforged.neoforge.client.model.ExtraFaceData.DEFAULT));
+                net.minecraftforge.client.model.ForgeFaceData.read(part.get("neoforge_data"),
+                    net.minecraftforge.client.model.ForgeFaceData.DEFAULT));
             // Convert pixel-space translation to block units; rotation and scale are unchanged.
             Matrix4f transform = ModelGeometry.transform(part);
             transform.m30(transform.m30() / 16).m31(transform.m31() / 16).m32(transform.m32() / 16);

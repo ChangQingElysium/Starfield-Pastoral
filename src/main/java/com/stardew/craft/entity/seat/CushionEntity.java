@@ -1,5 +1,6 @@
 package com.stardew.craft.entity.seat;
 
+import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.block.utility.CushionBlock;
 import com.stardew.craft.block.utility.MapUtilityStaticBlock;
@@ -67,8 +68,8 @@ public final class CushionEntity extends Entity {
     }
 
     @Override
-    protected void defineSynchedData(SynchedEntityData.Builder builder) {
-        builder.define(DATA_COLOR, WoodenChestColorPalette.defaultColorIndex());
+    protected void defineSynchedData() {
+        this.entityData.define(DATA_COLOR, WoodenChestColorPalette.defaultColorIndex());
     }
 
     public int getColor() {
@@ -146,7 +147,10 @@ public final class CushionEntity extends Entity {
         return !isVehicle();
     }
 
-    @Override
+    // PORT(1.20.1): 1.20.1 has no getPassengerRidingPosition; replay the 1.21 positionRider with it.
+    @Override protected void positionRider(Entity passenger, Entity.MoveFunction callback) {
+        if (hasPassenger(passenger)) com.stardew.craft.port.PortEntities.positionRider(passenger, getPassengerRidingPosition(passenger), callback);
+    }
     public Vec3 getPassengerRidingPosition(Entity passenger) {
         return new Vec3(getX(), getY() + getBbHeight(), getZ());
     }
@@ -236,13 +240,28 @@ public final class CushionEntity extends Entity {
         }
     }
 
-    @Override
+    // PORT(1.20.1): 1.20.1 Entity#ignoreExplosion() gets no Explosion; ExplosionHooks applies this per explosion.
     public boolean ignoreExplosion(Explosion explosion) {
         Entity directSource = explosion.getDirectSourceEntity();
         if (directSource != null && directSource.isInWater()) {
             return true;
         }
-        return !explosion.interactsWithBlocks() || super.ignoreExplosion(explosion);
+        return !explosion.interactsWithBlocks() || super.ignoreExplosion();
+    }
+
+    /**
+     * PORT(1.20.1): the 1.21 explosion skips entities whose {@code ignoreExplosion(Explosion)} is true; on 1.20.1 the
+     * affected-entity list handed to {@code Detonate} is the one the explosion then damages and pushes.
+     */
+    @com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber(modid = com.stardew.craft.StardewCraft.MODID)
+    public static final class ExplosionHooks {
+        private ExplosionHooks() {}
+
+        @net.minecraftforge.eventbus.api.SubscribeEvent
+        public static void onDetonate(net.minecraftforge.event.level.ExplosionEvent.Detonate event) {
+            event.getAffectedEntities().removeIf(entity -> entity instanceof CushionEntity cushion
+                    && cushion.ignoreExplosion(event.getExplosion()));
+        }
     }
 
     @Override
@@ -392,7 +411,7 @@ public final class CushionEntity extends Entity {
             ItemStack drop = new ItemStack(ModItems.CUSHION.get());
             Component customName = getCustomName();
             if (customName != null) {
-                drop.set(DataComponents.CUSTOM_NAME, customName);
+                PortItemData.set(drop, DataComponents.CUSTOM_NAME, customName);
             }
             spawnAtLocation(drop);
         }

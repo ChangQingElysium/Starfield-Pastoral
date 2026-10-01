@@ -13,15 +13,23 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
+import com.stardew.craft.port.PortBlockInteraction;
 
 /** The wall-mounted lock-box that starts the original Mr. Qi scavenger hunt. */
-public final class MrQiTunnelSafeBlock extends MapDecorWallThinBlock {
+public final class MrQiTunnelSafeBlock extends MapDecorWallThinBlock implements PortBlockInteraction {
     public MrQiTunnelSafeBlock(Properties properties) {
         super(properties);
     }
 
+    // PORT(1.20.1): replay the 1.21 useItemOn/useWithoutItem dispatch.
     @Override
-    protected InteractionResult useWithoutItem(
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player,
+            InteractionHand hand, BlockHitResult hit) {
+        return PortBlockInteraction.dispatch(this, state, level, pos, player, hand, hit);
+    }
+
+    @Override
+    public InteractionResult useWithoutItem(
             BlockState state,
             Level level,
             BlockPos pos,
@@ -39,7 +47,7 @@ public final class MrQiTunnelSafeBlock extends MapDecorWallThinBlock {
     }
 
     @Override
-    protected ItemInteractionResult useItemOn(
+    public ItemInteractionResult useItemOn(
             ItemStack stack,
             BlockState state,
             Level level,

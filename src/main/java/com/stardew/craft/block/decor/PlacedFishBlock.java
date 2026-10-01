@@ -29,10 +29,10 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import com.stardew.craft.port.PortBlockInteraction;
 
 /** The fish is the placed object. Its wall-only cradle has no separate block or item registration. */
-public final class PlacedFishBlock extends HorizontalDirectionalBlock implements EntityBlock {
-    public static final MapCodec<PlacedFishBlock> CODEC = simpleCodec(PlacedFishBlock::new);
+public final class PlacedFishBlock extends HorizontalDirectionalBlock implements EntityBlock, PortBlockInteraction {
     public static final BooleanProperty WALL = BooleanProperty.create("wall");
     private static final VoxelShape FLOOR = Block.box(1, 0, 1, 15, 8, 15);
     private static final java.util.Map<Direction, VoxelShape> WALL_SHAPES = java.util.Map.of(
@@ -45,7 +45,6 @@ public final class PlacedFishBlock extends HorizontalDirectionalBlock implements
         super(properties);
         registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(WALL, false));
     }
-    @Override protected MapCodec<? extends HorizontalDirectionalBlock> codec() { return CODEC; }
     @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) { builder.add(FACING, WALL); }
     @Override public BlockEntity newBlockEntity(BlockPos pos, BlockState state) { return new PlacedFishBlockEntity(pos, state); }
     @Override public BlockState getStateForPlacement(BlockPlaceContext context) {
@@ -54,26 +53,33 @@ public final class PlacedFishBlock extends HorizontalDirectionalBlock implements
         return defaultBlockState().setValue(WALL, face != Direction.UP)
                 .setValue(FACING, face == Direction.UP ? context.getHorizontalDirection().getOpposite() : face);
     }
-    @Override protected boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
+    @Override public boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
         if (!state.getValue(WALL)) return Block.canSupportCenter(level, pos.below(), Direction.UP);
         Direction facing = state.getValue(FACING);
         BlockPos support = pos.relative(facing.getOpposite());
         return level.getBlockState(support).isFaceSturdy(level, support, facing);
     }
-    @Override protected BlockState updateShape(BlockState state, Direction direction, BlockState neighbor,
+    @Override public BlockState updateShape(BlockState state, Direction direction, BlockState neighbor,
                                                 LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
         Direction support = state.getValue(WALL) ? state.getValue(FACING).getOpposite() : Direction.DOWN;
         return direction == support && !state.canSurvive(level, pos) ? Blocks.AIR.defaultBlockState()
                 : super.updateShape(state, direction, neighbor, level, pos, neighborPos);
     }
-    @Override protected boolean canBeReplaced(BlockState state, Fluid fluid) { return false; }
-    @Override protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+    @Override public boolean canBeReplaced(BlockState state, Fluid fluid) { return false; }
+    @Override public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return state.getValue(WALL) ? WALL_SHAPES.get(state.getValue(FACING)) : FLOOR;
     }
-    @Override public ItemStack getCloneItemStack(BlockState state, HitResult target, LevelReader level, BlockPos pos, Player player) {
+    @Override public ItemStack getCloneItemStack(BlockState state, HitResult target, BlockGetter level, BlockPos pos, Player player) {
         return level.getBlockEntity(pos) instanceof PlacedFishBlockEntity fish ? fish.fish() : ItemStack.EMPTY;
     }
-    @Override protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+    // PORT(1.20.1): replay the 1.21 useItemOn/useWithoutItem dispatch.
+    @Override
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player,
+            InteractionHand hand, BlockHitResult hit) {
+        return PortBlockInteraction.dispatch(this, state, level, pos, player, hand, hit);
+    }
+
+    @Override public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         if (!player.getMainHandItem().isEmpty() || !player.mayBuild()) return InteractionResult.PASS;
         if (!(level.getBlockEntity(pos) instanceof PlacedFishBlockEntity fish) || fish.fish().isEmpty()) return InteractionResult.PASS;
         if (!level.isClientSide) {

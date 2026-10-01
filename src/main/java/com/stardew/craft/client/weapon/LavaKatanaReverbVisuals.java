@@ -11,7 +11,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import com.stardew.craft.port.net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import static com.stardew.craft.client.weapon.WeaponGlowGeometry.*;
@@ -43,7 +43,7 @@ public final class LavaKatanaReverbVisuals {
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null || mc.player == null || mc.isPaused()) return;
         long now = mc.level.getGameTime();
-        if (!Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean() || now % 4 != 0) return;
+        if (!Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get() || now % 4 != 0) return;
         for (int id : LavaKatanaReverbClientState.activeCasterIds()) {
             if (!(mc.level.getEntity(id) instanceof Player caster) || !caster.isAlive()
                     || caster.distanceToSqr(mc.player) > 24 * 24) continue;
@@ -66,10 +66,10 @@ public final class LavaKatanaReverbVisuals {
     public static void render(RenderLevelStageEvent event) {
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_PARTICLES) return;
         Minecraft mc = Minecraft.getInstance();
-        if (mc.level == null || !Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()) return;
+        if (mc.level == null || !Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()) return;
         var ids = LavaKatanaReverbClientState.activeCasterIds();
         if (ids.isEmpty()) return;
-        float partial = event.getPartialTick().getGameTimeDeltaPartialTick(false);
+        float partial = event.getPartialTick();
         Vec3 camera = event.getCamera().getPosition();
         var stack = event.getPoseStack();
         stack.pushPose();

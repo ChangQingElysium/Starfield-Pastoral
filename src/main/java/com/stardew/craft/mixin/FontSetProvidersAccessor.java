@@ -9,6 +9,7 @@ import java.util.List;
 
 @Mixin(FontSet.class)
 public interface FontSetProvidersAccessor {
-    @Accessor("activeProviders")
+    // PORT(1.20.1): 1.20.5+ activeProviders (option-filtered) is 1.20.1 providers (no font options).
+    @Accessor("providers")
     List<GlyphProvider> stardewcraft$getActiveProviders();
 }

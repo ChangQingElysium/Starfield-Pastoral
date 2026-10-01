@@ -296,7 +296,7 @@ public class FishPondWorldData extends SavedData {
 
     @Override
     @SuppressWarnings("null")
-    public CompoundTag save(@Nonnull CompoundTag tag, @Nonnull net.minecraft.core.HolderLookup.Provider provider) {
+    public CompoundTag save(@Nonnull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
         tag.putLong("nextPondId", nextPondId);
 
         ListTag pondsTag = new ListTag();
@@ -322,7 +322,7 @@ public class FishPondWorldData extends SavedData {
 
     public static FishPondWorldData get(ServerLevel level) {
         return level.getServer().overworld().getDataStorage().computeIfAbsent(
-            new SavedData.Factory<>(FishPondWorldData::new, FishPondWorldData::load),
+            com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(FishPondWorldData::new, FishPondWorldData::load)), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(FishPondWorldData::new, FishPondWorldData::load)),
             DATA_NAME
         );
     }

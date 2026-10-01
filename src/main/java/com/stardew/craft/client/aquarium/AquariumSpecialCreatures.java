@@ -1,5 +1,6 @@
 package com.stardew.craft.client.aquarium;
 
+import com.stardew.craft.port.PortItemData;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import com.stardew.craft.client.render.AquariumHatRenderer;
@@ -31,7 +32,7 @@ final class AquariumSpecialCreatures {
         AquariumHatRenderer.render(stack, pose, buffers, light);
     }
     void frog(ItemStack stack, double seconds, float yaw, float jump, PoseStack pose, MultiBufferSource buffers, int light) {
-        int variant = Math.clamp(stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag().getInt("Variant"), 0, 7);
+        int variant = Math.clamp(PortItemData.getOrDefault(stack, DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag().getInt("Variant"), 0, 7);
         int color = variant == 7 ? 0xff000000 | Mth.hsvToRgb((float)(seconds % 12 / 12), .4f, .9f) : COLORS[variant];
         frog.getAllParts().forEach(ModelPart::resetPose);
         var body = frog.getChild("body"); body.getChild("tongue").visible = false;

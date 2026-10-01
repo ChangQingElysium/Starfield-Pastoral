@@ -28,9 +28,10 @@ import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import com.stardew.craft.port.PortBlockInteraction;
 
 /** Building manager/body; its protected 2x2 pad uses existing surface-floor overlays. */
-public final class PetBowlBlock extends Block {
+public final class PetBowlBlock extends Block implements PortBlockInteraction {
     public static final BooleanProperty FULL = BooleanProperty.create("full");
     public static final IntegerProperty SEASON = IntegerProperty.create("season", 0, 3);
     private static final VoxelShape SHAPE = box(2, 0, 2, 14, 4, 14);
@@ -39,7 +40,6 @@ public final class PetBowlBlock extends Block {
         super(properties); this.style = style;
         registerDefaultState(stateDefinition.any().setValue(FULL, false).setValue(SEASON, 0));
     }
-    @Override protected MapCodec<? extends Block> codec() { return simpleCodec(p -> new PetBowlBlock(p, style)); }
     @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) { builder.add(FULL, SEASON); }
     @Override public BlockState getStateForPlacement(BlockPlaceContext context) {
         if (context.getLevel() instanceof ServerLevel level) {
@@ -57,12 +57,12 @@ public final class PetBowlBlock extends Block {
         }
         return defaultBlockState().setValue(SEASON, StardewTimeManager.get().getCurrentSeason());
     }
-    @Override protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) { return SHAPE; }
-    @Override protected boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) { return level.getBlockState(pos.below()).isFaceSturdy(level, pos.below(), Direction.UP); }
-    @Override protected BlockState updateShape(BlockState state, Direction direction, BlockState neighbor, LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
+    @Override public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) { return SHAPE; }
+    @Override public boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) { return level.getBlockState(pos.below()).isFaceSturdy(level, pos.below(), Direction.UP); }
+    @Override public BlockState updateShape(BlockState state, Direction direction, BlockState neighbor, LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
         return direction == Direction.DOWN && !state.canSurvive(level, pos) ? Blocks.AIR.defaultBlockState() : super.updateShape(state, direction, neighbor, level, pos, neighborPos);
     }
-    @Override protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState previous, boolean moving) {
+    @Override public void onPlace(BlockState state, Level level, BlockPos pos, BlockState previous, boolean moving) {
         super.onPlace(state, level, pos, previous, moving);
         if (level instanceof ServerLevel server && server.dimension() == ModDimensions.STARDEW_VALLEY && previous.getBlock() != this
                 && !com.stardew.craft.building.runtime.BuildingProtection.transferring()) {
@@ -74,18 +74,25 @@ public final class PetBowlBlock extends Block {
             }
         }
     }
-    @Override protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState next, boolean moving) {
+    @Override public void onRemove(BlockState state, Level level, BlockPos pos, BlockState next, boolean moving) {
         if (next.getBlock() != this && level instanceof ServerLevel server && server.dimension() == ModDimensions.STARDEW_VALLEY
                 && !com.stardew.craft.building.runtime.BuildingProtection.transferring()) {
             PetWorldData.get(server.getServer()).removeBowl(pos); PetBowlBuildings.removed(server, pos);
         }
         super.onRemove(state, level, pos, next, moving);
     }
-    @Override protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
-        return stack.getItem() instanceof WateringCanItem ? ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION
-                : super.useItemOn(stack, state, level, pos, player, hand, hit);
+    // PORT(1.20.1): replay the 1.21 useItemOn/useWithoutItem dispatch.
+    @Override
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player,
+            InteractionHand hand, BlockHitResult hit) {
+        return PortBlockInteraction.dispatch(this, state, level, pos, player, hand, hit);
     }
-    @Override protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+
+    @Override public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        return stack.getItem() instanceof WateringCanItem ? ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION
+                : PortBlockInteraction.super.useItemOn(stack, state, level, pos, player, hand, hit);
+    }
+    @Override public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         if (player.getMainHandItem().getItem() instanceof WateringCanItem || player.getOffhandItem().getItem() instanceof WateringCanItem) return InteractionResult.PASS;
         if (player instanceof ServerPlayer serverPlayer) PetManagement.openBowl(serverPlayer, pos);
         return InteractionResult.sidedSuccess(level.isClientSide);

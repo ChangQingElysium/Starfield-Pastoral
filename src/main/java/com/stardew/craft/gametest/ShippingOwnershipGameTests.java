@@ -1,5 +1,6 @@
 package com.stardew.craft.gametest;
 
+import com.stardew.craft.port.PortItemStacks;
 import com.mojang.authlib.GameProfile;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.block.ModBlocks;
@@ -16,7 +17,6 @@ import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
-import com.stardew.craft.port.net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.inventory.ClickType;
@@ -46,10 +46,10 @@ public final class ShippingOwnershipGameTests {
         helper.assertTrue(bin.depositFromPlayer(bob, goods.copyWithCount(7)), "second deposit failed");
         assertLedger(helper, alice, 3, alicePrice);
         assertLedger(helper, bob, 0, -1);
-        CompoundTag saved = bin.saveWithoutMetadata(helper.getLevel().registryAccess());
+        CompoundTag saved = bin.saveWithoutMetadata();
         helper.assertTrue(saved.getUUID("bufferOwnerId").equals(bob.getUUID()), "new buffer has the wrong owner");
         bin.clearContent();
-        bin.loadWithComponents(saved, helper.getLevel().registryAccess());
+        bin.load(saved);
         bin.startOpen(alice);
         bin.flushBufferForOvernight();
         bin.flushBufferForOvernight();
@@ -112,7 +112,7 @@ public final class ShippingOwnershipGameTests {
         bin.startOpen(bob);
         ItemEntity thrown = new ItemEntity(helper.getLevel(), bin.getBlockPos().getX(),
                 bin.getBlockPos().getY(), bin.getBlockPos().getZ(), new ItemStack(ModItems.PARSNIP.get(), 6));
-        thrown.setThrower(alice);
+        thrown.setThrower(alice.getUUID());
         // Saving/reloading drops the cached entity reference; UUID attribution must still work offline.
         CompoundTag itemTag = thrown.saveWithoutId(new CompoundTag());
         ItemEntity reloaded = new ItemEntity(helper.getLevel(), 0, 0, 0, ItemStack.EMPTY);
@@ -179,7 +179,7 @@ public final class ShippingOwnershipGameTests {
 
     private static ItemEntity drop(GameTestHelper helper, ServerPlayer owner, net.minecraft.world.phys.Vec3 pos, int count) {
         ItemEntity entity = new ItemEntity(helper.getLevel(), pos.x, pos.y, pos.z, new ItemStack(ModItems.PARSNIP.get(), count));
-        entity.setThrower(owner);
+        entity.setThrower(owner.getUUID());
         entity.setNoGravity(true);
         entity.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
         helper.getLevel().addFreshEntity(entity);
@@ -188,7 +188,7 @@ public final class ShippingOwnershipGameTests {
 
     private static ServerPlayer player(GameTestHelper helper, String name) {
         ServerPlayer player = new ServerPlayer(helper.getLevel().getServer(), helper.getLevel(),
-                new GameProfile(UUID.randomUUID(), name), ClientInformation.createDefault());
+                new GameProfile(UUID.randomUUID(), name));
         PlayerDataManager.getPlayerData(player);
         return player;
     }
@@ -202,7 +202,7 @@ public final class ShippingOwnershipGameTests {
             if (!data.getUUID("Player").equals(player.getUUID())) continue;
             for (Tag item : data.getList("Items", Tag.TAG_COMPOUND)) {
                 CompoundTag itemData = (CompoundTag) item;
-                ItemStack stack = ItemStack.parse(helper.getLevel().registryAccess(), itemData.getCompound("Stack")).orElseThrow();
+                ItemStack stack = PortItemStacks.parse(helper.getLevel().registryAccess(), itemData.getCompound("Stack")).orElseThrow();
                 count += stack.getCount();
                 if (expectedPrice >= 0) helper.assertTrue(itemData.getInt("PricePerItem") == expectedPrice,
                         "sale price used another player's profession");

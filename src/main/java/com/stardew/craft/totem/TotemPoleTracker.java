@@ -99,7 +99,7 @@ public class TotemPoleTracker extends SavedData {
 
     @Override
     @Nonnull
-    public CompoundTag save(@Nonnull CompoundTag tag, @Nonnull HolderLookup.Provider registries) {
+    public CompoundTag save(@Nonnull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
         tag.putInt("nextId", nextId);
         ListTag list = new ListTag();
         for (Map.Entry<Integer, PoleEntry> e : poles.entrySet()) {
@@ -135,7 +135,7 @@ public class TotemPoleTracker extends SavedData {
 
     public static TotemPoleTracker get(ServerLevel level) {
         return level.getDataStorage().computeIfAbsent(
-                new Factory<>(TotemPoleTracker::new, TotemPoleTracker::load),
+                com.stardew.craft.port.PortSavedData.loader(new Factory<>(TotemPoleTracker::new, TotemPoleTracker::load)), com.stardew.craft.port.PortSavedData.constructor(new Factory<>(TotemPoleTracker::new, TotemPoleTracker::load)),
                 DATA_NAME
         );
     }

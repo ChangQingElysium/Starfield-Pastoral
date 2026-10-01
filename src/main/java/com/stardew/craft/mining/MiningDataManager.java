@@ -90,10 +90,13 @@ public class MiningDataManager extends SavedData {
         }
         return miningLevel.getDataStorage()
             .computeIfAbsent(
-                new SavedData.Factory<>(
+                com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(
                     MiningDataManager::new,
                     MiningDataManager::load
-                ),
+                )), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(
+                    MiningDataManager::new,
+                    MiningDataManager::load
+                )),
                 DATA_NAME
             );
     }

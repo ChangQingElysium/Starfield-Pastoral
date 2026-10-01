@@ -25,7 +25,7 @@ public final class ShockwaveRingEffectClient {
     private ShockwaveRingEffectClient() {}
 
     public static void add(float x, float y, float z, float maxRadius, int durationTicks, int color) {
-        if (!Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()) {
+        if (!Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()) {
             return;
         }
         if (durationTicks <= 0 || maxRadius <= 0.0f) {

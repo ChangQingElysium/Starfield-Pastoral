@@ -178,7 +178,7 @@ public final class OrdinaryMineRuntimeGameTests {
         menuA.getSlot(13).remove(1);menuA.getSlot(13).setChanged();
         h.assertTrue(MineRewardClaimManager.get(level).hasClaimed(a.getUUID(),20),"Taking reward did not record claim");
         h.assertTrue(menuB.getSlot(13).hasItem() && !MineRewardClaimManager.get(level).hasClaimed(b.getUUID(),20),"A consumed B's reward");
-        h.assertTrue(!chest.getUpdateTag(level.registryAccess()).contains("PlayerInventories"),"Private inventories sent in public update tag");
+        h.assertTrue(!chest.getUpdateTag().contains("PlayerInventories"),"Private inventories sent in public update tag");
         menuA.removed(a);menuB.removed(b);
         level.removeBlock(pos,false);level.setBlock(pos,ModBlocks.MINE_CHEST.get().defaultBlockState(),3);
         var fresh=(com.stardew.craft.blockentity.MineChestBlockEntity)level.getBlockEntity(pos);

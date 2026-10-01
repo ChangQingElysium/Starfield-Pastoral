@@ -5,7 +5,7 @@ import com.stardew.craft.farming.FertilizerApplicationService;
 import com.stardew.craft.item.FertilizerItem;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import com.stardew.craft.port.net.neoforged.neoforge.common.util.TriState;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 
@@ -21,7 +21,7 @@ public final class FertilizerInteractionEvents {
             return;
         }
         if (FertilizerApplicationService.resolveTarget(event.getLevel(), event.getPos()) != null) {
-            event.setUseBlock(TriState.FALSE);
+            event.setUseBlock(TriState.FALSE.toResult());
         }
     }
 }

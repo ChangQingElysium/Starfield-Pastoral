@@ -51,10 +51,13 @@ public class MineRewardClaimManager extends SavedData {
 
     public static MineRewardClaimManager get(ServerLevel level) {
         return level.getServer().overworld().getDataStorage().computeIfAbsent(
-            new SavedData.Factory<>(
+            com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(
                 MineRewardClaimManager::new,
                 MineRewardClaimManager::load
-            ),
+            )), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(
+                MineRewardClaimManager::new,
+                MineRewardClaimManager::load
+            )),
             DATA_NAME
         );
     }

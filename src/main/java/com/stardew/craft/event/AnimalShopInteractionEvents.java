@@ -6,7 +6,7 @@ import com.stardew.craft.core.ModDimensions;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 
 @EventBusSubscriber(modid = StardewCraft.MODID)

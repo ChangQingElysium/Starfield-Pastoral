@@ -1,5 +1,6 @@
 package com.stardew.craft.item.tool;
 
+import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.item.IStardewItem;
 import com.stardew.craft.api.v1.agriculture.StardewCropRuntime;
 import com.stardew.craft.api.v1.agriculture.StardewCropState;
@@ -159,7 +160,7 @@ public class WateringCanItem extends Item implements IStardewItem {
     // ================= 使用逻辑 =================
 
     @Override
-    public int getUseDuration(@Nonnull ItemStack stack, @Nonnull LivingEntity entity) {
+    public int getUseDuration(@Nonnull ItemStack stack) {
         return 72000; // 让物品可以一直按着
     }
 
@@ -219,7 +220,7 @@ public class WateringCanItem extends Item implements IStardewItem {
             return;
         }
 
-        int useDuration = this.getUseDuration(stack, entity) - timeCharged;
+        int useDuration = this.getUseDuration(stack) - timeCharged;
         int chargeLevel = getChargeLevel(stack, useDuration);
 
         // 获取作用范围
@@ -319,7 +320,7 @@ public class WateringCanItem extends Item implements IStardewItem {
     public void onUseTick(@Nonnull Level level, @Nonnull LivingEntity livingEntity, @Nonnull ItemStack stack, int remainingUseDuration) {
         if (!(livingEntity instanceof Player player)) return;
 
-        int usedTicks = getUseDuration(stack, livingEntity) - remainingUseDuration;
+        int usedTicks = getUseDuration(stack) - remainingUseDuration;
 
         int action = getAction(stack);
         if (action == ACTION_REFILL) {
@@ -626,9 +627,11 @@ public class WateringCanItem extends Item implements IStardewItem {
 
     @Override
     @SuppressWarnings("null")
-    public void appendHoverText(@Nonnull ItemStack stack, @Nonnull TooltipContext context,
-                                @Nonnull List<Component> tooltipComponents, @Nonnull TooltipFlag tooltipFlag) {
-        super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
+    public void appendHoverText(@Nonnull ItemStack stack,
+                                @javax.annotation.Nullable Level level,
+                                @Nonnull List<Component> tooltipComponents,
+                                @Nonnull TooltipFlag tooltipFlag) {
+        super.appendHoverText(stack, level, tooltipComponents, tooltipFlag);
     }
 
     @SuppressWarnings("null")
@@ -642,22 +645,22 @@ public class WateringCanItem extends Item implements IStardewItem {
 
     @SuppressWarnings("null")
     private static int getAction(@Nonnull ItemStack stack) {
-        return stack.getOrDefault(com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_DATA, com.stardew.craft.port.net.minecraft.world.item.component.CustomData.EMPTY)
+        return PortItemData.getOrDefault(stack, com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_DATA, com.stardew.craft.port.net.minecraft.world.item.component.CustomData.EMPTY)
                 .copyTag()
                 .getInt(TAG_ACTION);
     }
 
     @SuppressWarnings("null")
     private static void setAction(@Nonnull ItemStack stack, int action) {
-        var current = stack.getOrDefault(com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_DATA, com.stardew.craft.port.net.minecraft.world.item.component.CustomData.EMPTY).copyTag();
+        var current = PortItemData.getOrDefault(stack, com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_DATA, com.stardew.craft.port.net.minecraft.world.item.component.CustomData.EMPTY).copyTag();
         current.putInt(TAG_ACTION, action);
-        stack.set(com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_DATA, com.stardew.craft.port.net.minecraft.world.item.component.CustomData.of(current));
+        PortItemData.set(stack, com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_DATA, com.stardew.craft.port.net.minecraft.world.item.component.CustomData.of(current));
     }
 
     @SuppressWarnings("null")
     private static void clearAction(@Nonnull ItemStack stack) {
-        var current = stack.getOrDefault(com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_DATA, com.stardew.craft.port.net.minecraft.world.item.component.CustomData.EMPTY).copyTag();
+        var current = PortItemData.getOrDefault(stack, com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_DATA, com.stardew.craft.port.net.minecraft.world.item.component.CustomData.EMPTY).copyTag();
         current.remove(TAG_ACTION);
-        stack.set(com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_DATA, com.stardew.craft.port.net.minecraft.world.item.component.CustomData.of(current));
+        PortItemData.set(stack, com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_DATA, com.stardew.craft.port.net.minecraft.world.item.component.CustomData.of(current));
     }
 }

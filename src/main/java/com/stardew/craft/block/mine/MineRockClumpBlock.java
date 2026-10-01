@@ -37,7 +37,7 @@ public final class MineRockClumpBlock extends MapDecorStaticBlock {
         return Shapes.create(new AABB(bounds.minX, 0, bounds.minZ, bounds.maxX, bounds.maxY, bounds.maxZ));
     }
 
-    @Override protected boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
+    @Override public boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
         if (state.getValue(PART) == Part.EXTENSION) return super.canSurvive(state, level, pos);
         for (var offset : occupiedOffsets(state.getValue(FACING))) {
             if (offset.dy() != 0) continue;
@@ -47,24 +47,23 @@ public final class MineRockClumpBlock extends MapDecorStaticBlock {
         return true;
     }
 
-    @Override protected float getDestroyProgress(BlockState state, Player player, BlockGetter level, BlockPos pos) {
+    @Override public float getDestroyProgress(BlockState state, Player player, BlockGetter level, BlockPos pos) {
         return MineRockClumpMining.canMine(sourceId, player.getMainHandItem())
                 ? Math.nextUp(1.0F / MineRockClumpMining.breakTicks(sourceId, player.getMainHandItem())) : 0;
     }
 
-    @Override protected List<ItemStack> getDrops(BlockState state, LootParams.Builder params) { return List.of(); }
+    @Override public List<ItemStack> getDrops(BlockState state, LootParams.Builder params) { return List.of(); }
 
     @Override public void onRemove(BlockState state, Level level, BlockPos pos, BlockState replacement, boolean moving) {
         // Generic decor cleanup would drop its placeable item when an extension disappears.
         runWithDropsSuppressed(() -> super.onRemove(state, level, pos, replacement, moving));
     }
 
-    @Override public BlockState playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
+    @Override public void playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
         if (player instanceof net.minecraft.server.level.ServerPlayer serverPlayer)
             MineRockClumpMining.rememberBreakOrigin(serverPlayer, pos, state);
         // Let the actual destroyed cell emit BlockDropsEvent; onRemove cleans the whole bound.
         level.levelEvent(player, 2001, pos, Block.getId(state));
         level.gameEvent(GameEvent.BLOCK_DESTROY, pos, GameEvent.Context.of(player, state));
-        return state;
     }
 }

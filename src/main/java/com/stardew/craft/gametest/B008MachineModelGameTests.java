@@ -33,6 +33,7 @@ import net.minecraftforge.gametest.PrefixGameTestTemplate;
 import com.stardew.craft.port.net.neoforged.neoforge.capabilities.Capabilities;
 import java.util.List;
 import java.util.UUID;
+import com.stardew.craft.port.PortBlockInteraction;
 
 @GameTestHolder("stardewcraft_b008")
 @PrefixGameTestTemplate(false)
@@ -118,7 +119,7 @@ public final class B008MachineModelGameTests {
                     var bounds=level.getBlockState(origin).getCollisionShape(level,origin).bounds();
                     h.assertTrue(bounds.maxY==1&&Math.max(bounds.getXsize(),bounds.getZsize())<=2,"Keg exceeds 2x1x1");
                 } else h.assertTrue(extension.equals(origin.above()),"Tall machine did not reserve upper cell");
-                h.assertTrue(level.getCapability(Capabilities.ItemHandler.BLOCK,extension,Direction.UP)!=null,"Extension automation lost owner");
+                h.assertTrue(com.stardew.craft.port.PortCapabilities.getCapability(level, Capabilities.ItemHandler.BLOCK,extension,Direction.UP)!=null,"Extension automation lost owner");
                 level.getEntitiesOfClass(ItemEntity.class,new AABB(origin).inflate(4)).forEach(ItemEntity::discard);
                 // Exercise normal player mining, including the furnace's existing upper-part drop hook.
                 var removed = level.getBlockState(extension);
@@ -167,15 +168,15 @@ public final class B008MachineModelGameTests {
         var loom=(LoomBlockEntity)level.getBlockEntity(origin);
         h.assertTrue(!loom.isReady()&&!loom.isWorking(),"New loom not idle");
         h.assertTrue(loom.tryInsert(new ItemStack(ModItems.WOOL.get()),p)&&loom.isWorking(),"Wool did not start threaded wheel state");
-        var saved=loom.getUpdateTag(level.registryAccess());
+        var saved=loom.getUpdateTag();
         var restored=new LoomBlockEntity(origin,level.getBlockState(origin));restored.setLevel(level);
-        restored.loadWithComponents(saved,level.registryAccess());
+        restored.load(saved);
         h.assertTrue(restored.isWorking()&&!restored.isReady(),"Working state absent from save/client sync");
         h.assertTrue(loom.applyFairyDust()&&loom.isReady()&&!loom.isWorking(),"Completed loom still rotates");
         h.assertTrue(level.getBlockState(origin).getValue(LoomBlock.READY)&&loom.getProduct().is(ModItems.CLOTH.get()),"Ready cloth state missing");
         p.setItemInHand(InteractionHand.MAIN_HAND,ItemStack.EMPTY);
         var upper=origin.above();
-        level.getBlockState(upper).useWithoutItem(level,p,new BlockHitResult(Vec3.atCenterOf(upper),Direction.NORTH,upper,false));
+        PortBlockInteraction.stateUseWithoutItem(level.getBlockState(upper), level,p,new BlockHitResult(Vec3.atCenterOf(upper),Direction.NORTH,upper,false));
         h.assertTrue(!loom.isReady()&&!loom.isWorking()&&!level.getBlockState(origin).getValue(LoomBlock.READY),"Upper-part harvest did not restore idle");
         h.succeed();
     }

@@ -200,7 +200,7 @@ public final class TideReelSkillHandler implements RuntimeWeaponSkillHandler {
         return canPayEnergy(
                 PlayerStardewDataAPI.getEnergy(context.player()),
                 context.player().getAbilities().instabuild,
-                context.player().hasEffect(ModMobEffects.STATUE_OF_BLESSINGS_2)
+                context.player().hasEffect(ModMobEffects.STATUE_OF_BLESSINGS_2.get())
         );
     }
 

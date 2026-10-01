@@ -43,7 +43,7 @@ public final class ArtifactSpotGameTests {
             helper.assertTrue(!ModBlocks.SEED_SPOT.get().defaultBlockState().canSurvive(level, p), "Seed spot survived on grass/farmland");
         }
         level.setBlock(p.below(), ModBlocks.DIRT.get().defaultBlockState(), 3);
-        level.setBlock(p, Blocks.SHORT_GRASS.defaultBlockState(), 3);
+        level.setBlock(p, Blocks.GRASS.defaultBlockState(), 3);
         helper.assertTrue(!ArtifactSpotSpawnService.place(level, p, true), "Generation overwrote an occupied tile");
         level.setBlock(p, Blocks.AIR.defaultBlockState(), 3);
         level.setBlock(p.above(3), Blocks.STONE.defaultBlockState(), 3);
@@ -170,7 +170,7 @@ public final class ArtifactSpotGameTests {
         var field = ArtifactDropService.class.getDeclaredField("locationDrops"); field.setAccessible(true);
         var previous = field.get(null);
         var tool = new ItemStack(ModItems.IRIDIUM_HOE.get());
-        tool.enchant(helper.getLevel().registryAccess().registryOrThrow(net.minecraft.core.registries.Registries.ENCHANTMENT)
+        com.stardew.craft.port.PortItemStacks.enchant(tool, helper.getLevel().registryAccess().registryOrThrow(net.minecraft.core.registries.Registries.ENCHANTMENT)
                 .getHolderOrThrow(com.stardew.craft.enchantment.StardewEnchantments.GENEROUS), 1);
         try {
             field.set(null, java.util.Map.of("Default", java.util.List.of(entry)));

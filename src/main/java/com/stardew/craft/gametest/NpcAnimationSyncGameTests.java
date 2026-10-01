@@ -113,10 +113,11 @@ public final class NpcAnimationSyncGameTests {
     }
 
     private static void receive(StardewNpcEntity server, StardewNpcEntity observer, List<SynchedEntityData.DataValue<?>> values) {
-        var buffer = new RegistryFriendlyByteBuf(Unpooled.buffer(), server.registryAccess());
+        var buffer = new RegistryFriendlyByteBuf(Unpooled.buffer(), server.level().registryAccess());
         try {
-            ClientboundSetEntityDataPacket.STREAM_CODEC.encode(buffer, new ClientboundSetEntityDataPacket(server.getId(), values));
-            observer.getEntityData().assignValues(ClientboundSetEntityDataPacket.STREAM_CODEC.decode(buffer).packedItems());
+            // PORT(1.20.1): vanilla packets have no STREAM_CODEC; use the packet's own wire methods.
+            new ClientboundSetEntityDataPacket(server.getId(), values).write(buffer);
+            observer.getEntityData().assignValues(new ClientboundSetEntityDataPacket(buffer).packedItems());
         } finally {
             buffer.release();
         }

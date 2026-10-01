@@ -12,22 +12,14 @@ public class RoofTemplateBlock extends CompositeTemplateBlock {
     }
 
     @Override
-    protected net.minecraft.world.phys.shapes.VoxelShape getShape(BlockState state,
+    public net.minecraft.world.phys.shapes.VoxelShape getShape(BlockState state,
             net.minecraft.world.level.BlockGetter level, net.minecraft.core.BlockPos pos,
             net.minecraft.world.phys.shapes.CollisionContext context) {
         return TemplateShapeCache.get(templateShape(), state, RoofTemplateEdges.exposed(level, pos, state));
     }
 
     @Override
-    protected com.mojang.serialization.MapCodec<? extends net.minecraft.world.level.block.BaseEntityBlock> codec() {
-        return simpleCodec(properties -> templateShape().roofForm().connectsAsSlope()
-                ? new SmartRoofTemplateBlock(templateShape(), properties)
-                : templateShape().roofForm().isRidge() ? new SmartRidgeTemplateBlock(templateShape(), properties)
-                : new RoofTemplateBlock(templateShape(), properties));
-    }
-
-    @Override
-    protected void onPlace(BlockState state, net.minecraft.world.level.Level level,
+    public void onPlace(BlockState state, net.minecraft.world.level.Level level,
                            net.minecraft.core.BlockPos pos, BlockState oldState, boolean moving) {
         super.onPlace(state, level, pos, oldState, moving);
         if (state.getBlock() != oldState.getBlock()) {
@@ -40,7 +32,7 @@ public class RoofTemplateBlock extends CompositeTemplateBlock {
     }
 
     @Override
-    protected void onRemove(BlockState state, net.minecraft.world.level.Level level,
+    public void onRemove(BlockState state, net.minecraft.world.level.Level level,
                             net.minecraft.core.BlockPos pos, BlockState nextState, boolean moving) {
         super.onRemove(state, level, pos, nextState, moving);
         if (state.getBlock() != nextState.getBlock()) refreshTouchingRoofs(level, pos);

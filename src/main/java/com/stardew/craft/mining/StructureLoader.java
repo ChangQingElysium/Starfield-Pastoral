@@ -600,7 +600,7 @@ public final class StructureLoader {
                 continue;
             }
 
-            BlockEntity blockEntity = BlockEntity.loadStatic(worldPos, state, normalized, level.registryAccess());
+            BlockEntity blockEntity = BlockEntity.loadStatic(worldPos, state, normalized);
             if (blockEntity == null) {
                 continue;
             }
@@ -872,7 +872,7 @@ public final class StructureLoader {
 
             if (!normalized.contains("id", Tag.TAG_STRING)) continue;
 
-            BlockEntity blockEntity = BlockEntity.loadStatic(worldPos, state, normalized, level.registryAccess());
+            BlockEntity blockEntity = BlockEntity.loadStatic(worldPos, state, normalized);
             if (blockEntity == null) continue;
 
             level.setBlockEntity(blockEntity);

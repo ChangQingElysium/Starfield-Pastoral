@@ -32,10 +32,13 @@ public class WeatherSavedData extends SavedData {
                 .overworld()
                 .getDataStorage()
                 .computeIfAbsent(
-                        new SavedData.Factory<>(
+                        com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(
                                 WeatherSavedData::new,
                                 WeatherSavedData::load
-                        ),
+                        )), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(
+                                WeatherSavedData::new,
+                                WeatherSavedData::load
+                        )),
                         DATA_NAME
                 );
     }

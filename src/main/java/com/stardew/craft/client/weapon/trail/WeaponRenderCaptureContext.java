@@ -64,12 +64,12 @@ public final class WeaponRenderCaptureContext {
             BladeAnchors blade = SPRITE_ANCHORS.computeIfAbsent(model.getParticleIcon(), WeaponRenderCaptureContext::findAnchors);
             com.stardew.craft.client.weapon.DragontoothShivVisuals.blade(itemTransform,
                     new Vec3(blade.base.x, blade.base.y, blade.base.z), new Vec3(blade.tip.x, blade.tip.y, blade.tip.z),
-                    buffers, mc.level.getGameTime() + mc.getTimer().getGameTimeDeltaPartialTick(false));
+                    buffers, mc.level.getGameTime() + com.stardew.craft.port.net.minecraft.client.DeltaTracker.client().getGameTimeDeltaPartialTick(false));
         }
 
         if ("obsidian_edge".equals(weapon.getWeaponId())
                 && capture.entity == Minecraft.getInstance().player
-                && com.stardew.craft.Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()) {
+                && com.stardew.craft.Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()) {
             float charge = com.stardew.craft.client.weapon.ObsidianResonanceClientState.getChargeRatio(Minecraft.getInstance().player);
             if (charge > 0) {
                 BladeAnchors blade = SPRITE_ANCHORS.computeIfAbsent(model.getParticleIcon(), WeaponRenderCaptureContext::findAnchors);
@@ -80,18 +80,18 @@ public final class WeaponRenderCaptureContext {
         }
 
         if ("wooden_blade".equals(weapon.getWeaponId()) && capture.entity==Minecraft.getInstance().player
-                && com.stardew.craft.Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()
+                && com.stardew.craft.Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()
                 && com.stardew.craft.client.weapon.RustWoodVisuals.recentBlessing(capture.entity.getId())) {
-            var shelter=capture.entity.getEffect(com.stardew.craft.effect.ModMobEffects.SHELTER);
+            var shelter=capture.entity.getEffect(com.stardew.craft.effect.ModMobEffects.SHELTER.get());
             if(shelter!=null){
                 BladeAnchors blade=SPRITE_ANCHORS.computeIfAbsent(model.getParticleIcon(),WeaponRenderCaptureContext::findAnchors);
-                float partial=Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(false);
+                float partial=com.stardew.craft.port.net.minecraft.client.DeltaTracker.client().getGameTimeDeltaPartialTick(false);
                 com.stardew.craft.client.weapon.RustWoodGeometry.shelter(buffers.getBuffer(com.stardew.craft.client.weapon.WeaponEffectRenderTypes.MOLTEN_GLOW),itemTransform,
                         new Vec3(blade.base.x,blade.base.y,blade.base.z),new Vec3(blade.tip.x,blade.tip.y,blade.tip.z),Math.clamp((shelter.getDuration()-partial)/8,0,1));
             }
         }
-        if ("steel_smallsword".equals(weapon.getWeaponId()) && com.stardew.craft.Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()) {
-            float partial=Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(false);
+        if ("steel_smallsword".equals(weapon.getWeaponId()) && com.stardew.craft.Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()) {
+            float partial=com.stardew.craft.port.net.minecraft.client.DeltaTracker.client().getGameTimeDeltaPartialTick(false);
             var action=com.stardew.craft.client.weapon.MeleeWeaponVisuals.action(capture.entity,partial);
             if(action!=null){
                 boolean guard="light_counter".equals(action.skillId()),blocked="light_counter_counter".equals(action.skillId());
@@ -103,7 +103,7 @@ public final class WeaponRenderCaptureContext {
                 }
             }
         }
-        if ("iron_edge".equals(weapon.getWeaponId()) && com.stardew.craft.Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()) {
+        if ("iron_edge".equals(weapon.getWeaponId()) && com.stardew.craft.Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()) {
             int phase=com.stardew.craft.client.weapon.GuardSpineVisuals.bladePhase(capture.entity);
             if(phase>=0){
                 BladeAnchors blade=SPRITE_ANCHORS.computeIfAbsent(model.getParticleIcon(),WeaponRenderCaptureContext::findAnchors);
@@ -112,14 +112,14 @@ public final class WeaponRenderCaptureContext {
             }
         }
         if ("pirate_sword".equals(weapon.getWeaponId()) && capture.entity == Minecraft.getInstance().player
-                && com.stardew.craft.Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()) {
+                && com.stardew.craft.Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()) {
             com.stardew.craft.client.weapon.PirateSilverVisuals.ensureLevel();
             var player = Minecraft.getInstance().player;
-            float partial = Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(false);
+            float partial = com.stardew.craft.port.net.minecraft.client.DeltaTracker.client().getGameTimeDeltaPartialTick(false);
             BladeAnchors blade = SPRITE_ANCHORS.computeIfAbsent(model.getParticleIcon(), WeaponRenderCaptureContext::findAnchors);
             Vec3 base = new Vec3(blade.base.x, blade.base.y, blade.base.z), tip = new Vec3(blade.tip.x, blade.tip.y, blade.tip.z);
             var out = buffers.getBuffer(com.stardew.craft.client.weapon.WeaponEffectRenderTypes.MOLTEN_GLOW);
-            var fury = player.getEffect(com.stardew.craft.effect.ModMobEffects.FURY);
+            var fury = player.getEffect(com.stardew.craft.effect.ModMobEffects.FURY.get());
             if (fury != null && com.stardew.craft.client.weapon.PirateSilverVisuals.recentPlunder(player.getId()))
                 com.stardew.craft.client.weapon.PirateSilverGeometry.furyBlade(out, itemTransform, base, tip, Math.clamp((fury.getDuration() - partial) / 8, 0, 1));
             com.stardew.craft.client.weapon.NeedleBurglarGeometry.loot(out, itemTransform, base, tip,
@@ -127,9 +127,9 @@ public final class WeaponRenderCaptureContext {
         }
 
         if ("wind_spire".equals(weapon.getWeaponId()) && capture.entity == Minecraft.getInstance().player
-                && com.stardew.craft.Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()) {
+                && com.stardew.craft.Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()) {
             com.stardew.craft.client.weapon.IronWindVisuals.ensureLevel();
-            float partial = Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(false);
+            float partial = com.stardew.craft.port.net.minecraft.client.DeltaTracker.client().getGameTimeDeltaPartialTick(false);
             float remaining = com.stardew.craft.client.weapon.WindSpireClientState.getRemainingTicks(Minecraft.getInstance().player) - partial;
             if (remaining > 0) {
                 BladeAnchors blade = SPRITE_ANCHORS.computeIfAbsent(model.getParticleIcon(), WeaponRenderCaptureContext::findAnchors);
@@ -140,7 +140,7 @@ public final class WeaponRenderCaptureContext {
         }
 
         if (("dwarf_sword".equals(weapon.getWeaponId()) || "dwarf_dagger".equals(weapon.getWeaponId()))
-                && capture.entity == Minecraft.getInstance().player && com.stardew.craft.Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()) {
+                && capture.entity == Minecraft.getInstance().player && com.stardew.craft.Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()) {
             com.stardew.craft.client.weapon.DwarfWeaponVisuals.ensureLevel();
             var player = Minecraft.getInstance().player;
             boolean dagger = "dwarf_dagger".equals(weapon.getWeaponId());
@@ -148,7 +148,7 @@ public final class WeaponRenderCaptureContext {
                     : com.stardew.craft.client.weapon.DwarfFortressClientState.getRemainingTicks(player);
             float visibility = Math.clamp(remaining / 8, 0, 1);
             if (!dagger && com.stardew.craft.client.weapon.DwarfWeaponVisuals.guarding(player.getId())
-                    && player.hasEffect(com.stardew.craft.effect.ModMobEffects.SHELTER)) visibility = Math.max(visibility, .65f);
+                    && player.hasEffect(com.stardew.craft.effect.ModMobEffects.SHELTER.get())) visibility = Math.max(visibility, .65f);
             if (visibility > 0) {
                 BladeAnchors blade = SPRITE_ANCHORS.computeIfAbsent(model.getParticleIcon(), WeaponRenderCaptureContext::findAnchors);
                 com.stardew.craft.client.weapon.DwarfWeaponGeometry.bladeRune(
@@ -158,10 +158,10 @@ public final class WeaponRenderCaptureContext {
         }
 
         if (("iridium_needle".equals(weapon.getWeaponId()) || "burglars_shank".equals(weapon.getWeaponId()))
-                && capture.entity == Minecraft.getInstance().player && com.stardew.craft.Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()) {
+                && capture.entity == Minecraft.getInstance().player && com.stardew.craft.Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()) {
             com.stardew.craft.client.weapon.NeedleBurglarVisuals.ensureLevel();
             BladeAnchors blade = SPRITE_ANCHORS.computeIfAbsent(model.getParticleIcon(), WeaponRenderCaptureContext::findAnchors);
-            float partial = Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(false);
+            float partial = com.stardew.craft.port.net.minecraft.client.DeltaTracker.client().getGameTimeDeltaPartialTick(false);
             var out = buffers.getBuffer(com.stardew.craft.client.weapon.WeaponEffectRenderTypes.MOLTEN_GLOW);
             Vec3 base = new Vec3(blade.base.x, blade.base.y, blade.base.z), tip = new Vec3(blade.tip.x, blade.tip.y, blade.tip.z);
             if ("iridium_needle".equals(weapon.getWeaponId())) {
@@ -173,12 +173,12 @@ public final class WeaponRenderCaptureContext {
         }
 
         if ("insect_head".equals(weapon.getWeaponId()) && capture.entity == Minecraft.getInstance().player
-                && com.stardew.craft.Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()) {
+                && com.stardew.craft.Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()) {
             com.stardew.craft.client.weapon.ShadowInsectVisuals.ensureLevel();
             var player = Minecraft.getInstance().player;
             if (com.stardew.craft.client.weapon.InsectEyeStanceClientState.isActive(player)) {
                 BladeAnchors blade = SPRITE_ANCHORS.computeIfAbsent(model.getParticleIcon(), WeaponRenderCaptureContext::findAnchors);
-                float partial = Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(false);
+                float partial = com.stardew.craft.port.net.minecraft.client.DeltaTracker.client().getGameTimeDeltaPartialTick(false);
                 float remaining = com.stardew.craft.client.weapon.InsectEyeStanceClientState.getRemainingTicks(player) - partial;
                 com.stardew.craft.client.weapon.ShadowInsectGeometry.eyeLights(
                         buffers.getBuffer(com.stardew.craft.client.weapon.WeaponEffectRenderTypes.MOLTEN_GLOW), itemTransform,
@@ -188,10 +188,10 @@ public final class WeaponRenderCaptureContext {
         }
 
         if("crystal_dagger".equals(weapon.getWeaponId()) && capture.entity==Minecraft.getInstance().player
-                && com.stardew.craft.Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()) {
+                && com.stardew.craft.Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()) {
             com.stardew.craft.client.weapon.CrystalVenomVisuals.ensureLevel();
             BladeAnchors blade=SPRITE_ANCHORS.computeIfAbsent(model.getParticleIcon(),WeaponRenderCaptureContext::findAnchors);
-            float partial=Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(false);
+            float partial=com.stardew.craft.port.net.minecraft.client.DeltaTracker.client().getGameTimeDeltaPartialTick(false);
             com.stardew.craft.client.weapon.CrystalVenomGeometry.crystalLayers(
                     buffers.getBuffer(com.stardew.craft.client.weapon.WeaponEffectRenderTypes.MOLTEN_GLOW),itemTransform,
                     new Vec3(blade.base.x,blade.base.y,blade.base.z),new Vec3(blade.tip.x,blade.tip.y,blade.tip.z),
@@ -199,7 +199,7 @@ public final class WeaponRenderCaptureContext {
                     com.stardew.craft.client.weapon.CrystalVenomVisuals.burstAge(partial));
         }
 
-        if ("dark_sword".equals(weapon.getWeaponId()) && com.stardew.craft.Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()) {
+        if ("dark_sword".equals(weapon.getWeaponId()) && com.stardew.craft.Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()) {
             boolean moon = com.stardew.craft.client.weapon.BloodForgeVisuals.active(capture.entity.getId(),true);
             if(moon || com.stardew.craft.client.weapon.BloodForgeVisuals.active(capture.entity.getId(),false)) {
                 BladeAnchors blade = SPRITE_ANCHORS.computeIfAbsent(model.getParticleIcon(), WeaponRenderCaptureContext::findAnchors);
@@ -212,11 +212,11 @@ public final class WeaponRenderCaptureContext {
         WeaponSkillAnimPayload action =
                 WeaponSkillAnimationClient.getWorldAction(capture.entity.getId());
         var molten = LavaKatanaVisuals.action(capture.entity,
-                Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(false));
+                com.stardew.craft.port.net.minecraft.client.DeltaTracker.client().getGameTimeDeltaPartialTick(false));
         var melee = MeleeWeaponVisuals.action(capture.entity,
-                Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(false));
+                com.stardew.craft.port.net.minecraft.client.DeltaTracker.client().getGameTimeDeltaPartialTick(false));
         if (com.stardew.craft.combat.skill.handler.HeavyHammerRules.isWeapon(weapon.getWeaponId())
-                && com.stardew.craft.Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()) {
+                && com.stardew.craft.Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()) {
             boolean empowered=com.stardew.craft.client.weapon.HeavyHammerVisuals.empowered(capture.entity.getId());
             if(empowered || melee!=null && com.stardew.craft.client.weapon.animation.HeavyHammerAnimation.supports(melee.skillId())) {
                 BladeAnchors blade=SPRITE_ANCHORS.computeIfAbsent(model.getParticleIcon(),WeaponRenderCaptureContext::findAnchors);
@@ -226,7 +226,7 @@ public final class WeaponRenderCaptureContext {
                         buffers.getBuffer(com.stardew.craft.client.weapon.WeaponEffectRenderTypes.MOLTEN_GLOW),itemTransform,
                         new Vec3(blade.base.x,blade.base.y,blade.base.z),new Vec3(blade.tip.x,blade.tip.y,blade.tip.z),
                         "infinity_gavel".equals(weapon.getWeaponId()),power,
-                        mc.level.getGameTime()+mc.getTimer().getGameTimeDeltaPartialTick(false));
+                        mc.level.getGameTime()+com.stardew.craft.port.net.minecraft.client.DeltaTracker.client().getGameTimeDeltaPartialTick(false));
             }
         }
         if (molten == null && melee == null && (action == null
@@ -239,7 +239,7 @@ public final class WeaponRenderCaptureContext {
         if (minecraft.level == null) {
             return;
         }
-        float partialTick = minecraft.getTimer().getGameTimeDeltaPartialTick(false);
+        float partialTick = com.stardew.craft.port.net.minecraft.client.DeltaTracker.client().getGameTimeDeltaPartialTick(false);
         float progress = molten != null ? molten.progress() : melee != null ? melee.progress() : WeaponSkillAnimationClient.getWorldActionProgress(
                 capture.entity.getId(),
                 partialTick

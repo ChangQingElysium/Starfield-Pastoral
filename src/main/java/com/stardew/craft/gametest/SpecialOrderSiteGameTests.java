@@ -22,6 +22,7 @@ import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.common.util.FakePlayerFactory;
 import net.minecraftforge.gametest.GameTestHolder;
 import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import com.stardew.craft.port.PortBlockInteraction;
 
 @GameTestHolder("stardewcraft_special_orders")
 @PrefixGameTestTemplate(false)
@@ -84,7 +85,7 @@ public final class SpecialOrderSiteGameTests {
             var p = player(h);var data = PlayerStardewDataAPI.getData(p);
             data.addMailFlag(SpecialOrderManager.BOARD_UNLOCK_FLAG);data.setSpecialOrderPrizeTickets(1);
             BlockPos upper = board.west(2).above();
-            level.getBlockState(upper).useWithoutItem(level,p,new BlockHitResult(Vec3.atCenterOf(upper),Direction.SOUTH,upper,false));
+            PortBlockInteraction.stateUseWithoutItem(level.getBlockState(upper), level,p,new BlockHitResult(Vec3.atCenterOf(upper),Direction.SOUTH,upper,false));
             h.assertTrue(data.getSpecialOrderPrizeTickets() == 0 && p.getInventory().countItem(ModItems.PRIZE_TICKET.get()) == 1,
                     "Box upper half did not claim from its main part");
             h.succeed();

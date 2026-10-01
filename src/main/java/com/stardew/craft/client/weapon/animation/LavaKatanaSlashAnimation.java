@@ -36,7 +36,7 @@ public final class LavaKatanaSlashAnimation implements WeaponSkillAnimation {
     public boolean apply(PoseStack stack, HumanoidArm arm, float progress) {
         var minecraft = Minecraft.getInstance();
         var action = minecraft.player == null ? null : LavaKatanaVisuals.action(
-                minecraft.player, minecraft.getTimer().getGameTimeDeltaPartialTick(false));
+                minecraft.player, com.stardew.craft.port.net.minecraft.client.DeltaTracker.client().getGameTimeDeltaPartialTick(false));
         if (action != null && LavaKatanaVisuals.REVERB.equals(action.skillId())) {
             return LavaKatanaReverbAnimation.INSTANCE.apply(stack, arm, action.progress());
         }

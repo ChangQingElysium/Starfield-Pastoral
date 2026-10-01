@@ -26,7 +26,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
@@ -126,7 +126,7 @@ public final class ScytheHarvestEvents {
 				|| block instanceof com.stardew.craft.block.mine.MineGroundWeedsBlock
 				|| block instanceof WildWeedsBlock
 				|| block instanceof PastureGrassBlock
-				|| block == Blocks.SHORT_GRASS
+				|| block == Blocks.GRASS
 				|| block == Blocks.FERN
 				|| block == Blocks.TALL_GRASS
 				|| block == Blocks.LARGE_FERN
@@ -269,7 +269,7 @@ public final class ScytheHarvestEvents {
 		}
 		// 原版杂草/草丛：short_grass, fern, tall_grass, large_fern, dead_bush
 		Block block = state.getBlock();
-		if (block == Blocks.SHORT_GRASS || block == Blocks.FERN
+		if (block == Blocks.GRASS || block == Blocks.FERN
 				|| block == Blocks.TALL_GRASS || block == Blocks.LARGE_FERN
 				|| block instanceof TallGrassBlock || block instanceof DeadBushBlock) {
 			if (isPublicArea) {

@@ -1,5 +1,6 @@
 package com.stardew.craft.block.mine;
 
+import com.stardew.craft.port.PortItemData;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -19,7 +20,6 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 /** A two-pixel entrance stone layer; the underlying soil remains a separate block. */
 @SuppressWarnings("null")
 public final class MineStepStoneBlock extends Block {
-    public static final MapCodec<MineStepStoneBlock> CODEC = simpleCodec(MineStepStoneBlock::new);
     public static final net.minecraft.world.level.block.state.properties.EnumProperty<MineLadderBlock.Theme> THEME = net.minecraft.world.level.block.state.properties.EnumProperty.create("theme", MineLadderBlock.Theme.class);
     public static final IntegerProperty CONNECTIONS = IntegerProperty.create("connections", 0, 255);
     private static final VoxelShape SHAPE = Block.box(0, 0, 0, 16, 2, 16);
@@ -29,9 +29,6 @@ public final class MineStepStoneBlock extends Block {
         super(properties);
         registerDefaultState(defaultBlockState().setValue(CONNECTIONS, 0).setValue(THEME, MineLadderBlock.Theme.EARTH));
     }
-
-    @Override
-    public MapCodec<MineStepStoneBlock> codec() { return CODEC; }
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
@@ -64,7 +61,7 @@ public final class MineStepStoneBlock extends Block {
 
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
-        var theme = context.getItemInHand().getOrDefault(com.stardew.craft.port.net.minecraft.core.component.DataComponents.BLOCK_STATE,
+        var theme = PortItemData.getOrDefault(context.getItemInHand(), com.stardew.craft.port.net.minecraft.core.component.DataComponents.BLOCK_STATE,
                 com.stardew.craft.port.net.minecraft.world.item.component.BlockItemStateProperties.EMPTY).get(THEME);
         if (theme == null) {
             theme = MineLadderBlock.Theme.EARTH;
@@ -74,12 +71,12 @@ public final class MineStepStoneBlock extends Block {
     }
 
     @Override
-    protected boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
+    public boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
         return level.getBlockState(pos.below()).isFaceSturdy(level, pos.below(), Direction.UP);
     }
 
     @Override
-    protected BlockState updateShape(BlockState state, Direction direction, BlockState neighbor,
+    public BlockState updateShape(BlockState state, Direction direction, BlockState neighbor,
                                      LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
         return canSurvive(state, level, pos) ? state.setValue(CONNECTIONS, connections(level, pos)) : Blocks.AIR.defaultBlockState();
     }
@@ -97,7 +94,7 @@ public final class MineStepStoneBlock extends Block {
     }
 
     @Override
-    protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean moving) {
+    public void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean moving) {
         super.onPlace(state, level, pos, oldState, moving);
         if (!oldState.is(this) || oldState.getValue(THEME) != state.getValue(THEME)) refreshAround(level, pos);
     }
@@ -108,9 +105,9 @@ public final class MineStepStoneBlock extends Block {
         if (!newState.is(this)) refreshAround(level, pos);
     }
 
-    @Override public net.minecraft.world.item.ItemStack getCloneItemStack(LevelReader level, BlockPos pos, BlockState state) {
+    @Override public net.minecraft.world.item.ItemStack getCloneItemStack(BlockGetter level, BlockPos pos, BlockState state) {
         var stack = new net.minecraft.world.item.ItemStack(this);
-        stack.set(com.stardew.craft.port.net.minecraft.core.component.DataComponents.BLOCK_STATE,
+        PortItemData.set(stack, com.stardew.craft.port.net.minecraft.core.component.DataComponents.BLOCK_STATE,
                 com.stardew.craft.port.net.minecraft.world.item.component.BlockItemStateProperties.EMPTY.with(THEME, state));
         return stack;
     }

@@ -71,7 +71,7 @@ public class StardewLeavesBlock extends LeavesBlock {
 	}
 
 	@Override
-	protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean moved) {
+	public void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean moved) {
 		super.onPlace(state, level, pos, oldState, moved);
 		if (!level.isClientSide) {
 			BlockState updated = seasonalState(state, level);
@@ -111,7 +111,7 @@ public class StardewLeavesBlock extends LeavesBlock {
 
 	@SuppressWarnings("null")
 	@Override
-	protected BlockState updateShape(BlockState state, Direction direction, BlockState neighborState, LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
+	public BlockState updateShape(BlockState state, Direction direction, BlockState neighborState, LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
 		BlockState updated = super.updateShape(state, direction, neighborState, level, pos, neighborPos);
 		if (shouldFastDecay(updated)) {
 			level.scheduleTick(pos, this, FAST_DECAY_DELAY);
@@ -121,7 +121,7 @@ public class StardewLeavesBlock extends LeavesBlock {
 
 	@SuppressWarnings("null")
 	@Override
-	protected void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+	public void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
 		super.tick(state, level, pos, random);
 		BlockState current = level.getBlockState(pos);
 		if (current.is(this) && shouldFastDecay(current)) {
@@ -131,7 +131,7 @@ public class StardewLeavesBlock extends LeavesBlock {
 
 	@SuppressWarnings("null")
 	@Override
-	protected void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+	public void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
 		super.randomTick(state, level, pos, random);
 		BlockState current = level.getBlockState(pos);
 		if (current.is(this) && shouldFastDecay(current)) {

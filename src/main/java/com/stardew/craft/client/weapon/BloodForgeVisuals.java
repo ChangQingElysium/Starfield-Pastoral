@@ -13,7 +13,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import com.stardew.craft.port.net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import static com.stardew.craft.client.weapon.MeleeWeaponVisuals.*;
@@ -61,7 +61,7 @@ public final class BloodForgeVisuals {
         EffectKey key=new EffectKey(p.casterId(),p.targetId(),p.castTick());
         if(p.phase()==BloodForgeEffectPayload.HEAT_END) {HEAT.remove(key);return;}
         var mc=Minecraft.getInstance();Vec3 at=new Vec3(p.x(),p.y(),p.z());
-        if(mc.player==null||mc.player.distanceToSqr(at)>48*48||!Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()) return;
+        if(mc.player==null||mc.player.distanceToSqr(at)>48*48||!Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()) return;
         if(p.phase()==BloodForgeEffectPayload.RECOVERY) {
             boolean sound=RECOVERY.keySet().stream().noneMatch(k->k.caster==p.casterId()&&k.cast==p.castTick());
             RECOVERY.putIfAbsent(key,new Effect(p,level.getGameTime()));trim(RECOVERY,32);
@@ -79,9 +79,9 @@ public final class BloodForgeVisuals {
     }
     @SubscribeEvent public static void render(RenderLevelStageEvent event) {
         if(event.getStage()!=RenderLevelStageEvent.Stage.AFTER_PARTICLES) return;
-        ensureLevel(); if(level==null||!Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()||(HEAT.isEmpty()&&RECOVERY.isEmpty())) return;
+        ensureLevel(); if(level==null||!Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()||(HEAT.isEmpty()&&RECOVERY.isEmpty())) return;
         var mc=Minecraft.getInstance();var stack=event.getPoseStack();var buffers=mc.renderBuffers().bufferSource();
-        Vec3 camera=event.getCamera().getPosition();float partial=event.getPartialTick().getGameTimeDeltaPartialTick(false);
+        Vec3 camera=event.getCamera().getPosition();float partial=event.getPartialTick();
         double now=level.getGameTime()+partial;stack.pushPose();
         var out=buffers.getBuffer(WeaponEffectRenderTypes.MOLTEN_GLOW);
         for(Effect e:RECOVERY.values()) if(level.getEntity(e.payload.casterId()) instanceof LivingEntity caster) {

@@ -62,8 +62,8 @@ public class NewTreePartBlockEntity extends BlockEntity {
 	}
 
 	@Override
-	protected void saveAdditional(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
-		super.saveAdditional(tag, registries);
+	protected void saveAdditional(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+		super.saveAdditional(tag);
 		if (hasGeneratedTreeMarker()) {
 			tag.put(TAG_TREE_ID, NbtUtils.createUUID(generatedTreeId));
 			tag.putString(TAG_TREE_SPECIES, generatedTreeSpecies);
@@ -72,8 +72,8 @@ public class NewTreePartBlockEntity extends BlockEntity {
 	}
 
 	@Override
-	protected void loadAdditional(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
-		super.loadAdditional(tag, registries);
+	public void load(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+		super.load(tag);
 		generatedTreeId = tag.contains(TAG_TREE_ID, Tag.TAG_INT_ARRAY) ? NbtUtils.loadUUID(tag.get(TAG_TREE_ID)) : null;
 		generatedTreeSpecies = tag.contains(TAG_TREE_SPECIES, Tag.TAG_STRING) ? tag.getString(TAG_TREE_SPECIES) : null;
 		generatedTreeRoot = tag.contains(TAG_TREE_ROOT, Tag.TAG_COMPOUND)

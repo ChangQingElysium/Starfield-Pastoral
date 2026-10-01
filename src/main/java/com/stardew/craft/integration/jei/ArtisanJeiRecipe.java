@@ -77,7 +77,7 @@ public record ArtisanJeiRecipe(
         result.append('[')
                 .append(BuiltInRegistries.ITEM.getKey(stack.getItem()))
                 .append(':').append(stack.getCount())
-                .append(':').append(stack.getComponentsPatch())
+                .append(':').append(stack.getTag()) // PORT(1.20.1): the NBT tag is the component patch
                 .append(']');
     }
 }

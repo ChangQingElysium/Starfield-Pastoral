@@ -191,7 +191,7 @@ public record FestivalMapPatch(
 
     private static CompoundTag saveBlockEntity(ServerLevel level, BlockPos pos) {
         BlockEntity blockEntity = level.getBlockEntity(pos);
-        return blockEntity == null ? null : blockEntity.saveWithFullMetadata(level.registryAccess());
+        return blockEntity == null ? null : blockEntity.saveWithFullMetadata();
     }
 
     private static void addPending(Map<BlockPos, PendingPatchEntry> pendingEntries, PendingPatchEntry entry) {

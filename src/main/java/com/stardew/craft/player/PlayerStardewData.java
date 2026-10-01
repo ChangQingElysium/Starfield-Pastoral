@@ -1,5 +1,6 @@
 package com.stardew.craft.player;
 
+import com.stardew.craft.port.PortItemStacks;
 import com.stardew.craft.deco.DecorationStyleRegistry;
 import com.stardew.craft.deco.DecorationType;
 import com.stardew.craft.leaderboard.LeaderboardMetric;
@@ -376,7 +377,7 @@ public class PlayerStardewData {
                 CompoundTag itemTag = lostItemsTag.getCompound(li);
                 if (registries != null && itemTag.contains("Stack", Tag.TAG_COMPOUND)) {
                     net.minecraft.world.item.ItemStack stack =
-                            net.minecraft.world.item.ItemStack.parse(
+                            PortItemStacks.parse(
                                     registries, itemTag.getCompound("Stack"))
                                     .orElse(net.minecraft.world.item.ItemStack.EMPTY);
                     if (!stack.isEmpty()) {
@@ -865,7 +866,7 @@ public class PlayerStardewData {
             for (net.minecraft.world.item.ItemStack stack : itemsLostLastDeath) {
                 CompoundTag itemTag = new CompoundTag();
                 if (registries != null) {
-                    itemTag.put("Stack", stack.save(registries));
+                    itemTag.put("Stack", PortItemStacks.save(stack, registries));
                 } else {
                     // Tests and legacy callers may intentionally have no
                     // registry provider. Preserve the old lossless-enough
@@ -1157,9 +1158,9 @@ public class PlayerStardewData {
         if (!rightRingId.isEmpty()) tag.putString("EquippedRightRing", rightRingId);
         if (!bootsId.isEmpty()) tag.putString("EquippedBoots", bootsId);
         if (registries != null) {
-            if (!equippedLeftRing.isEmpty()) tag.put("EquippedLeftRingStack", equippedLeftRing.save(registries));
-            if (!equippedRightRing.isEmpty()) tag.put("EquippedRightRingStack", equippedRightRing.save(registries));
-            if (!equippedBoots.isEmpty()) tag.put("EquippedBootsStack", equippedBoots.save(registries));
+            if (!equippedLeftRing.isEmpty()) tag.put("EquippedLeftRingStack", PortItemStacks.save(equippedLeftRing, registries));
+            if (!equippedRightRing.isEmpty()) tag.put("EquippedRightRingStack", PortItemStacks.save(equippedRightRing, registries));
+            if (!equippedBoots.isEmpty()) tag.put("EquippedBootsStack", PortItemStacks.save(equippedBoots, registries));
         }
         if (!equippedTrinket.isEmpty()) tag.put("EquippedTrinket", com.stardew.craft.item.trinket.StardewTrinketItem.saveStackToTag(equippedTrinket));
         if (!equippedHat.isEmpty()) tag.putString("EquippedHat", equippedHat);
@@ -2812,7 +2813,7 @@ public class PlayerStardewData {
             CompoundTag root, String stackKey, String legacyKey,
             @Nullable net.minecraft.core.HolderLookup.Provider registries) {
         if (registries != null && root.contains(stackKey, Tag.TAG_COMPOUND)) {
-            net.minecraft.world.item.ItemStack loaded = net.minecraft.world.item.ItemStack.parseOptional(
+            net.minecraft.world.item.ItemStack loaded = PortItemStacks.parseOptional(
                     registries, root.getCompound(stackKey));
             if (!loaded.isEmpty()) return loaded.copyWithCount(1);
         }

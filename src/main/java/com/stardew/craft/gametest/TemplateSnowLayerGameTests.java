@@ -12,7 +12,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
-import com.stardew.craft.port.net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import com.stardew.craft.port.net.minecraft.world.ItemInteractionResult;
@@ -24,6 +23,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.gametest.GameTestHolder;
 import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import com.stardew.craft.port.PortBlockInteraction;
 
 @GameTestHolder(StardewCraft.MODID)
 @PrefixGameTestTemplate(false)
@@ -37,7 +37,7 @@ public final class TemplateSnowLayerGameTests {
         var block = TemplateContent.TEMPLATE_BLOCKS.get(TemplateShape.SNOW_LAYER).get();
         var item = TemplateContent.TEMPLATE_ITEMS.get(TemplateShape.SNOW_LAYER).get();
         var player = new ServerPlayer(level.getServer(), level,
-                new GameProfile(UUID.randomUUID(), "Layer test"), ClientInformation.createDefault());
+                new GameProfile(UUID.randomUUID(), "Layer test"));
         player.setPos(Vec3.atCenterOf(pos.offset(3, 0, 3)));
         var stack = new ItemStack(item, 16);
         player.setItemInHand(InteractionHand.MAIN_HAND, stack);
@@ -49,7 +49,7 @@ public final class TemplateSnowLayerGameTests {
             double height = layers == 1 ? 1 : (layers - 1) / 8D;
             var hit = new BlockHitResult(Vec3.atBottomCenterOf(clicked).add(0, height, 0), Direction.UP, clicked, false);
             if (layers > 1) {
-                helper.assertTrue(level.getBlockState(pos).useItemOn(stack, level, player, InteractionHand.MAIN_HAND, hit)
+                helper.assertTrue(PortBlockInteraction.stateUseItemOn(level.getBlockState(pos), stack, level, player, InteractionHand.MAIN_HAND, hit)
                                 == ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION,
                         "Template material interaction swallowed layer placement");
             }
@@ -95,7 +95,7 @@ public final class TemplateSnowLayerGameTests {
         var state = block.defaultBlockState();
         level.setBlock(pos, state, Block.UPDATE_ALL);
         var player = new ServerPlayer(level.getServer(), level,
-                new GameProfile(UUID.randomUUID(), "Layer safety"), ClientInformation.createDefault());
+                new GameProfile(UUID.randomUUID(), "Layer safety"));
         var hit = new BlockHitResult(Vec3.atBottomCenterOf(pos).add(0, 0.125, 0), Direction.UP, pos, false);
         var context = new BlockPlaceContext(player, InteractionHand.MAIN_HAND, new ItemStack(Blocks.STONE), hit);
         helper.assertTrue(!state.canBeReplaced(context), "Another block can erase the layer and its material");

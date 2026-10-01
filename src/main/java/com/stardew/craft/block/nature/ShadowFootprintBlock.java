@@ -23,7 +23,6 @@ import org.jetbrains.annotations.Nullable;
 
 /** Debug-only surface decal used to author the Shadow Guy's footprint trail. */
 public final class ShadowFootprintBlock extends HorizontalDirectionalBlock {
-    public static final MapCodec<ShadowFootprintBlock> CODEC = simpleCodec(ShadowFootprintBlock::new);
     public static final EnumProperty<Foot> FOOT = EnumProperty.create("foot", Foot.class);
     private static final VoxelShape SHAPE = Block.box(1.0D, 0.0D, 1.0D, 15.0D, 0.0016D, 15.0D);
 
@@ -32,11 +31,6 @@ public final class ShadowFootprintBlock extends HorizontalDirectionalBlock {
         registerDefaultState(stateDefinition.any()
                 .setValue(FACING, Direction.NORTH)
                 .setValue(FOOT, Foot.RIGHT));
-    }
-
-    @Override
-    protected MapCodec<? extends HorizontalDirectionalBlock> codec() {
-        return CODEC;
     }
 
     @Override
@@ -50,12 +44,12 @@ public final class ShadowFootprintBlock extends HorizontalDirectionalBlock {
     }
 
     @Override
-    protected boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
+    public boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
         return Block.canSupportCenter(level, pos.below(), Direction.UP);
     }
 
     @Override
-    protected BlockState updateShape(BlockState state, Direction direction, BlockState neighborState,
+    public BlockState updateShape(BlockState state, Direction direction, BlockState neighborState,
                                      LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
         if (direction == Direction.DOWN && !state.canSurvive(level, pos)) {
             return net.minecraft.world.level.block.Blocks.AIR.defaultBlockState();
@@ -64,7 +58,7 @@ public final class ShadowFootprintBlock extends HorizontalDirectionalBlock {
     }
 
     @Override
-    protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+    public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return SHAPE;
     }
 

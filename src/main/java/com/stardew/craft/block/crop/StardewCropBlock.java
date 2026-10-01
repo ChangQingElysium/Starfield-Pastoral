@@ -1,5 +1,6 @@
 package com.stardew.craft.block.crop;
 
+import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.api.v1.agriculture.StardewAgricultureDataApi;
 import com.stardew.craft.api.v1.agriculture.StardewCropData;
 import com.stardew.craft.block.shape.ModelVoxelShapeCache;
@@ -49,13 +50,14 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import com.stardew.craft.manager.CropGrowthManager;
+import com.stardew.craft.port.PortBlockInteraction;
 
 /**
  * 星露谷作物基类
  * 完全照抄原版Crop.cs的机制
  */
 @SuppressWarnings("null")
-public abstract class StardewCropBlock extends Block {
+public abstract class StardewCropBlock extends Block implements PortBlockInteraction {
 
     private static final Map<String, Integer> CROP_FARMING_XP = new HashMap<>();
     private static final Map<String, String> CROP_XP_ALIASES = new HashMap<>();
@@ -175,13 +177,13 @@ public abstract class StardewCropBlock extends Block {
     }
 
     @Override
-    protected boolean propagatesSkylightDown(BlockState state, BlockGetter level, BlockPos pos) {
+    public boolean propagatesSkylightDown(BlockState state, BlockGetter level, BlockPos pos) {
         // Selection bounds depend on soil/pot placement. Lighting must not load those chunks.
         return true;
     }
 
     @Override
-    protected int getLightBlock(BlockState state, BlockGetter level, BlockPos pos) {
+    public int getLightBlock(BlockState state, BlockGetter level, BlockPos pos) {
         return 0;
     }
 
@@ -410,7 +412,7 @@ public abstract class StardewCropBlock extends Block {
      */
     @SuppressWarnings("null")
     @Override
-    protected boolean canSurvive(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") net.minecraft.world.level.LevelReader level, @SuppressWarnings("null") BlockPos pos) {
+    public boolean canSurvive(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") net.minecraft.world.level.LevelReader level, @SuppressWarnings("null") BlockPos pos) {
         BlockPos belowPos = pos.below();
         @SuppressWarnings("null")
         BlockState belowState = level.getBlockState(belowPos);
@@ -454,7 +456,7 @@ public abstract class StardewCropBlock extends Block {
 
     @SuppressWarnings("null")
     @Override
-    protected VoxelShape getShape(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") BlockGetter level, @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") CollisionContext context) {
+    public VoxelShape getShape(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") BlockGetter level, @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") CollisionContext context) {
         VoxelShape modelShape = CropModelShapes.shape(state, level, pos);
         if (modelShape != null) return modelShape;
         if (com.stardew.craft.block.utility.GardenPotBlock.isPottedPlant(level, pos, state)) {
@@ -466,7 +468,7 @@ public abstract class StardewCropBlock extends Block {
 
     @SuppressWarnings("null")
     @Override
-    protected VoxelShape getCollisionShape(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") BlockGetter level, @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") CollisionContext context) {
+    public VoxelShape getCollisionShape(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") BlockGetter level, @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") CollisionContext context) {
         if (com.stardew.craft.block.utility.GardenPotBlock.isPottedPlant(level, pos, state)) {
             return net.minecraft.world.phys.shapes.Shapes.empty();
         }
@@ -520,15 +522,22 @@ public abstract class StardewCropBlock extends Block {
      */
     @SuppressWarnings("null")
     @Override
-    protected BlockState updateShape(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") net.minecraft.core.Direction direction, @SuppressWarnings("null") BlockState neighborState, @SuppressWarnings("null") net.minecraft.world.level.LevelAccessor level, @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") BlockPos neighborPos) {
+    public BlockState updateShape(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") net.minecraft.core.Direction direction, @SuppressWarnings("null") BlockState neighborState, @SuppressWarnings("null") net.minecraft.world.level.LevelAccessor level, @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") BlockPos neighborPos) {
         return !state.canSurvive(level, pos) ? Blocks.AIR.defaultBlockState() : super.updateShape(state, direction, neighborState, level, pos, neighborPos);
     }
     
     @SuppressWarnings("null")
     @Override
-    public ItemStack getCloneItemStack(@SuppressWarnings("null") net.minecraft.world.level.LevelReader level, @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") BlockState state) {
+    public ItemStack getCloneItemStack(@SuppressWarnings("null") BlockGetter level, @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") BlockState state) {
         // 返回作物物品作为图标（防风草）
         return new ItemStack(this.getCropItem().get());
+    }
+
+    // PORT(1.20.1): replay the 1.21 useItemOn/useWithoutItem dispatch.
+    @Override
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player,
+            InteractionHand hand, BlockHitResult hit) {
+        return PortBlockInteraction.dispatch(this, state, level, pos, player, hand, hit);
     }
 
     /**
@@ -536,13 +545,13 @@ public abstract class StardewCropBlock extends Block {
      */
     @SuppressWarnings("null")
     @Override
-    protected InteractionResult useWithoutItem(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") Level level, @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") Player player, @SuppressWarnings("null") BlockHitResult hitResult) {
+    public InteractionResult useWithoutItem(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") Level level, @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") Player player, @SuppressWarnings("null") BlockHitResult hitResult) {
         return tryRightClickHarvest(state, level, pos, player);
     }
 
     @SuppressWarnings("null")
     @Override
-    protected ItemInteractionResult useItemOn(@SuppressWarnings("null") ItemStack stack, @SuppressWarnings("null") BlockState state,
+    public ItemInteractionResult useItemOn(@SuppressWarnings("null") ItemStack stack, @SuppressWarnings("null") BlockState state,
                                               @SuppressWarnings("null") Level level, @SuppressWarnings("null") BlockPos pos,
                                               @SuppressWarnings("null") Player player, @SuppressWarnings("null") InteractionHand hand,
                                               @SuppressWarnings("null") BlockHitResult hitResult) {
@@ -615,7 +624,7 @@ public abstract class StardewCropBlock extends Block {
      */
     @SuppressWarnings("null")
     @Override
-    public BlockState playerWillDestroy(@SuppressWarnings("null") Level level, @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") BlockState state, @SuppressWarnings("null") Player player) {
+    public void playerWillDestroy(@SuppressWarnings("null") Level level, @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") BlockState state, @SuppressWarnings("null") Player player) {
         if (!level.isClientSide && level instanceof ServerLevel serverLevel) {
             BlockPos interactionPos = resolveMultiBlockRootPos(level, pos, state);
             BlockState interactionState = level.getBlockState(interactionPos);
@@ -641,7 +650,7 @@ public abstract class StardewCropBlock extends Block {
                 }
             }
         }
-        return super.playerWillDestroy(level, pos, state, player);
+        super.playerWillDestroy(level, pos, state, player);
     }
 
     /**
@@ -981,7 +990,7 @@ public abstract class StardewCropBlock extends Block {
     protected static void setFlowerVariantModelData(ItemStack stack, int color) {
         int quality = QualityHelper.getQuality(stack);
         int cmd = 100 + (quality * 10) + Math.max(0, color);
-        stack.set(com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_MODEL_DATA,
+        PortItemData.set(stack, com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_MODEL_DATA,
                 new com.stardew.craft.port.net.minecraft.world.item.component.CustomModelData(cmd));
     }
     
@@ -1310,13 +1319,13 @@ public abstract class StardewCropBlock extends Block {
      * 检查能否存活
      */
     // @Override
-    // protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean isMoving) {
+    // public void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean isMoving) {
     //    // Removed unsafe onPlace check. Rely on canSurvive and updateShape.
     // }
     
     @SuppressWarnings("null")
     @Override
-    protected void onPlace(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") Level level, @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") BlockState oldState, boolean isMoving) {
+    public void onPlace(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") Level level, @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") BlockState oldState, boolean isMoving) {
         boolean pottedHere = com.stardew.craft.block.utility.GardenPotBlock.isPottedPlant(level, pos, state);
         if (!level.isClientSide && state.getValue(POTTED) != pottedHere) {
             state = state.setValue(POTTED, pottedHere);
@@ -1360,7 +1369,7 @@ public abstract class StardewCropBlock extends Block {
     
     @SuppressWarnings("null")
     @Override
-    protected void onRemove(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") Level level, @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") BlockState newState, boolean isMoving) {
+    public void onRemove(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") Level level, @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") BlockState newState, boolean isMoving) {
         if (!state.is(newState.getBlock())) {
             // 被移除 (或者变成别的方块了)，从管理器移除
             if (level instanceof ServerLevel serverLevel) {

@@ -1,5 +1,6 @@
 package com.stardew.craft.block.mine;
 
+import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.block.shape.ModelVoxelShapeCache;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -17,10 +18,14 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.*;
 
 import javax.annotation.Nullable;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.Level;
+import com.stardew.craft.port.PortBlockInteraction;
 
 /** Four-high mine return ladder. All sections retain the existing exit interaction. */
 @SuppressWarnings("null")
-public class MineExitBlock extends Block {
+public class MineExitBlock extends Block implements PortBlockInteraction {
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
     public static final EnumProperty<MineLadderBlock.Theme> THEME = EnumProperty.create("theme", MineLadderBlock.Theme.class);
     public static final IntegerProperty TIER = IntegerProperty.create("tier", 0, 3);
@@ -60,7 +65,7 @@ public class MineExitBlock extends Block {
             if (tier > 0 && !level.getBlockState(cell).canBeReplaced(context)) return null;
             if (!level.getBlockState(wall).isFaceSturdy(level, wall, facing)) return null;
         }
-        var theme = context.getItemInHand().getOrDefault(com.stardew.craft.port.net.minecraft.core.component.DataComponents.BLOCK_STATE,
+        var theme = PortItemData.getOrDefault(context.getItemInHand(), com.stardew.craft.port.net.minecraft.core.component.DataComponents.BLOCK_STATE,
                 com.stardew.craft.port.net.minecraft.world.item.component.BlockItemStateProperties.EMPTY).get(THEME);
         if (theme == null) {
             theme = MineLadderBlock.Theme.EARTH;
@@ -84,7 +89,7 @@ public class MineExitBlock extends Block {
         for (int tier = 1; tier < 4; tier++) level.setBlock(pos.above(tier), state.setValue(TIER, tier), 3);
     }
 
-    @Override protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState replacement, boolean moving) {
+    @Override public void onRemove(BlockState state, Level level, BlockPos pos, BlockState replacement, boolean moving) {
         if (!replacement.is(this) && !level.isClientSide) {
             BlockPos root = pos.below(state.getValue(TIER));
             for (int tier = 0; tier < 4; tier++) {
@@ -110,9 +115,9 @@ public class MineExitBlock extends Block {
         return COLLISIONS[state.getValue(TIER)][ModelVoxelShapeCache.horizontalIndex(state.getValue(FACING))];
     }
 
-    @Override public ItemStack getCloneItemStack(LevelReader level, BlockPos pos, BlockState state) {
+    @Override public ItemStack getCloneItemStack(net.minecraft.world.level.BlockGetter level, BlockPos pos, BlockState state) {
         ItemStack stack = new ItemStack(this);
-        stack.set(com.stardew.craft.port.net.minecraft.core.component.DataComponents.BLOCK_STATE,
+        PortItemData.set(stack, com.stardew.craft.port.net.minecraft.core.component.DataComponents.BLOCK_STATE,
                 com.stardew.craft.port.net.minecraft.world.item.component.BlockItemStateProperties.EMPTY.with(THEME, state));
         return stack;
     }
@@ -125,13 +130,20 @@ public class MineExitBlock extends Block {
         return rotate(state, mirror.getRotation(state.getValue(FACING)));
     }
 
+    // PORT(1.20.1): replay the 1.21 useItemOn/useWithoutItem dispatch.
+    @Override
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player,
+            InteractionHand hand, BlockHitResult hit) {
+        return PortBlockInteraction.dispatch(this, state, level, pos, player, hand, hit);
+    }
+
     /**
      * 右键交互 — 映射自 SDV MineShaft.checkAction case 115 (梯子)：
      * createQuestionDialogue(" ", { "Leave", "Do nothing" }, "ExitMine");
      */
     @SuppressWarnings("null")
     @Override
-    protected InteractionResult useWithoutItem(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") Level level, @SuppressWarnings("null") BlockPos pos, 
+    public InteractionResult useWithoutItem(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") Level level, @SuppressWarnings("null") BlockPos pos, 
                                                @SuppressWarnings("null")    Player player, @SuppressWarnings("null")    BlockHitResult hitResult) {
         if (level.dimension() != com.stardew.craft.core.ModMiningDimensions.STARDEW_MINING) {
             return InteractionResult.FAIL;

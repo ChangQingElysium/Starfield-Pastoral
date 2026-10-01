@@ -1,5 +1,6 @@
 package com.stardew.craft.client.model;
 
+import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.block.mine.MineBuildingTheme;
 import com.stardew.craft.block.mine.MinePlanksBlock;
@@ -14,7 +15,7 @@ import net.minecraft.world.item.ItemStack;
 import com.stardew.craft.port.net.minecraft.world.item.component.BlockItemStateProperties;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import net.minecraftforge.client.event.ModelEvent;
 import net.minecraftforge.client.model.BakedModelWrapper;
 import javax.annotation.Nullable;
@@ -55,7 +56,7 @@ public final class MineThemeItemModels {
             overrides = new ItemOverrides() {
                 @Override public BakedModel resolve(BakedModel model, ItemStack stack, @Nullable ClientLevel level,
                                                     @Nullable LivingEntity entity, int seed) {
-                    var saved = stack.getOrDefault(DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY);
+                    var saved = PortItemData.getOrDefault(stack, DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY);
                     var theme = saved.get(MineBuildingTheme.PROPERTY);
                     Integer v = saved.get(MinePlanksBlock.VARIANT);
                     BakedModel[] row = models[theme == null ? 0 : theme.ordinal()];

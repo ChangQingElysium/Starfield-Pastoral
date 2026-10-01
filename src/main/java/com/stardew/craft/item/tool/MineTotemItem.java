@@ -101,7 +101,7 @@ public class MineTotemItem extends Item implements IStardewItem {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, @javax.annotation.Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
         tooltip.add(Component.translatable("item.stardewcraft.mine_totem.cooldown")
             .withStyle(ChatFormatting.DARK_GRAY));
     }

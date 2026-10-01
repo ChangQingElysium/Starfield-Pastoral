@@ -1,5 +1,6 @@
 package com.stardew.craft.entity.junimo;
 
+import com.stardew.craft.port.PortItemStacks;
 import com.stardew.craft.sound.ModSounds;
 import com.stardew.craft.entity.npc.NpcPathNavigation;
 import net.minecraft.core.BlockPos;
@@ -138,14 +139,14 @@ public class JunimoEntity extends PathfinderMob implements GeoEntity {
     // ── Synched Data ────────────────────────────────────────────
 
     @Override
-    protected void defineSynchedData(SynchedEntityData.Builder builder) {
-        super.defineSynchedData(builder);
-        builder.define(DATA_COLOR, DEFAULT_COLOR);
-        builder.define(DATA_HOLDING_TYPE, HOLDING_NONE);
-        builder.define(DATA_BUNDLE_COLOR, 0x00FF00); // default Lime
-        builder.define(DATA_HELD_ITEM, ItemStack.EMPTY);
-        builder.define(DATA_PRISMATIC, false);
-        builder.define(DATA_HARVEST_WORKER_NUMBER, -1);
+    protected void defineSynchedData() {
+        super.defineSynchedData();
+        this.entityData.define(DATA_COLOR, DEFAULT_COLOR);
+        this.entityData.define(DATA_HOLDING_TYPE, HOLDING_NONE);
+        this.entityData.define(DATA_BUNDLE_COLOR, 0x00FF00); // default Lime
+        this.entityData.define(DATA_HELD_ITEM, ItemStack.EMPTY);
+        this.entityData.define(DATA_PRISMATIC, false);
+        this.entityData.define(DATA_HARVEST_WORKER_NUMBER, -1);
     }
 
     public int getJunimoColor() {
@@ -249,7 +250,7 @@ public class JunimoEntity extends PathfinderMob implements GeoEntity {
         ListTag carried = new ListTag();
         for (ItemStack stack : carriedHarvest) {
             if (!stack.isEmpty()) {
-                carried.add(stack.save(level().registryAccess()));
+                carried.add(PortItemStacks.save(stack, level().registryAccess()));
             }
         }
         tag.put("CarriedHarvest", carried);
@@ -286,7 +287,7 @@ public class JunimoEntity extends PathfinderMob implements GeoEntity {
         carriedHarvest.clear();
         ListTag carried = tag.getList("CarriedHarvest", Tag.TAG_COMPOUND);
         for (int i = 0; i < carried.size(); i++) {
-            ItemStack stack = ItemStack.parse(level().registryAccess(), carried.getCompound(i))
+            ItemStack stack = PortItemStacks.parse(level().registryAccess(), carried.getCompound(i))
                     .orElse(ItemStack.EMPTY);
             if (!stack.isEmpty()) {
                 carriedHarvest.add(stack);

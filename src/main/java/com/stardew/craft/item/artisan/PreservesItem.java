@@ -1,5 +1,6 @@
 package com.stardew.craft.item.artisan;
 
+import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.api.v1.item.StardewItemDataApi;
 import com.stardew.craft.item.IStardewItem;
@@ -376,18 +377,18 @@ public class PreservesItem extends Item implements IStardewItem {
 
     @SuppressWarnings("null")
     private static CompoundTag getOrCreateTag(ItemStack stack) {
-        CustomData data = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY);
+        CustomData data = PortItemData.getOrDefault(stack, DataComponents.CUSTOM_DATA, CustomData.EMPTY);
         return data.copyTag();
     }
 
     @SuppressWarnings("null")
     private static void applyTag(ItemStack stack, CompoundTag tag) {
-        stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+        PortItemData.set(stack, DataComponents.CUSTOM_DATA, CustomData.of(tag));
     }
 
     @SuppressWarnings("null")
     private static int getIntTag(ItemStack stack, String key, int fallback) {
-        CustomData data = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY);
+        CustomData data = PortItemData.getOrDefault(stack, DataComponents.CUSTOM_DATA, CustomData.EMPTY);
         CompoundTag tag = data.copyTag();
         if (!tag.contains(key)) {
             return fallback;
@@ -397,7 +398,7 @@ public class PreservesItem extends Item implements IStardewItem {
 
     @SuppressWarnings("null")
     private static String getStringTag(ItemStack stack, String key, String fallback) {
-        CustomData data = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY);
+        CustomData data = PortItemData.getOrDefault(stack, DataComponents.CUSTOM_DATA, CustomData.EMPTY);
         CompoundTag tag = data.copyTag();
         if (!tag.contains(key)) {
             return fallback;

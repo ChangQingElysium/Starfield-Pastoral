@@ -5,7 +5,7 @@ import com.stardew.craft.block.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import net.minecraftforge.event.level.ChunkEvent;
 
 /** Old static wizard cauldrons have no saved block-entity tag, on either side. */

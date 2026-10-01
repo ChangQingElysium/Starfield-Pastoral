@@ -1,5 +1,6 @@
 package com.stardew.craft.blockentity;
 
+import com.stardew.craft.port.PortItemStacks;
 import com.stardew.craft.production.MachineProductionData;
 import com.stardew.craft.api.v1.internal.machine.StardewArtisanResolverRegistry;
 import com.stardew.craft.item.ModItems;
@@ -371,10 +372,10 @@ public class CaskBlockEntity extends BlockEntity implements UtilityAutomationAcc
 
     @SuppressWarnings("null")
     @Override
-    protected void saveAdditional(@SuppressWarnings("null") CompoundTag tag, @SuppressWarnings("null") net.minecraft.core.HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
+    protected void saveAdditional(@SuppressWarnings("null") CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        super.saveAdditional(tag);
         if (!product.isEmpty()) {
-            tag.put(TAG_PRODUCT, product.save(registries));
+            tag.put(TAG_PRODUCT, PortItemStacks.save(product, registries));
         }
         tag.putBoolean(TAG_READY, ready);
         tag.putFloat(TAG_DAYS_TO_MATURE, daysToMature);
@@ -384,9 +385,9 @@ public class CaskBlockEntity extends BlockEntity implements UtilityAutomationAcc
 
     @SuppressWarnings("null")
     @Override
-    protected void loadAdditional(@SuppressWarnings("null") CompoundTag tag, @SuppressWarnings("null") net.minecraft.core.HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
-        product = tag.contains(TAG_PRODUCT) ? ItemStack.parse(registries, tag.getCompound(TAG_PRODUCT)).orElse(ItemStack.EMPTY) : ItemStack.EMPTY;
+    public void load(@SuppressWarnings("null") CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        super.load(tag);
+        product = tag.contains(TAG_PRODUCT) ? PortItemStacks.parse(registries, tag.getCompound(TAG_PRODUCT)).orElse(ItemStack.EMPTY) : ItemStack.EMPTY;
         ready = false;
         daysToMature = tag.contains(TAG_DAYS_TO_MATURE) ? tag.getFloat(TAG_DAYS_TO_MATURE) : -1f;
         agingRate = tag.contains(TAG_AGING_RATE) ? tag.getFloat(TAG_AGING_RATE) : 1f;
@@ -403,9 +404,9 @@ public class CaskBlockEntity extends BlockEntity implements UtilityAutomationAcc
     }
 
     @Override
-    public CompoundTag getUpdateTag(@SuppressWarnings("null") net.minecraft.core.HolderLookup.Provider registries) {
+    public CompoundTag getUpdateTag() { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
         CompoundTag tag = new CompoundTag();
-        saveAdditional(tag, registries);
+        saveAdditional(tag);
         return tag;
     }
 

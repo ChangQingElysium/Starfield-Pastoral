@@ -42,7 +42,7 @@ public class MuseumDonationData extends SavedData {
                 .overworld()
                 .getDataStorage()
                 .computeIfAbsent(
-                        new SavedData.Factory<>(MuseumDonationData::new, MuseumDonationData::load),
+                        com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(MuseumDonationData::new, MuseumDonationData::load)), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(MuseumDonationData::new, MuseumDonationData::load)),
                         DATA_NAME
                 );
     }

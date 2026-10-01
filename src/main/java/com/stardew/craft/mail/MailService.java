@@ -447,7 +447,7 @@ public class MailService {
             ServerPlayer player,
             PlayerStardewData data
     ) {
-        if (!player.isFakePlayer()) {
+        if (!(player instanceof net.minecraftforge.common.util.FakePlayer)) { // PORT(1.20.1): Player#isFakePlayer is MinecraftForge-only
             PlayerDataEventHandler.syncPlayerData(player, data);
         }
     }

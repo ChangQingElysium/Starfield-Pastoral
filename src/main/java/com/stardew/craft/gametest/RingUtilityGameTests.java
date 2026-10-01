@@ -10,7 +10,6 @@ import com.stardew.craft.player.PlayerMagnetHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
-import com.stardew.craft.port.net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
@@ -107,7 +106,7 @@ public final class RingUtilityGameTests {
                 helper.getLevel().setBlock(wall, previous, 2);
             }
             // Thrower is provenance, not pickup ownership.
-            item.setThrower(player(helper));
+            item.setThrower(player(helper).getUUID());
             PlayerMagnetHandler.tick(player);
             helper.assertTrue(item.getDeltaMovement().x < 0, "an eligible item was not attracted");
             helper.assertTrue(item.getDeltaMovement().length() < 0.15, "attraction began with an abrupt impulse");
@@ -166,7 +165,7 @@ public final class RingUtilityGameTests {
 
     private static ServerPlayer player(GameTestHelper helper) {
         ServerPlayer player = new ServerPlayer(helper.getLevel().getServer(), helper.getLevel(),
-                new GameProfile(UUID.randomUUID(), "Ring utility test"), ClientInformation.createDefault());
+                new GameProfile(UUID.randomUUID(), "Ring utility test"));
         BlockPos pos = helper.absolutePos(new BlockPos(8, 2, 8));
         player.setPos(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
         return player;

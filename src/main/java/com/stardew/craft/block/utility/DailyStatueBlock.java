@@ -30,9 +30,10 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import com.stardew.craft.port.PortBlockInteraction;
 
 /** A placeable utility statue which produces one source-faithful daily reward. */
-public final class DailyStatueBlock extends Block implements EntityBlock {
+public final class DailyStatueBlock extends Block implements EntityBlock, PortBlockInteraction {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
 
     private final DailyStatueBlockEntity.Kind kind;
@@ -82,7 +83,7 @@ public final class DailyStatueBlock extends Block implements EntityBlock {
     }
 
     @Override
-    protected List<ItemStack> getDrops(BlockState state,
+    public List<ItemStack> getDrops(BlockState state,
                                       net.minecraft.world.level.storage.loot.LootParams.Builder params) {
         return List.of(new ItemStack(kind == DailyStatueBlockEntity.Kind.PERFECTION
                 ? ModBlocks.STATUE_OF_PERFECTION.get()
@@ -107,8 +108,15 @@ public final class DailyStatueBlock extends Block implements EntityBlock {
                         tickLevel, pos, tickState, (DailyStatueBlockEntity) blockEntity);
     }
 
+    // PORT(1.20.1): replay the 1.21 useItemOn/useWithoutItem dispatch.
     @Override
-    protected ItemInteractionResult useItemOn(
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player,
+            InteractionHand hand, BlockHitResult hit) {
+        return PortBlockInteraction.dispatch(this, state, level, pos, player, hand, hit);
+    }
+
+    @Override
+    public ItemInteractionResult useItemOn(
             ItemStack stack, BlockState state, Level level, BlockPos pos,
             Player player, InteractionHand hand, BlockHitResult hit) {
         if (level.isClientSide) {
@@ -120,7 +128,7 @@ public final class DailyStatueBlock extends Block implements EntityBlock {
     }
 
     @Override
-    protected InteractionResult useWithoutItem(
+    public InteractionResult useWithoutItem(
             BlockState state, Level level, BlockPos pos,
             Player player, BlockHitResult hit) {
         if (level.isClientSide) {

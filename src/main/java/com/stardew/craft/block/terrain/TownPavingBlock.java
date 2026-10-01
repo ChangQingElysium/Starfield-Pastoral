@@ -8,16 +8,10 @@ import net.minecraft.world.level.block.state.StateDefinition;
 
 /** Full stone cube; only the chosen stone arrangement is persisted. */
 public final class TownPavingBlock extends Block {
-    public static final MapCodec<TownPavingBlock> CODEC = simpleCodec(TownPavingBlock::new);
 
     public TownPavingBlock(Properties properties) {
         super(properties);
         registerDefaultState(defaultBlockState().setValue(TerrainVariants.PAVING, 0));
-    }
-
-    @Override
-    public MapCodec<TownPavingBlock> codec() {
-        return CODEC;
     }
 
     @Override

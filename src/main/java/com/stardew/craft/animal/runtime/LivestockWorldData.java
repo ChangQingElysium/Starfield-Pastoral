@@ -1,5 +1,6 @@
 package com.stardew.craft.animal.runtime;
 
+import com.stardew.craft.port.PortItemStacks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -58,7 +59,7 @@ public final class LivestockWorldData extends SavedData {
         @Override public CompoundTag stackData(){return stackData.copy();}
         public Product(UUID id,UUID animal,UUID home,boolean large,int quality,String item,int count,BlockPos position){this(id,animal,home,large,quality,item,count,position,new CompoundTag());}
         public static Product fromStack(net.minecraft.server.level.ServerLevel level,LivestockRecord animal,net.minecraft.world.item.ItemStack stack){
-            return new Product(UUID.randomUUID(),animal.id(),animal.home(),false,com.stardew.craft.item.quality.QualityHelper.getQuality(stack),net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(stack.getItem()).toString(),stack.getCount(),null,(CompoundTag)stack.save(level.registryAccess()));
+            return new Product(UUID.randomUUID(),animal.id(),animal.home(),false,com.stardew.craft.item.quality.QualityHelper.getQuality(stack),net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(stack.getItem()).toString(),stack.getCount(),null,(CompoundTag)PortItemStacks.save(stack, level.registryAccess()));
         }
         public Product(UUID id, UUID animal, UUID home, boolean large, int quality) { this(id, animal, home, large, quality, large ? "large_egg_white" : "egg_white", 1, null); }
         public CompoundTag save() {
@@ -93,7 +94,7 @@ public final class LivestockWorldData extends SavedData {
     }
     public static LivestockWorldData get(MinecraftServer server) {
         if (!server.isSameThread()) throw new IllegalStateException("Livestock access requires server thread");
-        return server.overworld().getDataStorage().computeIfAbsent(new Factory<>(LivestockWorldData::new, LivestockWorldData::load), "stardew_livestock");
+        return server.overworld().getDataStorage().computeIfAbsent(com.stardew.craft.port.PortSavedData.loader(new Factory<>(LivestockWorldData::new, LivestockWorldData::load)), com.stardew.craft.port.PortSavedData.constructor(new Factory<>(LivestockWorldData::new, LivestockWorldData::load)), "stardew_livestock");
     }
     public void removeFarm(UUID farm, Set<UUID> homes) {
         var removed = animals.values().stream().filter(a -> a.farm().equals(farm)).map(LivestockRecord::id).collect(java.util.stream.Collectors.toSet());
@@ -119,7 +120,7 @@ public final class LivestockWorldData extends SavedData {
         if (pending.farm != null) { hay(pending.farm, pending.hayAfter); feedDays.put(pending.home, pending.day); }
         pending = null; setDirty();
     }
-    @Override public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
+    @Override public CompoundTag save(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
         tag.putInt("Format", 1); tag.putLong("NextRandomId", nextRandomId);
         var imported = new CompoundTag(); legacyImports.forEach(imported::putUUID); tag.put("LegacyImports", imported);
         var rows = new ListTag(); animals.values().forEach(a -> rows.add(a.save())); tag.put("Animals", rows);

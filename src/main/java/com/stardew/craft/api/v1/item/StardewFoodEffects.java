@@ -15,8 +15,8 @@ public final class StardewFoodEffects {
         if (stack == null || stack.isEmpty()) {
             return Optional.empty();
         }
-        return Optional.ofNullable(BuiltInRegistries.ITEM.wrapAsHolder(stack.getItem())
-                        .getData(StardewDataMaps.FOOD_EFFECTS))
+        return Optional.ofNullable(com.stardew.craft.port.PortDataMaps.getData(
+                        BuiltInRegistries.ITEM.wrapAsHolder(stack.getItem()), StardewDataMaps.FOOD_EFFECTS))
                 .filter(data -> !data.effects().isEmpty());
     }
 }

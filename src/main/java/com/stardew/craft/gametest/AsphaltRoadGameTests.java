@@ -1,5 +1,6 @@
 package com.stardew.craft.gametest;
 
+import com.stardew.craft.port.PortItemData;
 import com.mojang.authlib.GameProfile;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.block.ModBlocks;
@@ -81,7 +82,7 @@ public final class AsphaltRoadGameTests {
         for(int variant=0;variant<3;variant++) {
             var source=block.defaultBlockState().setValue(TerrainVariants.ASPHALT,variant);var plain=new ItemStack(block);
             var fixed=TerrainVariants.fixedCopy(plain,source);
-            helper.assertTrue(!plain.has(DataComponents.BLOCK_STATE),"Ctrl-copy altered ordinary items");
+            helper.assertTrue(!PortItemData.has(plain, DataComponents.BLOCK_STATE),"Ctrl-copy altered ordinary items");
             player.setItemInHand(InteractionHand.MAIN_HAND,fixed);
             for(int repeat=0;repeat<4;repeat++) {
                 level.setBlock(pos,Blocks.AIR.defaultBlockState(),2);

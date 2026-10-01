@@ -10,7 +10,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
-import com.stardew.craft.port.net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.BlockItem;
@@ -47,7 +46,7 @@ public final class MineMasonryGameTests {
             helper.assertTrue(state.getValue(MineMasonryBlock.CONNECTIONS) == MineMasonryBlock.canonicalMask(mask), "Stale edge or diagonal at " + mask);
             helper.assertTrue(state.getValue(MineMasonryBlock.VARIANT) == 1, "Connection update erased the surface variant");
         }
-        var player = new ServerPlayer(level.getServer(), level, new GameProfile(UUID.randomUUID(), "Paving test"), ClientInformation.createDefault());
+        var player = new ServerPlayer(level.getServer(), level, new GameProfile(UUID.randomUUID(), "Paving test"));
         player.getAbilities().instabuild = true;
         var stack = paving.getCloneItemStack(level, center, level.getBlockState(center));
         level.setBlock(center, Blocks.AIR.defaultBlockState(), 3);
@@ -69,7 +68,7 @@ public final class MineMasonryGameTests {
         var level = helper.getLevel();
         var elevator = (ElevatorBlock) ModBlocks.ELEVATOR.get();
         BlockPos main = helper.absolutePos(new BlockPos(8, 3, 8));
-        var player = new ServerPlayer(level.getServer(), level, new GameProfile(UUID.randomUUID(), "Elevator test"), ClientInformation.createDefault());
+        var player = new ServerPlayer(level.getServer(), level, new GameProfile(UUID.randomUUID(), "Elevator test"));
         player.getAbilities().instabuild = true;
         for (int x = -3; x <= 3; x++) for (int z = -3; z <= 3; z++) for (int y = -1; y < 5; y++) {
             level.setBlock(main.offset(x,y,z), y == -1 ? Blocks.STONE.defaultBlockState() : Blocks.AIR.defaultBlockState(), 3);

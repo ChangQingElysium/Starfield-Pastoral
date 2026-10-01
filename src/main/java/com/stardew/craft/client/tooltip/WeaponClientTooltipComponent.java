@@ -52,7 +52,7 @@ public final class WeaponClientTooltipComponent implements ClientTooltipComponen
         return a.data() == b.data() && a.expanded() == b.expanded()
                 && a.screenWidth() == b.screenWidth() && a.screenHeight() == b.screenHeight()
                 && a.title().equals(b.title()) && a.extras().equals(b.extras())
-                && net.minecraft.world.item.ItemStack.isSameItemSameComponents(a.stack(), b.stack());
+                && net.minecraft.world.item.ItemStack.isSameItemSameTags(a.stack(), b.stack());
     }
 
     public void setScroll(int scroll) { this.scroll = scroll; }

@@ -1,5 +1,6 @@
 package com.stardew.craft.integration.jade;
 
+import com.stardew.craft.port.PortItemStacks;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.block.utility.AbstractTwoBlockUtilityBlock;
 import com.stardew.craft.blockentity.UtilityMachineInfo;
@@ -66,14 +67,14 @@ public enum GenericUtilityMachineJadeProvider implements IBlockComponentProvider
             if (inputId != null) {
                 tag.putString(NBT_INPUT_ITEM, inputId.toString());
             }
-            tag.put(NBT_INPUT_STACK, input.save(accessor.getLevel().registryAccess()));
+            tag.put(NBT_INPUT_STACK, PortItemStacks.save(input, accessor.getLevel().registryAccess()));
         }
         if (!output.isEmpty()) {
             ResourceLocation productId = BuiltInRegistries.ITEM.getKey(output.getItem());
             if (productId != null) {
                 tag.putString(NBT_PRODUCT_ITEM, productId.toString());
             }
-            tag.put(NBT_PRODUCT_STACK, output.save(accessor.getLevel().registryAccess()));
+            tag.put(NBT_PRODUCT_STACK, PortItemStacks.save(output, accessor.getLevel().registryAccess()));
         }
 
         if (info.hasRemainingTimeForDisplay()) {
@@ -159,7 +160,7 @@ public enum GenericUtilityMachineJadeProvider implements IBlockComponentProvider
         if (tag == null || tag.isEmpty()) {
             return ItemStack.EMPTY;
         }
-        return ItemStack.parse(accessor.getLevel().registryAccess(), tag).orElse(ItemStack.EMPTY);
+        return PortItemStacks.parse(accessor.getLevel().registryAccess(), tag).orElse(ItemStack.EMPTY);
     }
 
     @SuppressWarnings("null")

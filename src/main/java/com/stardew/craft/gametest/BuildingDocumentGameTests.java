@@ -1,5 +1,7 @@
 package com.stardew.craft.gametest;
 
+import com.stardew.craft.port.PortItemStacks;
+import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.building.runtime.*;
 import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.greenhouse.GreenhouseBuildings;
@@ -112,7 +114,7 @@ public final class BuildingDocumentGameTests {
         item.use(level, player, InteractionHand.MAIN_HAND);
         var expected=BuildingBlueprintItem.targetAnchor(stack,ground,BuildingBlueprintItem.facing(stack));
         h.assertTrue(stack.getCount() == 1 && expected.equals(BuildingBlueprintItem.pinned(stack, level)), "First use consumed the document or refused an invalid site");
-        var restored = ItemStack.parseOptional(level.registryAccess(), (CompoundTag) stack.save(level.registryAccess()));
+        var restored = PortItemStacks.parseOptional(level.registryAccess(), (CompoundTag) PortItemStacks.save(stack, level.registryAccess()));
         h.assertTrue(BuildingBlueprintItem.pinned(restored, level).equals(expected), "Pinned preview was lost on item reload");
         h.runAfterDelay(1, () -> {
             item.use(level, player, InteractionHand.MAIN_HAND);
@@ -135,7 +137,7 @@ public final class BuildingDocumentGameTests {
         BuildingBlueprintItem.rotate(player, InteractionHand.MAIN_HAND, false);
         h.assertTrue(BuildingBlueprintItem.facing(stack) == Direction.WEST, "Clockwise rotation is reversed");
         player.setYRot(45);
-        var restored = ItemStack.parseOptional(h.getLevel().registryAccess(), (CompoundTag) stack.save(h.getLevel().registryAccess()));
+        var restored = PortItemStacks.parseOptional(h.getLevel().registryAccess(), (CompoundTag) PortItemStacks.save(stack, h.getLevel().registryAccess()));
         h.assertTrue(BuildingBlueprintItem.facing(restored) == Direction.WEST, "Rotation follows camera or disappears on reload");
         BuildingBlueprintItem.rotate(player, InteractionHand.MAIN_HAND, true);
         h.assertTrue(BuildingBlueprintItem.facing(stack) == Direction.SOUTH, "Counterclockwise rotation did not undo the turn");
@@ -236,7 +238,7 @@ public final class BuildingDocumentGameTests {
         var stack=new ItemStack(ModItems.COOP_BLUEPRINT.get());BuildingBlueprintItem.bindMove(stack,record);
         player.setItemInHand(InteractionHand.MAIN_HAND,stack);
         var tag=BuildingBlueprintItem.draft(stack);tag.putLong("DraftAnchor",new BlockPos(500,90,500).asLong());tag.putString("DraftDimension","minecraft:the_nether");
-        stack.set(com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_DATA,com.stardew.craft.port.net.minecraft.world.item.component.CustomData.of(tag));
+        PortItemData.set(stack, com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_DATA,com.stardew.craft.port.net.minecraft.world.item.component.CustomData.of(tag));
         BuildingDrafts.get(player.server).write(stack);
         BuildingBlueprintItem.cancel(player,InteractionHand.MAIN_HAND,false);
         h.assertTrue(!BuildingBlueprintItem.draft(stack).contains("DraftAnchor") && stack.getCount()==1,"Unreachable cross-dimension pin cannot be reset");

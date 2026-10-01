@@ -1,6 +1,7 @@
 
 package com.stardew.craft.mixin;
 
+import com.stardew.craft.port.PortItemData;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.stardew.craft.item.tool.HoeItem;
 import net.minecraft.client.player.AbstractClientPlayer;
@@ -184,7 +185,7 @@ public class ItemInHandRendererHoeSwingMixin {
 		}
 
 		@SuppressWarnings("null")
-		CustomData data = used.get(DataComponents.CUSTOM_DATA);
+		CustomData data = PortItemData.get(used, DataComponents.CUSTOM_DATA);
 		if (data == null) {
 			return false;
 		}
@@ -214,9 +215,9 @@ public class ItemInHandRendererHoeSwingMixin {
 			tag.remove(HoeItem.NBT_STRIKE_DURATION_TICKS);
 			tag.remove(HoeItem.NBT_STRIKE_FROM_P1);
 			if (tag.isEmpty()) {
-				used.remove(DataComponents.CUSTOM_DATA);
+				PortItemData.remove(used, DataComponents.CUSTOM_DATA);
 			} else {
-				used.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+				PortItemData.set(used, DataComponents.CUSTOM_DATA, CustomData.of(tag));
 			}
 		}
 
@@ -252,7 +253,7 @@ public class ItemInHandRendererHoeSwingMixin {
 			return false;
 		}
 
-		int activeTicks = stack.getUseDuration(player) - player.getUseItemRemainingTicks();
+		int activeTicks = stack.getUseDuration() - player.getUseItemRemainingTicks();
 		float partialTick = STARDEWCRAFT_PARTIAL_TICK.get();
 		float t = (activeTicks + partialTick) / (float) HoeItem.RAISE_TO_P1_TICKS;
 		t = Mth.clamp(t, 0.0F, 1.0F);

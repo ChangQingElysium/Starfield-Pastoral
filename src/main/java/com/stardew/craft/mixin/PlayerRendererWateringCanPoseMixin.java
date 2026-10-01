@@ -1,5 +1,6 @@
 package com.stardew.craft.mixin;
 
+import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.item.tool.WateringCanItem;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.player.AbstractClientPlayer;
@@ -37,7 +38,7 @@ public class PlayerRendererWateringCanPoseMixin {
 
         // 汲水蓄力时不要改姿势（避免看起来像在“格挡”水源）
         @SuppressWarnings("null")
-        int action = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY)
+        int action = PortItemData.getOrDefault(stack, DataComponents.CUSTOM_DATA, CustomData.EMPTY)
                 .copyTag()
                 .getInt(TAG_ACTION);
         if (action == ACTION_REFILL) {

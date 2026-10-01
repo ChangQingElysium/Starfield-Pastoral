@@ -8,14 +8,11 @@ import net.minecraft.world.level.block.state.StateDefinition;
 
 /** Fixed playground sand; grain variants persist while the outer timber rim follows neighbors. */
 public final class PlaygroundSandBlock extends Block {
-    public static final MapCodec<PlaygroundSandBlock> CODEC = simpleCodec(PlaygroundSandBlock::new);
 
     public PlaygroundSandBlock(Properties properties) {
         super(properties);
         registerDefaultState(defaultBlockState().setValue(TerrainVariants.SAND, 0));
     }
-
-    @Override public MapCodec<PlaygroundSandBlock> codec() { return CODEC; }
 
     @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(TerrainVariants.SAND);

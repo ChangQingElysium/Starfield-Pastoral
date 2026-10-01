@@ -76,7 +76,7 @@ public final class SpecialOrderBoardIndicatorRenderer {
                 || player.distanceToSqr(Vec3.atCenterOf(pos)) > RENDER_RANGE_SQ) return;
         PoseStack pose = event.getPoseStack();
         Vec3 camera = event.getCamera().getPosition();
-        double bob = Math.sin((level.getGameTime() + event.getPartialTick().getGameTimeDeltaPartialTick(false)) / 5.0) * 0.08;
+        double bob = Math.sin((level.getGameTime() + event.getPartialTick()) / 5.0) * 0.08;
         pose.pushPose();
         pose.translate(pos.getX() + .5 - camera.x, pos.getY() + 1.85 + bob - camera.y, pos.getZ() + .5 - camera.z);
         pose.mulPose(event.getCamera().rotation());

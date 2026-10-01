@@ -1,5 +1,6 @@
 package com.stardew.craft.blockentity;
 
+import com.stardew.craft.port.PortItemStacks;
 import com.stardew.craft.item.fish.FishItem;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -54,25 +55,24 @@ public final class FishMarketCrateBlockEntity extends BlockEntity {
         if (level != null && !level.isClientSide) level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
     }
 
-    @Override protected void saveAdditional(CompoundTag tag, HolderLookup.Provider provider) {
-        super.saveAdditional(tag, provider);
-        for (int slot = 0; slot < fish.length; slot++) if (!fish[slot].isEmpty()) tag.put("Fish" + slot, fish[slot].save(provider));
+    @Override protected void saveAdditional(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
+        super.saveAdditional(tag);
+        for (int slot = 0; slot < fish.length; slot++) if (!fish[slot].isEmpty()) tag.put("Fish" + slot, PortItemStacks.save(fish[slot], provider));
     }
 
-    @Override protected void loadAdditional(CompoundTag tag, HolderLookup.Provider provider) {
-        super.loadAdditional(tag, provider);
+    @Override public void load(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
+        super.load(tag);
         for (int slot = 0; slot < fish.length; slot++) {
-            ItemStack stack = ItemStack.parseOptional(provider, tag.getCompound("Fish" + slot));
+            ItemStack stack = PortItemStacks.parseOptional(provider, tag.getCompound("Fish" + slot));
             fish[slot] = stack.isEmpty() ? ItemStack.EMPTY : stack.copyWithCount(1);
         }
     }
 
-    @Override public CompoundTag getUpdateTag(HolderLookup.Provider provider) {
-        var tag = new CompoundTag(); saveAdditional(tag, provider); return tag;
+    @Override public CompoundTag getUpdateTag() { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
+        var tag = new CompoundTag(); saveAdditional(tag); return tag;
     }
     @Override public ClientboundBlockEntityDataPacket getUpdatePacket() { return ClientboundBlockEntityDataPacket.create(this); }
-    @Override public void onDataPacket(Connection connection, ClientboundBlockEntityDataPacket packet,
-                                       HolderLookup.Provider provider) {
+    @Override public void onDataPacket(Connection connection, ClientboundBlockEntityDataPacket packet) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
         // This is a full snapshot: an empty tag must clear the last displayed fish.
         // MinecraftForge's default handler skips empty tags.
         loadWithComponents(packet.getTag(), provider);

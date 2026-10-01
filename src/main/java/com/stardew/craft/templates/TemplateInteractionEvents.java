@@ -13,7 +13,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import com.stardew.craft.port.net.neoforged.neoforge.common.util.TriState;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.level.BlockEvent;
@@ -36,7 +36,7 @@ public final class TemplateInteractionEvents {
                 && event.getLevel().getBlockEntity(event.getPos()) instanceof TemplateBlockEntity template
                 && template.material() != null) {
             // Keep normal item placement in either hand, bypassing even doors/buttons.
-            event.setUseBlock(TriState.FALSE);
+            event.setUseBlock(TriState.FALSE.toResult());
             return;
         }
         if (event.getHand() != InteractionHand.MAIN_HAND) {

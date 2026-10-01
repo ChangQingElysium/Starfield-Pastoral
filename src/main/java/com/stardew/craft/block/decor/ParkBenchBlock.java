@@ -1,5 +1,7 @@
 package com.stardew.craft.block.decor;
 
+import com.stardew.craft.port.PortEntities;
+import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.block.shape.ModelVoxelShapeCache;
 import com.stardew.craft.entity.seat.SofaSeatEntity;
 import java.util.Map;
@@ -78,7 +80,7 @@ public final class ParkBenchBlock extends MapDecorStaticBlock {
     public BlockState getStateForPlacement(BlockPlaceContext context) {
         BlockState state = super.getStateForPlacement(context);
         if (state == null) return null;
-        Integer fixed = context.getItemInHand().getOrDefault(DataComponents.BLOCK_STATE,
+        Integer fixed = PortItemData.getOrDefault(context.getItemInHand(), DataComponents.BLOCK_STATE,
                 BlockItemStateProperties.EMPTY).get(VARIANT);
         int variant = fixed == null ? (context.getLevel().isClientSide ? 0 : context.getLevel().random.nextInt(3)) : fixed;
         return withConnections(state.setValue(VARIANT, variant), context.getLevel(), context.getClickedPos());
@@ -96,7 +98,7 @@ public final class ParkBenchBlock extends MapDecorStaticBlock {
     }
 
     @Override
-    protected BlockState updateShape(BlockState state, Direction direction, BlockState neighbor,
+    public BlockState updateShape(BlockState state, Direction direction, BlockState neighbor,
                                      LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
         BlockState result = super.updateShape(state, direction, neighbor, level, pos, neighborPos);
         if (!result.is(this)) return result;
@@ -116,14 +118,14 @@ public final class ParkBenchBlock extends MapDecorStaticBlock {
     }
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos,
+    public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos,
                                                 Player player, BlockHitResult hit) {
         if (player.isShiftKeyDown() || player.isPassenger()) return InteractionResult.PASS;
         BlockPos mainPos = findMainPos(level, pos, state);
         if (mainPos == null) return InteractionResult.PASS;
         if (level.isClientSide) return InteractionResult.SUCCESS;
         // Vanilla subtracts the 0.6 vehicle attachment; humanoid hips are 12/16 above the feet.
-        double seatOffset = 10.0 / 16.0 - 12.0 / 16.0 + Player.DEFAULT_VEHICLE_ATTACHMENT.y;
+        double seatOffset = 10.0 / 16.0 - 12.0 / 16.0 + PortEntities.PLAYER_VEHICLE_ATTACHMENT.y;
         SofaSeatEntity seat = SofaSeatEntity.getOrCreate((ServerLevel) level, mainPos, seatOffset);
         if (seat == null) return InteractionResult.PASS;
         if (seat.isVehicle()) return InteractionResult.CONSUME;
@@ -146,5 +148,5 @@ public final class ParkBenchBlock extends MapDecorStaticBlock {
     }
 
     @Override
-    protected boolean isPathfindable(BlockState state, PathComputationType type) { return false; }
+    public boolean isPathfindable(BlockState state, BlockGetter level, BlockPos pos, PathComputationType type) { return false; }
 }

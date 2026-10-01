@@ -96,7 +96,7 @@ public final class PanPointRenderer {
         // Outer halo — 0.45 wide, 1.8 tall
         quadColumn(bb, ps, 0.45f, 1.8f, r, g, b, aEdge);
 
-        com.stardew.craft.port.com.mojang.blaze3d.vertex.MeshData mesh = bb.build();
+        com.mojang.blaze3d.vertex.BufferBuilder.RenderedBuffer mesh = bb.build();
         if (mesh != null) {
             com.mojang.blaze3d.vertex.BufferUploader.drawWithShader(mesh);
         }

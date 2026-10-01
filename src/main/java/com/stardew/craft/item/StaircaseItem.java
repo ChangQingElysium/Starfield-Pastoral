@@ -59,7 +59,7 @@ public final class StaircaseItem extends SimpleStardewItem {
         data.setLadderPos(pos.immutable());
         manager.setFloorData(floor, data);
         SkullCavernSessionManager.recordCraftedStaircasePlaced(serverPlayer);
-        context.getItemInHand().consume(1, player);
+        com.stardew.craft.port.PortItemStacks.consume(context.getItemInHand(), 1, player);
         player.awardStat(Stats.ITEM_USED.get(this));
         level.playSound(null, pos, ModSounds.HOE_HIT.get(), SoundSource.BLOCKS, 1, 1);
         return InteractionResult.CONSUME;

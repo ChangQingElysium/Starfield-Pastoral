@@ -32,6 +32,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraftforge.common.util.FakePlayerFactory;
 import net.minecraftforge.gametest.GameTestHolder;
 import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import com.stardew.craft.port.PortBlockInteraction;
 
 @GameTestHolder(StardewCraft.MODID)
 @PrefixGameTestTemplate(false)
@@ -100,7 +101,7 @@ public final class BusPropsGameTests {
         level.setBlock(pos,state,2);machine.placeExtensions(level,pos,state);
         for (BlockPos cell : List.of(pos,pos.above())) {
             var hit = new BlockHitResult(Vec3.atCenterOf(cell),Direction.NORTH,cell,false);
-            helper.assertTrue(level.getBlockState(cell).useWithoutItem(level,player,hit).consumesAction(),"Machine half failed to handle interaction");
+            helper.assertTrue(PortBlockInteraction.stateUseWithoutItem(level.getBlockState(cell), level,player,hit).consumesAction(),"Machine half failed to handle interaction");
             helper.assertTrue(PlayerStardewDataAPI.getMoney(player) == money && !DesertBusService.isRiding(player),"Locked machine charged or started a ride");
         }
         // The reusable road sign has no bus behavior.
@@ -109,7 +110,7 @@ public final class BusPropsGameTests {
         level.setBlock(signPos.above(),Blocks.AIR.defaultBlockState(),2);
         level.setBlock(signPos,sign.defaultBlockState(),2);sign.placeExtensions(level,signPos,sign.defaultBlockState());
         var hit = new BlockHitResult(Vec3.atCenterOf(signPos.above()),Direction.NORTH,signPos.above(),false);
-        helper.assertTrue(!level.getBlockState(signPos.above()).useWithoutItem(level,player,hit).consumesAction(),"Reusable road sign opens a purchase flow");
+        helper.assertTrue(!PortBlockInteraction.stateUseWithoutItem(level.getBlockState(signPos.above()), level,player,hit).consumesAction(),"Reusable road sign opens a purchase flow");
         helper.succeed();
     }
 }

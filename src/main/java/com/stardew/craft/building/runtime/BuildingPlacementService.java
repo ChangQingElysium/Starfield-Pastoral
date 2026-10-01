@@ -290,7 +290,7 @@ public final class BuildingPlacementService {
                 if (cell.blockEntity() != null && level.getBlockEntity(pos) != null) {
                     var tag = cell.blockEntity().copy();
                     tag.putInt("x", pos.getX()); tag.putInt("y", pos.getY()); tag.putInt("z", pos.getZ());
-                    level.getBlockEntity(pos).loadWithComponents(tag, level.registryAccess());
+                    level.getBlockEntity(pos).load(tag);
                     level.getBlockEntity(pos).setChanged();
                 }
             }
@@ -348,7 +348,7 @@ public final class BuildingPlacementService {
                     tag.putInt("x", pos.getX());
                     tag.putInt("y", pos.getY());
                     tag.putInt("z", pos.getZ());
-                    level.getBlockEntity(pos).loadWithComponents(tag, level.registryAccess());
+                    level.getBlockEntity(pos).load(tag);
                     level.getBlockEntity(pos).setChanged();
                 }
             }

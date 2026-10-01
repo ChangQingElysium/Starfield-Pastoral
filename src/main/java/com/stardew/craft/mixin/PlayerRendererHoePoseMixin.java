@@ -31,7 +31,7 @@ public class PlayerRendererHoePoseMixin {
         }
 
         // 点按不显示“蓄力抱持”姿势，避免单格锄地出现先蓄一下的割裂。
-        int activeTicks = stack.getUseDuration(player) - player.getUseItemRemainingTicks();
+        int activeTicks = stack.getUseDuration() - player.getUseItemRemainingTicks();
         if (activeTicks < HoeItem.TAP_THRESHOLD_TICKS) {
             return;
         }

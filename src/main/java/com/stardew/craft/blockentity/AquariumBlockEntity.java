@@ -64,21 +64,21 @@ public final class AquariumBlockEntity extends BlockEntity implements Container,
         super.setChanged();
         if (level != null && !level.isClientSide) level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
     }
-    @Override protected void saveAdditional(CompoundTag tag, HolderLookup.Provider provider) {
-        super.saveAdditional(tag, provider);
+    @Override protected void saveAdditional(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
+        super.saveAdditional(tag);
         ContainerHelper.saveAllItems(tag, items, provider);
         tag.putLong("LayoutSeed", layoutSeed);
     }
-    @Override protected void loadAdditional(CompoundTag tag, HolderLookup.Provider provider) {
-        super.loadAdditional(tag, provider);
+    @Override public void load(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
+        super.load(tag);
         items.clear(); ContainerHelper.loadAllItems(tag, items, provider);
         if (tag.contains("LayoutSeed")) layoutSeed = tag.getLong("LayoutSeed");
     }
-    @Override public CompoundTag getUpdateTag(HolderLookup.Provider provider) {
-        var tag = new CompoundTag(); saveAdditional(tag, provider); return tag;
+    @Override public CompoundTag getUpdateTag() { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
+        var tag = new CompoundTag(); saveAdditional(tag); return tag;
     }
     @Override public ClientboundBlockEntityDataPacket getUpdatePacket() { return ClientboundBlockEntityDataPacket.create(this); }
-    @Override public void onDataPacket(Connection connection, ClientboundBlockEntityDataPacket packet, HolderLookup.Provider provider) {
+    @Override public void onDataPacket(Connection connection, ClientboundBlockEntityDataPacket packet) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
         loadWithComponents(packet.getTag(), provider);
     }
 }

@@ -153,7 +153,7 @@ public final class WizardBuildingBlock extends MapDecorStaticBlock implements En
     }
 
     @Override
-    protected List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
+    public List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
         if (state.getValue(PART) == Part.EXTENSION) {
             return List.of();
         }
@@ -191,13 +191,13 @@ public final class WizardBuildingBlock extends MapDecorStaticBlock implements En
     }
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos,
+    public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos,
                                                 Player player, BlockHitResult hit) {
         return interact(state, level, pos, player);
     }
 
     @Override
-    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
+    public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
                                               Player player, InteractionHand hand, BlockHitResult hit) {
         InteractionResult result = interact(state, level, pos, player);
         return result == InteractionResult.PASS

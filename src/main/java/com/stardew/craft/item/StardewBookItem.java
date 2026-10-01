@@ -64,7 +64,7 @@ public class StardewBookItem extends Item implements IStardewItem {
     }
 
     @Override
-    public int getUseDuration(@Nonnull ItemStack stack, @Nonnull LivingEntity entity) {
+    public int getUseDuration(@Nonnull ItemStack stack) {
         return USE_DURATION_TICKS;
     }
 
@@ -82,8 +82,10 @@ public class StardewBookItem extends Item implements IStardewItem {
     }
 
     @Override
-    public void appendHoverText(@Nonnull ItemStack stack, @Nonnull TooltipContext context,
-                                @Nonnull List<Component> tooltipComponents, @Nonnull TooltipFlag tooltipFlag) {
+    public void appendHoverText(@Nonnull ItemStack stack,
+                                @javax.annotation.Nullable Level level,
+                                @Nonnull List<Component> tooltipComponents,
+                                @Nonnull TooltipFlag tooltipFlag) {
         tooltipComponents.add(Component.translatable(getDescriptionId(stack) + ".desc").withStyle(ChatFormatting.GRAY));
         if (definition.wellReadPower()) {
             tooltipComponents.add(Component.translatable("stardewcraft.book.tooltip.power").withStyle(ChatFormatting.GOLD));

@@ -7,8 +7,8 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
-import net.minecraftforge.event.entity.living.LivingDamageEvent;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 
 /** Applied Post bridge for direct authored damage that is not weapon damage. */
 @EventBusSubscriber(modid = StardewCraft.MODID)

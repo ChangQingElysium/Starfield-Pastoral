@@ -23,8 +23,6 @@ import javax.annotation.Nullable;
 @SuppressWarnings("null")
 public class StarPlaqueBlock extends BaseEntityBlock {
 
-    public static final MapCodec<StarPlaqueBlock> CODEC = simpleCodec(StarPlaqueBlock::new);
-
     private static final VoxelShape SHAPE = Block.box(0, 0, 0, 16, 4, 16);
 
     public StarPlaqueBlock(Properties properties) {
@@ -32,17 +30,12 @@ public class StarPlaqueBlock extends BaseEntityBlock {
     }
 
     @Override
-    protected MapCodec<? extends BaseEntityBlock> codec() {
-        return CODEC;
-    }
-
-    @Override
-    protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+    public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return SHAPE;
     }
 
     @Override
-    protected RenderShape getRenderShape(BlockState state) {
+    public RenderShape getRenderShape(BlockState state) {
         return RenderShape.MODEL;
     }
 

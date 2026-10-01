@@ -39,8 +39,9 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import com.stardew.craft.port.PortBlockInteraction;
 
-public abstract class AbstractTwoBlockUtilityBlock<T extends BlockEntity> extends Block implements EntityBlock {
+public abstract class AbstractTwoBlockUtilityBlock<T extends BlockEntity> extends Block implements EntityBlock, PortBlockInteraction {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final BooleanProperty WORKING = BooleanProperty.create("working");
     public static final EnumProperty<Part> PART = EnumProperty.create("part", Part.class);
@@ -110,7 +111,7 @@ public abstract class AbstractTwoBlockUtilityBlock<T extends BlockEntity> extend
     }
 
     @Override
-    protected List<ItemStack> getDrops(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") LootParams.Builder params) {
+    public List<ItemStack> getDrops(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") LootParams.Builder params) {
         if (state.getValue(PART) == Part.EXTENSION) {
             return List.of();
         }
@@ -185,9 +186,16 @@ public abstract class AbstractTwoBlockUtilityBlock<T extends BlockEntity> extend
         return state.setValue(FACING, mirror.mirror(state.getValue(FACING)));
     }
 
+    // PORT(1.20.1): replay the 1.21 useItemOn/useWithoutItem dispatch.
+    @Override
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player,
+            InteractionHand hand, BlockHitResult hit) {
+        return PortBlockInteraction.dispatch(this, state, level, pos, player, hand, hit);
+    }
+
     @Override
     @SuppressWarnings("unchecked")
-    protected ItemInteractionResult useItemOn(@SuppressWarnings("null") ItemStack stack, @SuppressWarnings("null") BlockState state, @SuppressWarnings("null") Level level, @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") Player player, @SuppressWarnings("null") InteractionHand hand, @SuppressWarnings("null") BlockHitResult hit) {
+    public ItemInteractionResult useItemOn(@SuppressWarnings("null") ItemStack stack, @SuppressWarnings("null") BlockState state, @SuppressWarnings("null") Level level, @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") Player player, @SuppressWarnings("null") InteractionHand hand, @SuppressWarnings("null") BlockHitResult hit) {
         if (state.getValue(PART) == Part.EXTENSION) {
             BlockPos mainPos = getMainPos(pos, state);
             BlockState mainState = level.getBlockState(mainPos);
@@ -220,7 +228,7 @@ public abstract class AbstractTwoBlockUtilityBlock<T extends BlockEntity> extend
 
     @Override
     @SuppressWarnings("unchecked")
-    protected InteractionResult useWithoutItem(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") Level level, @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") Player player, @SuppressWarnings("null") BlockHitResult hit) {
+    public InteractionResult useWithoutItem(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") Level level, @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") Player player, @SuppressWarnings("null") BlockHitResult hit) {
         if (state.getValue(PART) == Part.EXTENSION) {
             BlockPos mainPos = getMainPos(pos, state);
             BlockState mainState = level.getBlockState(mainPos);
@@ -256,15 +264,15 @@ public abstract class AbstractTwoBlockUtilityBlock<T extends BlockEntity> extend
     }
 
     @Override
-    public BlockState playerWillDestroy(@SuppressWarnings("null") Level level, @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") BlockState state, @SuppressWarnings("null") Player player) {
+    public void playerWillDestroy(@SuppressWarnings("null") Level level, @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") BlockState state, @SuppressWarnings("null") Player player) {
         if (!level.isClientSide && state.getValue(PART) == Part.EXTENSION && !player.isCreative()) {
             popResource(level, pos, new ItemStack(asItem()));
         }
-        return super.playerWillDestroy(level, pos, state, player);
+        super.playerWillDestroy(level, pos, state, player);
     }
 
     @Override
-    protected BlockState updateShape(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") Direction direction, @SuppressWarnings("null") BlockState neighborState, @SuppressWarnings("null") LevelAccessor level, @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") BlockPos neighborPos) {
+    public BlockState updateShape(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") Direction direction, @SuppressWarnings("null") BlockState neighborState, @SuppressWarnings("null") LevelAccessor level, @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") BlockPos neighborPos) {
         BlockPos otherPos = state.getValue(PART) == Part.MAIN ? pos.above() : pos.below();
         if (neighborPos.equals(otherPos) && !neighborState.is(this)) {
             return Blocks.AIR.defaultBlockState();

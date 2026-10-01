@@ -29,7 +29,7 @@ public class ScarecrowManager extends SavedData {
 
     public static ScarecrowManager get(ServerLevel level) {
         return level.getDataStorage().computeIfAbsent(
-                new Factory<>(ScarecrowManager::new, ScarecrowManager::load),
+                com.stardew.craft.port.PortSavedData.loader(new Factory<>(ScarecrowManager::new, ScarecrowManager::load)), com.stardew.craft.port.PortSavedData.constructor(new Factory<>(ScarecrowManager::new, ScarecrowManager::load)),
                 DATA_NAME);
     }
 
@@ -77,7 +77,7 @@ public class ScarecrowManager extends SavedData {
 
     @Override
     @Nonnull
-    public CompoundTag save(@Nonnull CompoundTag tag, @Nonnull HolderLookup.Provider registries) {
+    public CompoundTag save(@Nonnull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
         ListTag list = new ListTag();
         for (Map.Entry<Long, Integer> entry : radiusByPos.entrySet()) {
             CompoundTag e = new CompoundTag();

@@ -8,7 +8,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import com.stardew.craft.port.net.neoforged.neoforge.common.CommonHooks;
+import net.minecraftforge.common.ForgeHooks;
 
 /**
  * Server-side entry point for a skill hit that must use the normal Stardew
@@ -226,7 +226,7 @@ public final class WeaponSkillDamage {
 
         try {
             if (attackGatePolicy == AttackGatePolicy.RESPECT_AT_IMPACT
-                    && !CommonHooks.onPlayerAttackTarget(
+                    && !ForgeHooks.onPlayerAttackTarget(
                             serverPlayer,
                             target
                     )) {

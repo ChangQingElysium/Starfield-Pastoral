@@ -12,7 +12,7 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import net.minecraftforge.client.event.ScreenEvent;
 
 import java.util.Map;
@@ -153,7 +153,8 @@ public final class StardewReadingZoom {
         var bar = barAt(zoom, mouseX(), mouseY());
         if (bar == null && !Screen.hasAltDown() && !Screen.hasShiftDown()) return;
         boolean horizontal = bar != null ? bar.horizontal() : Screen.hasShiftDown();
-        double delta = event.getScrollDeltaY() != 0 ? event.getScrollDeltaY() : event.getScrollDeltaX();
+        // PORT(1.20.1): 1.20.1 has no horizontal scroll; getScrollDelta() is the vertical delta.
+        double delta = event.getScrollDelta();
         if (pan(event.getScreen(), horizontal ? -delta * 64 : 0, horizontal ? 0 : -delta * 64)) event.setCanceled(true);
     }
 

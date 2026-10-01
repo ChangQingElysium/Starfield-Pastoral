@@ -50,7 +50,7 @@ public final class EmoteBubbleWorldRenderer {
 			}
 
 			poseStack.pushPose();
-			float partial = event.getPartialTick().getGameTimeDeltaPartialTick(false);
+			float partial = event.getPartialTick();
 			double x = Mth.lerp(partial, entity.xOld, entity.getX());
 			double y = Mth.lerp(partial, entity.yOld, entity.getY()) + entity.getBbHeight() + 0.72D;
 			double z = Mth.lerp(partial, entity.zOld, entity.getZ());

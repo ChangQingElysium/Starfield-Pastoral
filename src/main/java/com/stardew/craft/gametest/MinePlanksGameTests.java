@@ -9,7 +9,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
-import com.stardew.craft.port.net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.BlockItem;
@@ -70,7 +69,7 @@ public final class MinePlanksGameTests {
             level.setBlock(center.north().above(), Blocks.AIR.defaultBlockState(), 3);
             helper.assertTrue(level.getBlockState(center).equals(soil.defaultBlockState()), "Connection mutated soil identity/state");
         }
-        var player = new ServerPlayer(level.getServer(), level, new GameProfile(UUID.randomUUID(), "Plank test"), ClientInformation.createDefault());
+        var player = new ServerPlayer(level.getServer(), level, new GameProfile(UUID.randomUUID(), "Plank test"));
         player.getAbilities().instabuild = true;
         for (int variant = 0; variant < 2; variant++) {
             level.setBlock(center, Blocks.AIR.defaultBlockState(), 3);

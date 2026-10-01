@@ -25,7 +25,7 @@ public final class StarfallMeteorEffectClient {
     private StarfallMeteorEffectClient() {}
 
     public static void add(float x, float y, float z, float height, int durationTicks, int color) {
-        if (!Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()) {
+        if (!Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()) {
             return;
         }
         if (durationTicks <= 0 || height <= 0.1f) {
@@ -68,7 +68,7 @@ public final class StarfallMeteorEffectClient {
         MultiBufferSource.BufferSource buffer = mc.renderBuffers().bufferSource();
         RenderType trailType = WeaponEffectRenderTypes.MOLTEN_GLOW;
         VertexConsumer trailConsumer = buffer.getBuffer(trailType);
-        float partial = event.getPartialTick().getGameTimeDeltaPartialTick(false);
+        float partial = event.getPartialTick();
         RenderType headType = WeaponEffectRenderTypes.MOLTEN_GLOW;
         VertexConsumer headConsumer = buffer.getBuffer(headType);
 

@@ -34,7 +34,7 @@ public final class CalicoJackTableBlock extends CasinoInteractiveBlock {
     }
 
     @Override
-    protected InteractionResult useWithoutItem(
+    public InteractionResult useWithoutItem(
             @Nonnull BlockState state,
             @Nonnull Level level,
             @Nonnull BlockPos pos,

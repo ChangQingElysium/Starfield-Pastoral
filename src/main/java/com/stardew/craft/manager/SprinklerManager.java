@@ -114,8 +114,7 @@ public class SprinklerManager extends SavedData {
 
     @SuppressWarnings("null")
     @Override
-    public CompoundTag save(@SuppressWarnings("null") CompoundTag tag,
-                            @SuppressWarnings("null") net.minecraft.core.HolderLookup.Provider provider) {
+    public CompoundTag save(@SuppressWarnings("null") CompoundTag tag) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
         ListTag list = new ListTag();
         for (GlobalPos pos : sprinklerPositions) {
             CompoundTag posTag = new CompoundTag();
@@ -147,11 +146,15 @@ public class SprinklerManager extends SavedData {
     public static SprinklerManager get(ServerLevel level) {
         ServerLevel overworld = level.getServer().overworld();
         return overworld.getDataStorage().computeIfAbsent(
-                new SavedData.Factory<>(
+                com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(
                         SprinklerManager::new,
                         SprinklerManager::load,
                         null
-                ),
+                )), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(
+                        SprinklerManager::new,
+                        SprinklerManager::load,
+                        null
+                )),
                 DATA_NAME
         );
     }

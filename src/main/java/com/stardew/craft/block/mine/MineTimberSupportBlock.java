@@ -1,5 +1,6 @@
 package com.stardew.craft.block.mine;
 
+import com.stardew.craft.port.PortItemData;
 import com.mojang.serialization.MapCodec;
 import com.stardew.craft.block.shape.ModelVoxelShapeCache;
 import net.minecraft.core.BlockPos;
@@ -23,7 +24,6 @@ import java.util.concurrent.ConcurrentHashMap;
 /** One item places a four-high column; neighboring columns join without changing identity. */
 @SuppressWarnings("null")
 public final class MineTimberSupportBlock extends Block {
-    public static final MapCodec<MineTimberSupportBlock> CODEC = simpleCodec(MineTimberSupportBlock::new);
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final IntegerProperty TIER = IntegerProperty.create("tier", 0, 3);
     public static final IntegerProperty VARIANT = IntegerProperty.create("variant", 0, 1);
@@ -38,7 +38,6 @@ public final class MineTimberSupportBlock extends Block {
                 .setValue(MineBuildingTheme.PROPERTY, MineBuildingTheme.EARTH));
     }
 
-    @Override public MapCodec<MineTimberSupportBlock> codec() { return CODEC; }
     @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(FACING, TIER, LEFT, RIGHT, VARIANT, MineBuildingTheme.PROPERTY);
     }
@@ -52,7 +51,7 @@ public final class MineTimberSupportBlock extends Block {
         }
         Direction facing = context.getClickedFace().getAxis().isHorizontal()
                 ? context.getClickedFace() : context.getHorizontalDirection().getOpposite();
-        Integer variant = context.getItemInHand().getOrDefault(DataComponents.BLOCK_STATE,
+        Integer variant = PortItemData.getOrDefault(context.getItemInHand(), DataComponents.BLOCK_STATE,
                 BlockItemStateProperties.EMPTY).get(VARIANT);
         BlockState state = defaultBlockState().setValue(FACING, facing).setValue(VARIANT, variant == null ? 0 : variant)
                 .setValue(MineBuildingTheme.PROPERTY, MineBuildingTheme.forPlacement(context));
@@ -79,14 +78,14 @@ public final class MineTimberSupportBlock extends Block {
                 && neighbor.getValue(TIER).equals(state.getValue(TIER));
     }
 
-    @Override protected boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
+    @Override public boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
         int tier = state.getValue(TIER);
         if (tier == 0) return level.getBlockState(pos.below()).isFaceSturdy(level, pos.below(), Direction.UP);
         BlockState root = level.getBlockState(pos.below(tier));
         return root.is(this) && root.getValue(TIER) == 0 && root.getValue(FACING) == state.getValue(FACING);
     }
 
-    @Override protected BlockState updateShape(BlockState state, Direction direction, BlockState neighbor,
+    @Override public BlockState updateShape(BlockState state, Direction direction, BlockState neighbor,
                                                 LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
         // Structure imports may place upper pieces before their anchor.
         level.scheduleTick(pos, this, 1);
@@ -96,17 +95,17 @@ public final class MineTimberSupportBlock extends Block {
         return connections(state, level, pos);
     }
 
-    @Override protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState old, boolean moving) {
+    @Override public void onPlace(BlockState state, Level level, BlockPos pos, BlockState old, boolean moving) {
         super.onPlace(state, level, pos, old, moving);
         if (!level.isClientSide) level.scheduleTick(pos, this, 1);
     }
 
-    @Override protected void tick(BlockState state, net.minecraft.server.level.ServerLevel level, BlockPos pos,
+    @Override public void tick(BlockState state, net.minecraft.server.level.ServerLevel level, BlockPos pos,
                                   net.minecraft.util.RandomSource random) {
         if (!state.canSurvive(level, pos)) level.removeBlock(pos, false);
     }
 
-    @Override protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState replacement, boolean moving) {
+    @Override public void onRemove(BlockState state, Level level, BlockPos pos, BlockState replacement, boolean moving) {
         if (!replacement.is(this) && !level.isClientSide) {
             BlockPos root = pos.below(state.getValue(TIER));
             for (int i = 0; i < 4; i++) {
@@ -121,27 +120,27 @@ public final class MineTimberSupportBlock extends Block {
         super.onRemove(state, level, pos, replacement, moving);
     }
 
-    @Override public BlockState playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
+    @Override public void playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
         if (!level.isClientSide && state.getValue(TIER) > 0 && !player.isCreative()) {
             BlockPos root = pos.below(state.getValue(TIER));
             BlockState base = level.getBlockState(root);
             if (base.is(this)) dropResources(base, level, root, null, player, player.getMainHandItem());
         }
-        return super.playerWillDestroy(level, pos, state, player);
+        super.playerWillDestroy(level, pos, state, player);
     }
 
-    @Override public ItemStack getCloneItemStack(LevelReader level, BlockPos pos, BlockState state) {
+    @Override public ItemStack getCloneItemStack(net.minecraft.world.level.BlockGetter level, BlockPos pos, BlockState state) {
         ItemStack stack = new ItemStack(this);
-        stack.set(DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY.with(VARIANT, state)
+        PortItemData.set(stack, DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY.with(VARIANT, state)
                 .with(MineBuildingTheme.PROPERTY, state));
         return stack;
     }
 
-    @Override protected BlockState rotate(BlockState state, Rotation rotation) {
+    @Override public BlockState rotate(BlockState state, Rotation rotation) {
         return state.setValue(FACING, rotation.rotate(state.getValue(FACING)));
     }
 
-    @Override protected BlockState mirror(BlockState state, Mirror mirror) {
+    @Override public BlockState mirror(BlockState state, Mirror mirror) {
         if (mirror == Mirror.NONE) return state;
         return state.rotate(mirror.getRotation(state.getValue(FACING)))
                 .setValue(LEFT, state.getValue(RIGHT)).setValue(RIGHT, state.getValue(LEFT));
@@ -174,11 +173,11 @@ public final class MineTimberSupportBlock extends Block {
         return ModelVoxelShapeCache.rotateY(shape, turns).move(0, -state.getValue(TIER), 0);
     }
 
-    @Override protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+    @Override public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return OUTLINES.computeIfAbsent(state, MineTimberSupportBlock::columnShape);
     }
 
-    @Override protected VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+    @Override public VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return Shapes.join(getShape(state, level, pos, context), Shapes.block(), BooleanOp.AND);
     }
 

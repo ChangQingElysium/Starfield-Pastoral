@@ -87,7 +87,7 @@ public final class BuildingTemplatePreview {
                 var entity = block.newBlockEntity(pos, state);
                 if (entity != null && mc.level != null) {
                     entity.setLevel(mc.level);
-                    entity.loadWithComponents(tag.getCompound("Appearance"), mc.level.registryAccess());
+                    entity.load(tag.getCompound("Appearance"));
                     data = entity.getModelData();
                 }
             }

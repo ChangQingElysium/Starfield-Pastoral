@@ -1,5 +1,6 @@
 package com.stardew.craft.event;
 
+import com.stardew.craft.port.PortEntities;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.block.mine.MineBarrelBlock;
 import com.stardew.craft.block.mine.MineIceDebrisBlock;
@@ -24,7 +25,7 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import com.stardew.craft.port.net.neoforged.neoforge.event.tick.PlayerTickEvent;
@@ -90,7 +91,7 @@ public final class MineBarrelBreakHandler {
         Vec3 origin = player.getBoundingBox().getCenter();
         breakInVolume(player, player.getBoundingBox().inflate(2.5), player.getEyePosition(), center -> {
             if (forcedPos != null && BlockPos.containing(center).equals(forcedPos)
-                    && player.canInteractWithBlock(forcedPos, 0)) return true;
+                    && PortEntities.canInteractWithBlock(player, forcedPos, 0)) return true;
             Vec3 offset = center.subtract(origin);
             return StardewWeaponAreaAttack.contains(type, offset.dot(forward), offset.dot(right), offset.y);
         });

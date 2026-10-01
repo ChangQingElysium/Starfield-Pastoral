@@ -78,7 +78,7 @@ public class QuarryAccessManager extends SavedData {
     public static QuarryAccessManager get(ServerLevel level) {
         ServerLevel overworld = level.getServer().getLevel(net.minecraft.world.level.Level.OVERWORLD);
         if (overworld == null) return new QuarryAccessManager();
-        return overworld.getDataStorage().computeIfAbsent(factory(), DATA_NAME);
+        return overworld.getDataStorage().computeIfAbsent(com.stardew.craft.port.PortSavedData.loader(factory()), com.stardew.craft.port.PortSavedData.constructor(factory()), DATA_NAME);
     }
 
     public void resetForMigration() {
@@ -135,7 +135,7 @@ public class QuarryAccessManager extends SavedData {
 
     @Override
     @Nonnull
-    public CompoundTag save(@Nonnull CompoundTag tag, @Nonnull HolderLookup.Provider registries) {
+    public CompoundTag save(@Nonnull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
         tag.putInt("PlacedVersion", placedVersion);
         return tag;
     }
@@ -151,7 +151,7 @@ public class QuarryAccessManager extends SavedData {
         return manager;
     }
 
-    public static SavedData.Factory<QuarryAccessManager> factory() {
-        return new SavedData.Factory<>(QuarryAccessManager::new, QuarryAccessManager::load);
+    public static com.stardew.craft.port.PortSavedData.Factory<QuarryAccessManager> factory() {
+        return new com.stardew.craft.port.PortSavedData.Factory<>(QuarryAccessManager::new, QuarryAccessManager::load);
     }
 }

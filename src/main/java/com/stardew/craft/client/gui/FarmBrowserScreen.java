@@ -186,7 +186,7 @@ public class FarmBrowserScreen extends Screen {
         // Enter on a row selects it; sending an application is an explicit button action.
         return super.keyPressed(key, scan, modifiers);
     }
-    @Override public boolean mouseScrolled(double x, double y, double dx, double dy) {
+    @Override public boolean mouseScrolled(double x, double y, double dy) {
         if (x < layout.left() || x >= layout.left() + layout.innerWidth() || y < layout.listY() || y >= layout.listBottom()) return false;
         if (dy != 0) scrollTo(model.scrollOffset + (dy > 0 ? -1 : 1));
         return true;

@@ -51,7 +51,7 @@ public final class FertilizedSoilModels {
         }
     }
 
-    static TerrainFarmlandQuads[][][] bake(Map<ModelResourceLocation, BakedModel> models) {
+    static TerrainFarmlandQuads[][][] bake(Map<ResourceLocation, BakedModel> models) {
         int count = FertilizerType.values().length;
         TerrainFarmlandQuads[][][] result = bakeFamily(models, "");
         BakedModel[][] vanilla = new BakedModel[2][count];
@@ -68,15 +68,15 @@ public final class FertilizedSoilModels {
         return result;
     }
 
-    static TerrainFarmlandQuads[][][] bakeSandy(Map<ModelResourceLocation, BakedModel> models) {
+    static TerrainFarmlandQuads[][][] bakeSandy(Map<ResourceLocation, BakedModel> models) {
         return bakeFamily(models, "sandy/");
     }
 
-    static TerrainFarmlandQuads[][][] bakeInfertile(Map<ModelResourceLocation, BakedModel> models) {
+    static TerrainFarmlandQuads[][][] bakeInfertile(Map<ResourceLocation, BakedModel> models) {
         return bakeFamily(models, "infertile/");
     }
 
-    private static TerrainFarmlandQuads[][][] bakeFamily(Map<ModelResourceLocation, BakedModel> models, String prefix) {
+    private static TerrainFarmlandQuads[][][] bakeFamily(Map<ResourceLocation, BakedModel> models, String prefix) {
         int count = FertilizerType.values().length;
         TerrainFarmlandQuads[][][] result = new TerrainFarmlandQuads[4][count][2];
         for (int season = 0; season < 4; season++) {

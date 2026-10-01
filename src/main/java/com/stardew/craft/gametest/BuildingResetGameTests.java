@@ -1,5 +1,6 @@
 package com.stardew.craft.gametest;
 
+import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.animal.runtime.*;
 import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.building.runtime.*;
@@ -55,9 +56,9 @@ public final class BuildingResetGameTests {
     public static void copiedDocumentSharesDurablePinAndCancellation(GameTestHelper h){
         var data=new BuildingDrafts();var stack=new ItemStack(ModItems.COOP_BLUEPRINT.get());BuildingBlueprintItem.bind(stack,UUID.randomUUID());
         var tag=BuildingBlueprintItem.draft(stack);tag.putLong("DraftAnchor",new BlockPos(4,5,6).asLong());tag.putString("DraftDimension",h.getLevel().dimension().location().toString());tag.putString("DraftFacing","west");
-        stack.set(com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_DATA,com.stardew.craft.port.net.minecraft.world.item.component.CustomData.of(tag));data.write(stack);var copy=stack.copy();
+        PortItemData.set(stack, com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_DATA,com.stardew.craft.port.net.minecraft.world.item.component.CustomData.of(tag));data.write(stack);var copy=stack.copy();
         data=BuildingDrafts.load(data.save(new CompoundTag(),h.getLevel().registryAccess()),h.getLevel().registryAccess());
-        tag=BuildingBlueprintItem.draft(stack);tag.remove("DraftAnchor");stack.set(com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_DATA,com.stardew.craft.port.net.minecraft.world.item.component.CustomData.of(tag));data.write(stack);data.apply(copy);
+        tag=BuildingBlueprintItem.draft(stack);tag.remove("DraftAnchor");PortItemData.set(stack, com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_DATA,com.stardew.craft.port.net.minecraft.world.item.component.CustomData.of(tag));data.write(stack);data.apply(copy);
         h.assertTrue(BuildingBlueprintItem.pinned(copy,h.getLevel())==null && BuildingBlueprintItem.facing(copy)==Direction.WEST,"Copied item retained a conflicting pin after cancellation/reload");h.succeed();
     }
     @GameTest(template="construction_site",timeoutTicks=200)

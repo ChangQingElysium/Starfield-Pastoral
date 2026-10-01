@@ -1,7 +1,7 @@
 package com.stardew.craft.combat.network;
 import com.stardew.craft.StardewCraft;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.network.codec.*;
+import com.stardew.craft.port.net.minecraft.network.codec.*;
 import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import com.stardew.craft.port.net.neoforged.neoforge.network.handling.IPayloadContext;

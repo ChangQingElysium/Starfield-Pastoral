@@ -87,7 +87,7 @@ final class BuiltinSkillAppliedHitRules {
             }
         } else {
             target.addEffect(new MobEffectInstance(
-                    ModMobEffects.WEAK_POINT,
+                    ModMobEffects.WEAK_POINT.get(),
                     60,
                     1,
                     false,
@@ -103,7 +103,7 @@ final class BuiltinSkillAppliedHitRules {
             return;
         }
         hit.target().addEffect(new MobEffectInstance(
-                ModMobEffects.VULNERABLE,
+                ModMobEffects.VULNERABLE.get(),
                 TetanusStrikeSkillHandler.VULNERABLE_DURATION_TICKS,
                 TetanusStrikeSkillHandler.VULNERABLE_AMPLIFIER
         ));
@@ -406,7 +406,7 @@ final class BuiltinSkillAppliedHitRules {
             return;
         }
         hit.target().addEffect(new MobEffectInstance(
-                ModMobEffects.VULNERABLE,
+                ModMobEffects.VULNERABLE.get(),
                 TemperedQuenchSkillHandler.VULNERABLE_DURATION_TICKS,
                 TemperedQuenchSkillHandler.VULNERABLE_AMPLIFIER,
                 false,
@@ -432,7 +432,7 @@ final class BuiltinSkillAppliedHitRules {
         EquipmentMobEffectHandler.addPreAdjustedEffect(
                 hit.target(),
                 new MobEffectInstance(
-                        ModMobEffects.VULNERABLE,
+                        ModMobEffects.VULNERABLE.get(),
                         protection.durationTicks(),
                         DragonBreathThrustSkillHandler
                                 .VULNERABLE_AMPLIFIER,

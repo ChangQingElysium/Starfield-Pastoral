@@ -177,8 +177,9 @@ public class WoodenChestScreen extends AbstractContainerScreen<WoodenChestMenu> 
     }
 
     @Override
-    public boolean mouseScrolled(double x, double y, double horizontal, double vertical) {
-        return wheel.scroll(vertical) || super.mouseScrolled(x, y, horizontal, vertical);
+    public boolean mouseScrolled(double x, double y, double vertical) {
+        double horizontal = 0.0D; // PORT(1.20.1): no horizontal scroll before 1.20.2
+        return wheel.scroll(vertical) || super.mouseScrolled(x, y, vertical);
     }
 
     @Override

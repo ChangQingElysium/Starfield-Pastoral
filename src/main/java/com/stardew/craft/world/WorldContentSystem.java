@@ -10,7 +10,7 @@ import com.stardew.craft.mastery.MasteryRewardRegistry;
 import com.stardew.craft.player.ProfessionData;
 import com.stardew.craft.farm.FarmLayoutDataRegistry;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import net.minecraftforge.event.AddReloadListenerEvent;
 
 @EventBusSubscriber(modid = StardewCraft.MODID)

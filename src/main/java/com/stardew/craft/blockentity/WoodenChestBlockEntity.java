@@ -1,5 +1,6 @@
 package com.stardew.craft.blockentity;
 
+import com.stardew.craft.port.PortItemStacks;
 import com.stardew.craft.block.utility.WoodenChestBlock;
 import com.stardew.craft.block.utility.WoodenChestColorPalette;
 import com.stardew.craft.menu.WoodenChestMenu;
@@ -254,8 +255,8 @@ public class WoodenChestBlockEntity extends net.minecraft.world.level.block.enti
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
+    protected void saveAdditional(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        super.saveAdditional(tag);
 
         ListTag list = new ListTag();
         for (int i = 0; i < localItems.size(); i++) {
@@ -265,7 +266,7 @@ public class WoodenChestBlockEntity extends net.minecraft.world.level.block.enti
             }
             CompoundTag entry = new CompoundTag();
             entry.putInt("Slot", i);
-            entry.put("Stack", stack.save(registries));
+            entry.put("Stack", PortItemStacks.save(stack, registries));
             list.add(entry);
         }
         tag.put(TAG_ITEMS, list);
@@ -273,8 +274,8 @@ public class WoodenChestBlockEntity extends net.minecraft.world.level.block.enti
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
+    public void load(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        super.load(tag);
 
         for (int i = 0; i < localItems.size(); i++) {
             localItems.set(i, ItemStack.EMPTY);
@@ -288,7 +289,7 @@ public class WoodenChestBlockEntity extends net.minecraft.world.level.block.enti
                 if (slot < 0 || slot >= localItems.size()) {
                     continue;
                 }
-                ItemStack parsed = ItemStack.parse(registries, entry.getCompound("Stack")).orElse(ItemStack.EMPTY);
+                ItemStack parsed = PortItemStacks.parse(registries, entry.getCompound("Stack")).orElse(ItemStack.EMPTY);
                 localItems.set(slot, parsed);
             }
         }
@@ -307,9 +308,9 @@ public class WoodenChestBlockEntity extends net.minecraft.world.level.block.enti
     }
 
     @Override
-    public CompoundTag getUpdateTag(net.minecraft.core.HolderLookup.Provider registries) {
-        CompoundTag tag = super.getUpdateTag(registries);
-        saveAdditional(tag, registries);
+    public CompoundTag getUpdateTag() { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        CompoundTag tag = super.getUpdateTag();
+        saveAdditional(tag);
         return tag;
     }
 

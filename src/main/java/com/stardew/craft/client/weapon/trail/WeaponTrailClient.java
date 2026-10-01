@@ -167,7 +167,7 @@ public final class WeaponTrailClient {
             String weaponId
     ) {
         Minecraft minecraft = Minecraft.getInstance();
-        if (minecraft.level == null || !Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()) {
+        if (minecraft.level == null || !Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()) {
             return;
         }
         if (activeLevel != minecraft.level) {
@@ -245,7 +245,7 @@ public final class WeaponTrailClient {
 
     public static void render(RenderLevelStageEvent event) {
         Minecraft minecraft = Minecraft.getInstance();
-        if (minecraft.level == null || !Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()) {
+        if (minecraft.level == null || !Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()) {
             STATES.clear();
             activeLevel = minecraft.level;
             return;
@@ -256,7 +256,7 @@ public final class WeaponTrailClient {
             return;
         }
 
-        float partialTick = event.getPartialTick().getGameTimeDeltaPartialTick(false);
+        float partialTick = event.getPartialTick();
         double now = minecraft.level.getGameTime() + partialTick;
         Vec3 camera = event.getCamera().getPosition();
         Map<TrailProfile, RenderType> renderTypes = new LinkedHashMap<>();
@@ -329,14 +329,14 @@ public final class WeaponTrailClient {
     public static void renderFirstPerson() {
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null || mc.player == null || activeLevel != mc.level
-                || !Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()) return;
+                || !Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()) return;
         TrailState state = STATES.get(mc.player.getId());
         if (state == null || !state.firstPerson || state.samples.size() < 2) return;
         Vec3 camera = mc.gameRenderer.getMainCamera().getPosition();
         Matrix4f pose = new Matrix4f().translation((float) -camera.x, (float) -camera.y, (float) -camera.z);
         var buffers = mc.renderBuffers().bufferSource();
         RenderType type = WeaponEffectRenderTypes.MOLTEN_GLOW;
-        double now = mc.level.getGameTime() + mc.getTimer().getGameTimeDeltaPartialTick(false);
+        double now = mc.level.getGameTime() + com.stardew.craft.port.net.minecraft.client.DeltaTracker.client().getGameTimeDeltaPartialTick(false);
         renderTrail(mc.level, buffers.getBuffer(type), pose, state, now);
         buffers.endBatch(type);
     }

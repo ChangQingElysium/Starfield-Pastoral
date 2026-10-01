@@ -1,5 +1,7 @@
 package com.stardew.craft.gametest;
 
+import com.stardew.craft.port.PortGameTests;
+import com.stardew.craft.port.PortItemData;
 import com.mojang.authlib.GameProfile;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.api.v1.equipment.StardewEquipmentData;
@@ -205,7 +207,6 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import com.stardew.craft.port.net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -282,7 +283,7 @@ public final class ApiContractGameTests {
 
         StardewWorldEvents.Result committed =
                 StardewWorldEvents.start(context);
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 committed.status(),
                 StardewWorldEvents.Status.COMMITTED,
                 "world event did not commit");
@@ -294,7 +295,7 @@ public final class ApiContractGameTests {
                 helper.getLevel().getBlockState(second)
                         .is(Blocks.MOSS_BLOCK),
                 "second world-event block was not committed");
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 StardewWorldEvents.persistentData(
                                 helper.getLevel().getServer(),
                                 instanceId,
@@ -305,11 +306,11 @@ public final class ApiContractGameTests {
 
         StardewWorldEvents.Result replay =
                 StardewWorldEvents.start(context);
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 replay.status(),
                 StardewWorldEvents.Status.ALREADY_ACTIVE,
                 "replayed world event was not idempotent");
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 preparations.get(),
                 1,
                 "idempotent replay invoked the handler again");
@@ -321,7 +322,7 @@ public final class ApiContractGameTests {
         StardewWorldEvents.Result conflicted =
                 StardewWorldEvents.cleanup(
                         helper.getLevel().getServer(), instanceId);
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 conflicted.status(),
                 StardewWorldEvents.Status.CONFLICT,
                 "cleanup ignored an external block change");
@@ -335,7 +336,7 @@ public final class ApiContractGameTests {
         StardewWorldEvents.Result cleaned =
                 StardewWorldEvents.cleanup(
                         helper.getLevel().getServer(), instanceId);
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 cleaned.status(),
                 StardewWorldEvents.Status.CLEANED,
                 "world event did not clean up");
@@ -347,7 +348,7 @@ public final class ApiContractGameTests {
                 helper.getLevel().getBlockState(second)
                         .is(Blocks.DIRT),
                 "cleanup did not restore the second block");
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 StardewWorldEvents.cleanup(
                                 helper.getLevel().getServer(),
                                 instanceId)
@@ -408,7 +409,7 @@ public final class ApiContractGameTests {
                         player.damageSources().generic(),
                         helper.getLevel().dimension(),
                         10.0F));
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 modified,
                 6.0F,
                 "damage modifiers were not ordered and composed");
@@ -460,7 +461,7 @@ public final class ApiContractGameTests {
                         Set.of("stardewcraft_gametest"),
                         helper.getLevel().dimension(),
                         helper.absolutePos(BlockPos.ZERO)));
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 observedKills,
                 List.of("first", "second"),
                 "kill listeners were not ordered or failure-isolated");
@@ -563,7 +564,7 @@ public final class ApiContractGameTests {
                 pond.managerPosition().getY() + 0.5D,
                 pond.managerPosition().getZ() + 0.5D,
                 new ItemStack(Items.DIAMOND));
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 FishPondHusbandry.absorbItemEntity(
                         helper.getLevel(), mutablePond, delivered),
                 FishPondHusbandry.ItemAbsorbResult
@@ -573,7 +574,7 @@ public final class ApiContractGameTests {
                 delivered.getItem().isEmpty(),
                 "fish pond request notification ran before item consumption");
 
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 observed,
                 List.of("daily", "request"),
                 "fish pond listeners were not ordered or failure-isolated");
@@ -634,7 +635,7 @@ public final class ApiContractGameTests {
                 StardewProgress.inspect(player, questKey);
         helper.assertTrue(activeQuest != null,
                 "active built-in quest was absent from unified progress");
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 activeQuest.phase(),
                 StardewProgressPhase.ACTIVE,
                 "accepted quest did not project ACTIVE");
@@ -679,7 +680,7 @@ public final class ApiContractGameTests {
                 !requirementReport.satisfied()
                         && requirementReport.blocking().size() == 1,
                 "condition report did not preserve authoritative blocker");
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 requirementReport.requirements().getFirst()
                         .description().getString(),
                 "GameTest blocker",
@@ -694,7 +695,7 @@ public final class ApiContractGameTests {
                 StardewProgress.inspect(player, mailKey);
         helper.assertTrue(scheduledMail != null,
                 "scheduled mail was absent from unified progress");
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 scheduledMail.phase(),
                 StardewProgressPhase.SCHEDULED,
                 "tomorrow mail did not project SCHEDULED");
@@ -737,11 +738,11 @@ public final class ApiContractGameTests {
                 StardewProgress.inspect(player, bundleKey);
         helper.assertTrue(activeBundle != null,
                 "Community Center bundle was absent from unified progress");
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 activeBundle.phase(),
                 StardewProgressPhase.ACTIVE,
                 "partially filled bundle did not project ACTIVE");
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 activeBundle.metrics().getFirst().target(),
                 progressBundle.requiredCount(),
                 "bundle required count was not projected");
@@ -749,7 +750,7 @@ public final class ApiContractGameTests {
                 player.getUUID(), progressBundle.bundleId());
         communityCenter.setRewardAvailable(
                 player.getUUID(), progressBundle.bundleId(), true);
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 StardewProgress.inspect(player, bundleKey).phase(),
                 StardewProgressPhase.REWARD_AVAILABLE,
                 "completed bundle reward did not become claimable");
@@ -794,7 +795,7 @@ public final class ApiContractGameTests {
                 StardewProgress.inspect(player, museumRewardKey);
         helper.assertTrue(museumReward != null,
                 "museum reward was absent from unified progress");
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 museumReward.phase(),
                 StardewProgressPhase.REWARD_AVAILABLE,
                 "qualifying museum donation did not expose its reward");
@@ -842,19 +843,19 @@ public final class ApiContractGameTests {
                         player, available, StardewProgressPhase.AVAILABLE);
         helper.assertTrue(availableOrder != null,
                 "available special order was absent from unified progress");
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 availableOrder.key().id(),
                 specialId,
                 "special order lost its datapack definition ID");
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 availableOrder.scope(),
                 StardewProgressScope.TEAM,
                 "special order did not retain shared scope");
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 availableOrder.phase(),
                 StardewProgressPhase.AVAILABLE,
                 "board order did not project AVAILABLE");
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 availableOrder.metrics().size(),
                 specialDefinition.objectives().size(),
                 "special-order objective metrics were not projected");
@@ -983,7 +984,7 @@ public final class ApiContractGameTests {
     @GameTest(templateNamespace = "minecraft", template = "bastion/mobs/empty")
     public static void equipmentStackRoundTrip(GameTestHelper helper) {
         ItemStack source = new ItemStack(Items.DIAMOND, 16);
-        source.set(DataComponents.CUSTOM_NAME, Component.literal("API component sentinel"));
+        PortItemData.set(source, DataComponents.CUSTOM_NAME, Component.literal("API component sentinel"));
 
         PlayerStardewData original = new PlayerStardewData(UUID.randomUUID());
         original.setEquippedLeftRingStack(source);
@@ -993,13 +994,13 @@ public final class ApiContractGameTests {
 
         ItemStack restored = loaded.getEquippedLeftRingStack();
         helper.assertTrue(restored.is(Items.DIAMOND), "equipment item changed during NBT round trip");
-        helper.assertValueEqual(restored.getCount(), 1, "equipment slot must contain one item");
-        helper.assertValueEqual(restored.get(DataComponents.CUSTOM_NAME),
+        PortGameTests.assertValueEqual(helper, restored.getCount(), 1, "equipment slot must contain one item");
+        PortGameTests.assertValueEqual(helper, PortItemData.get(restored, DataComponents.CUSTOM_NAME),
                 Component.literal("API component sentinel"), "equipment component was lost");
-        helper.assertValueEqual(source.getCount(), 16, "equipment setter mutated the source stack");
+        PortGameTests.assertValueEqual(helper, source.getCount(), 16, "equipment setter mutated the source stack");
 
         restored.setCount(0);
-        helper.assertValueEqual(loaded.getEquippedLeftRingStack().getCount(), 1,
+        PortGameTests.assertValueEqual(helper, loaded.getEquippedLeftRingStack().getCount(), 1,
                 "equipment getter leaked its internal stack");
         helper.succeed();
     }
@@ -1034,13 +1035,11 @@ public final class ApiContractGameTests {
                 helper.getLevel().getServer(),
                 helper.getLevel(),
                 new GameProfile(
-                        UUID.randomUUID(), "Economy API"),
-                ClientInformation.createDefault());
+                        UUID.randomUUID(), "Economy API"));
         PlayerStardewDataAPI.setMoney(player, 500);
         ItemStack markedDiamonds =
                 new ItemStack(Items.DIAMOND, 3);
-        markedDiamonds.set(
-                DataComponents.CUSTOM_NAME,
+        PortItemData.set(markedDiamonds, DataComponents.CUSTOM_NAME,
                 Component.literal("Payment sentinel"));
         helper.assertTrue(
                 player.getInventory().add(markedDiamonds),
@@ -1061,11 +1060,11 @@ public final class ApiContractGameTests {
         helper.assertTrue(
                 payment.success(),
                 "composite payment was rejected");
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 PlayerStardewDataAPI.getMoney(player),
                 375,
                 "money component was not withdrawn");
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 player.getInventory().countItem(Items.DIAMOND),
                 1,
                 "item component was not withdrawn");
@@ -1080,11 +1079,11 @@ public final class ApiContractGameTests {
         helper.assertTrue(
                 payment.receipt().orElseThrow().refund(),
                 "composite payment did not refund");
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 PlayerStardewDataAPI.getMoney(player),
                 500,
                 "money refund was not exact");
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 player.getInventory().countItem(Items.DIAMOND),
                 3,
                 "item refund was not exact");
@@ -1097,8 +1096,7 @@ public final class ApiContractGameTests {
                         .filter(stack -> stack.is(Items.DIAMOND))
                         .anyMatch(stack -> Component.literal(
                                 "Payment sentinel").equals(
-                                stack.get(
-                                        DataComponents.CUSTOM_NAME))),
+                                PortItemData.get(stack, DataComponents.CUSTOM_NAME))),
                 "refunded item lost its data components");
 
         String shopId = "stardewcraft_gametest:orchard_"
@@ -1157,11 +1155,11 @@ public final class ApiContractGameTests {
                 StardewCosts.pay(
                         player, customCost.cost()).success(),
                 "resolved addon shop cost could not be paid");
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 PlayerStardewDataAPI.getMoney(player),
                 500,
                 "custom item-only cost also charged legacy money");
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 player.getInventory().countItem(Items.EMERALD),
                 0,
                 "custom shop item cost was not consumed");
@@ -1218,7 +1216,7 @@ public final class ApiContractGameTests {
                         ShopCostService.toApiEntry(virtualEntry), 1);
         var productResolution =
                 StardewShopProductRegistry.resolve(productContext);
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 productResolution.decision(),
                 StardewShopProductDecision.ACCEPT,
                 "fallback product handler was not selected");
@@ -1287,7 +1285,7 @@ public final class ApiContractGameTests {
                                 ShopCostService.toApiEntry(
                                         unknownRecipe),
                                 1));
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 rejectedRecipe.decision(),
                 StardewShopProductDecision.REJECT,
                 "unknown built-in recipe was not rejected");
@@ -1302,14 +1300,14 @@ public final class ApiContractGameTests {
         String limitedItem =
                 "stardewcraft_gametest:weekly_stock_"
                         + UUID.randomUUID();
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 ShopStockTracker.getRemaining(
                         player, shopId, limitedItem, 5),
                 5,
                 "fresh limited stock was not available");
         ShopStockTracker.recordPurchase(
                 player, shopId, limitedItem, 2);
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 ShopStockTracker.getRemaining(
                         player, shopId, limitedItem, 5),
                 3,
@@ -1318,10 +1316,10 @@ public final class ApiContractGameTests {
                 "AnimalShop", "stardewcraft:milk_pail");
         var before = StardewShopInventories.inspect(
                 player, key).orElseThrow();
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 before.key(), key,
                 "shop inventory snapshot changed compound identity");
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 before.remainingStock(), 1,
                 "shop inventory snapshot lost initial stock");
         helper.assertTrue(
@@ -1341,7 +1339,7 @@ public final class ApiContractGameTests {
                 "normal shop inventory retained a sold-out row");
         var soldOut = StardewShopInventories.inspect(
                 player, key).orElseThrow();
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 soldOut.remainingStock(), 0,
                 "diagnostic shop inventory did not retain sold-out row");
         helper.assertTrue(
@@ -1444,18 +1442,18 @@ public final class ApiContractGameTests {
         helper.assertTrue(
                 resolved.output().is(Items.GOLDEN_APPLE),
                 "production output provider did not apply");
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 resolved.output().getCount(),
                 2,
                 "production output count changed");
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 resolved.minutes(),
                 30,
                 "production duration provider did not apply");
 
         ItemStack leaked = resolved.output();
         leaked.setCount(1);
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 resolved.output().getCount(),
                 2,
                 "production plan leaked its output stack");
@@ -1496,13 +1494,13 @@ public final class ApiContractGameTests {
                         resolved.output(),
                         30);
         StardewProductionEventRegistry.dispatch(event);
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 observed.get(),
                 1,
                 "production event failure blocked later listeners");
         ItemStack eventOutput = event.output();
         eventOutput.setCount(1);
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 event.output().getCount(),
                 2,
                 "production event leaked its output stack");
@@ -1541,7 +1539,7 @@ public final class ApiContractGameTests {
         helper.assertTrue(
                 environmental.output().is(Items.WATER_BUCKET),
                 "environmental cycle did not accept empty input");
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 environmental.minutes(), 15,
                 "general cycle provider did not replace duration");
         AtomicInteger environmentalEvents = new AtomicInteger();
@@ -1570,7 +1568,7 @@ public final class ApiContractGameTests {
                         environmental.output(),
                         15,
                         true));
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 environmentalEvents.get(), 1,
                 "addon-owned machine could not announce a cycle");
 
@@ -1610,7 +1608,7 @@ public final class ApiContractGameTests {
                 baitMaker.tryInsertWithResult(
                         sardine, null).inserted(),
                 "migrated machine rejected valid production");
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 sardine.getCount(),
                 0,
                 "migrated machine did not consume input");
@@ -1618,13 +1616,13 @@ public final class ApiContractGameTests {
         helper.assertFalse(
                 baitMaker.harvestOne().isEmpty(),
                 "migrated machine did not collect output");
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 started.get(), 1,
                 "machine did not emit STARTED");
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 ready.get(), 1,
                 "machine did not emit READY");
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 collected.get(), 1,
                 "machine did not emit COLLECTED");
 
@@ -1690,20 +1688,20 @@ public final class ApiContractGameTests {
         helper.assertFalse(
                 crystalarium.harvestOne().isEmpty(),
                 "repeating machine did not collect output");
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 crystalarium.stardewCycleKind(),
                 StardewMachineCycleKind.REPEATING,
                 "repeating cycle kind was not retained");
         helper.assertTrue(
                 crystalarium.stardewAutomationStarted(),
                 "automatic repeat was not identified");
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 repeatingStarted.get(), 2,
                 "repeating machine did not begin its next cycle");
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 repeatingReady.get(), 1,
                 "repeating machine did not emit READY");
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 repeatingCollected.get(), 1,
                 "repeating machine did not emit COLLECTED");
 
@@ -1769,11 +1767,11 @@ public final class ApiContractGameTests {
         helper.assertFalse(
                 wormBin.harvestOne().isEmpty(),
                 "passive output could not be collected");
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 wormBin.stardewCycleKind(),
                 StardewMachineCycleKind.PASSIVE,
                 "passive machine kind changed");
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 passiveTransitions.get(), 4,
                 "passive machine did not emit one complete cycle "
                         + "and the next STARTED");
@@ -1793,11 +1791,11 @@ public final class ApiContractGameTests {
         helper.assertFalse(
                 lightningRod.harvestOne().isEmpty(),
                 "environmental output could not be collected");
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 lightningRod.stardewCycleKind(),
                 StardewMachineCycleKind.ENVIRONMENTAL,
                 "environmental machine kind changed");
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 environmentalTransitions.get(), 3,
                 "environmental machine did not emit a complete cycle");
         helper.succeed();
@@ -1813,8 +1811,8 @@ public final class ApiContractGameTests {
         PlayerStardewData loaded = PlayerStardewData.fromNBT(original.toNBT(), UUID.randomUUID());
         helper.assertTrue(loaded.isProfileComplete(), "completed player profile was lost");
         helper.assertFalse(loaded.isMale(), "female gender changed during NBT round trip");
-        helper.assertValueEqual(loaded.getPreferredName(), "Farmer", "preferred name changed");
-        helper.assertValueEqual(loaded.getFavoriteThing(), "strawberries", "favorite thing changed");
+        PortGameTests.assertValueEqual(helper, loaded.getPreferredName(), "Farmer", "preferred name changed");
+        PortGameTests.assertValueEqual(helper, loaded.getFavoriteThing(), "strawberries", "favorite thing changed");
         helper.succeed();
     }
 
@@ -1879,7 +1877,7 @@ public final class ApiContractGameTests {
                 worldData.moveAnimalToBuilding(animal.animalId(), secondBuilding, null),
                 "registered addon animal could not move between compatible buildings"
         );
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 StardewAnimalTypes.entityType(TEST_ANIMAL_TYPE),
                 ModEntities.WHITE_CHICKEN.get(),
                 "registered addon animal entity projection changed"
@@ -1891,12 +1889,12 @@ public final class ApiContractGameTests {
                 saved, helper.getLevel().registryAccess());
         var restored = loaded.getAnimal(animal.animalId()).orElse(null);
         helper.assertTrue(restored != null, "addon animal disappeared during world-data round trip");
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 restored.buildingId(),
                 secondBuilding,
                 "addon animal move was not persisted"
         );
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 StardewAnimalPersistentData.read(restored, TEST_ANIMAL_DATA)
                         .orElseThrow().payload().getString("lineage"),
                 "silver",
@@ -1944,19 +1942,19 @@ public final class ApiContractGameTests {
         StardewFarmInitializationSteps.RunReport firstRun =
                 StardewFarmInitializationSteps.runPending(helper.getLevel(), owner);
         helper.assertTrue(firstRun.attempted() >= 3, "not all addon farm steps were attempted");
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 firstRun.succeeded() + firstRun.failed(),
                 firstRun.attempted(),
                 "farm step report counts did not balance"
         );
-        helper.assertValueEqual(firstRun.failed(), 1, "failing farm step was not reported");
-        helper.assertValueEqual(calls, List.of("first", "failing", "final"),
+        PortGameTests.assertValueEqual(helper, firstRun.failed(), 1, "failing farm step was not reported");
+        PortGameTests.assertValueEqual(helper, calls, List.of("first", "failing", "final"),
                 "farm initialization ordering changed");
 
         StardewFarmInitializationSteps.RunReport retry =
                 StardewFarmInitializationSteps.runPending(helper.getLevel(), owner);
-        helper.assertValueEqual(retry.attempted(), 1, "successful farm steps were executed twice");
-        helper.assertValueEqual(calls, List.of("first", "failing", "final", "failing"),
+        PortGameTests.assertValueEqual(helper, retry.attempted(), 1, "successful farm steps were executed twice");
+        PortGameTests.assertValueEqual(helper, calls, List.of("first", "failing", "final", "failing"),
                 "only the failed farm step should remain pending");
 
         StardewFarmPersistentData.Key stateKey = StardewFarmPersistentData.register(
@@ -1970,7 +1968,7 @@ public final class ApiContractGameTests {
                 "addon farm state could not be written");
         helper.assertTrue(registry.transferFarm(owner, newOwner, "New Farm Owner"),
                 "farm transfer failed");
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 StardewFarmPersistentData.read(
                                 helper.getLevel().getServer(), newOwner, stateKey)
                         .orElseThrow().payload().getString("bundle_variant"),
@@ -1979,7 +1977,7 @@ public final class ApiContractGameTests {
         );
         FarmInstance transferred = registry.getFarm(newOwner);
         helper.assertTrue(transferred != null, "transferred farm disappeared");
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 transferred.getInitializationStepVersion(firstStep),
                 1,
                 "completed initialization step version did not survive transfer"
@@ -2070,15 +2068,15 @@ public final class ApiContractGameTests {
                 "Migration Farm",
                 layoutId,
                 Map.of(cabins, "4"));
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 fresh.getFarmLayoutVersion(),
                 3,
                 "new farm did not start at current layout version");
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 fresh.getFarmLayoutConfiguration().integerValue(cabins, -1),
                 4,
                 "server-normalized layout option was not persisted");
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 StardewFarms.find(
                                 helper.getLevel().getServer(), owner)
                         .orElseThrow().farmLayoutVersion(),
@@ -2101,25 +2099,25 @@ public final class ApiContractGameTests {
         StardewFarmLayoutMigrations.RunReport report =
                 StardewFarmLayoutMigrations.runPending(
                         helper.getLevel(), owner);
-        helper.assertValueEqual(report.attempted(), 2,
+        PortGameTests.assertValueEqual(helper, report.attempted(), 2,
                 "pending layout migrations were not attempted in order");
-        helper.assertValueEqual(report.succeeded(), 1,
+        PortGameTests.assertValueEqual(helper, report.succeeded(), 1,
                 "successful layout migration was not recorded");
-        helper.assertValueEqual(report.failed(), 1,
+        PortGameTests.assertValueEqual(helper, report.failed(), 1,
                 "failed layout migration was not reported");
         helper.assertTrue(report.stopped(),
                 "STOP layout migration policy was ignored");
-        helper.assertValueEqual(fresh.getFarmLayoutVersion(), 2,
+        PortGameTests.assertValueEqual(helper, fresh.getFarmLayoutVersion(), 2,
                 "failed migration incorrectly advanced the layout version");
-        helper.assertValueEqual(calls, List.of("1->2:4", "failed-3"),
+        PortGameTests.assertValueEqual(helper, calls, List.of("1->2:4", "failed-3"),
                 "layout migration ordering or context changed");
 
         StardewFarmLayoutMigrations.RunReport retry =
                 StardewFarmLayoutMigrations.runPending(
                         helper.getLevel(), owner);
-        helper.assertValueEqual(retry.attempted(), 1,
+        PortGameTests.assertValueEqual(helper, retry.attempted(), 1,
                 "successful layout migration ran twice");
-        helper.assertValueEqual(retry.resultingVersion(), 2,
+        PortGameTests.assertValueEqual(helper, retry.resultingVersion(), 2,
                 "failed retry advanced layout version");
 
         registry.deleteFarm(owner);
@@ -2162,7 +2160,7 @@ public final class ApiContractGameTests {
                                 helper.absolutePos(BlockPos.ZERO),
                                 helper.getLevel().getRandom()
                         ));
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 caveResult,
                 StardewFarmCaveDailyHandlers.Result.SKIP_DEFAULT,
                 "addon cave handler could not replace default processing"
@@ -2183,7 +2181,7 @@ public final class ApiContractGameTests {
                         helper.getLevel().getRandom(),
                         Blocks.OAK_SAPLING
                 ));
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 resolvedFruit,
                 Blocks.DIAMOND_BLOCK,
                 "addon fruit provider did not replace the default fruit"
@@ -2236,7 +2234,7 @@ public final class ApiContractGameTests {
                 14,
                 helper.getLevel().getRandom()
         ));
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 calls,
                 List.of("cave-throwing", "cave-selected", "daily-throwing", "daily-after"),
                 "farm daily providers were not ordered or isolated"
@@ -2295,7 +2293,7 @@ public final class ApiContractGameTests {
                 "addon cask rate did not reach CaskBlockEntity");
         helper.assertTrue(SmokedOutputResolver.resolve(new ItemStack(Items.COD)).is(Items.DIAMOND),
                 "addon smoked output did not reach shared gameplay/JEI resolver");
-        helper.assertValueEqual(SeedMakerOutputResolver.resolve(Items.APPLE), Items.MELON_SEEDS,
+        PortGameTests.assertValueEqual(helper, SeedMakerOutputResolver.resolve(Items.APPLE), Items.MELON_SEEDS,
                 "addon seed output did not reach runtime resolver");
         helper.assertTrue(MachineJeiRegistry.find(machineId).isPresent(),
                 "addon machine descriptor did not reach the JEI registry adapter");
@@ -2369,20 +2367,20 @@ public final class ApiContractGameTests {
 
         BlockPos treePos = helper.absolutePos(new BlockPos(3, 2, 3));
         helper.getLevel().setBlock(treePos, Blocks.BIRCH_LOG.defaultBlockState(), 3);
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 StardewTreeRuntime.inspect(helper.getLevel(), treePos).typeId(),
                 treeId,
                 "addon tree was not recognized"
         );
         helper.assertTrue(StardewTreeRuntime.growOneDay(helper.getLevel(), treePos),
                 "addon tree growth adapter did not handle the request");
-        helper.assertValueEqual(growthCalls[0], 1, "addon tree grew more than once");
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, growthCalls[0], 1, "addon tree grew more than once");
+        PortGameTests.assertValueEqual(helper, 
                 StardewTreeRuntime.fertilize(helper.getLevel(), treePos),
                 StardewTreeRuntimeAdapter.FertilizerResult.APPLIED,
                 "addon fertilizer adapter did not handle the request"
         );
-        helper.assertValueEqual(fertilizerCalls[0], 1, "addon fertilizer ran more than once");
+        PortGameTests.assertValueEqual(helper, fertilizerCalls[0], 1, "addon fertilizer ran more than once");
 
         BlockPos plantingPos = treePos.west(2);
         helper.getLevel().setBlock(plantingPos.below(), Blocks.DIRT.defaultBlockState(), 3);
@@ -2523,7 +2521,7 @@ public final class ApiContractGameTests {
                         .anyMatch(value -> value.pos().equals(cropPos)),
                 "addon crop was not added to the persistent daily scheduler"
         );
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 StardewCropRuntime.inspect(helper.getLevel(), cropPos).typeId(),
                 cropId,
                 "addon crop inspection did not isolate a failing higher-priority adapter"
@@ -2538,13 +2536,13 @@ public final class ApiContractGameTests {
                                         == StardewAcquisitionSource.Kind.FARMING
                                         && source.sourceId().equals(cropId)),
                 "addon crop descriptor did not reach acquisition sources");
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 StardewCropRuntime.growOneDay(
                         helper.getLevel(), cropPos, true, true),
                 StardewCropRuntimeAdapter.DailyResult.CHANGED,
                 "addon crop daily adapter did not handle the request"
         );
-        helper.assertValueEqual(growthCalls.get(), 1,
+        PortGameTests.assertValueEqual(helper, growthCalls.get(), 1,
                 "addon crop daily adapter ran more than once");
         helper.assertTrue(receivedContext[0] != null
                         && receivedContext[0].watered()
@@ -2552,7 +2550,7 @@ public final class ApiContractGameTests {
                 "addon crop did not receive authoritative daily context");
 
         List<ItemStack> automatedOutput = new ArrayList<>();
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 StardewCropRuntime.harvestForAutomation(
                         helper.getLevel(), cropPos, 4, automatedOutput::add),
                 StardewCropHarvestResult.notReady(),
@@ -2560,7 +2558,7 @@ public final class ApiContractGameTests {
         );
         helper.assertTrue(automatedOutput.isEmpty(),
                 "staged outputs leaked from an unsuccessful addon harvest");
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 StardewCropRuntime.harvestForAutomation(
                         helper.getLevel(), cropPos, 4, automatedOutput::add),
                 StardewCropHarvestResult.harvested(7),
@@ -2570,7 +2568,7 @@ public final class ApiContractGameTests {
                         && automatedOutput.getFirst().is(Items.DIAMOND)
                         && automatedOutput.getFirst().getCount() == 2,
                 "addon automation harvest did not route copied outputs");
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 StardewCropRuntime.growOneDay(
                         helper.getLevel(), cropPos, false, false),
                 StardewCropRuntimeAdapter.DailyResult.REMOVED,
@@ -2626,7 +2624,7 @@ public final class ApiContractGameTests {
                 "progress snapshot leaked the mutable slot array");
         helper.assertTrue(progress.rewardAvailable(),
                 "progress snapshot changed with live reward state");
-        helper.assertValueEqual(progress.filledSlots(), 1,
+        PortGameTests.assertValueEqual(helper, progress.filledSlots(), 1,
                 "progress snapshot filled-slot count changed");
         data.resetAll(playerId);
         helper.succeed();
@@ -2688,9 +2686,9 @@ public final class ApiContractGameTests {
         StardewCommunityCenterPersistentData.Value stored =
                 StardewCommunityCenterPersistentData.read(
                         helper.getLevel(), playerId, key).orElseThrow();
-        helper.assertValueEqual(stored.storedVersion(), 2,
+        PortGameTests.assertValueEqual(helper, stored.storedVersion(), 2,
                 "Community Center addon-state version was lost");
-        helper.assertValueEqual(stored.payload().getString("difficulty"), "hard",
+        PortGameTests.assertValueEqual(helper, stored.payload().getString("difficulty"), "hard",
                 "Community Center addon state leaked its source tag");
         CommunityCenterSavedData liveData =
                 CommunityCenterSavedData.get(helper.getLevel());
@@ -2698,7 +2696,7 @@ public final class ApiContractGameTests {
                 new CompoundTag(), helper.getLevel().registryAccess());
         CommunityCenterSavedData restored = CommunityCenterSavedData.load(
                 serialized, helper.getLevel().registryAccess());
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 restored.getAddonData(playerId, key.id().toString())
                         .getCompound("payload").getString("difficulty"),
                 "hard",
@@ -2781,7 +2779,7 @@ public final class ApiContractGameTests {
                         StardewNpcSocialRules.Rule.CAN_SOCIALIZE,
                         false),
                 "lower-priority social provider did not survive an earlier failure");
-        helper.assertValueEqual(socialCalls[0], 1,
+        PortGameTests.assertValueEqual(helper, socialCalls[0], 1,
                 "social provider ran an unexpected number of times");
 
         net.minecraft.world.entity.decoration.ArmorStand marker =
@@ -2843,9 +2841,9 @@ public final class ApiContractGameTests {
         StardewNpcLifecycleEvents.announceRemoved(
                 npcId, marker, "gametest_remove");
         marker.discard();
-        helper.assertValueEqual(lifecycleCounts[0], 1,
+        PortGameTests.assertValueEqual(helper, lifecycleCounts[0], 1,
                 "NPC spawn lifecycle event was not isolated and observed");
-        helper.assertValueEqual(lifecycleCounts[1], 1,
+        PortGameTests.assertValueEqual(helper, lifecycleCounts[1], 1,
                 "NPC removal lifecycle event was not isolated and observed");
         helper.succeed();
     }
@@ -2918,17 +2916,17 @@ public final class ApiContractGameTests {
         state.removeParticipant(participant);
         state.removeParticipant(participant);
 
-        helper.assertValueEqual(calls[0], 1,
+        PortGameTests.assertValueEqual(helper, calls[0], 1,
                 "festival phase event was duplicated or lost");
-        helper.assertValueEqual(calls[1], 1,
+        PortGameTests.assertValueEqual(helper, calls[1], 1,
                 "festival map phase event was duplicated or lost");
-        helper.assertValueEqual(calls[2], 1,
+        PortGameTests.assertValueEqual(helper, calls[2], 1,
                 "festival participant event was duplicated or lost");
-        helper.assertValueEqual(calls[3], 1,
+        PortGameTests.assertValueEqual(helper, calls[3], 1,
                 "festival participant leave event was duplicated or lost");
-        helper.assertValueEqual(progressEvents.size(), 1,
+        PortGameTests.assertValueEqual(helper, progressEvents.size(), 1,
                 "festival phase did not publish one unified progress event");
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 progressEvents.getFirst().type(),
                 StardewProgressEventType.MADE_AVAILABLE,
                 "festival OPEN phase did not project MADE_AVAILABLE");
@@ -3007,7 +3005,7 @@ public final class ApiContractGameTests {
                 "spring13", 2, 0, 13);
         state.attachLevel(helper.getLevel());
         state.setPhase(FestivalSessionPhase.OPEN);
-        helper.assertValueEqual(calls[0], 1,
+        PortGameTests.assertValueEqual(helper, calls[0], 1,
                 "festival mechanic failure was not isolated");
         helper.succeed();
     }
@@ -3023,11 +3021,11 @@ public final class ApiContractGameTests {
                         "stardewcraft",
                         "festival_egg_festival_pierre");
         var shops = StardewFestivalShops.list(festivalId);
-        helper.assertValueEqual(shops.size(), 1,
+        PortGameTests.assertValueEqual(helper, shops.size(), 1,
                 "egg festival shop was absent from the public directory");
-        helper.assertValueEqual(shops.getFirst().shopId(), shopId,
+        PortGameTests.assertValueEqual(helper, shops.getFirst().shopId(), shopId,
                 "legacy festival shop did not resolve to its canonical ID");
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 shops.getFirst().runtimeShopId(),
                 "Festival_EggFestival_Pierre",
                 "festival shop lost its purchase-compatible runtime ID");
@@ -3040,11 +3038,10 @@ public final class ApiContractGameTests {
         ServerPlayer player = new ServerPlayer(
                 helper.getLevel().getServer(),
                 helper.getLevel(),
-                new GameProfile(UUID.randomUUID(), "Festival Shop API"),
-                ClientInformation.createDefault());
+                new GameProfile(UUID.randomUUID(), "Festival Shop API"));
         var result = StardewFestivalShops.open(
                 player, festivalId, shopId);
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 result.status(),
                 StardewFestivalShopOpenResult.Status
                         .PARTICIPATION_REQUIRED,
@@ -3109,8 +3106,7 @@ public final class ApiContractGameTests {
         ServerPlayer player = new ServerPlayer(
                 helper.getLevel().getServer(),
                 helper.getLevel(),
-                new GameProfile(UUID.randomUUID(), "Festival Reward API"),
-                ClientInformation.createDefault());
+                new GameProfile(UUID.randomUUID(), "Festival Reward API"));
         var definition = FestivalRegistry.get(festivalId).orElseThrow();
         FestivalSessionState session = FestivalWorldData
                 .get(helper.getLevel())
@@ -3139,7 +3135,7 @@ public final class ApiContractGameTests {
                                 descriptor.rewardId().equals(
                                         rewardId)),
                 "festival reward descriptor was not discoverable");
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 StardewProgress.inspect(
                         player, rewardProgressKey).phase(),
                 StardewProgressPhase.AVAILABLE,
@@ -3163,7 +3159,7 @@ public final class ApiContractGameTests {
         helper.assertTrue(
                 festivalProgress != null,
                 "festival session was absent from unified progress");
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 festivalProgress.phase(),
                 StardewProgressPhase.AVAILABLE,
                 "open festival did not project AVAILABLE");
@@ -3198,20 +3194,20 @@ public final class ApiContractGameTests {
                 player, festivalId, rewardId);
         var duplicate = StardewFestivalRewards.claim(
                 player, festivalId, rewardId);
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 first.status(),
                 StardewFestivalRewardClaimResult.Status.CLAIMED,
                 "festival reward was not granted after provider isolation");
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 duplicate.status(),
                 StardewFestivalRewardClaimResult.Status.ALREADY_CLAIMED,
                 "festival reward duplicate claim was not rejected");
-        helper.assertValueEqual(grants[0], 1,
+        PortGameTests.assertValueEqual(helper, grants[0], 1,
                 "festival reward grant ran more than once");
         helper.assertTrue(StardewFestivalRewards.hasClaimed(
                         player, festivalId, rewardId),
                 "festival reward claim was not persisted in the session");
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 StardewProgress.inspect(
                         player, rewardProgressKey).phase(),
                 StardewProgressPhase.COMPLETED,
@@ -3276,7 +3272,7 @@ public final class ApiContractGameTests {
                 .filter(registration -> registration.activityId()
                         .equals(activityId))
                 .toList();
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 registrations.stream()
                         .map(registration -> registration.id().getPath())
                         .toList(),
@@ -3288,8 +3284,7 @@ public final class ApiContractGameTests {
         ServerPlayer player = new ServerPlayer(
                 helper.getLevel().getServer(),
                 helper.getLevel(),
-                new GameProfile(UUID.randomUUID(), "Festival Activity API"),
-                ClientInformation.createDefault());
+                new GameProfile(UUID.randomUUID(), "Festival Activity API"));
         var definition = FestivalRegistry.get(festivalId).orElseThrow();
         FestivalSessionState session = FestivalWorldData
                 .get(helper.getLevel())
@@ -3297,14 +3292,14 @@ public final class ApiContractGameTests {
         session.setPhase(FestivalSessionPhase.OPEN);
         var denied = StardewFestivalActivities.start(
                 player, festivalId, activityId);
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 denied.status(),
                 StardewFestivalActivityResult.Status.NOT_PARTICIPATING,
                 "festival activity bypassed participant validation");
         session.addParticipant(player.getUUID());
         var result = StardewFestivalActivities.start(
                 player, festivalId, activityId);
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 result.status(),
                 StardewFestivalActivityResult.Status.WRONG_LOCATION,
                 "resolved core festival location accepted the wrong dimension");
@@ -3350,7 +3345,7 @@ public final class ApiContractGameTests {
                         position);
         helper.assertTrue(keys.contains(addonPool),
                 "addon fishing pool was not appended");
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 keys.stream().filter(addonPool::equals).count(),
                 1L,
                 "addon fishing pool was not deduplicated");
@@ -3370,8 +3365,7 @@ public final class ApiContractGameTests {
         ServerPlayer player = new ServerPlayer(
                 helper.getLevel().getServer(),
                 helper.getLevel(),
-                new GameProfile(UUID.randomUUID(), "Fishing API"),
-                ClientInformation.createDefault());
+                new GameProfile(UUID.randomUUID(), "Fishing API"));
         helper.assertFalse(StardewFishingRuleConditionRegistry.evaluate(
                         player,
                         helper.getLevel(),
@@ -3390,7 +3384,7 @@ public final class ApiContractGameTests {
                         ? Component.literal("Festival Pool")
                         : null
         );
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 StardewFishingLocationDisplayRegistry.resolve(addonPool),
                 Component.literal("Festival Pool"),
                 "addon fishing location label was not resolved");
@@ -3437,11 +3431,11 @@ public final class ApiContractGameTests {
 
         List<ItemStack> drops =
                 ArtifactDropService.rollDrops(helper.getLevel(), target, null);
-        helper.assertValueEqual(drops.size(), 1,
+        PortGameTests.assertValueEqual(helper, drops.size(), 1,
                 "addon artifact-spot provider returned the wrong number of drops");
         helper.assertTrue(drops.getFirst().is(Items.DIAMOND),
                 "addon artifact-spot provider returned the wrong item");
-        helper.assertValueEqual(drops.getFirst().getCount(), 2,
+        PortGameTests.assertValueEqual(helper, drops.getFirst().getCount(), 2,
                 "addon artifact-spot stack count changed");
         helper.assertTrue(drops.getFirst() != source,
                 "artifact-spot provider leaked its source stack");
@@ -3536,8 +3530,7 @@ public final class ApiContractGameTests {
         ServerPlayer player = new ServerPlayer(
                 helper.getLevel().getServer(),
                 helper.getLevel(),
-                new GameProfile(UUID.randomUUID(), "Location API"),
-                ClientInformation.createDefault());
+                new GameProfile(UUID.randomUUID(), "Location API"));
         ResourceLocation locationId =
                 new ResourceLocation(
                         "stardewcraft_gametest", "orchard");
@@ -3554,7 +3547,7 @@ public final class ApiContractGameTests {
                         StardewLocationTransition.Reason.INITIAL);
         StardewLocationTransitionRegistry.dispatch(transition);
 
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 calls,
                 List.of("high", "low"),
                 "location listeners did not compose in priority order");
@@ -3578,11 +3571,11 @@ public final class ApiContractGameTests {
         ResourceLocation dimension =
                 ModDimensions.STARDEW_VALLEY.location();
 
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 StardewLocations.resolveId("Town").orElse(null),
                 town,
                 "legacy Town alias did not resolve to the canonical location");
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 StardewLocations.resolveId("BusStop")
                         .map(ResourceLocation::getPath)
                         .orElse(""),
@@ -3596,7 +3589,7 @@ public final class ApiContractGameTests {
                                 StardewCraft.MODID, "pierre_house"))
                         .orElseThrow().indoor(),
                 "fixed interior lost its indoor metadata");
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 StardewLocations.find(
                                 dimension, new BlockPos(0, 64, 0))
                         .map(location -> location.id())
@@ -3669,7 +3662,7 @@ public final class ApiContractGameTests {
         }
 
         var rootSnapshot = StardewContents.find(root).orElseThrow();
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 rootSnapshot.references().size(),
                 2,
                 "provider references were not projected");
@@ -3693,11 +3686,11 @@ public final class ApiContractGameTests {
                         .orElseThrow()
                         .healthy(),
                 "reference-free provider node was not healthy");
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 StardewContents.resolve(legacyChild).orElse(null),
                 child,
                 "content alias did not resolve to the canonical key");
-        helper.assertValueEqual(
+        PortGameTests.assertValueEqual(helper, 
                 StardewContents.find(legacyChild)
                         .map(node -> node.key())
                         .orElse(null),

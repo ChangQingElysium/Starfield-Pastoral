@@ -1,5 +1,7 @@
 package com.stardew.craft.animal.model;
 
+import com.stardew.craft.port.PortItemStacks;
+import com.stardew.craft.port.PortItemData;
 import com.google.gson.*;
 import com.mojang.authlib.GameProfile;
 import com.stardew.craft.animal.runtime.*;
@@ -107,7 +109,7 @@ public final class AnimalAddonRuntimeGameTests {
             var id=unique("handler").toString();install(animal(id));var home=home(h,farm);var data=LivestockWorldData.get(level.getServer());
             var record=new LivestockRecord(UUID.randomUUID(),owner,farm.getInstanceId(),home.id(),"Pearl",data.allocateRandomId(),1,LivestockCare.purchased()).species(LivestockSpecies.parse(id));data.put(record);
             var key=StardewAnimalPersistentData.register(unique("state"),1);var calls=new AtomicInteger();
-            var named=new ItemStack(Items.DIAMOND,2);named.set(DataComponents.CUSTOM_NAME,Component.literal("Pearl's gift"));
+            var named=new ItemStack(Items.DIAMOND,2);PortItemData.set(named, DataComponents.CUSTOM_NAME,Component.literal("Pearl's gift"));
             StardewAnimalDailyHandlers.register(unique("daily"),id,100,context->{
                 calls.incrementAndGet();var payload=new CompoundTag();payload.putInt("visits",1);
                 h.assertTrue(context.entityId().equals(record.id()),"Wrong entity UUID in public context");
@@ -118,7 +120,7 @@ public final class AnimalAddonRuntimeGameTests {
             var products=new ArrayList<LivestockWorldData.Product>();
             var settled=LivestockDayState.settle(level,home,record,2,true,false,false,false,StardewDeterministicRandom.create(1,2,3),products,0);
             h.assertTrue(StardewAnimalPersistentData.read(level,record.id(),key).isEmpty(),"Callback changed ledger before transaction commit");
-            h.assertTrue(ItemStack.isSameItemSameComponents(LivestockProducts.held(level,settled),named),"Held produce lost components");
+            h.assertTrue(ItemStack.isSameItemSameTags(LivestockProducts.held(level,settled),named),"Held produce lost components");
             var stagedAnimals=new ArrayList<>(List.of(settled));var statPlan=LivestockStats.plan(stagedAnimals);
             data.prepare(new LivestockWorldData.Batch(home.id(),stagedAnimals,products,List.of(),List.of(),farm.getInstanceId(),0,2,Map.of(),statPlan));
             LivestockService.recover(level.getServer());LivestockService.recover(level.getServer());
@@ -126,7 +128,7 @@ public final class AnimalAddonRuntimeGameTests {
             h.assertTrue(calls.get()==1&&StardewAnimalPersistentData.read(level,record.id(),key).isPresent(),"Recovery reran handler or lost its state");
             var product=data.eggs().stream().filter(p->p.animal().equals(record.id())).findFirst().orElseThrow();
             var restored=LivestockWorldData.Product.load(product.save());var stack=LivestockProductEntity.stack(restored,level);
-            h.assertTrue(stack.getCount()==2&&ItemStack.isSameItemSameComponents(stack,named),"Product persistence lost stack metadata/count");
+            h.assertTrue(stack.getCount()==2&&ItemStack.isSameItemSameTags(stack,named),"Product persistence lost stack metadata/count");
             var moved=LivestockRecord.load(data.find(record.id()).rename("Moved").rehome(UUID.randomUUID()).save());
             h.assertTrue(StardewAnimalPersistentData.read(moved,key).isPresent(),"Rename/rehome lost addon state");
         }finally{AnimalDefinitionSnapshot.publish(previous,tiers);farms.deleteFarm(owner);}
@@ -145,8 +147,8 @@ public final class AnimalAddonRuntimeGameTests {
             public List<ItemStack> inventory(){return held.stream().map(ItemStack::copy).toList();}
             public int slotLimit(int slot,ItemStack stack){return 1;}
             public boolean canInsert(int slot,ItemStack stack){return slot==1;}
-            public CompoundTag withInventory(CompoundTag input,List<ItemStack> items){input=input.copy();if(!items.get(1).isEmpty())input.put("item",items.get(1).save(level.registryAccess()));return input;}
-            public void apply(CompoundTag plan){state.merge(plan);held.set(1,ItemStack.parseOptional(level.registryAccess(),state.getCompound("item")));}
+            public CompoundTag withInventory(CompoundTag input,List<ItemStack> items){input=input.copy();if(!items.get(1).isEmpty())input.put("item",PortItemStacks.save(items.get(1), level.registryAccess()));return input;}
+            public void apply(CompoundTag plan){state.merge(plan);held.set(1,PortItemStacks.parseOptional(level.registryAccess(),state.getCompound("item")));}
         }:null);
         var facility=StardewAnimalFacilities.resolve(level,pos);var plan=facility.plan(facility.access().withHay(facility.access().snapshot(),1));
         h.assertTrue(state.getInt("hay")==3,"Facility planning mutated world");StardewAnimalFacilities.apply(level,pos,plan);StardewAnimalFacilities.apply(level,pos,plan);

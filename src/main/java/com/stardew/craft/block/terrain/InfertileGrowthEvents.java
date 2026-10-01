@@ -5,7 +5,7 @@ import com.stardew.craft.block.crop.StardewCropBlock;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import com.stardew.craft.port.net.neoforged.neoforge.event.level.BlockGrowFeatureEvent;
 import com.stardew.craft.port.net.neoforged.neoforge.event.level.block.CropGrowEvent;
 

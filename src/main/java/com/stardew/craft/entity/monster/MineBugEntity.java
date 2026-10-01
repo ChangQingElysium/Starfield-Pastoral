@@ -54,8 +54,8 @@ public final class MineBugEntity extends StardewMonsterEntity {
         setPos(getX(),getY()+FLIGHT_LIFT-flightLift,getZ());
         flightLift=FLIGHT_LIFT;
     }
-    @Override protected void defineSynchedData(SynchedEntityData.Builder builder) {
-        super.defineSynchedData(builder);builder.define(FACING,2);builder.define(HIT_START,-100L);
+    @Override protected void defineSynchedData() {
+        super.defineSynchedData();this.entityData.define(FACING,2);this.entityData.define(HIT_START,-100L);
     }
     public boolean armored() { return armored; }
     public String variant() { return armored?"armored_bug":"bug"; }

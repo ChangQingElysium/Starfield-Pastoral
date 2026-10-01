@@ -16,7 +16,6 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketFlow;
 import com.stardew.craft.port.net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
 import net.minecraft.network.protocol.game.ClientboundBundlePacket;
-import com.stardew.craft.port.net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ServerPlayer;
 import com.stardew.craft.port.net.minecraft.server.network.CommonListenerCookie;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
@@ -43,7 +42,7 @@ public final class DedicatedLoginGameTests {
         helper.assertTrue(server.getLevel(com.stardew.craft.core.ModMiningDimensions.STARDEW_MINING) == null,
                 "Replay fixture unexpectedly has the mining dimension");
         var player = new ServerPlayer(server, level,
-                new GameProfile(UUID.randomUUID(), "ReplayViewerProbe"), ClientInformation.createDefault());
+                new GameProfile(UUID.randomUUID(), "ReplayViewerProbe"));
         try {
             var mining = MiningDataManager.getPlayerData(player);
             mining.setCurrentFloor(37);
@@ -96,10 +95,10 @@ public final class DedicatedLoginGameTests {
         var level = helper.getLevel();
         var server = level.getServer();
         var player = new ServerPlayer(server, level,
-                new GameProfile(UUID.randomUUID(), "LoginWireProbe"), ClientInformation.createDefault());
+                new GameProfile(UUID.randomUUID(), "LoginWireProbe"));
         Set<String> sent = new HashSet<>();
         player.connection = new ServerGamePacketListenerImpl(server, new Connection(PacketFlow.SERVERBOUND),
-                player, CommonListenerCookie.createInitial(player.getGameProfile(), false)) {
+                player) {
             @Override
             public void send(Packet<?> packet) {
                 inspect(packet);
@@ -108,7 +107,7 @@ public final class DedicatedLoginGameTests {
             private void inspect(Packet<?> packet) {
                 if (packet instanceof ClientboundBundlePacket bundle) {
                     bundle.subPackets().forEach(this::inspect);
-                } else if (packet instanceof ClientboundCustomPayloadPacket custom) {
+                } else if (ClientboundCustomPayloadPacket.unwrap(packet) instanceof ClientboundCustomPayloadPacket custom) {
                     String id = custom.payload().type().id().toString();
                     var encoded = new RegistryFriendlyByteBuf(Unpooled.buffer(), server.registryAccess(), ConnectionType.NEOFORGE);
                     var roundTrip = new RegistryFriendlyByteBuf(Unpooled.buffer(), server.registryAccess(), ConnectionType.NEOFORGE);

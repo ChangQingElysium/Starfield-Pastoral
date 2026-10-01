@@ -1,5 +1,6 @@
 package com.stardew.craft.blockentity;
 
+import com.stardew.craft.port.PortItemStacks;
 import com.stardew.craft.block.utility.ShippingBinBlock;
 import com.stardew.craft.economy.sell.ProfessionSellPriceService;
 import com.stardew.craft.economy.sell.SellQuote;
@@ -335,7 +336,7 @@ public class ShippingBinBlockEntity extends net.minecraft.world.level.block.enti
         }
 
         ItemStack previous = items.get(0);
-        boolean sameBatch = !sanitized.isEmpty() && ItemStack.isSameItemSameComponents(previous, sanitized)
+        boolean sameBatch = !sanitized.isEmpty() && ItemStack.isSameItemSameTags(previous, sanitized)
                 && sanitized.getCount() <= previous.getCount();
         items.set(0, sanitized);
         if (!sameBatch) {
@@ -487,15 +488,15 @@ public class ShippingBinBlockEntity extends net.minecraft.world.level.block.enti
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
+    protected void saveAdditional(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        super.saveAdditional(tag);
 
         ListTag list = new ListTag();
         ItemStack stack = items.get(0);
         if (!stack.isEmpty()) {
             CompoundTag entry = new CompoundTag();
             entry.putInt("Slot", 0);
-            entry.put("Stack", stack.save(registries));
+            entry.put("Stack", PortItemStacks.save(stack, registries));
             list.add(entry);
         }
         tag.put(TAG_ITEMS, list);
@@ -508,8 +509,8 @@ public class ShippingBinBlockEntity extends net.minecraft.world.level.block.enti
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
+    public void load(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        super.load(tag);
         items.set(0, ItemStack.EMPTY);
 
         if (tag.contains(TAG_ITEMS, 9)) {
@@ -517,7 +518,7 @@ public class ShippingBinBlockEntity extends net.minecraft.world.level.block.enti
             for (int i = 0; i < list.size(); i++) {
                 CompoundTag entry = list.getCompound(i);
                 if (entry.getInt("Slot") == 0) {
-                    ItemStack parsed = ItemStack.parse(registries, entry.getCompound("Stack")).orElse(ItemStack.EMPTY);
+                    ItemStack parsed = PortItemStacks.parse(registries, entry.getCompound("Stack")).orElse(ItemStack.EMPTY);
                     items.set(0, parsed);
                 }
             }
@@ -532,7 +533,7 @@ public class ShippingBinBlockEntity extends net.minecraft.world.level.block.enti
         }
         if (items.get(0).isEmpty()) bufferOwnerId = null;
         if (level != null && level.isClientSide && tag.contains("ShipmentItem")) {
-            shipmentItem = ItemStack.parse(registries, tag.getCompound("ShipmentItem")).orElse(ItemStack.EMPTY);
+            shipmentItem = PortItemStacks.parse(registries, tag.getCompound("ShipmentItem")).orElse(ItemStack.EMPTY);
             shipmentTick = tag.getLong("ShipmentTick");
             shipmentSerial = tag.getLong("ShipmentSerial");
         }
@@ -545,11 +546,11 @@ public class ShippingBinBlockEntity extends net.minecraft.world.level.block.enti
     }
 
     @Override
-    public CompoundTag getUpdateTag(net.minecraft.core.HolderLookup.Provider registries) {
-        CompoundTag tag = super.getUpdateTag(registries);
-        saveAdditional(tag, registries);
+    public CompoundTag getUpdateTag() { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        CompoundTag tag = super.getUpdateTag();
+        saveAdditional(tag);
         if (shipmentAge(0) < .5f) {
-            tag.put("ShipmentItem", shipmentItem.save(registries));
+            tag.put("ShipmentItem", PortItemStacks.save(shipmentItem, registries));
             tag.putLong("ShipmentTick", shipmentTick);
             tag.putLong("ShipmentSerial", shipmentSerial);
         }

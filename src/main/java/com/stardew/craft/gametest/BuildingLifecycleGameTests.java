@@ -1,5 +1,6 @@
 package com.stardew.craft.gametest;
 
+import com.stardew.craft.port.PortItemStacks;
 import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.building.runtime.*;
 import com.stardew.craft.farm.FarmInstanceRegistry;
@@ -111,9 +112,9 @@ public final class BuildingLifecycleGameTests {
                 for (int target = 2; target <= 3; target++) {
                     var trough = BuildingTransfer.nativeCells(level, record, record.tier()).values().stream()
                             .filter(cell -> cell.state().is(ModBlocks.FEED_TROUGH.get())).findFirst().orElseThrow();
-                    var troughEntity = level.getBlockEntity(trough.pos()); var food = troughEntity.saveWithFullMetadata(level.registryAccess());
-                    food.put("hay", new ItemStack(com.stardew.craft.item.ModItems.HAY.get(), 1).save(level.registryAccess()));
-                    if (target == 2) troughEntity.loadWithComponents(food, level.registryAccess());
+                    var troughEntity = level.getBlockEntity(trough.pos()); var food = troughEntity.saveWithFullMetadata();
+                    food.put("hay", PortItemStacks.save(new ItemStack(com.stardew.craft.item.ModItems.HAY.get(), 1), level.registryAccess()));
+                    if (target == 2) troughEntity.load(food);
                     // The high animation must have an actual wall-hung notice location in each old template.
                     h.assertTrue(BuildingLifecycleService.noticePosition(level, record) != null, "No upgrade wall for " + family + " tier " + record.tier());
                     var oldCells = BuildingTransfer.nativeCells(level, record, record.tier());
@@ -150,8 +151,8 @@ public final class BuildingLifecycleGameTests {
                     int hay = 0;
                     for (var cell : BuildingTransfer.nativeCells(level, record, target).values()) {
                         if (!cell.state().is(ModBlocks.FEED_TROUGH.get()) && !cell.state().is(ModBlocks.AUTOFEED_TROUGH.get())) continue;
-                        var hayTag = level.getBlockEntity(cell.pos()).saveWithFullMetadata(level.registryAccess()).getCompound("hay");
-                        hay += ItemStack.parse(level.registryAccess(), hayTag).orElse(ItemStack.EMPTY).getCount();
+                        var hayTag = level.getBlockEntity(cell.pos()).saveWithFullMetadata().getCompound("hay");
+                        hay += PortItemStacks.parse(level.registryAccess(), hayTag).orElse(ItemStack.EMPTY).getCount();
                     }
                     h.assertTrue(hay == 1, "Upgrade lost feeding inventory, including ordinary to automatic conversion");
                     h.assertTrue(record.tier() == target && record.phase() == BuildingRecord.Phase.READY, "Upgrade did not reach target");

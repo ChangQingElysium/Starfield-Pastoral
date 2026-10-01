@@ -133,7 +133,7 @@ public class JunimoGreenhouseRuneManager extends SavedData {
     // ─── 序列化 ─────────────────────────────────────────────────
 
     @Override
-    public CompoundTag save(CompoundTag tag, HolderLookup.Provider provider) {
+    public CompoundTag save(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
         ListTag list = new ListTag();
         for (var entry : runes.entrySet()) {
             CompoundTag runeTag = new CompoundTag();
@@ -164,11 +164,15 @@ public class JunimoGreenhouseRuneManager extends SavedData {
     public static JunimoGreenhouseRuneManager get(ServerLevel level) {
         ServerLevel overworld = level.getServer().overworld();
         return overworld.getDataStorage().computeIfAbsent(
-                new SavedData.Factory<>(
+                com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(
                         JunimoGreenhouseRuneManager::new,
                         JunimoGreenhouseRuneManager::load,
                         null
-                ),
+                )), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(
+                        JunimoGreenhouseRuneManager::new,
+                        JunimoGreenhouseRuneManager::load,
+                        null
+                )),
                 DATA_NAME
         );
     }

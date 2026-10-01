@@ -1,5 +1,6 @@
 package com.stardew.craft.client.model;
 
+import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.block.mine.MineSerpentPillarBlock;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -13,7 +14,7 @@ import net.minecraft.world.item.ItemStack;
 import com.stardew.craft.port.net.minecraft.world.item.component.BlockItemStateProperties;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import net.minecraftforge.client.event.ModelEvent;
 import net.minecraftforge.client.model.BakedModelWrapper;
 import javax.annotation.Nullable;
@@ -44,7 +45,7 @@ public final class MineSerpentPillarModels {
             overrides = new ItemOverrides() {
                 @Override public BakedModel resolve(BakedModel model, ItemStack stack, @Nullable ClientLevel level,
                         @Nullable LivingEntity entity, int seed) {
-                    Integer variant = stack.getOrDefault(DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY)
+                    Integer variant = PortItemData.getOrDefault(stack, DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY)
                             .get(MineSerpentPillarBlock.VARIANT);
                     return variants[variant == null ? 0 : variant];
                 }

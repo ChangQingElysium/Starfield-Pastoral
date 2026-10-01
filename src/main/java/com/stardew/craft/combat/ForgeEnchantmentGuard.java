@@ -1,5 +1,6 @@
 package com.stardew.craft.combat;
 
+import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.api.v1.item.StardewItemDataApi;
 import com.stardew.craft.item.weapon.IStardewWeapon;
@@ -9,7 +10,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import com.stardew.craft.port.net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import net.minecraftforge.event.AnvilUpdateEvent;
 import net.minecraftforge.event.GrindstoneEvent;
 import com.stardew.craft.port.net.neoforged.neoforge.event.entity.player.PlayerEnchantItemEvent;
@@ -51,8 +52,8 @@ public final class ForgeEnchantmentGuard {
     }
 
     public static boolean stackHasProtectedForgeEnchantments(ItemStack stack) {
-        return componentHasProtectedForgeEnchantments(stack.get(DataComponents.ENCHANTMENTS))
-                || componentHasProtectedForgeEnchantments(stack.get(DataComponents.STORED_ENCHANTMENTS));
+        return componentHasProtectedForgeEnchantments(PortItemData.get(stack, DataComponents.ENCHANTMENTS))
+                || componentHasProtectedForgeEnchantments(PortItemData.get(stack, DataComponents.STORED_ENCHANTMENTS));
     }
 
     public static boolean stripProtectedForgeEnchantments(ItemStack stack, boolean force) {
@@ -115,7 +116,7 @@ public final class ForgeEnchantmentGuard {
             return;
         }
         ItemStack stack = event.getEnchantedItem();
-        event.getEnchantments().removeIf(instance -> isProtectedForgeEnchantment(instance.enchantment));
+        event.getEnchantments().removeIf(instance -> isProtectedForgeEnchantment(ItemEnchantments.portHolder(instance.enchantment)) /* PORT(1.20.1): EnchantmentInstance holds the Enchantment */);
         stripProtectedForgeEnchantments(stack, true);
     }
 
@@ -146,7 +147,7 @@ public final class ForgeEnchantmentGuard {
     private static boolean filterEnchantments(ItemStack stack,
             com.stardew.craft.port.net.minecraft.core.component.DataComponentType<ItemEnchantments> component,
             boolean keepProtected) {
-        ItemEnchantments enchantments = stack.get(component);
+        ItemEnchantments enchantments = PortItemData.get(stack, component);
         if (enchantments == null || enchantments.isEmpty()) {
             return false;
         }
@@ -157,7 +158,7 @@ public final class ForgeEnchantmentGuard {
         if (filtered.equals(enchantments)) {
             return false;
         }
-        stack.set(component, filtered);
+        PortItemData.set(stack, component, filtered);
         return true;
     }
 

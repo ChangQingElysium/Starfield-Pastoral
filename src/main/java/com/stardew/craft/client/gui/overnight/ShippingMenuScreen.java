@@ -147,7 +147,7 @@ public class ShippingMenuScreen extends Screen {
                 OvernightSettlementPayload.ShippedItem existing = consolidated.get(i);
                 if (existing.category() == item.category()
                         && existing.pricePerItem() == item.pricePerItem()
-                        && ItemStack.isSameItemSameComponents(existing.stack(), item.stack())) {
+                        && ItemStack.isSameItemSameTags(existing.stack(), item.stack())) {
                     matchingIndex = i;
                     break;
                 }

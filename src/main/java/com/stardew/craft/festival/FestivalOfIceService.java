@@ -33,7 +33,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import com.stardew.craft.port.net.minecraft.world.scores.ScoreHolder;
 import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 import net.minecraftforge.server.ServerLifecycleHooks;
 
@@ -928,10 +927,10 @@ public final class FestivalOfIceService {
         for (ServerPlayer participant : onlineParticipants(level)) {
             IceFishingPlayerState state = ICE_FISHING_PLAYERS.get(participant.getUUID());
             int count = state == null ? 0 : state.fishCaught;
-            var score = scoreboard.getOrCreatePlayerScore(
-                    ScoreHolder.forNameOnly(participant.getStringUUID()), objective);
-            score.set(count);
-            score.display(Component.literal(PlayerDisplayName.get(participant)));
+            // PORT(1.20.1): no ScoreHolder / ScoreAccess#display before 1.20.3; the 1.20.1 sidebar prints the holder
+            // name, so the display name the 1.21 entry showed becomes the holder.
+            var score = scoreboard.getOrCreatePlayerScore(PlayerDisplayName.get(participant), objective);
+            score.setScore(count);
         }
     }
 

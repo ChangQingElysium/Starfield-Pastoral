@@ -320,12 +320,13 @@ public final class FishingMinigameScreen extends Screen implements com.stardew.c
 
 	@SuppressWarnings("null")
 	@Override
-	public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+	public boolean mouseScrolled(double mouseX, double mouseY, double scrollY) {
+		double scrollX = 0.0D; // PORT(1.20.1): no horizontal scroll before 1.20.2
 		if (minecraft != null && minecraft.player != null && scrollY != 0) {
 			FishingInteractionState.selectSlot(Math.floorMod(minecraft.player.getInventory().selected - (int) Math.signum(scrollY), 9));
 			return true;
 		}
-		return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
+		return super.mouseScrolled(mouseX, mouseY, scrollY);
 	}
 
 	@Override

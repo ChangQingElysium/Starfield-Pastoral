@@ -29,11 +29,11 @@ public final class SurfaceFloorData extends SavedData {
     private final Map<Long, Map<Long, Cover>> chunks = new HashMap<>();
 
     public static SurfaceFloorData get(ServerLevel level) {
-        return level.getDataStorage().computeIfAbsent(FACTORY, ID);
+        return level.getDataStorage().computeIfAbsent(com.stardew.craft.port.PortSavedData.loader(FACTORY), com.stardew.craft.port.PortSavedData.constructor(FACTORY), ID);
     }
 
     public static void supportChanged(ServerLevel level, BlockPos pos) {
-        SurfaceFloorData data = level.getDataStorage().get(FACTORY, ID);
+        SurfaceFloorData data = level.getDataStorage().get(com.stardew.craft.port.PortSavedData.loader(FACTORY), ID);
         if (data == null || data.at(pos) == null
                 || SurfaceFloorItem.supports(level, pos, level.getBlockState(pos))) return;
         if (level.captureBlockSnapshots) {
@@ -114,7 +114,7 @@ public final class SurfaceFloorData extends SavedData {
         }
     }
 
-    @Override public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
+    @Override public CompoundTag save(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
         var list = new ListTag();
         chunks.values().forEach(chunk -> chunk.forEach((pos, cover) -> {
             var entry = new CompoundTag();

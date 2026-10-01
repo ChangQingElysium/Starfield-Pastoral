@@ -73,7 +73,7 @@ public final class ReclamationMachineGameTests {
                     h.assertTrue(shape.toAabbs().size()==1,"Must use one overall box per part");
                 }
                 h.assertTrue(extension.equals(origin.above()),"Tall machine did not reserve upper cell");
-                h.assertTrue(level.getCapability(Capabilities.ItemHandler.BLOCK,extension,Direction.UP)!=null,"Extension automation lost owner");
+                h.assertTrue(com.stardew.craft.port.PortCapabilities.getCapability(level, Capabilities.ItemHandler.BLOCK,extension,Direction.UP)!=null,"Extension automation lost owner");
                 level.getEntitiesOfClass(ItemEntity.class,new AABB(origin).inflate(4)).forEach(ItemEntity::discard);
                 // Mining the upper part must remove the whole machine and drop exactly one item.
                 var removed = level.getBlockState(extension);
@@ -117,7 +117,7 @@ public final class ReclamationMachineGameTests {
             h.assertTrue(be.insertAutomation(input, false).getCount() == 2 && be.isWorking() && !be.isReady(), "Machine did not start one item");
             h.assertTrue(be.getRemainingAbsMinutes() == (be.isWoodChipper() ? 180 : 60), "Original processing duration differs");
             var restored = new ReclamationMachineBlockEntity(pos, level.getBlockState(pos)); restored.setLevel(level);
-            restored.loadWithComponents(be.getUpdateTag(level.registryAccess()), level.registryAccess());
+            restored.load(be.getUpdateTag());
             h.assertTrue(restored.isWorking() && ItemStack.matches(restored.getProduct(), be.getProduct())
                     && restored.getStartedAtGameTick() == be.getStartedAtGameTick(), "Save/client sync lost animation or rerolled output");
             h.assertTrue(be.applyFairyDust() && be.isReady() && !be.isWorking() && level.getBlockState(pos).getValue(ReclamationMachineBlock.READY), "Fairy dust ready state missing");

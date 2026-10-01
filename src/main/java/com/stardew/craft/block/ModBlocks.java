@@ -1,5 +1,6 @@
 package com.stardew.craft.block;
 
+import com.stardew.craft.port.PortBlockProperties;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.block.cooking.CookingPlacedFoodBlock;
 import com.stardew.craft.block.mine.CalicoStatueBlock;
@@ -38,7 +39,7 @@ public class ModBlocks {
 
         public static final DeferredBlock<com.stardew.craft.block.terrain.PlaygroundSandBlock> PLAYGROUND_SAND =
                         BLOCKS.register("playground_sand", () -> new com.stardew.craft.block.terrain.PlaygroundSandBlock(
-                                        Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.SAND)));
+                                        PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.SAND)));
 
         public static final DeferredBlock<com.stardew.craft.block.decor.PlaygroundBlock> BIRD_SPRING_RIDER =
                         BLOCKS.register("bird_spring_rider", () -> new com.stardew.craft.block.decor.PlaygroundBlock(
@@ -47,7 +48,7 @@ public class ModBlocks {
 
         public static final DeferredBlock<com.stardew.craft.block.terrain.AsphaltRoadBlock> ASPHALT_ROAD =
                         BLOCKS.register("asphalt_road", () -> new com.stardew.craft.block.terrain.AsphaltRoadBlock(
-                                        Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.STONE)));
+                                        PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.STONE)));
 
         public static final DeferredBlock<com.stardew.craft.block.terrain.RoadMarkingBlock> ROAD_DASH =
                         BLOCKS.register("road_dash", () -> new com.stardew.craft.block.terrain.RoadMarkingBlock(
@@ -61,29 +62,29 @@ public class ModBlocks {
 
         public static final DeferredBlock<com.stardew.craft.block.terrain.TerrainGrassBlock> GRASS_BLOCK =
                         BLOCKS.register("grass_block", () -> new com.stardew.craft.block.terrain.VariedTerrainGrassBlock(
-                                        Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.GRASS_BLOCK)));
+                                        PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.GRASS_BLOCK)));
 
         public static final DeferredBlock<com.stardew.craft.block.terrain.TerrainDirtBlock> DIRT =
                         BLOCKS.register("dirt", () -> new com.stardew.craft.block.terrain.TerrainDirtBlock(
-                                        Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.DIRT)));
+                                        PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.DIRT)));
 
         public static final DeferredBlock<com.stardew.craft.block.terrain.HardSoilBlock> HARD_SOIL =
                         BLOCKS.register("hard_soil", () -> new com.stardew.craft.block.terrain.HardSoilBlock(
-                                        Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.DIRT).strength(1.0F)));
+                                        PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.DIRT).strength(1.0F)));
         public static final DeferredBlock<com.stardew.craft.block.terrain.TerrainFarmlandBlock.Infertile> INFERTILE_FARMLAND =
                         BLOCKS.register("infertile_farmland", () -> new com.stardew.craft.block.terrain.TerrainFarmlandBlock.Infertile(
-                                        Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.FARMLAND)));
+                                        PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.FARMLAND)));
 
         public static final DeferredBlock<com.stardew.craft.block.terrain.TerrainSandBlock> SAND =
                         BLOCKS.register("sand", () -> new com.stardew.craft.block.terrain.TerrainSandBlock(
-                                        Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.SAND)));
+                                        PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.SAND)));
         public static final DeferredBlock<com.stardew.craft.block.terrain.TerrainFarmlandBlock.Sandy> SANDY_FARMLAND =
                         BLOCKS.register("sandy_farmland", () -> new com.stardew.craft.block.terrain.TerrainFarmlandBlock.Sandy(
-                                        Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.FARMLAND).mapColor(MapColor.SAND).sound(SoundType.SAND)));
+                                        PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.FARMLAND).mapColor(MapColor.SAND).sound(SoundType.SAND)));
 
         public static final DeferredBlock<com.stardew.craft.block.terrain.TerrainFarmlandBlock> FARMLAND =
                         BLOCKS.register("farmland", () -> new com.stardew.craft.block.terrain.TerrainFarmlandBlock(
-                                        Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.FARMLAND)));
+                                        PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.FARMLAND)));
 
         public static final DeferredBlock<com.stardew.craft.block.decor.BlacksmithToolDecorBlock> LEANING_SHOVEL =
                         BLOCKS.register("leaning_shovel", () -> new com.stardew.craft.block.decor.BlacksmithToolDecorBlock(
@@ -96,30 +97,30 @@ public class ModBlocks {
 
         public static final DeferredBlock<com.stardew.craft.block.decor.MapDecorStaticBlock> ROAD_SIGN =
                         BLOCKS.register("road_sign", () -> new com.stardew.craft.block.decor.MapDecorStaticBlock(
-                                        Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_PLANKS).noOcclusion()
+                                        PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_PLANKS).noOcclusion()
                                                 .pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK),
                                         "stardewcraft:block/decor/road_sign"));
 
         public static final DeferredBlock<com.stardew.craft.block.decor.RuralFenceBlock> RURAL_FENCE =
                         BLOCKS.register("rural_fence", () -> new com.stardew.craft.block.decor.RuralFenceBlock(
-                                        Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_PLANKS).noOcclusion()
+                                        PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_PLANKS).noOcclusion()
                                                 .pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK)));
 
         public static final DeferredBlock<com.stardew.craft.block.decor.RuralFenceBlock> WOOD_FENCE =
                         BLOCKS.register("wood_fence", () -> new com.stardew.craft.block.decor.RuralFenceBlock(
-                                        Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_PLANKS).noOcclusion()
+                                        PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_PLANKS).noOcclusion()
                                                 .pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK),
                                         "stardewcraft:block/decor/wood_fence"));
 
         public static final DeferredBlock<com.stardew.craft.block.decor.RuralFenceBlock> HARDWOOD_FENCE =
                         BLOCKS.register("hardwood_fence", () -> new com.stardew.craft.block.decor.RuralFenceBlock(
-                                        Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_PLANKS).noOcclusion()
+                                        PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_PLANKS).noOcclusion()
                                                 .pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK),
                                         "stardewcraft:block/decor/hardwood_fence"));
 
         public static final DeferredBlock<com.stardew.craft.block.decor.GardenPlanterBlock> GARDEN_PLANTER =
                         BLOCKS.register("garden_planter", () -> new com.stardew.craft.block.decor.GardenPlanterBlock(
-                                        Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_PLANKS).noOcclusion()
+                                        PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_PLANKS).noOcclusion()
                                                 .pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK)));
 
         public static final DeferredBlock<com.stardew.craft.block.decor.MapDecorStaticBlock> BLUE_FLOWERPOT =
@@ -131,7 +132,7 @@ public class ModBlocks {
 
         public static final DeferredBlock<com.stardew.craft.block.decor.DogHouseBlock> DOG_HOUSE =
                         BLOCKS.register("dog_house", () -> new com.stardew.craft.block.decor.DogHouseBlock(
-                                        Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_PLANKS).noOcclusion()
+                                        PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_PLANKS).noOcclusion()
                                                 .pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK)));
 
         public static final DeferredBlock<com.stardew.craft.block.decor.OldTireBlock> OLD_TIRE =
@@ -141,29 +142,29 @@ public class ModBlocks {
 
         public static final DeferredBlock<com.stardew.craft.block.decor.ManholeBlock> MANHOLE =
                         BLOCKS.register("manhole", () -> new com.stardew.craft.block.decor.ManholeBlock(
-                                        Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.IRON_BLOCK).noOcclusion()
+                                        PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.IRON_BLOCK).noOcclusion()
                                                 .strength(3.0F, 6.0F).pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK)));
 
         public static final DeferredBlock<com.stardew.craft.block.decor.MapDecorStaticBlock> TALL_GRAVESTONE =
                         BLOCKS.register("tall_gravestone", () -> new com.stardew.craft.block.decor.MapDecorStaticBlock(
-                                        Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.STONE).noOcclusion()
+                                        PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.STONE).noOcclusion()
                                                 .pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK),
                                         "stardewcraft:block/decor/gravestones/spring/tall_gravestone"));
 
         public static final DeferredBlock<com.stardew.craft.block.decor.MapDecorStaticBlock> SHORT_GRAVESTONE =
                         BLOCKS.register("short_gravestone", () -> new com.stardew.craft.block.decor.MapDecorStaticBlock(
-                                        Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.STONE).noOcclusion()
+                                        PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.STONE).noOcclusion()
                                                 .pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK),
                                         "stardewcraft:block/decor/gravestones/spring/short_gravestone"));
 
         public static final DeferredBlock<com.stardew.craft.block.utility.OutdoorTableBlock> OUTDOOR_TABLE =
                         BLOCKS.register("outdoor_table", () -> new com.stardew.craft.block.utility.OutdoorTableBlock(
-                                        Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_PLANKS).noOcclusion()
+                                        PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_PLANKS).noOcclusion()
                                                 .pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK)));
 
         public static final DeferredBlock<com.stardew.craft.block.decor.ParkBenchBlock> PARK_BENCH =
                         BLOCKS.register("park_bench", () -> new com.stardew.craft.block.decor.ParkBenchBlock(
-                                        Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_PLANKS).noOcclusion()
+                                        PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_PLANKS).noOcclusion()
                                                 .pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK)));
 
         public static final DeferredBlock<com.stardew.craft.block.decor.PlaygroundBlock> PLAYGROUND_SLIDE =
@@ -197,12 +198,12 @@ public class ModBlocks {
 
         public static final DeferredBlock<com.stardew.craft.block.decor.IceCreamStandBlock> ICE_CREAM_STAND =
                         BLOCKS.register("ice_cream_stand", () -> new com.stardew.craft.block.decor.IceCreamStandBlock(
-                                        Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_PLANKS).noOcclusion()
+                                        PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_PLANKS).noOcclusion()
                                                 .strength(2.0F).pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK)));
 
         public static final DeferredBlock<com.stardew.craft.block.decor.PlazaDisplayBlock> PLAZA_DISPLAY =
                         BLOCKS.register("plaza_display", () -> new com.stardew.craft.block.decor.PlazaDisplayBlock(
-                                        Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_PLANKS).noOcclusion()
+                                        PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_PLANKS).noOcclusion()
                                                 .strength(2.0F).pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK)));
 
         public static final DeferredBlock<com.stardew.craft.block.decor.ParkedVehicleBlock> BUS =
@@ -227,7 +228,7 @@ public class ModBlocks {
 
         public static final DeferredBlock<com.stardew.craft.block.decor.ParkFountainBlock> PARK_FOUNTAIN =
                         BLOCKS.register("park_fountain", () -> new com.stardew.craft.block.decor.ParkFountainBlock(
-                                        Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.STONE_BRICKS).noOcclusion()
+                                        PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.STONE_BRICKS).noOcclusion()
                                                 .pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK)));
 
         public static final DeferredBlock<com.stardew.craft.block.decor.LargeFishTankBlock> LARGE_FISH_TANK =
@@ -258,31 +259,31 @@ public class ModBlocks {
 
         public static final DeferredBlock<com.stardew.craft.block.terrain.TerrainCliffBlock> CLIFF =
                         BLOCKS.register("cliff", () -> new com.stardew.craft.block.terrain.TerrainCliffBlock(
-                                        Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.STONE)));
+                                        PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.STONE)));
 
         public static final DeferredBlock<com.stardew.craft.block.terrain.TownPavingBlock> TOWN_PAVING =
                         BLOCKS.register("town_paving", () -> new com.stardew.craft.block.terrain.TownPavingBlock(
-                                        Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.STONE_BRICKS)));
+                                        PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.STONE_BRICKS)));
 
         public static final DeferredBlock<com.stardew.craft.block.terrain.PalePavingBlock> PALE_PAVING =
                         BLOCKS.register("pale_paving", () -> new com.stardew.craft.block.terrain.PalePavingBlock(
-                                        Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.SMOOTH_STONE)));
+                                        PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.SMOOTH_STONE)));
 
         public static final DeferredBlock<StairBlock> TOWN_PAVING_STAIRS = stairsFromAnyBlock("town_paving_stairs",
-                        TOWN_PAVING, Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.STONE_BRICK_STAIRS));
+                        TOWN_PAVING, PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.STONE_BRICK_STAIRS));
 
         public static final DeferredBlock<com.stardew.craft.block.terrain.TownPavingBlock> PLAZA_RED_BRICKS =
                         BLOCKS.register("plaza_red_bricks", () -> new com.stardew.craft.block.terrain.TownPavingBlock(
-                                        Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.BRICKS)));
+                                        PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.BRICKS)));
 
         public static final DeferredBlock<com.stardew.craft.block.terrain.OchreBricksBlock> OCHRE_BRICKS =
                         BLOCKS.register("ochre_bricks", () -> new com.stardew.craft.block.terrain.OchreBricksBlock(
-                                        Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.BRICKS)
+                                        PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.BRICKS)
                                                 .mapColor(MapColor.TERRACOTTA_ORANGE)));
 
         public static final DeferredBlock<com.stardew.craft.block.terrain.TerrainGrassBlock> DARK_GRASS_BLOCK =
                         BLOCKS.register("dark_grass_block", () -> new com.stardew.craft.block.terrain.TerrainGrassBlock(
-                                        Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.GRASS_BLOCK)));
+                                        PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.GRASS_BLOCK)));
 
                 @SuppressWarnings("null")
                 private static Block.Properties stoneProps(MapColor color, SoundType sound, float hardness) {
@@ -319,7 +320,7 @@ public class ModBlocks {
 
                 @SuppressWarnings("null")
                 private static DeferredBlock<FenceGateBlock> fenceGate(String name, Block.Properties props) {
-                return BLOCKS.register(name, () -> new FenceGateBlock(WoodType.OAK, props));
+                return BLOCKS.register(name, () -> new FenceGateBlock(props, WoodType.OAK));
         }
 
         private static Map<String, DeferredBlock<WallpaperBlock>> registerWallpaperStyles() {
@@ -822,13 +823,13 @@ public class ModBlocks {
                                         .pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK)));
 
         public static final DeferredBlock<com.stardew.craft.block.decor.PaintedDoorBlock> GREEN_PANEL_DOOR = BLOCKS.register("green_panel_door",
-                        () -> new com.stardew.craft.block.decor.PaintedDoorBlock(Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_DOOR)));
+                        () -> new com.stardew.craft.block.decor.PaintedDoorBlock(PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_DOOR)));
 
         public static final DeferredBlock<com.stardew.craft.block.decor.PaintedDoorBlock> RED_GLASS_DOOR = BLOCKS.register("red_glass_door",
-                        () -> new com.stardew.craft.block.decor.PaintedDoorBlock(Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_DOOR)));
+                        () -> new com.stardew.craft.block.decor.PaintedDoorBlock(PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_DOOR)));
 
         public static final DeferredBlock<com.stardew.craft.block.decor.ShopGlassDoorBlock> SHOP_GLASS_DOOR = BLOCKS.register("shop_glass_door",
-                        () -> new com.stardew.craft.block.decor.ShopGlassDoorBlock(Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_DOOR)));
+                        () -> new com.stardew.craft.block.decor.ShopGlassDoorBlock(PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_DOOR)));
 
         public static final DeferredBlock<com.stardew.craft.block.decor.CeilingPendantBlock> OWL_PENDANT = BLOCKS.register("owl_pendant",
                         () -> new com.stardew.craft.block.decor.CeilingPendantBlock(Block.Properties.of().strength(0.5F).noOcclusion().sound(SoundType.WOOD),
@@ -836,33 +837,33 @@ public class ModBlocks {
         public static final DeferredBlock<com.stardew.craft.block.decor.CeilingPendantBlock> HANGING_BASKET = BLOCKS.register("hanging_basket",
                         () -> new com.stardew.craft.block.decor.CeilingPendantBlock(Block.Properties.of().strength(0.5F).noOcclusion().sound(SoundType.WOOD),
                                         "stardewcraft:block/decor/house/hanging_basket", 2, -3, 4, 14, 16, 12));
-        public static final DeferredBlock<com.stardew.craft.port.net.minecraft.world.level.block.TransparentBlock> PALE_BLUE_WINDOW_GLASS = BLOCKS.register("pale_blue_window_glass",
-                        () -> new com.stardew.craft.port.net.minecraft.world.level.block.TransparentBlock(Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.GLASS)));
+        public static final DeferredBlock<net.minecraft.world.level.block.GlassBlock> PALE_BLUE_WINDOW_GLASS = BLOCKS.register("pale_blue_window_glass",
+                        () -> new net.minecraft.world.level.block.GlassBlock(PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.GLASS)));
 
         public static final DeferredBlock<Block> PALE_CYAN_PLASTER = BLOCKS.register("pale_cyan_plaster",
-                        () -> new Block(Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.TERRACOTTA).mapColor(MapColor.COLOR_LIGHT_BLUE)));
+                        () -> new Block(PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.TERRACOTTA).mapColor(MapColor.COLOR_LIGHT_BLUE)));
 
         public static final DeferredBlock<net.minecraft.world.level.block.RotatedPillarBlock> TEAL_PAINTED_TIMBER = BLOCKS.register("teal_painted_timber",
                         () -> new net.minecraft.world.level.block.RotatedPillarBlock(
-                                        Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_PLANKS).mapColor(MapColor.COLOR_CYAN)));
+                                        PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_PLANKS).mapColor(MapColor.COLOR_CYAN)));
 
         public static final DeferredBlock<com.stardew.craft.block.decor.PaintedDoorBlock> BLUE_GLASS_DOOR = BLOCKS.register("blue_glass_door",
-                        () -> new com.stardew.craft.block.decor.PaintedDoorBlock(Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_DOOR)));
+                        () -> new com.stardew.craft.block.decor.PaintedDoorBlock(PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_DOOR)));
 
         public static final DeferredBlock<Block> CREAM_SIDING = BLOCKS.register("cream_siding",
-                        () -> new Block(Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_PLANKS).mapColor(MapColor.SAND)));
+                        () -> new Block(PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_PLANKS).mapColor(MapColor.SAND)));
 
         public static final DeferredBlock<Block> TERRACOTTA_ROOF_TILES = BLOCKS.register("terracotta_roof_tiles",
-                        () -> new Block(Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.BRICKS).mapColor(MapColor.TERRACOTTA_ORANGE)));
+                        () -> new Block(PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.BRICKS).mapColor(MapColor.TERRACOTTA_ORANGE)));
 
         public static final DeferredBlock<Block> DARK_BROWN_ROOF_TILES = BLOCKS.register("dark_brown_roof_tiles",
-                        () -> new Block(Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.BRICKS).mapColor(MapColor.TERRACOTTA_BROWN)));
+                        () -> new Block(PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.BRICKS).mapColor(MapColor.TERRACOTTA_BROWN)));
 
         public static final DeferredBlock<Block> IVORY_SIDING = BLOCKS.register("ivory_siding",
-                        () -> new Block(Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_PLANKS).mapColor(MapColor.SAND)));
+                        () -> new Block(PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_PLANKS).mapColor(MapColor.SAND)));
 
         public static final DeferredBlock<com.stardew.craft.block.decor.PaintedDoorBlock> BROWN_GLASS_DOOR = BLOCKS.register("brown_glass_door",
-                        () -> new com.stardew.craft.block.decor.PaintedDoorBlock(Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_DOOR)));
+                        () -> new com.stardew.craft.block.decor.PaintedDoorBlock(PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_DOOR)));
 
         public static final DeferredBlock<com.stardew.craft.block.decor.MapDecorWallStaticBlock> PIERRE_SIGN = BLOCKS.register("pierre_sign",
                         () -> new com.stardew.craft.block.decor.MapDecorWallStaticBlock(Block.Properties.of().strength(1.0F).sound(SoundType.WOOD).noOcclusion()
@@ -881,33 +882,33 @@ public class ModBlocks {
                                         .pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK), "stardewcraft:block/decor/house/sun_wall_ornament", true));
 
         public static final DeferredBlock<Block> GRAY_GREEN_MASONRY = BLOCKS.register("gray_green_masonry",
-                        () -> new Block(Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.STONE_BRICKS)
+                        () -> new Block(PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.STONE_BRICKS)
                                         .mapColor(MapColor.TERRACOTTA_LIGHT_GREEN)));
 
         public static final DeferredBlock<Block> GRAY_VIOLET_ROOF_TILES = BLOCKS.register("gray_violet_roof_tiles",
-                        () -> new Block(Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.BRICKS)
+                        () -> new Block(PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.BRICKS)
                                         .mapColor(MapColor.TERRACOTTA_PURPLE)));
 
         public static final DeferredBlock<Block> BRICK_RED_ROOF_TILES = BLOCKS.register("brick_red_roof_tiles",
-                        () -> new Block(Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.BRICKS)
+                        () -> new Block(PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.BRICKS)
                                         .mapColor(MapColor.TERRACOTTA_RED)));
 
         public static final DeferredBlock<net.minecraft.world.level.block.RotatedPillarBlock> BLUE_GRAY_TIMBER = BLOCKS.register("blue_gray_timber",
                         () -> new net.minecraft.world.level.block.RotatedPillarBlock(
-                                        Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_PLANKS)
+                                        PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_PLANKS)
                                                         .mapColor(MapColor.COLOR_CYAN)));
 
         public static final DeferredBlock<Block> PALE_BLUE_SIDING = BLOCKS.register("pale_blue_siding",
-                        () -> new Block(Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_PLANKS)
+                        () -> new Block(PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_PLANKS)
                                         .mapColor(MapColor.COLOR_LIGHT_BLUE)));
 
         public static final DeferredBlock<Block> BLUE_PAINTED_PLANKS = BLOCKS.register("blue_painted_planks",
-                        () -> new Block(Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_PLANKS)
+                        () -> new Block(PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_PLANKS)
                                         .mapColor(MapColor.COLOR_BLUE)));
 
         public static final DeferredBlock<com.stardew.craft.block.mine.MinePlanksBlock> MINE_PLANKS = BLOCKS.register("mine_planks",
                         () -> new com.stardew.craft.block.mine.MinePlanksBlock(
-                                        Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_PLANKS)));
+                                        PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_PLANKS)));
 
         public static final DeferredBlock<com.stardew.craft.block.mine.MineMasonryBlock> MINE_MASONRY = BLOCKS.register("mine_masonry",
                         () -> new com.stardew.craft.block.mine.MineMasonryBlock(Block.Properties.of()
@@ -1158,61 +1159,61 @@ public class ModBlocks {
                                         .mapColor(MapColor.TERRACOTTA_BROWN).strength(1.0F, 3600000.0F).sound(SoundType.STONE).noOcclusion()));
 
         public static final DeferredBlock<Block> MINE_EARTH_LOOSE_SOIL = BLOCKS.register("mine_earth_loose_soil",
-                        () -> new Block(Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.DIRT)));
+                        () -> new Block(PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.DIRT)));
 
         public static final DeferredBlock<Block> MINE_EARTH_WALL = BLOCKS.register("mine_earth_wall",
                         () -> new Block(stoneProps(MapColor.TERRACOTTA_BROWN, SoundType.STONE, 5.0F)));
 
         public static final DeferredBlock<com.stardew.craft.block.mine.MineSoilBlock> MINE_EARTH_SOIL = BLOCKS.register("mine_earth_soil",
                         () -> new com.stardew.craft.block.mine.MineSoilBlock(
-                                        Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.DIRT)));
+                                        PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.DIRT)));
 
         public static final DeferredBlock<com.stardew.craft.block.mine.MineSoilBlock> MINE_EARTH_DARK_SOIL = BLOCKS.register("mine_earth_dark_soil",
-                        () -> new com.stardew.craft.block.mine.MineSoilBlock(Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.DIRT).mapColor(MapColor.DEEPSLATE)));
+                        () -> new com.stardew.craft.block.mine.MineSoilBlock(PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.DIRT).mapColor(MapColor.DEEPSLATE)));
         public static final DeferredBlock<Block> MINE_EARTH_DARK_LOOSE_SOIL = BLOCKS.register("mine_earth_dark_loose_soil",
-                        () -> new Block(Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.DIRT).mapColor(MapColor.DEEPSLATE)));
+                        () -> new Block(PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.DIRT).mapColor(MapColor.DEEPSLATE)));
         public static final DeferredBlock<Block> MINE_EARTH_DARK_WALL = BLOCKS.register("mine_earth_dark_wall",
                         () -> new Block(stoneProps(MapColor.DEEPSLATE, SoundType.STONE, 5.0F)));
 
         public static final DeferredBlock<com.stardew.craft.block.mine.MineSoilBlock> MINE_FROST_DARK_SOIL = BLOCKS.register("mine_frost_dark_soil",
-                        () -> new com.stardew.craft.block.mine.MineSoilBlock(Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.DIRT).mapColor(MapColor.DEEPSLATE)));
+                        () -> new com.stardew.craft.block.mine.MineSoilBlock(PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.DIRT).mapColor(MapColor.DEEPSLATE)));
         public static final DeferredBlock<Block> MINE_FROST_DARK_LOOSE_SOIL = BLOCKS.register("mine_frost_dark_loose_soil",
-                        () -> new Block(Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.DIRT).mapColor(MapColor.DEEPSLATE)));
+                        () -> new Block(PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.DIRT).mapColor(MapColor.DEEPSLATE)));
         public static final DeferredBlock<Block> MINE_FROST_DARK_WALL = BLOCKS.register("mine_frost_dark_wall",
                         () -> new Block(stoneProps(MapColor.DEEPSLATE, SoundType.STONE, 5.0F)));
 
         public static final DeferredBlock<com.stardew.craft.block.mine.MineSoilBlock> MINE_LAVA_DARK_SOIL = BLOCKS.register("mine_lava_dark_soil",
-                        () -> new com.stardew.craft.block.mine.MineSoilBlock(Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.DIRT).mapColor(MapColor.DEEPSLATE)));
+                        () -> new com.stardew.craft.block.mine.MineSoilBlock(PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.DIRT).mapColor(MapColor.DEEPSLATE)));
         public static final DeferredBlock<Block> MINE_LAVA_DARK_LOOSE_SOIL = BLOCKS.register("mine_lava_dark_loose_soil",
-                        () -> new Block(Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.DIRT).mapColor(MapColor.DEEPSLATE)));
+                        () -> new Block(PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.DIRT).mapColor(MapColor.DEEPSLATE)));
         public static final DeferredBlock<Block> MINE_LAVA_DARK_WALL = BLOCKS.register("mine_lava_dark_wall",
                         () -> new Block(stoneProps(MapColor.DEEPSLATE, SoundType.STONE, 5.0F)));
 
         public static final DeferredBlock<com.stardew.craft.block.mine.MineSoilBlock> MINE_DESERT_DARK_SOIL = BLOCKS.register("mine_desert_dark_soil",
-                        () -> new com.stardew.craft.block.mine.MineSoilBlock(Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.DIRT).mapColor(MapColor.DEEPSLATE)));
+                        () -> new com.stardew.craft.block.mine.MineSoilBlock(PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.DIRT).mapColor(MapColor.DEEPSLATE)));
         public static final DeferredBlock<Block> MINE_DESERT_DARK_LOOSE_SOIL = BLOCKS.register("mine_desert_dark_loose_soil",
-                        () -> new Block(Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.DIRT).mapColor(MapColor.DEEPSLATE)));
+                        () -> new Block(PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.DIRT).mapColor(MapColor.DEEPSLATE)));
         public static final DeferredBlock<Block> MINE_DESERT_DARK_WALL = BLOCKS.register("mine_desert_dark_wall",
                         () -> new Block(stoneProps(MapColor.DEEPSLATE, SoundType.STONE, 5.0F)));
 
         public static final DeferredBlock<com.stardew.craft.block.mine.MineSoilBlock> MINE_FROST_SOIL = BLOCKS.register("mine_frost_soil",
-                        () -> new com.stardew.craft.block.mine.MineSoilBlock(Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.DIRT).mapColor(MapColor.ICE)));
+                        () -> new com.stardew.craft.block.mine.MineSoilBlock(PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.DIRT).mapColor(MapColor.ICE)));
         public static final DeferredBlock<Block> MINE_FROST_LOOSE_SOIL = BLOCKS.register("mine_frost_loose_soil",
-                        () -> new Block(Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.DIRT).mapColor(MapColor.ICE)));
+                        () -> new Block(PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.DIRT).mapColor(MapColor.ICE)));
         public static final DeferredBlock<Block> MINE_FROST_WALL = BLOCKS.register("mine_frost_wall",
                         () -> new Block(stoneProps(MapColor.ICE, SoundType.STONE, 5.0F)));
 
         public static final DeferredBlock<com.stardew.craft.block.mine.MineSoilBlock> MINE_LAVA_SOIL = BLOCKS.register("mine_lava_soil",
-                        () -> new com.stardew.craft.block.mine.MineSoilBlock(Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.DIRT).mapColor(MapColor.COLOR_PURPLE)));
+                        () -> new com.stardew.craft.block.mine.MineSoilBlock(PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.DIRT).mapColor(MapColor.COLOR_PURPLE)));
         public static final DeferredBlock<Block> MINE_LAVA_LOOSE_SOIL = BLOCKS.register("mine_lava_loose_soil",
-                        () -> new Block(Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.DIRT).mapColor(MapColor.COLOR_PURPLE)));
+                        () -> new Block(PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.DIRT).mapColor(MapColor.COLOR_PURPLE)));
         public static final DeferredBlock<Block> MINE_LAVA_WALL = BLOCKS.register("mine_lava_wall",
                         () -> new Block(stoneProps(MapColor.COLOR_PURPLE, SoundType.STONE, 5.0F)));
 
         public static final DeferredBlock<com.stardew.craft.block.mine.MineSoilBlock> MINE_DESERT_SOIL = BLOCKS.register("mine_desert_soil",
-                        () -> new com.stardew.craft.block.mine.MineSoilBlock(Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.DIRT).mapColor(MapColor.SAND)));
+                        () -> new com.stardew.craft.block.mine.MineSoilBlock(PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.DIRT).mapColor(MapColor.SAND)));
         public static final DeferredBlock<Block> MINE_DESERT_LOOSE_SOIL = BLOCKS.register("mine_desert_loose_soil",
-                        () -> new Block(Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.DIRT).mapColor(MapColor.SAND)));
+                        () -> new Block(PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.DIRT).mapColor(MapColor.SAND)));
         public static final DeferredBlock<Block> MINE_DESERT_WALL = BLOCKS.register("mine_desert_wall",
                         () -> new Block(stoneProps(MapColor.SAND, SoundType.STONE, 5.0F)));
 
@@ -1540,7 +1541,7 @@ public static final DeferredBlock<Block> DEAD_CROP = BLOCKS.register("dead_crop"
         // 预制树组件与木制建筑方块
         private static DeferredBlock<Block> decorativeLeaves(String name) {
                 return BLOCKS.register(name, () -> new com.stardew.craft.block.tree.StardewLeavesBlock(
-                                Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_LEAVES).dynamicShape()));
+                                PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_LEAVES).dynamicShape()));
         }
 
         public static final DeferredBlock<Block> BLOSSOM_LEAVES = decorativeLeaves("blossom_leaves");
@@ -1549,7 +1550,7 @@ public static final DeferredBlock<Block> DEAD_CROP = BLOCKS.register("dead_crop"
 
         private static DeferredBlock<Block> forestCanopyLeaves(String name) {
                 return BLOCKS.register(name, () -> new com.stardew.craft.block.tree.StardewLeavesBlock(
-                                Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_LEAVES).dynamicShape(), true));
+                                PortBlockProperties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_LEAVES).dynamicShape(), true));
         }
 
         public static final DeferredBlock<Block> FOREST_LEAVES = forestCanopyLeaves("forest_leaves");

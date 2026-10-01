@@ -1,5 +1,6 @@
 package com.stardew.craft.compat;
 
+import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.StardewCraft;
 import net.minecraft.core.Holder;
 import com.stardew.craft.port.net.minecraft.core.component.DataComponents;
@@ -13,7 +14,7 @@ import com.stardew.craft.port.net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import net.minecraftforge.common.brewing.IBrewingRecipe;
 import com.stardew.craft.port.net.neoforged.neoforge.event.brewing.RegisterBrewingRecipesEvent;
 
@@ -31,8 +32,13 @@ public final class VanillaCompatBrewingRecipes {
     @SubscribeEvent
     public static void onRegisterBrewingRecipes(RegisterBrewingRecipesEvent event) {
         Ingredient rabbitFeet = Ingredient.of(RABBIT_FEET);
-        event.getBuilder().addRecipe(new TaggedPotionRecipe(Potions.WATER, rabbitFeet, Potions.MUNDANE));
-        event.getBuilder().addRecipe(new TaggedPotionRecipe(Potions.AWKWARD, rabbitFeet, Potions.LEAPING));
+        event.getBuilder().addRecipe(new TaggedPotionRecipe(potion(Potions.WATER), rabbitFeet, potion(Potions.MUNDANE)));
+        event.getBuilder().addRecipe(new TaggedPotionRecipe(potion(Potions.AWKWARD), rabbitFeet, potion(Potions.LEAPING)));
+    }
+
+    // PORT(1.20.1): Potions.X are plain registry objects; PotionContents works with canonical registry holders.
+    private static Holder<Potion> potion(Potion potion) {
+        return net.minecraft.core.registries.BuiltInRegistries.POTION.wrapAsHolder(potion);
     }
 
     private record TaggedPotionRecipe(
@@ -60,7 +66,7 @@ public final class VanillaCompatBrewingRecipes {
         }
 
         private static Optional<Holder<Potion>> getPotion(ItemStack stack) {
-            return stack.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY).potion();
+            return PortItemData.getOrDefault(stack, DataComponents.POTION_CONTENTS, PotionContents.EMPTY).potion();
         }
     }
 }

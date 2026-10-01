@@ -15,7 +15,7 @@ public final class GoldenWalnutData extends SavedData {
 
     public static GoldenWalnutData get(MinecraftServer server) {
         return server.overworld().getDataStorage().computeIfAbsent(
-                new SavedData.Factory<>(GoldenWalnutData::new, GoldenWalnutData::load), "stardewcraft_golden_walnuts");
+                com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(GoldenWalnutData::new, GoldenWalnutData::load)), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(GoldenWalnutData::new, GoldenWalnutData::load)), "stardewcraft_golden_walnuts");
     }
 
     public boolean reserveMusselDrop() {
@@ -46,7 +46,7 @@ public final class GoldenWalnutData extends SavedData {
     }
 
     @Override @Nonnull
-    public CompoundTag save(@Nonnull CompoundTag tag, @Nonnull HolderLookup.Provider provider) {
+    public CompoundTag save(@Nonnull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
         tag.putInt("MusselStoneDrops", musselDrops);
         tag.putInt("VolcanoMiningDrops", volcanoDrops);
         tag.putInt("Found", found);

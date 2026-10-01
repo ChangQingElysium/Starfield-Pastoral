@@ -8,30 +8,24 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.GrassBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
-import com.stardew.craft.port.net.neoforged.neoforge.common.ItemAbilities;
-import com.stardew.craft.port.net.neoforged.neoforge.common.ItemAbility;
+import net.minecraftforge.common.ToolActions;
+import net.minecraftforge.common.ToolAction;
 
 import javax.annotation.Nullable;
 import java.util.function.BiConsumer;
 
 /** Permanent authored grass; retains spreading, bonemeal and snowy-state behavior. */
 public class TerrainGrassBlock extends GrassBlock {
-    public static final MapCodec<GrassBlock> CODEC = simpleCodec(TerrainGrassBlock::new);
 
     public TerrainGrassBlock(Properties properties) {
         super(properties);
     }
 
-    @Override
-    public MapCodec<GrassBlock> codec() {
-        return CODEC;
-    }
-
     @Nullable
     @Override
-    public BlockState getToolModifiedState(BlockState state, UseOnContext context, ItemAbility ability, boolean simulate) {
+    public BlockState getToolModifiedState(BlockState state, UseOnContext context, ToolAction ability, boolean simulate) {
         // Paths/farmland can later turn into dirt, so do not open either conversion route.
-        if (ability == ItemAbilities.HOE_TILL || ability == ItemAbilities.SHOVEL_FLATTEN) return null;
+        if (ability == ToolActions.HOE_TILL || ability == ToolActions.SHOVEL_FLATTEN) return null;
         return super.getToolModifiedState(state, context, ability, simulate);
     }
 

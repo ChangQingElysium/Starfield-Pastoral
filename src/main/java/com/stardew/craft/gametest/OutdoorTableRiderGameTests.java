@@ -1,5 +1,6 @@
 package com.stardew.craft.gametest;
 
+import com.stardew.craft.port.PortGameTests;
 import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.block.decor.PlaygroundBlock;
 import com.stardew.craft.block.utility.OutdoorTableBlock;
@@ -18,6 +19,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.*;
 import net.minecraftforge.gametest.GameTestHolder;
 import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import com.stardew.craft.port.PortBlockInteraction;
 
 @GameTestHolder("stardewcraft_table_riders")
 @PrefixGameTestTemplate(false)
@@ -34,19 +36,19 @@ public final class OutdoorTableRiderGameTests {
         for(var p:new BlockPos[]{pos,pos.east(),pos.south(),pos.east().south()})level.setBlock(p,base,3);
         h.assertTrue(level.getBlockState(pos).getValue(OutdoorTableBlock.CONNECTIONS)==38,"2x2 corner must include diagonal");
         var be=(TableDisplayBlockEntity)level.getBlockEntity(pos);
-        var player=h.makeMockPlayer(GameType.SURVIVAL);player.setPos(Vec3.atCenterOf(pos.north(2)));
+        var player=PortGameTests.makeMockPlayer(h, GameType.SURVIVAL);player.setPos(Vec3.atCenterOf(pos.north(2)));
         var stack=new ItemStack(Items.DIAMOND,3);player.setItemInHand(InteractionHand.MAIN_HAND,stack);
         var hit=new BlockHitResult(Vec3.atCenterOf(pos).add(0,.5,0),Direction.UP,pos,false);
-        level.getBlockState(pos).useItemOn(stack,level,player,InteractionHand.MAIN_HAND,hit);
+        PortBlockInteraction.stateUseItemOn(level.getBlockState(pos), stack,level,player,InteractionHand.MAIN_HAND,hit);
         h.assertTrue(stack.getCount()==2&&be.getDisplayItem().is(Items.DIAMOND)&&be.getDisplayItem().getCount()==1,"Display must consume exactly one item");
-        var tag=be.saveWithFullMetadata(level.registryAccess());
-        var restored=new TableDisplayBlockEntity(pos,level.getBlockState(pos));restored.loadWithComponents(tag,level.registryAccess());
+        var tag=be.saveWithFullMetadata();
+        var restored=new TableDisplayBlockEntity(pos,level.getBlockState(pos));restored.load(tag);
         h.assertTrue(restored.getDisplayItem().is(Items.DIAMOND),"Display item lost on reload");
         level.removeBlock(pos.east().south(),false);
         h.assertTrue(level.getBlockState(pos).getValue(OutdoorTableBlock.CONNECTIONS)==6,"Diagonal removal must restore inner leg");
         h.assertTrue(level.getBlockEntity(pos)==be&&be.hasDisplayItem()&&level.getBlockState(pos).getValue(OutdoorTableBlock.VARIANT)==2,"Connection change replaced item or variant");
         player.setItemInHand(InteractionHand.MAIN_HAND,ItemStack.EMPTY);
-        level.getBlockState(pos).useWithoutItem(level,player,hit);
+        PortBlockInteraction.stateUseWithoutItem(level.getBlockState(pos), level,player,hit);
         h.assertTrue(!be.hasDisplayItem()&&player.getInventory().countItem(Items.DIAMOND)==1,"Empty hand must retrieve display");
         be.setDisplayItem(new ItemStack(Items.EMERALD));
         for(var item:level.getEntitiesOfClass(ItemEntity.class,new AABB(pos).inflate(3)))item.discard();
@@ -60,7 +62,7 @@ public final class OutdoorTableRiderGameTests {
     public static void birdMountsAboveLowCollisionAndCleansUp(GameTestHelper h) {
         var main=prepare(h);var level=h.getLevel();var block=ModBlocks.BIRD_SPRING_RIDER.get();
         for(var facing:Direction.Plane.HORIZONTAL){
-            var player=h.makeMockPlayer(GameType.SURVIVAL);player.setPos(Vec3.atCenterOf(main.offset(6,0,6)));player.setYRot(facing.getOpposite().toYRot());
+            var player=PortGameTests.makeMockPlayer(h, GameType.SURVIVAL);player.setPos(Vec3.atCenterOf(main.offset(6,0,6)));player.setYRot(facing.getOpposite().toYRot());
             player.setItemInHand(InteractionHand.MAIN_HAND,new ItemStack(block,3));
             var ctx=new BlockPlaceContext(new UseOnContext(player,InteractionHand.MAIN_HAND,new BlockHitResult(Vec3.atBottomCenterOf(main),Direction.UP,main.below(),false)));
             h.assertTrue(((BlockItem)block.asItem()).place(ctx).consumesAction(),"Bird placement failed");
@@ -68,15 +70,15 @@ public final class OutdoorTableRiderGameTests {
             h.assertTrue(shape.toAabbs().size()==1&&shape.bounds().maxY<=1,"Base should be a small AABB");
             h.assertTrue(level.getBlockState(main.above()).getCollisionShape(level,main.above()).isEmpty(),"Head must not collide");
             var hit=new BlockHitResult(Vec3.atCenterOf(main.above()),facing,main.above(),false);
-            level.getBlockState(main.above()).useWithoutItem(level,player,hit);
+            PortBlockInteraction.stateUseWithoutItem(level.getBlockState(main.above()), level,player,hit);
             h.assertTrue(player.getVehicle() instanceof BirdSpringRiderSeatEntity,"Head click should mount bird");
             var seat=(BirdSpringRiderSeatEntity)player.getVehicle();level.tickNonPassenger(seat);
             h.assertTrue(player.position().distanceTo(seat.riderFeet(0))<.00001,"Rider must follow the animated saddle");
-            var other=h.makeMockPlayer(GameType.SURVIVAL);level.getBlockState(main.above()).useWithoutItem(level,other,hit);
+            var other=PortGameTests.makeMockPlayer(h, GameType.SURVIVAL);PortBlockInteraction.stateUseWithoutItem(level.getBlockState(main.above()), level,other,hit);
             h.assertTrue(!other.isPassenger(),"Occupied bird cannot be stolen");
             player.stopRiding();level.tickNonPassenger(seat);level.tickNonPassenger(seat);
             h.assertTrue(seat.isRemoved(),"Dismount leaked seat");
-            level.getBlockState(main.above()).useWithoutItem(level,player,hit);var replacement=player.getVehicle();
+            PortBlockInteraction.stateUseWithoutItem(level.getBlockState(main.above()), level,player,hit);var replacement=player.getVehicle();
             h.assertTrue(replacement!=null,"Cannot remount bird");
             level.destroyBlock(main.above(),false);
             h.assertTrue(!player.isPassenger()&&replacement.isRemoved()&&level.getBlockState(main).isAir(),"Breaking upper part must dismount and clean up");

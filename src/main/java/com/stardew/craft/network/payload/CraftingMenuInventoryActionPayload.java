@@ -128,7 +128,7 @@ public record CraftingMenuInventoryActionPayload(int action, int slotIndex, bool
                 if (slotStack.isEmpty()) {
                     inv.setItem(slotIndex, carried.copy());
                     player.containerMenu.setCarried(ItemStack.EMPTY);
-                } else if (ItemStack.isSameItemSameComponents(slotStack, carried)) {
+                } else if (ItemStack.isSameItemSameTags(slotStack, carried)) {
                     int max = Math.min(slotStack.getMaxStackSize(), inv.getMaxStackSize());
                     int space = Math.max(0, max - slotStack.getCount());
                     if (space > 0) {
@@ -164,7 +164,7 @@ public record CraftingMenuInventoryActionPayload(int action, int slotIndex, bool
                     inv.setItem(slotIndex, carried.copyWithCount(1));
                     carried.shrink(1);
                     player.containerMenu.setCarried(carried.isEmpty() ? ItemStack.EMPTY : carried);
-                } else if (ItemStack.isSameItemSameComponents(slotStack, carried) && slotStack.getCount() < slotStack.getMaxStackSize()) {
+                } else if (ItemStack.isSameItemSameTags(slotStack, carried) && slotStack.getCount() < slotStack.getMaxStackSize()) {
                     slotStack.grow(1);
                     carried.shrink(1);
                     player.containerMenu.setCarried(carried.isEmpty() ? ItemStack.EMPTY : carried);
@@ -293,7 +293,7 @@ public record CraftingMenuInventoryActionPayload(int action, int slotIndex, bool
             player.containerMenu.setCarried(carried);
         } else {
             ItemStack clicked = inv.items.get(slotIndex);
-            if (!clicked.isEmpty() && !ItemStack.isSameItemSameComponents(clicked, carried)) {
+            if (!clicked.isEmpty() && !ItemStack.isSameItemSameTags(clicked, carried)) {
                 return;
             }
         }
@@ -301,7 +301,7 @@ public record CraftingMenuInventoryActionPayload(int action, int slotIndex, bool
         int max = Math.min(carried.getMaxStackSize(), inv.getMaxStackSize());
         for (int i = 0; i < inv.items.size() && carried.getCount() < max; i++) {
             ItemStack slotStack = inv.items.get(i);
-            if (slotStack.isEmpty() || !ItemStack.isSameItemSameComponents(slotStack, carried)) {
+            if (slotStack.isEmpty() || !ItemStack.isSameItemSameTags(slotStack, carried)) {
                 continue;
             }
             int move = Math.min(max - carried.getCount(), slotStack.getCount());
@@ -350,7 +350,7 @@ public record CraftingMenuInventoryActionPayload(int action, int slotIndex, bool
     private static void moveStackToRange(Inventory inv, ItemStack source, int startInclusive, int endExclusive) {
         for (int i = startInclusive; i < endExclusive && !source.isEmpty(); i++) {
             ItemStack target = inv.items.get(i);
-            if (target.isEmpty() || !ItemStack.isSameItemSameComponents(target, source)) {
+            if (target.isEmpty() || !ItemStack.isSameItemSameTags(target, source)) {
                 continue;
             }
             int max = Math.min(target.getMaxStackSize(), inv.getMaxStackSize());
@@ -381,7 +381,7 @@ public record CraftingMenuInventoryActionPayload(int action, int slotIndex, bool
                 continue;
             }
             ItemStack slotStack = inv.items.get(slot);
-            if (slotStack.isEmpty() || (ItemStack.isSameItemSameComponents(slotStack, carried)
+            if (slotStack.isEmpty() || (ItemStack.isSameItemSameTags(slotStack, carried)
                     && slotStack.getCount() < Math.min(slotStack.getMaxStackSize(), inv.getMaxStackSize()))) {
                 result.add(slot);
             }

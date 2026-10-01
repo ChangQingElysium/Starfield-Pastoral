@@ -21,9 +21,10 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import com.stardew.craft.port.PortBlockInteraction;
 
 @SuppressWarnings("null")
-public class FishPondBucketBlock extends Block implements EntityBlock {
+public class FishPondBucketBlock extends Block implements EntityBlock, PortBlockInteraction {
     public static final net.minecraft.world.level.block.state.properties.BooleanProperty GOLDEN =
             net.minecraft.world.level.block.state.properties.BooleanProperty.create("golden");
     public static final net.minecraft.world.level.block.state.properties.BooleanProperty READY =
@@ -64,8 +65,15 @@ public class FishPondBucketBlock extends Block implements EntityBlock {
         return java.util.List.of(new ItemStack(ModBlocks.FISH_POND_BUCKET.get()));
     }
 
+    // PORT(1.20.1): replay the 1.21 useItemOn/useWithoutItem dispatch.
     @Override
-    protected ItemInteractionResult useItemOn(ItemStack stack,
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player,
+            InteractionHand hand, BlockHitResult hit) {
+        return PortBlockInteraction.dispatch(this, state, level, pos, player, hand, hit);
+    }
+
+    @Override
+    public ItemInteractionResult useItemOn(ItemStack stack,
                                               BlockState state,
                                               Level level,
                                               BlockPos pos,
@@ -76,7 +84,7 @@ public class FishPondBucketBlock extends Block implements EntityBlock {
     }
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState state,
+    public InteractionResult useWithoutItem(BlockState state,
                                                Level level,
                                                BlockPos pos,
                                                Player player,

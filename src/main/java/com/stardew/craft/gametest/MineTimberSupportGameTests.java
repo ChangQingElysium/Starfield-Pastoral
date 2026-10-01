@@ -8,7 +8,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
-import com.stardew.craft.port.net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.BlockItem;
@@ -35,7 +34,7 @@ public final class MineTimberSupportGameTests {
         var block = ModBlocks.MINE_TIMBER_SUPPORT.get();
         var origin = helper.absolutePos(new BlockPos(8, 1, 8));
         var player = new ServerPlayer(level.getServer(), level,
-                new GameProfile(UUID.randomUUID(), "Timber test"), ClientInformation.createDefault());
+                new GameProfile(UUID.randomUUID(), "Timber test"));
         player.getAbilities().instabuild = true;
         for (Direction facing : Direction.Plane.HORIZONTAL) {
             Direction along = facing.getCounterClockWise();

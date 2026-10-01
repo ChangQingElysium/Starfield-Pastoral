@@ -614,7 +614,7 @@ final class FarmInitialEcology {
     }
 
     private static boolean isInitialCover(BlockState state) {
-        return state.is(Blocks.SHORT_GRASS) || state.is(Blocks.TALL_GRASS)
+        return state.is(Blocks.GRASS) || state.is(Blocks.TALL_GRASS)
                 || state.is(Blocks.FERN) || state.is(Blocks.LARGE_FERN) || state.is(Blocks.DEAD_BUSH);
     }
 

@@ -1,5 +1,6 @@
 package com.stardew.craft.block.cooking;
 
+import com.stardew.craft.port.PortItemData;
 import com.mojang.serialization.MapCodec;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.blockentity.CookingPlacedFoodBlockEntity;
@@ -35,11 +36,10 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 import javax.annotation.Nonnull;
+import com.stardew.craft.port.PortBlockInteraction;
 
 @SuppressWarnings("null")
-public class CookingPlacedFoodBlock extends HorizontalDirectionalBlock implements EntityBlock {
-    public static final MapCodec<CookingPlacedFoodBlock> CODEC =
-            simpleCodec(properties -> new CookingPlacedFoodBlock("", properties));
+public class CookingPlacedFoodBlock extends HorizontalDirectionalBlock implements EntityBlock, PortBlockInteraction {
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
     private static final VoxelShape SHAPE = Block.box(1.0D, 0.0D, 1.0D, 15.0D, 8.0D, 15.0D);
 
@@ -56,11 +56,6 @@ public class CookingPlacedFoodBlock extends HorizontalDirectionalBlock implement
     }
 
     @Override
-    protected MapCodec<? extends HorizontalDirectionalBlock> codec() {
-        return CODEC;
-    }
-
-    @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(FACING);
     }
@@ -72,13 +67,13 @@ public class CookingPlacedFoodBlock extends HorizontalDirectionalBlock implement
     }
 
     @Override
-    protected boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
+    public boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
         BlockPos below = pos.below();
         return Block.canSupportCenter(level, below, Direction.UP);
     }
 
     @Override
-    protected BlockState updateShape(BlockState state, Direction direction, BlockState neighborState,
+    public BlockState updateShape(BlockState state, Direction direction, BlockState neighborState,
                                      LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
         if (direction == Direction.DOWN && !state.canSurvive(level, pos)) {
             return net.minecraft.world.level.block.Blocks.AIR.defaultBlockState();
@@ -87,12 +82,12 @@ public class CookingPlacedFoodBlock extends HorizontalDirectionalBlock implement
     }
 
     @Override
-    protected boolean canBeReplaced(@Nonnull BlockState state, @Nonnull Fluid fluid) {
+    public boolean canBeReplaced(@Nonnull BlockState state, @Nonnull Fluid fluid) {
         return false;
     }
 
     @Override
-    protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+    public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return SHAPE;
     }
 
@@ -101,8 +96,15 @@ public class CookingPlacedFoodBlock extends HorizontalDirectionalBlock implement
         return new CookingPlacedFoodBlockEntity(pos, state);
     }
 
+    // PORT(1.20.1): replay the 1.21 useItemOn/useWithoutItem dispatch.
     @Override
-    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player,
+            InteractionHand hand, BlockHitResult hit) {
+        return PortBlockInteraction.dispatch(this, state, level, pos, player, hand, hit);
+    }
+
+    @Override
+    public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
                                              Player player, InteractionHand hand, BlockHitResult hit) {
         if (player == null) {
             return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
@@ -115,7 +117,7 @@ public class CookingPlacedFoodBlock extends HorizontalDirectionalBlock implement
     }
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player,
+    public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player,
                                                BlockHitResult hit) {
         if (handleInteraction(level, pos, player)) {
             return InteractionResult.sidedSuccess(level.isClientSide);
@@ -150,7 +152,7 @@ public class CookingPlacedFoodBlock extends HorizontalDirectionalBlock implement
 
     private boolean eat(Level level, BlockPos pos, Player player) {
         ItemStack food = createFoodStack(level, pos);
-        if (food.isEmpty() || !food.has(DataComponents.FOOD)) {
+        if (food.isEmpty() || !PortItemData.has(food, DataComponents.FOOD)) {
             return false;
         }
 

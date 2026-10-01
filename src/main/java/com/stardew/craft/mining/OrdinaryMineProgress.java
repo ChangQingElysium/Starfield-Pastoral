@@ -20,7 +20,7 @@ public final class OrdinaryMineProgress extends SavedData {
         return disconnected.values().stream().mapToInt(DisconnectedFloor::floor).max().orElse(0);
     }
     public static OrdinaryMineProgress get(ServerLevel level) {
-        var data = level.getDataStorage().computeIfAbsent(new Factory<>(OrdinaryMineProgress::new, OrdinaryMineProgress::load), "stardew_ordinary_mine_progress");
+        var data = level.getDataStorage().computeIfAbsent(com.stardew.craft.port.PortSavedData.loader(new Factory<>(OrdinaryMineProgress::new, OrdinaryMineProgress::load)), com.stardew.craft.port.PortSavedData.constructor(new Factory<>(OrdinaryMineProgress::new, OrdinaryMineProgress::load)), "stardew_ordinary_mine_progress");
         int current = com.stardew.craft.time.StardewTimeManager.get().getCurrentYear();
         if (data.year != current) {
             data.platforms.keySet().removeIf(f -> f % 5 != 0);
@@ -44,7 +44,7 @@ public final class OrdinaryMineProgress extends SavedData {
         }
         return d;
     }
-    @Override public CompoundTag save(CompoundTag tag, HolderLookup.Provider provider) {
+    @Override public CompoundTag save(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
         tag.putInt("year",year); var p=new CompoundTag(); platforms.forEach((f,n)->p.putInt(f.toString(),n)); tag.put("platforms",p);
         var c=new CompoundTag(); caches.forEach(k->c.putBoolean(k,true)); tag.put("caches",c);
         var leases=new CompoundTag();disconnected.forEach((id,v)->{var lease=new CompoundTag();lease.putInt("floor",v.floor());lease.putInt("day",v.day());leases.put(id.toString(),lease);});tag.put("disconnected",leases);

@@ -8,7 +8,7 @@ import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import net.minecraftforge.event.entity.living.LivingChangeTargetEvent;
 import com.stardew.craft.port.net.neoforged.neoforge.event.tick.EntityTickEvent;
 
@@ -23,8 +23,9 @@ public final class AvoidMonstersEffectEvents {
             return;
         }
 
-        LivingEntity target = event.getNewAboutToBeSetTarget();
-        if (target instanceof Player player && player.hasEffect(ModMobEffects.AVOID_MONSTERS)) {
+        // PORT(1.20.1): Forge names NeoForge's getNewAboutToBeSetTarget() getNewTarget().
+        LivingEntity target = event.getNewTarget();
+        if (target instanceof Player player && player.hasEffect(ModMobEffects.AVOID_MONSTERS.get())) {
             event.setCanceled(true);
         }
     }
@@ -36,7 +37,7 @@ public final class AvoidMonstersEffectEvents {
         }
 
         LivingEntity target = mob.getTarget();
-        if (target instanceof Player player && player.hasEffect(ModMobEffects.AVOID_MONSTERS)) {
+        if (target instanceof Player player && player.hasEffect(ModMobEffects.AVOID_MONSTERS.get())) {
             mob.setTarget(null);
             mob.getNavigation().stop();
         }

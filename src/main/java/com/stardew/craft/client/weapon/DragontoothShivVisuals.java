@@ -25,7 +25,7 @@ public final class DragontoothShivVisuals {
 
     /** Uses the captured sprite anchors and item matrix in both views, including idle stance. */
     public static void blade(Matrix4f pose, Vec3 base, Vec3 tip, MultiBufferSource buffers, double time) {
-        if (!Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()) return;
+        if (!Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()) return;
         Vec3 axis = tip.subtract(base).normalize();
         Vec3 side = new Vec3(-axis.y, axis.x, 0).normalize();
         float pulse = 0.85f + 0.15f * (float) Math.sin(time * 1.7);

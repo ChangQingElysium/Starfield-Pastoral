@@ -1,5 +1,6 @@
 package com.stardew.craft.item;
 
+import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.blockentity.FriendshipDoorBlockEntity;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
@@ -56,7 +57,7 @@ public class FriendshipDoorItem extends DoubleHighBlockItem implements IStardewI
     }
 
     public static void applyBinding(ItemStack stack, List<String> npcIds, int requiredPoints) {
-        CompoundTag tag = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
+        CompoundTag tag = PortItemData.getOrDefault(stack, DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
         List<String> normalized = FriendshipDoorBlockEntity.normalizeNpcIds(npcIds);
         if (!normalized.isEmpty()) {
             tag.putString(FriendshipDoorBlockEntity.TAG_NPC_ID, normalized.getFirst());
@@ -67,7 +68,7 @@ public class FriendshipDoorItem extends DoubleHighBlockItem implements IStardewI
             tag.put(FriendshipDoorBlockEntity.TAG_NPC_IDS, list);
         }
         tag.putInt(FriendshipDoorBlockEntity.TAG_REQUIRED_POINTS, Math.max(0, requiredPoints));
-        stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+        PortItemData.set(stack, DataComponents.CUSTOM_DATA, CustomData.of(tag));
     }
 
     public static String getNpcId(ItemStack stack) {
@@ -76,12 +77,12 @@ public class FriendshipDoorItem extends DoubleHighBlockItem implements IStardewI
     }
 
     public static List<String> getNpcIds(ItemStack stack) {
-        CompoundTag tag = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
+        CompoundTag tag = PortItemData.getOrDefault(stack, DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
         return FriendshipDoorBlockEntity.readNpcIds(tag);
     }
 
     public static int getRequiredPoints(ItemStack stack) {
-        CompoundTag tag = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
+        CompoundTag tag = PortItemData.getOrDefault(stack, DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
         return tag.contains(FriendshipDoorBlockEntity.TAG_REQUIRED_POINTS)
                 ? Math.max(0, tag.getInt(FriendshipDoorBlockEntity.TAG_REQUIRED_POINTS))
                 : FriendshipDoorBlockEntity.DEFAULT_REQUIRED_POINTS;
@@ -100,8 +101,8 @@ public class FriendshipDoorItem extends DoubleHighBlockItem implements IStardewI
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
+    public void appendHoverText(ItemStack stack, @javax.annotation.Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
+        super.appendHoverText(stack, level, tooltipComponents, tooltipFlag);
         List<String> npcIds = getNpcIds(stack);
         if (npcIds.isEmpty()) {
             tooltipComponents.add(Component.translatable("tooltip.stardewcraft.friendship_door.unbound").withStyle(ChatFormatting.GRAY));

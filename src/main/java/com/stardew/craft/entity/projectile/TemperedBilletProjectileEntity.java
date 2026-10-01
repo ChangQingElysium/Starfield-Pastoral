@@ -1,5 +1,6 @@
 package com.stardew.craft.entity.projectile;
 
+import com.stardew.craft.port.PortItemStacks;
 import com.stardew.craft.combat.skill.SkillContext;
 import com.stardew.craft.combat.skill.WeaponDamageSnapshot;
 import com.stardew.craft.combat.skill.WeaponSkillDamage;
@@ -69,7 +70,7 @@ public class TemperedBilletProjectileEntity extends ThrowableProjectile {
     }
 
     @Override
-    protected void defineSynchedData(@SuppressWarnings("null") net.minecraft.network.syncher.SynchedEntityData.Builder builder) {
+    protected void defineSynchedData() {
     }
 
     @SuppressWarnings("null")
@@ -260,7 +261,7 @@ public class TemperedBilletProjectileEntity extends ThrowableProjectile {
             return;
         }
         tag.putString("ReleaseWeaponId", snapshot.weaponId().toString());
-        tag.put("ReleaseWeapon", weapon.saveOptional(registries));
+        tag.put("ReleaseWeapon", PortItemStacks.saveOptional(weapon, registries));
     }
 
     static WeaponDamageSnapshot readReleaseWeaponSnapshot(
@@ -275,7 +276,7 @@ public class TemperedBilletProjectileEntity extends ThrowableProjectile {
         if (weaponId == null) {
             return null;
         }
-        ItemStack weapon = ItemStack.parseOptional(
+        ItemStack weapon = PortItemStacks.parseOptional(
                 registries,
                 tag.getCompound("ReleaseWeapon")
         );

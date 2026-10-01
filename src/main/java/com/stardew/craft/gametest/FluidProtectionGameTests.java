@@ -33,7 +33,7 @@ public final class FluidProtectionGameTests {
             helper.assertTrue(StardewBlockFluidProtection.blocksFlowReplacement(state),
                     "Flow replacement remains enabled for " + id);
         }
-        helper.assertTrue(!StardewBlockFluidProtection.blocksFlowReplacement(Blocks.SHORT_GRASS.defaultBlockState()),
+        helper.assertTrue(!StardewBlockFluidProtection.blocksFlowReplacement(Blocks.GRASS.defaultBlockState()),
                 "Protection leaked into vanilla blocks");
         helper.succeed();
     }

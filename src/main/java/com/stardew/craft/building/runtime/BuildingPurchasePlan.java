@@ -39,7 +39,7 @@ public record BuildingPurchasePlan(Map<Integer, ItemStack> slots) {
         int remaining=delivery.getCount();
         for(int pass=0;pass<2;pass++)for(int slot=0;slot<inventory.items.size();slot++) {
             var current=after.get(slot);
-            if(pass==0 && (current.isEmpty() || !ItemStack.isSameItemSameComponents(current,delivery)))continue;
+            if(pass==0 && (current.isEmpty() || !ItemStack.isSameItemSameTags(current,delivery)))continue;
             if(pass==1 && !current.isEmpty())continue;
             int take=Math.min(remaining,delivery.getMaxStackSize()-current.getCount());
             if(take<=0)continue;

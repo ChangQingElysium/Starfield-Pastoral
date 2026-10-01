@@ -330,7 +330,7 @@ public class GreenhouseManager extends SavedData {
 
     @Override
     @Nonnull
-    public CompoundTag save(@Nonnull CompoundTag tag, @Nonnull HolderLookup.Provider provider) {
+    public CompoundTag save(@Nonnull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
         tag.putBoolean("Repaired", repaired);
         tag.putBoolean("RuinsPlaced", ruinsPlaced);
 
@@ -391,7 +391,7 @@ public class GreenhouseManager extends SavedData {
     public static GreenhouseManager get(ServerLevel level) {
         ServerLevel overworld = level.getServer().overworld();
         return overworld.getDataStorage().computeIfAbsent(
-            new SavedData.Factory<>(GreenhouseManager::new, GreenhouseManager::load),
+            com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(GreenhouseManager::new, GreenhouseManager::load)), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(GreenhouseManager::new, GreenhouseManager::load)),
             DATA_ID
         );
     }

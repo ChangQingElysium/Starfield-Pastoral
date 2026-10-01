@@ -22,7 +22,7 @@ public final class NpcRuntimeDataManager extends SavedData {
 
     public static NpcRuntimeDataManager get(net.minecraft.server.level.ServerLevel level) {
         return level.getDataStorage().computeIfAbsent(
-            new SavedData.Factory<>(NpcRuntimeDataManager::new, NpcRuntimeDataManager::load),
+            com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(NpcRuntimeDataManager::new, NpcRuntimeDataManager::load)), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(NpcRuntimeDataManager::new, NpcRuntimeDataManager::load)),
             DATA_NAME
         );
     }

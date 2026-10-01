@@ -201,8 +201,8 @@ public class FruitTreeBlockEntity extends BlockEntity implements GeoBlockEntity 
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
+    protected void saveAdditional(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        super.saveAdditional(tag);
         tag.putString(TAG_TYPE, getFruitTreeType().id());
         tag.putInt(TAG_FRUIT_COUNT, fruitCount);
         tag.putInt(TAG_DAYS_SINCE_MATURE, daysSinceMature);
@@ -210,8 +210,8 @@ public class FruitTreeBlockEntity extends BlockEntity implements GeoBlockEntity 
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
+    public void load(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        super.load(tag);
         type = FruitTreeType.byId(tag.getString(TAG_TYPE));
         fruitCount = Math.max(0, tag.getInt(TAG_FRUIT_COUNT));
         daysSinceMature = Math.max(0, tag.getInt(TAG_DAYS_SINCE_MATURE));
@@ -219,9 +219,9 @@ public class FruitTreeBlockEntity extends BlockEntity implements GeoBlockEntity 
     }
 
     @Override
-    public CompoundTag getUpdateTag(net.minecraft.core.HolderLookup.Provider registries) {
+    public CompoundTag getUpdateTag() { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
         CompoundTag tag = new CompoundTag();
-        saveAdditional(tag, registries);
+        saveAdditional(tag);
         return tag;
     }
 

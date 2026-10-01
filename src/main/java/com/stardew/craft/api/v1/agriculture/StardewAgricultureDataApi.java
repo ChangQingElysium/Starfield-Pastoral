@@ -62,7 +62,7 @@ public final class StardewAgricultureDataApi {
 
     @Nullable
     public static StardewCropData crop(BlockState state) {
-        return state.getBlock().builtInRegistryHolder().getData(StardewDataMaps.CROP_DATA);
+        return com.stardew.craft.port.PortDataMaps.getData(state.getBlock().builtInRegistryHolder(), StardewDataMaps.CROP_DATA);
     }
 
     @Nullable
@@ -75,7 +75,7 @@ public final class StardewAgricultureDataApi {
                 logFailure("tree", entry.id(), BuiltInRegistries.BLOCK.getKey(state.getBlock()), exception);
             }
         }
-        return state.getBlock().builtInRegistryHolder().getData(StardewDataMaps.TREE_DATA);
+        return com.stardew.craft.port.PortDataMaps.getData(state.getBlock().builtInRegistryHolder(), StardewDataMaps.TREE_DATA);
     }
 
     @Nullable
@@ -91,7 +91,7 @@ public final class StardewAgricultureDataApi {
         // Builtin animals share a visual projection entity, but their data-map identity
         // remains the EntityType configured by the animal definition.
         var type=entity instanceof com.stardew.craft.animal.runtime.LivestockEntity animal?animal.species().entityType():entity.getType();
-        return type==null?null:type.builtInRegistryHolder().getData(StardewDataMaps.ANIMAL_DATA);
+        return type==null?null:com.stardew.craft.port.PortDataMaps.getData(type.builtInRegistryHolder(), StardewDataMaps.ANIMAL_DATA);
     }
 
     @Nullable
@@ -104,7 +104,7 @@ public final class StardewAgricultureDataApi {
                 logFailure("building", entry.id(), BuiltInRegistries.BLOCK.getKey(state.getBlock()), exception);
             }
         }
-        return state.getBlock().builtInRegistryHolder().getData(StardewDataMaps.BUILDING_DATA);
+        return com.stardew.craft.port.PortDataMaps.getData(state.getBlock().builtInRegistryHolder(), StardewDataMaps.BUILDING_DATA);
     }
 
     private static <T> List<Registered<T>> register(Map<ResourceLocation, Registered<T>> entries,

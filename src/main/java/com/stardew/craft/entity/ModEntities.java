@@ -522,7 +522,7 @@ public final class ModEntities {
 			"cushion",
 			() -> EntityType.Builder.<CushionEntity>of(CushionEntity::new, MobCategory.MISC)
 					.sized(1.0F, 0.25F)
-					.passengerAttachments(0.25F)
+					// PORT(1.20.1): no passengerAttachments; CushionEntity#getPassengerRidingPosition overrides it anyway.
 					.clientTrackingRange(10)
 					.updateInterval(Integer.MAX_VALUE)
 					.setShouldReceiveVelocityUpdates(false)

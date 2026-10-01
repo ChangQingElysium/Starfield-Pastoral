@@ -336,7 +336,7 @@ public class FruitTreeGrowthManager extends SavedData {
     public static FruitTreeGrowthManager get(ServerLevel level) {
         ServerLevel overworld = level.getServer().overworld();
         return overworld.getDataStorage().computeIfAbsent(
-                new SavedData.Factory<>(FruitTreeGrowthManager::new, FruitTreeGrowthManager::load),
+                com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(FruitTreeGrowthManager::new, FruitTreeGrowthManager::load)), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(FruitTreeGrowthManager::new, FruitTreeGrowthManager::load)),
                 DATA_NAME);
     }
 

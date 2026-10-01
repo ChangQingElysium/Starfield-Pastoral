@@ -24,11 +24,11 @@ public final class ConnectedFacadeTemplateBlock extends WallCompositeTemplateBlo
         var state=super.getStateForPlacement(context);
         return state==null?null:connect(state,context.getLevel(),context.getClickedPos());
     }
-    @Override protected BlockState updateShape(BlockState state,Direction direction,BlockState neighbor,LevelAccessor level,BlockPos pos,BlockPos other) {
+    @Override public BlockState updateShape(BlockState state,Direction direction,BlockState neighbor,LevelAccessor level,BlockPos pos,BlockPos other) {
         return connect(state,level,pos);
     }
     @Override
-    protected BlockState mirror(BlockState state, net.minecraft.world.level.block.Mirror mirror) {
+    public BlockState mirror(BlockState state, net.minecraft.world.level.block.Mirror mirror) {
         if (mirror == net.minecraft.world.level.block.Mirror.NONE) return state;
         int mask = connections(state);
         return super.mirror(state, mirror).setValue(CONNECTIONS, (mask & 5) | ((mask & 2) << 2) | ((mask & 8) >> 2));

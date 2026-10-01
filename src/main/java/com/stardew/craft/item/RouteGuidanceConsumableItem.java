@@ -47,7 +47,7 @@ public class RouteGuidanceConsumableItem extends Item implements IStardewItem {
     }
 
     @Override
-    public int getUseDuration(@Nonnull ItemStack stack, @Nonnull LivingEntity entity) {
+    public int getUseDuration(@Nonnull ItemStack stack) {
         return 32;
     }
 

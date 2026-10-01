@@ -1,5 +1,6 @@
 package com.stardew.craft.block.mine;
 
+import com.stardew.craft.port.PortItemData;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import com.stardew.craft.port.net.minecraft.core.component.DataComponents;
@@ -14,17 +15,11 @@ import net.minecraft.world.level.block.state.properties.IntegerProperty;
 
 /** Two persistent painted surfaces sharing one full-cube block and item identity. */
 public final class MinePlanksBlock extends Block {
-    public static final MapCodec<MinePlanksBlock> CODEC = simpleCodec(MinePlanksBlock::new);
     public static final IntegerProperty VARIANT = IntegerProperty.create("variant", 0, 1);
 
     public MinePlanksBlock(Properties properties) {
         super(properties);
         registerDefaultState(defaultBlockState().setValue(VARIANT, 0).setValue(MineBuildingTheme.PROPERTY, MineBuildingTheme.EARTH));
-    }
-
-    @Override
-    public MapCodec<MinePlanksBlock> codec() {
-        return CODEC;
     }
 
     @Override
@@ -34,7 +29,7 @@ public final class MinePlanksBlock extends Block {
 
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
-        Integer fixed = context.getItemInHand().getOrDefault(DataComponents.BLOCK_STATE,
+        Integer fixed = PortItemData.getOrDefault(context.getItemInHand(), DataComponents.BLOCK_STATE,
                 BlockItemStateProperties.EMPTY).get(VARIANT);
         BlockState themed = defaultBlockState().setValue(MineBuildingTheme.PROPERTY, MineBuildingTheme.forPlacement(context));
         if (fixed != null) return themed.setValue(VARIANT, fixed);
@@ -44,9 +39,9 @@ public final class MinePlanksBlock extends Block {
     }
 
     @Override
-    public ItemStack getCloneItemStack(LevelReader level, BlockPos pos, BlockState state) {
+    public ItemStack getCloneItemStack(net.minecraft.world.level.BlockGetter level, BlockPos pos, BlockState state) {
         ItemStack stack = new ItemStack(this);
-        stack.set(DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY.with(VARIANT, state).with(MineBuildingTheme.PROPERTY, state));
+        PortItemData.set(stack, DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY.with(VARIANT, state).with(MineBuildingTheme.PROPERTY, state));
         return stack;
     }
 }

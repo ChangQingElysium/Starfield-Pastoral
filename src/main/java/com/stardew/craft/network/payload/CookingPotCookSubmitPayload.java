@@ -168,7 +168,7 @@ public record CookingPotCookSubmitPayload(String recipeItemId, int craftCount) i
             return;
         }
 
-        if (!ItemStack.isSameItemSameComponents(carried, output)) {
+        if (!ItemStack.isSameItemSameTags(carried, output)) {
             return;
         }
 

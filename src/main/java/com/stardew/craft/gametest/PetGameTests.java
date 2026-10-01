@@ -79,7 +79,7 @@ public final class PetGameTests {
             var entity = ModEntities.PET.get().create(level); var pet = new PetRecord(UUID.randomUUID(), UUID.randomUUID(), variant, "Stride", 1); entity.refresh(pet);
             entity.moveTo(origin.getX() + .5, origin.getY(), origin.getZ() + .5); entity.setOnGround(true); entity.play("walk");
             h.assertTrue(!entity.hurt(level.damageSources().genericKill(), 10000), "Pet accepted damage"); entity.kill();
-            h.assertTrue(entity.isAlive() && !entity.canBeLeashed() && !entity.shouldBeSaved(), "Pet protection or projection contract failed");
+            h.assertTrue(entity.isAlive() && !entity.canBeLeashed(null) && !entity.shouldBeSaved(), "Pet protection or projection contract failed");
             double start = entity.getX();
             for (int tick = 0; tick < 14; tick++) { entity.getMoveControl().setWantedPosition(start + 4, origin.getY(), entity.getZ(), 1); entity.getMoveControl().tick(); entity.travel(Vec3.ZERO); }
             h.assertTrue(Math.abs(entity.getX() - start - variant.stride(false) / 16) < .0001, "One walk cycle does not match authored stride: " + variant);

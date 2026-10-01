@@ -61,7 +61,7 @@ public class HolidayRibbonPostBlock extends Block {
     }
 
     @Override
-    protected BlockState updateShape(@Nonnull BlockState state, @Nonnull Direction direction, @Nonnull BlockState neighborState,
+    public BlockState updateShape(@Nonnull BlockState state, @Nonnull Direction direction, @Nonnull BlockState neighborState,
                                      @Nonnull LevelAccessor level, @Nonnull BlockPos pos, @Nonnull BlockPos neighborPos) {
         if (!direction.getAxis().isHorizontal()) {
             return state;

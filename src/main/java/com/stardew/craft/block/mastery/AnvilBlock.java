@@ -26,9 +26,10 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 
 import javax.annotation.Nullable;
+import com.stardew.craft.port.PortBlockInteraction;
 
 @SuppressWarnings("null")
-public class AnvilBlock extends HorizontalMasteryBlock implements EntityBlock {
+public class AnvilBlock extends HorizontalMasteryBlock implements EntityBlock, PortBlockInteraction {
     private static final int IRIDIUM_BARS_REQUIRED = 3;
 
     public AnvilBlock(Properties properties) {
@@ -42,7 +43,7 @@ public class AnvilBlock extends HorizontalMasteryBlock implements EntityBlock {
     }
 
     @Override
-    protected RenderShape getRenderShape(BlockState state) {
+    public RenderShape getRenderShape(BlockState state) {
         return RenderShape.ENTITYBLOCK_ANIMATED;
     }
 
@@ -58,8 +59,15 @@ public class AnvilBlock extends HorizontalMasteryBlock implements EntityBlock {
         return (lvl, pos, st, be) -> AnvilBlockEntity.serverTick(lvl, pos, st, (AnvilBlockEntity) be);
     }
 
+    // PORT(1.20.1): replay the 1.21 useItemOn/useWithoutItem dispatch.
     @Override
-    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player,
+            InteractionHand hand, BlockHitResult hit) {
+        return PortBlockInteraction.dispatch(this, state, level, pos, player, hand, hit);
+    }
+
+    @Override
+    public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         if (level.isClientSide) {
             return ItemInteractionResult.sidedSuccess(true);
         }
@@ -102,7 +110,7 @@ public class AnvilBlock extends HorizontalMasteryBlock implements EntityBlock {
     }
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+    public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         if (level.isClientSide) {
             return InteractionResult.SUCCESS;
         }

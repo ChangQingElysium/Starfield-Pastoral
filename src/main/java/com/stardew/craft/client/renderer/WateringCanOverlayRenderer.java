@@ -1,5 +1,6 @@
 package com.stardew.craft.client.renderer;
 
+import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.item.tool.WateringCanItem;
 import com.stardew.craft.block.utility.GardenPotBlock;
@@ -17,7 +18,7 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
@@ -83,7 +84,7 @@ public class WateringCanOverlayRenderer {
 
         // 汲水蓄力时不显示“洒水范围”预览
         @SuppressWarnings("null")
-        int action = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY)
+        int action = PortItemData.getOrDefault(stack, DataComponents.CUSTOM_DATA, CustomData.EMPTY)
             .copyTag()
             .getInt(TAG_ACTION);
         if (action == ACTION_REFILL) return;
@@ -91,7 +92,7 @@ public class WateringCanOverlayRenderer {
         // getUseDuration返回最大值 (72000)。
         // player.getUseItemRemainingTicks() 返回剩余倒计时。
         // ticksUsed = total - remaining
-        int activeTicks = stack.getUseDuration(player) - player.getUseItemRemainingTicks();
+        int activeTicks = stack.getUseDuration() - player.getUseItemRemainingTicks();
         int chargeLevel = wateringCan.getChargeLevel(stack, activeTicks);
 
         // 不蓄力(0级/单格)时不显示预览；只有蓄力到1级及以上才显示

@@ -8,16 +8,10 @@ import net.minecraft.world.level.block.state.StateDefinition;
 
 /** Full stone cube; stone arrangement and moss are persisted independently of the season. */
 public final class TerrainCliffBlock extends Block {
-    public static final MapCodec<TerrainCliffBlock> CODEC = simpleCodec(TerrainCliffBlock::new);
 
     public TerrainCliffBlock(Properties properties) {
         super(properties);
         registerDefaultState(defaultBlockState().setValue(TerrainVariants.CLIFF, 0));
-    }
-
-    @Override
-    public MapCodec<TerrainCliffBlock> codec() {
-        return CODEC;
     }
 
     @Override

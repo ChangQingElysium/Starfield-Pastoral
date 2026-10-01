@@ -20,7 +20,7 @@ public final class HolyBladeRingEffectClient {
     public static void add(double x, double y, double z, float radius, int duration) {
         var mc = Minecraft.getInstance(); ensureLevel(mc.level);
         if (mc.level == null || mc.player == null || radius <= 0 || duration <= 0
-                || mc.player.distanceToSqr(x, y, z) > 48 * 48 || !Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()) return;
+                || mc.player.distanceToSqr(x, y, z) > 48 * 48 || !Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()) return;
         List<Segment> segments = new ArrayList<>();
         // Actual targeting uses a box: four square corners show its full extent immediately.
         for (int sx : new int[]{-1, 1}) for (int sz : new int[]{-1, 1}) {
@@ -58,11 +58,11 @@ public final class HolyBladeRingEffectClient {
     public static void onRenderLevel(RenderLevelStageEvent event) {
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_PARTICLES) return;
         var mc = Minecraft.getInstance(); ensureLevel(mc.level);
-        if (mc.level == null || RINGS.isEmpty() || !Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()) return;
+        if (mc.level == null || RINGS.isEmpty() || !Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()) return;
         var stack = event.getPoseStack(); var camera = event.getCamera().getPosition();
         var buffers = mc.renderBuffers().bufferSource();
         stack.pushPose(); stack.translate(-camera.x, -camera.y, -camera.z);
-        double now = mc.level.getGameTime() + event.getPartialTick().getGameTimeDeltaPartialTick(false);
+        double now = mc.level.getGameTime() + event.getPartialTick();
         var out = buffers.getBuffer(WeaponEffectRenderTypes.MOLTEN_GLOW);
         for (var ring : RINGS) {
             float fade = opacity((float) (now - ring.tick), ring.duration);

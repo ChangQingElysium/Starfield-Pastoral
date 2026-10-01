@@ -31,7 +31,7 @@ public class FairGrillBlock extends MapDecorStaticBlock {
     }
 
     @Override
-    protected void onPlace(@Nonnull BlockState state, @Nonnull Level level, @Nonnull BlockPos pos,
+    public void onPlace(@Nonnull BlockState state, @Nonnull Level level, @Nonnull BlockPos pos,
                            @Nonnull BlockState oldState, boolean isMoving) {
         super.onPlace(state, level, pos, oldState, isMoving);
         if (level.isClientSide || state.getValue(PART) != Part.MAIN) {
@@ -58,7 +58,7 @@ public class FairGrillBlock extends MapDecorStaticBlock {
     }
 
     @Override
-    protected ItemInteractionResult useItemOn(@Nonnull ItemStack stack, @Nonnull BlockState state, @Nonnull Level level,
+    public ItemInteractionResult useItemOn(@Nonnull ItemStack stack, @Nonnull BlockState state, @Nonnull Level level,
                                              @Nonnull BlockPos pos, @Nonnull Player player, @Nonnull InteractionHand hand,
                                              @Nonnull BlockHitResult hit) {
         BlockPos mainPos = mainPosForInteraction(level, pos, state);
@@ -79,7 +79,7 @@ public class FairGrillBlock extends MapDecorStaticBlock {
     }
 
     @Override
-    protected InteractionResult useWithoutItem(@Nonnull BlockState state, @Nonnull Level level, @Nonnull BlockPos pos,
+    public InteractionResult useWithoutItem(@Nonnull BlockState state, @Nonnull Level level, @Nonnull BlockPos pos,
                                                @Nonnull Player player, @Nonnull BlockHitResult hit) {
         BlockPos mainPos = mainPosForInteraction(level, pos, state);
         if (mainPos == null && state.is(this)) {

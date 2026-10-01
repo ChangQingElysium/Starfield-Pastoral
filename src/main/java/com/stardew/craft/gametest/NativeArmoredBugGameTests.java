@@ -24,9 +24,9 @@ public final class NativeArmoredBugGameTests {
         var player=new net.minecraftforge.common.util.FakePlayer(level,new com.mojang.authlib.GameProfile(java.util.UUID.randomUUID(),"ArmorTest"));player.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);player.setPos(Vec3.atBottomCenterOf(pos.offset(0,0,3)));level.addNewPlayer(player);
         var weapon=new net.minecraft.world.item.ItemStack(ModItems.RUSTY_SWORD.get());player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,weapon);
         h.assertTrue(!bug.hurt(level.damageSources().playerAttack(player),20)&&bug.getHealth()==150,"Unenchanted sword pierced armor");
-        var enchantment=level.registryAccess().registryOrThrow(net.minecraft.core.registries.Registries.ENCHANTMENT).getHolderOrThrow(StardewEnchantments.BUG_KILLER);weapon.enchant(enchantment,1);
+        var enchantment=level.registryAccess().registryOrThrow(net.minecraft.core.registries.Registries.ENCHANTMENT).getHolderOrThrow(StardewEnchantments.BUG_KILLER);com.stardew.craft.port.PortItemStacks.enchant(weapon, enchantment,1);
         h.assertTrue(!bug.hurt(level.damageSources().explosion(null,player),20)&&bug.getHealth()==150,"Bomb pierced armor while player held Bug Killer");
-        var stick=new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.STICK);stick.enchant(enchantment,1);player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,stick);
+        var stick=new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.STICK);com.stardew.craft.port.PortItemStacks.enchant(stick, enchantment,1);player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,stick);
         h.assertTrue(!bug.hurt(level.damageSources().playerAttack(player),20),"Enchant alone made a non-weapon pierce armor");player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,weapon);
         h.assertTrue(bug.hurt(level.damageSources().playerAttack(player),20)&&bug.getHealth()<150,"Bug Killer melee failed to damage armor");
         bug.knockback(2,1,0);var saved=new CompoundTag();bug.saveWithoutId(saved);h.assertTrue(saved.getDouble("BugSlideX")==0&&saved.getDouble("BugSlideZ")==0,"Armored Bug accepted knockback despite slipperiness -1");

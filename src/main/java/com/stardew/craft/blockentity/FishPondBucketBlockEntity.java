@@ -1,5 +1,6 @@
 package com.stardew.craft.blockentity;
 
+import com.stardew.craft.port.PortItemStacks;
 import com.stardew.craft.fishpond.data.FishPondWorldData;
 import com.stardew.craft.fishpond.model.FishPondRecord;
 import com.stardew.craft.fishpond.service.FishPondHusbandry;
@@ -209,17 +210,17 @@ public class FishPondBucketBlockEntity extends BlockEntity implements UtilityAut
     }
 
     @Override
-    protected void saveAdditional(@Nonnull CompoundTag tag, @Nonnull HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
+    protected void saveAdditional(@Nonnull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        super.saveAdditional(tag);
         tag.putBoolean("ready", ready);
         if (!cachedOutput.isEmpty()) {
-            tag.put("cachedOutput", cachedOutput.save(registries));
+            tag.put("cachedOutput", PortItemStacks.save(cachedOutput, registries));
         }
         if (!cachedRequest.isEmpty()) {
-            tag.put("cachedRequest", cachedRequest.save(registries));
+            tag.put("cachedRequest", PortItemStacks.save(cachedRequest, registries));
         }
         if (!cachedFishSign.isEmpty()) {
-            tag.put("cachedFishSign", cachedFishSign.save(registries));
+            tag.put("cachedFishSign", PortItemStacks.save(cachedFishSign, registries));
         }
         tag.putInt("requestCount", requestCount);
         tag.putInt("fishPopulation", fishPopulation);
@@ -238,17 +239,17 @@ public class FishPondBucketBlockEntity extends BlockEntity implements UtilityAut
     }
 
     @Override
-    protected void loadAdditional(@Nonnull CompoundTag tag, @Nonnull HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
+    public void load(@Nonnull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        super.load(tag);
         ready = tag.getBoolean("ready");
         cachedOutput = tag.contains("cachedOutput")
-            ? ItemStack.parseOptional(registries, tag.getCompound("cachedOutput"))
+            ? PortItemStacks.parseOptional(registries, tag.getCompound("cachedOutput"))
             : ItemStack.EMPTY;
         cachedRequest = tag.contains("cachedRequest")
-            ? ItemStack.parseOptional(registries, tag.getCompound("cachedRequest"))
+            ? PortItemStacks.parseOptional(registries, tag.getCompound("cachedRequest"))
             : ItemStack.EMPTY;
         cachedFishSign = tag.contains("cachedFishSign")
-            ? ItemStack.parseOptional(registries, tag.getCompound("cachedFishSign"))
+            ? PortItemStacks.parseOptional(registries, tag.getCompound("cachedFishSign"))
             : ItemStack.EMPTY;
         requestCount = Math.max(0, tag.getInt("requestCount"));
         fishPopulation = Math.max(0, tag.getInt("fishPopulation"));
@@ -276,8 +277,8 @@ public class FishPondBucketBlockEntity extends BlockEntity implements UtilityAut
     }
 
     @Override
-    public CompoundTag getUpdateTag(@Nonnull HolderLookup.Provider registries) {
-        return saveWithoutMetadata(registries);
+    public CompoundTag getUpdateTag() { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        return saveWithoutMetadata();
     }
 
     @Override

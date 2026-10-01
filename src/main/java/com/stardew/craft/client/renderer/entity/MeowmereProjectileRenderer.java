@@ -50,7 +50,7 @@ public class MeowmereProjectileRenderer extends EntityRenderer<MeowmereProjectil
     }
 
     private void renderTrail(MeowmereProjectileEntity entity, float partialTicks, PoseStack poseStack, MultiBufferSource buffer, int packedLight) {
-        if (entity.isRemoved() || !com.stardew.craft.Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()) return;
+        if (entity.isRemoved() || !com.stardew.craft.Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()) return;
         Vec3 camera = entityRenderDispatcher.camera.getPosition();
         Vec3 head = entity.getPosition(partialTicks);
         if (head.distanceToSqr(camera) > 48 * 48) return;

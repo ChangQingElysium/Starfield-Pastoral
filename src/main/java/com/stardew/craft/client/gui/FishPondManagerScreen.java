@@ -239,11 +239,12 @@ public class FishPondManagerScreen extends AbstractContainerScreen<FishPondManag
         return addRenderableWidget(b);
     }
     private boolean inside(double x,double y,int rx,int ry,int w,int h) {return x>=rx&&x<rx+w&&y>=ry&&y<ry+h;}
-    @Override public boolean mouseScrolled(double x,double y,double horizontal,double vertical) {
+    @Override public boolean mouseScrolled(double x, double y, double vertical) {
+        double horizontal = 0.0D; // PORT(1.20.1): no horizontal scroll before 1.20.2
         if(inside(x,y,page.contentX(),page.top(),page.contentWidth(),page.bottom()-page.top())&&vertical!=0) {
             scroll=FishPondLayout.clampScroll(scroll+(vertical<0?24:-24),contentHeight,page.bottom()-page.top());return true;
         }
-        return super.mouseScrolled(x,y,horizontal,vertical);
+        return super.mouseScrolled(x, y, vertical);
     }
     private void drag(double y) {
         int vh=page.bottom()-page.top(),max=Math.max(0,contentHeight-vh),thumb=Math.min(vh,Math.max(12,vh*vh/Math.max(1,contentHeight)));

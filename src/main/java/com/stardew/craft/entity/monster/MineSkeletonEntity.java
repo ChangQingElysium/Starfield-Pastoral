@@ -40,7 +40,7 @@ public final class MineSkeletonEntity extends StardewMonsterEntity {
     @Override protected void registerGoals(){}
     @Override protected ResourceLocation definitionId(){return new ResourceLocation("stardewcraft:skeleton");}
     @Override protected void configureSpawn(MonsterDefinition d,MonsterSpawnContext c){var r=MonsterStatResolver.base(d,c,random);setInitialHealth(r.initialHealth());replaceCombatStats(r.combat());movement.face(random.nextInt(4));}
-    @Override protected void defineSynchedData(SynchedEntityData.Builder b){super.defineSynchedData(b);b.define(MOVING,false);b.define(THROW_PROGRESS,0F);b.define(HIT,-100L);b.define(RELEASE,-100L);}
+    @Override protected void defineSynchedData(){super.defineSynchedData();this.entityData.define(MOVING,false);this.entityData.define(THROW_PROGRESS,0F);this.entityData.define(HIT,-100L);this.entityData.define(RELEASE,-100L);}
     public boolean moving(){return entityData.get(MOVING);}
     public double throwProgress(float partial){return Math.min(1,entityData.get(THROW_PROGRESS)+(phase()==1?partial/12.:0));}
     public double hitTime(float p){return (level().getGameTime()-entityData.get(HIT)+p)/20.;}
@@ -48,7 +48,7 @@ public final class MineSkeletonEntity extends StardewMonsterEntity {
     public boolean spotted(){return spotted;}
     public SkeletonThrowClock throwClock(){return clock;}
     public void stunFor(int milliseconds){stunMilliseconds=Math.max(stunMilliseconds,milliseconds);}
-    private boolean valid(Player p){return p.isAlive()&&!p.isCreative()&&!p.isSpectator()&&!p.hasEffect(ModMobEffects.AVOID_MONSTERS)&&(monsterState().context().generation()==null||OrdinaryMineRuntime.floorAt(p.blockPosition())==monsterState().context().floor());}
+    private boolean valid(Player p){return p.isAlive()&&!p.isCreative()&&!p.isSpectator()&&!p.hasEffect(ModMobEffects.AVOID_MONSTERS.get())&&(monsterState().context().generation()==null||OrdinaryMineRuntime.floorAt(p.blockPosition())==monsterState().context().floor());}
     @Override protected void customServerAiStep(){
         if(!initialized())initialize(MonsterSpawnContext.capture((ServerLevel)level(),MonsterSpawnContext.Source.WORLD,1));
         var target=level().getNearestPlayer(getX(),getY(),getZ(),64,e->e instanceof Player p&&valid(p));setTarget(target);double bx=getX(),bz=getZ();

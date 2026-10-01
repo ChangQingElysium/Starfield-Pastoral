@@ -81,7 +81,7 @@ public record ShopPickupPayload(
                     ItemStack existing = player.getInventory().getItem(targetSlot);
                     if (existing.isEmpty()) {
                         player.getInventory().setItem(targetSlot, stack);
-                    } else if (ItemStack.isSameItemSameComponents(existing, stack)
+                    } else if (ItemStack.isSameItemSameTags(existing, stack)
                             && existing.getCount() < existing.getMaxStackSize()) {
                         int canAdd = existing.getMaxStackSize() - existing.getCount();
                         int toAdd = Math.min(canAdd, stack.getCount());

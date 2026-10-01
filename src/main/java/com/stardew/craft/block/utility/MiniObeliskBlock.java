@@ -67,7 +67,7 @@ public class MiniObeliskBlock extends MapUtilityStaticBlock {
     }
 
     @Override
-    protected List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
+    public List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
         return state.getValue(PART) == Part.MAIN ? List.of(new ItemStack(ModBlocks.MINI_OBELISK.get())) : List.of();
     }
 
@@ -102,7 +102,7 @@ public class MiniObeliskBlock extends MapUtilityStaticBlock {
     }
 
     @Override
-    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
+    public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
                                               Player player, InteractionHand hand, BlockHitResult hit) {
         if (state.getValue(PART) == Part.EXTENSION) return super.useItemOn(stack, state, level, pos, player, hand, hit);
         if (level.isClientSide) {
@@ -116,7 +116,7 @@ public class MiniObeliskBlock extends MapUtilityStaticBlock {
     }
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+    public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         if (state.getValue(PART) == Part.EXTENSION) return super.useWithoutItem(state, level, pos, player, hit);
         if (level.isClientSide) {
             return InteractionResult.SUCCESS;

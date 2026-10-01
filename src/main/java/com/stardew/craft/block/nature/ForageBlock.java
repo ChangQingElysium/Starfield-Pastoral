@@ -33,6 +33,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.AABB;
 
 import java.util.function.Supplier;
+import com.stardew.craft.port.PortBlockInteraction;
 
 /**
  * Forage block with a model-sized selection box for static 3D resources.
@@ -46,19 +47,13 @@ import java.util.function.Supplier;
  *   <li>7 Foraging XP per pickup</li>
  * </ul>
  */
-public class ForageBlock extends BushBlock {
-    public static final MapCodec<ForageBlock> CODEC = simpleCodec(ForageBlock::new);
+public class ForageBlock extends BushBlock implements PortBlockInteraction {
 
     /** Foraging XP granted per forage pickup (SDV: 7) */
     private static final int FORAGE_XP = 7;
 
     private Supplier<ItemStack> dropSupplier;
     private int allowedSeasonMask = 0;
-
-    @Override
-    protected MapCodec<? extends BushBlock> codec() {
-        return CODEC;
-    }
 
     public ForageBlock(Properties properties) {
         super(properties);
@@ -85,7 +80,7 @@ public class ForageBlock extends BushBlock {
     }
 
     @Override
-    protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+    public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         String model = ModelVoxelShapeCache.variantModel(BuiltInRegistries.BLOCK.getKey(this).toString(), "");
         if (model != null && model.startsWith("stardewcraft:block/crop3d/forage_")) {
             AABB bounds = ModelVoxelShapeCache.requiredShape(model).bounds();
@@ -121,7 +116,7 @@ public class ForageBlock extends BushBlock {
 
     @SuppressWarnings("null")
     @Override
-    protected void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+    public void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
         if (allowedSeasonMask == 0 || !level.canSeeSky(pos)) {
             return;
         }
@@ -131,20 +126,27 @@ public class ForageBlock extends BushBlock {
         }
     }
 
+    // PORT(1.20.1): replay the 1.21 useItemOn/useWithoutItem dispatch.
+    @Override
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player,
+            InteractionHand hand, BlockHitResult hit) {
+        return PortBlockInteraction.dispatch(this, state, level, pos, player, hand, hit);
+    }
+
     /**
      * Right-click to pick up forage (SDV: click to collect).
      * Same quality / gatherer / XP logic as breaking.
      */
     @SuppressWarnings("null")
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos,
+    public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos,
                                                Player player, BlockHitResult hitResult) {
         return pickForage(level, pos, player);
     }
 
     @SuppressWarnings("null")
     @Override
-    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
+    public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
                                               Player player, InteractionHand hand, BlockHitResult hitResult) {
         pickForage(level, pos, player);
         return ItemInteractionResult.sidedSuccess(level.isClientSide);
@@ -162,12 +164,12 @@ public class ForageBlock extends BushBlock {
 
     @SuppressWarnings("null")
     @Override
-    public BlockState playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
+    public void playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
         if (!level.isClientSide && level instanceof ServerLevel serverLevel
                 && player instanceof ServerPlayer serverPlayer && !player.isCreative()) {
             harvestForage(serverLevel, pos, serverPlayer);
         }
-        return super.playerWillDestroy(level, pos, state, player);
+        super.playerWillDestroy(level, pos, state, player);
     }
 
     /**

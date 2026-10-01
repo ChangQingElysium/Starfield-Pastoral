@@ -19,7 +19,7 @@ import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BedPart;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import com.stardew.craft.port.net.neoforged.neoforge.event.entity.player.CanContinueSleepingEvent;
 import com.stardew.craft.port.net.neoforged.neoforge.event.entity.player.CanPlayerSleepEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;

@@ -1,5 +1,6 @@
 package com.stardew.craft.client;
 
+import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.item.ModItems;
 import com.stardew.craft.item.tool.FishingRodItem;
@@ -21,11 +22,11 @@ public final class ModItemProperties {
 	@SuppressWarnings("null")
 	public static void register() {
         ItemProperties.register(ModItems.MINE_CHEST.get(), new ResourceLocation(StardewCraft.MODID, "mine_chest_special"),
-                (stack, level, entity, seed) -> Boolean.TRUE.equals(stack.getOrDefault(com.stardew.craft.port.net.minecraft.core.component.DataComponents.BLOCK_STATE,
+                (stack, level, entity, seed) -> Boolean.TRUE.equals(PortItemData.getOrDefault(stack, com.stardew.craft.port.net.minecraft.core.component.DataComponents.BLOCK_STATE,
                         com.stardew.craft.port.net.minecraft.world.item.component.BlockItemStateProperties.EMPTY).get(com.stardew.craft.block.mine.MineChestBlock.SPECIAL)) ? 1 : 0);
         ItemProperties.register(ModItems.MINE_COAL_BACKPACK.get(), new ResourceLocation(StardewCraft.MODID, "mine_backpack_variant"),
                 (stack, level, entity, seed) -> {
-                    var saved = stack.getOrDefault(com.stardew.craft.port.net.minecraft.core.component.DataComponents.BLOCK_STATE,
+                    var saved = PortItemData.getOrDefault(stack, com.stardew.craft.port.net.minecraft.core.component.DataComponents.BLOCK_STATE,
                             com.stardew.craft.port.net.minecraft.world.item.component.BlockItemStateProperties.EMPTY);
                     int theme = Boolean.TRUE.equals(saved.get(com.stardew.craft.block.mine.MineCoalBackpackBlock.DESERT)) ? 2
                             : Boolean.TRUE.equals(saved.get(com.stardew.craft.block.mine.MineCoalBackpackBlock.DARK)) ? 1 : 0;

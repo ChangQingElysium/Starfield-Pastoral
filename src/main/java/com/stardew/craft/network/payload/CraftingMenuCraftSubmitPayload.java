@@ -178,7 +178,7 @@ public record CraftingMenuCraftSubmitPayload(String recipeItemId, int craftCount
         if (carried.isEmpty()) {
             return prototype.getMaxStackSize() / outputPerCraft;
         }
-        if (!ItemStack.isSameItemSameComponents(carried, prototype)) {
+        if (!ItemStack.isSameItemSameTags(carried, prototype)) {
             return 0;
         }
 

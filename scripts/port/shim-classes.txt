@@ -1,11 +1,6 @@
 # 1.21.1/NeoForge classes absent from Forge 1.20.1.
 # References are redirected to com.stardew.craft.port.<original FQN>.
-com.mojang.blaze3d.vertex.MeshData
 net.minecraft.client.DeltaTracker
-net.minecraft.client.gui.font.FontOption
-net.minecraft.client.gui.screens.options.controls.KeyBindsScreen
-net.minecraft.client.renderer.SectionBufferBuilderPack
-net.minecraft.client.renderer.chunk.SectionRenderDispatcher
 net.minecraft.client.resources.PlayerSkin
 net.minecraft.core.component.DataComponentPatch
 net.minecraft.core.component.DataComponentType
@@ -18,10 +13,8 @@ net.minecraft.network.codec.ByteBufCodecs
 net.minecraft.network.codec.StreamCodec
 net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket
 net.minecraft.network.protocol.common.custom.CustomPacketPayload
-net.minecraft.server.level.ClientInformation
 net.minecraft.server.network.CommonListenerCookie
 net.minecraft.world.ItemInteractionResult
-net.minecraft.world.TickRateManager
 net.minecraft.world.entity.EquipmentSlotGroup
 net.minecraft.world.item.alchemy.PotionContents
 net.minecraft.world.item.component.BlockItemStateProperties
@@ -32,15 +25,10 @@ net.minecraft.world.item.component.FireworkExplosion
 net.minecraft.world.item.component.Fireworks
 net.minecraft.world.item.component.ItemAttributeModifiers
 net.minecraft.world.item.component.ItemContainerContents
+net.minecraft.world.item.component.ItemLore
 net.minecraft.world.item.component.Unbreakable
 net.minecraft.world.item.enchantment.ItemEnchantments
-net.minecraft.world.level.block.TransparentBlock
 net.minecraft.world.level.chunk.status.ChunkStatus
-net.minecraft.world.level.chunk.storage.RegionStorageInfo
-net.minecraft.world.level.chunk.storage.SimpleRegionStorage
-net.minecraft.world.level.pathfinder.PathType
-net.minecraft.world.level.pathfinder.PathfindingContext
-net.minecraft.world.scores.ScoreHolder
 net.neoforged.neoforge.attachment.AttachmentType
 net.neoforged.neoforge.capabilities.BlockCapability
 net.neoforged.neoforge.capabilities.Capabilities
@@ -63,6 +51,7 @@ net.neoforged.neoforge.common.world.chunk.RegisterTicketControllersEvent
 net.neoforged.neoforge.common.world.chunk.TicketController
 net.neoforged.neoforge.event.brewing.RegisterBrewingRecipesEvent
 net.neoforged.neoforge.event.entity.living.FinalizeSpawnEvent
+net.neoforged.neoforge.event.entity.living.LivingDamageEvent
 net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent
 net.neoforged.neoforge.event.entity.player.CanContinueSleepingEvent
 net.neoforged.neoforge.event.entity.player.CanPlayerSleepEvent

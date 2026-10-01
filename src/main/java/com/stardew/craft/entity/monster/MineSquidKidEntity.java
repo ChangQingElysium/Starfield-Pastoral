@@ -28,11 +28,11 @@ public final class MineSquidKidEntity extends StardewMonsterEntity {
     @Override protected void registerGoals(){}
     @Override protected ResourceLocation definitionId(){return new ResourceLocation("stardewcraft:squid_kid");}
     @Override protected void configureSpawn(MonsterDefinition d,MonsterSpawnContext c){var r=MonsterStatResolver.base(d,c,random);setInitialHealth(r.initialHealth());replaceCombatStats(r.combat());groundY=getY();setPos(getX(),groundY+SquidKidBehavior.lift(level().getGameTime(),0),getZ());}
-    @Override protected void defineSynchedData(SynchedEntityData.Builder b){super.defineSynchedData(b);b.define(EXPRESSION,0);b.define(HIT,-100L);b.define(FIRE,-100L);}
+    @Override protected void defineSynchedData(){super.defineSynchedData();this.entityData.define(EXPRESSION,0);this.entityData.define(HIT,-100L);this.entityData.define(FIRE,-100L);}
     public int expression(){return entityData.get(EXPRESSION);}public double groundY(){return groundY;}
     public double hitTime(float p){return (level().getGameTime()-entityData.get(HIT)+p)/20.;}public double fireTime(float p){return (level().getGameTime()-entityData.get(FIRE)+p)/20.;}
     public void stunFor(int milliseconds){stunMilliseconds=Math.max(stunMilliseconds,milliseconds);}
-    private boolean valid(Player p){return p.isAlive()&&!p.isCreative()&&!p.isSpectator()&&!p.hasEffect(ModMobEffects.AVOID_MONSTERS)&&(monsterState().context().generation()==null||OrdinaryMineRuntime.floorAt(p.blockPosition())==monsterState().context().floor());}
+    private boolean valid(Player p){return p.isAlive()&&!p.isCreative()&&!p.isSpectator()&&!p.hasEffect(ModMobEffects.AVOID_MONSTERS.get())&&(monsterState().context().generation()==null||OrdinaryMineRuntime.floorAt(p.blockPosition())==monsterState().context().floor());}
     @Override protected void customServerAiStep(){
         if(!initialized())initialize(MonsterSpawnContext.capture((ServerLevel)level(),MonsterSpawnContext.Source.WORLD,1));
         var target=level().getNearestPlayer(getX(),groundY,getZ(),64,e->e instanceof Player p&&valid(p));setTarget(target);

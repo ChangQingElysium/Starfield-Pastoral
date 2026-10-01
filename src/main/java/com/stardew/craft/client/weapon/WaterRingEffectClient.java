@@ -60,7 +60,7 @@ public final class WaterRingEffectClient {
         VertexConsumer consumer = buffer.getBuffer(ringType);
 
         for (Ring ring : RINGS) {
-            float partial = event.getPartialTick().getGameTimeDeltaPartialTick(false);
+            float partial = event.getPartialTick();
             float age = ring.age + partial;
             float t = Math.min(1.0f, Math.max(0.0f, age / ring.durationTicks));
             float radius = ring.maxRadius * (0.2f + 0.8f * t);

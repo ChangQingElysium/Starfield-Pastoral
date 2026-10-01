@@ -37,14 +37,15 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.util.RandomSource;
-import com.stardew.craft.port.net.neoforged.neoforge.common.ItemAbilities;
+import net.minecraftforge.common.ToolActions;
 
 import javax.annotation.Nullable;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import com.stardew.craft.port.PortBlockInteraction;
 
-public class TapperBlock extends Block implements EntityBlock {
+public class TapperBlock extends Block implements EntityBlock, PortBlockInteraction {
 	/**
 	 * Facing means the direction of the supporting tree block relative to the tapper.
 	 * Example: FACING=NORTH -> the supported log/trunk is at pos.north().
@@ -135,7 +136,7 @@ public class TapperBlock extends Block implements EntityBlock {
 
 	@SuppressWarnings("null")
 	@Override
-	protected List<ItemStack> getDrops(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") LootParams.Builder params) {
+	public List<ItemStack> getDrops(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") LootParams.Builder params) {
 		// Always drop itself (block item), regardless of loot-table/data-pack issues.
 		return List.of(new ItemStack(ModBlocks.TAPPER.get()));
 	}
@@ -163,7 +164,7 @@ public class TapperBlock extends Block implements EntityBlock {
 
 		ItemStack tool = player.getMainHandItem();
 		float digSpeed = 1.0f;
-		if (!tool.isEmpty() && tool.canPerformAction(ItemAbilities.AXE_DIG) && tool.getItem() instanceof TieredItem tiered) {
+		if (!tool.isEmpty() && tool.canPerformAction(ToolActions.AXE_DIG) && tool.getItem() instanceof TieredItem tiered) {
 			digSpeed = tiered.getTier().getSpeed();
 		}
 
@@ -178,6 +179,13 @@ public class TapperBlock extends Block implements EntityBlock {
 		return SHAPES[ModelVoxelShapeCache.horizontalIndex(state.getValue(FACING))];
 	}
 
+	// PORT(1.20.1): replay the 1.21 useItemOn/useWithoutItem dispatch.
+	@Override
+	public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player,
+	        InteractionHand hand, BlockHitResult hit) {
+	    return PortBlockInteraction.dispatch(this, state, level, pos, player, hand, hit);
+	}
+
 	@SuppressWarnings("null")
 	@Override
 	public InteractionResult useWithoutItem(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") Level level, @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") Player player, @SuppressWarnings("null") BlockHitResult hitResult) {
@@ -186,7 +194,7 @@ public class TapperBlock extends Block implements EntityBlock {
 
 	@SuppressWarnings("null")
 	@Override
-	protected ItemInteractionResult useItemOn(@SuppressWarnings("null") ItemStack stack, @SuppressWarnings("null") BlockState state,
+	public ItemInteractionResult useItemOn(@SuppressWarnings("null") ItemStack stack, @SuppressWarnings("null") BlockState state,
 			@SuppressWarnings("null") Level level, @SuppressWarnings("null") BlockPos pos,
 			@SuppressWarnings("null") Player player, @SuppressWarnings("null") InteractionHand hand,
 			@SuppressWarnings("null") BlockHitResult hitResult) {

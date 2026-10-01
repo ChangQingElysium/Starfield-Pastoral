@@ -1,5 +1,7 @@
 package com.stardew.craft.gametest;
 
+import com.stardew.craft.port.PortItemStacks;
+import com.stardew.craft.port.PortItemData;
 import com.mojang.authlib.GameProfile;
 import com.stardew.craft.building.runtime.BuildingBlueprintItem;
 import com.stardew.craft.building.runtime.BuildingDrafts;
@@ -38,9 +40,9 @@ public final class BlueprintPreviewSyncGameTests {
                 var stack = new ItemStack(item);
                 var permit = UUID.randomUUID(); BuildingBlueprintItem.bind(stack, permit);
                 var tag = BuildingBlueprintItem.draft(stack); tag.putString("DraftFacing", facing.getName());
-                stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+                PortItemData.set(stack, DataComponents.CUSTOM_DATA, CustomData.of(tag));
                 // Persist/reload an existing document with no newly introduced preview data.
-                stack = ItemStack.parse(h.getLevel().registryAccess(), stack.save(h.getLevel().registryAccess())).orElseThrow();
+                stack = PortItemStacks.parse(h.getLevel().registryAccess(), PortItemStacks.save(stack, h.getLevel().registryAccess())).orElseThrow();
                 player.setItemInHand(hand, stack);
                 h.assertTrue(BuildingBlueprintItem.previewTargetAnchor(stack, ground, facing) == null, "Old document should wait for sync");
                 item.inventoryTick(stack, h.getLevel(), player, hand == InteractionHand.MAIN_HAND ? 0 : 40, hand == InteractionHand.MAIN_HAND);
@@ -48,9 +50,11 @@ public final class BlueprintPreviewSyncGameTests {
                 h.assertTrue(expected.equals(BuildingBlueprintItem.previewTargetAnchor(stack, ground, facing)), "Wrong synchronized anchor: " + item.family() + " " + hand);
                 h.assertTrue(permit.equals(BuildingBlueprintItem.permit(stack)), "Sync changed the purchased permit");
                 h.assertTrue(BuildingBlueprintItem.facing(stack) == facing, "Sync reset document rotation");
-                var component = stack.get(DataComponents.CUSTOM_DATA);
+                // PORT(1.20.1): component reads are NBT snapshots, so a rewrite is detected by the identity
+                // of the stored root-tag values instead of the identity of the component object.
+                var component = storedTagValues(stack);
                 item.inventoryTick(stack, h.getLevel(), player, 0, hand == InteractionHand.MAIN_HAND);
-                h.assertTrue(component == stack.get(DataComponents.CUSTOM_DATA), "Unchanged geometry rewrites inventory every tick");
+                h.assertTrue(component.equals(storedTagValues(stack)), "Unchanged geometry rewrites inventory every tick");
                 var buffer = new RegistryFriendlyByteBuf(Unpooled.buffer(), h.getLevel().registryAccess());
                 try {
                     com.stardew.craft.port.PortCodecs.ITEM_STACK.encode(buffer, stack);
@@ -59,7 +63,7 @@ public final class BlueprintPreviewSyncGameTests {
                 } finally { buffer.release(); }
                 // A stale/custom item component must never influence authoritative placement.
                 tag = BuildingBlueprintItem.draft(stack); tag.putInt("BlueprintPreviewDepth", 999);
-                stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+                PortItemData.set(stack, DataComponents.CUSTOM_DATA, CustomData.of(tag));
                 h.assertTrue(expected.equals(BuildingBlueprintItem.targetAnchor(stack, ground, facing)), "Server trusted client preview geometry");
                 item.inventoryTick(stack, h.getLevel(), player, 0, hand == InteractionHand.MAIN_HAND);
                 h.assertTrue(expected.equals(BuildingBlueprintItem.previewTargetAnchor(stack, ground, facing)), "Stale metadata was not refreshed");
@@ -72,5 +76,30 @@ public final class BlueprintPreviewSyncGameTests {
         h.assertTrue(count >= 7, "Not all registered blueprints were exercised");
         player.getInventory().clearContent();
         h.succeed();
+    }
+
+    /** PORT(1.20.1): identity snapshot of the stack's root tag values (see the rewrite check above). */
+    private static java.util.List<Object> storedTagValues(net.minecraft.world.item.ItemStack stack) {
+        var tag = stack.getTag();
+        var values = new java.util.ArrayList<Object>();
+        if (tag != null) {
+            for (String key : new java.util.TreeSet<>(tag.getAllKeys())) {
+                values.add(key);
+                values.add(new IdentityKey(tag.get(key)));
+            }
+        }
+        return values;
+    }
+
+    private record IdentityKey(Object value) {
+        @Override
+        public boolean equals(Object other) {
+            return other instanceof IdentityKey key && key.value == value;
+        }
+
+        @Override
+        public int hashCode() {
+            return System.identityHashCode(value);
+        }
     }
 }

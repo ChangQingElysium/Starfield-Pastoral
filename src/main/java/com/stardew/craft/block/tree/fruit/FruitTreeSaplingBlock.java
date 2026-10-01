@@ -70,7 +70,7 @@ public class FruitTreeSaplingBlock extends Block {
     }
 
     @Override
-    protected boolean canSurvive(@Nonnull BlockState state, @Nonnull LevelReader level, @Nonnull BlockPos pos) {
+    public boolean canSurvive(@Nonnull BlockState state, @Nonnull LevelReader level, @Nonnull BlockPos pos) {
         if (state.getValue(HALF) == DoubleBlockHalf.UPPER) {
             BlockState below = level.getBlockState(pos.below());
             return below.is(this) && below.getValue(HALF) == DoubleBlockHalf.LOWER;
@@ -81,7 +81,7 @@ public class FruitTreeSaplingBlock extends Block {
     }
 
     @Override
-    protected BlockState updateShape(@Nonnull BlockState state, @Nonnull Direction direction, @Nonnull BlockState neighborState,
+    public BlockState updateShape(@Nonnull BlockState state, @Nonnull Direction direction, @Nonnull BlockState neighborState,
                                      @Nonnull LevelAccessor level, @Nonnull BlockPos pos, @Nonnull BlockPos neighborPos) {
         if (!state.canSurvive(level, pos)) {
             return Blocks.AIR.defaultBlockState();
@@ -90,7 +90,7 @@ public class FruitTreeSaplingBlock extends Block {
     }
 
     @Override
-    protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean movedByPiston) {
+    public void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean movedByPiston) {
         if (state.getValue(HALF) == DoubleBlockHalf.UPPER) {
             super.onPlace(state, level, pos, oldState, movedByPiston);
             return;
@@ -110,7 +110,7 @@ public class FruitTreeSaplingBlock extends Block {
     }
 
     @Override
-    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
+    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
         if (!level.isClientSide() && !state.is(newState.getBlock())) {
             if (state.getValue(HALF) == DoubleBlockHalf.LOWER) {
                 BlockPos above = pos.above();

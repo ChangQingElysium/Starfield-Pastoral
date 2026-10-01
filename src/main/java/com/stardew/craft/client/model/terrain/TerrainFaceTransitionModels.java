@@ -1,5 +1,6 @@
 package com.stardew.craft.client.model.terrain;
 
+import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.block.terrain.TerrainSoils;
@@ -36,7 +37,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import net.minecraftforge.client.ChunkRenderTypeSet;
 import net.minecraftforge.client.event.ModelEvent;
 import net.minecraftforge.client.model.BakedModelWrapper;
@@ -164,7 +165,7 @@ public final class TerrainFaceTransitionModels {
             super(original);
             overrides=new ItemOverrides() {
                 @Override public BakedModel resolve(BakedModel model, ItemStack stack, @Nullable ClientLevel level, @Nullable LivingEntity entity, int seed) {
-                    Integer variant=stack.getOrDefault(DataComponents.BLOCK_STATE,BlockItemStateProperties.EMPTY).get(TerrainVariants.CLIFF);
+                    Integer variant=PortItemData.getOrDefault(stack, DataComponents.BLOCK_STATE,BlockItemStateProperties.EMPTY).get(TerrainVariants.CLIFF);
                     BlockState state=ModBlocks.CLIFF.get().defaultBlockState().setValue(TerrainVariants.CLIFF,variant == null ? 0 : variant);
                     return raw.get(state)[TerrainSeasonTextures.currentTextureSet()];
                 }

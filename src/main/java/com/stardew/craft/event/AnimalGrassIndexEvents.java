@@ -4,7 +4,7 @@ import com.stardew.craft.StardewCraft;
 import com.stardew.craft.animal.service.AnimalGrassTargetService;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import net.minecraftforge.event.level.ChunkEvent;
 
 /** Releases transient grass-index state when a chunk leaves memory. */

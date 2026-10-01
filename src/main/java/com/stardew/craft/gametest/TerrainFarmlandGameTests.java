@@ -9,7 +9,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
-import com.stardew.craft.port.net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
@@ -20,7 +19,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FarmBlock;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import com.stardew.craft.port.net.neoforged.neoforge.common.ItemAbilities;
+import net.minecraftforge.common.ToolActions;
 import net.minecraftforge.gametest.GameTestHolder;
 import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
@@ -64,21 +63,21 @@ public final class TerrainFarmlandGameTests {
         var level = helper.getLevel();
         var pos = helper.absolutePos(new BlockPos(6, 1, 6));
         level.setBlock(pos.above(), Blocks.AIR.defaultBlockState(), 3);
-        var player = new ServerPlayer(level.getServer(), level, new GameProfile(UUID.randomUUID(), "TerrainFarmer"), ClientInformation.createDefault());
+        var player = new ServerPlayer(level.getServer(), level, new GameProfile(UUID.randomUUID(), "TerrainFarmer"));
         player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.IRON_HOE));
         var context = new UseOnContext(player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atCenterOf(pos), Direction.UP, pos, false));
         for (int variant = 0; variant < 5; variant++) {
             var dirt = ModBlocks.DIRT.get().defaultBlockState().setValue(TerrainVariants.DIRT, variant);
             level.setBlock(pos, dirt, 3);
-            var tilled = dirt.getToolModifiedState(context, ItemAbilities.HOE_TILL, true);
+            var tilled = dirt.getToolModifiedState(context, ToolActions.HOE_TILL, true);
             helper.assertTrue(tilled != null && tilled.is(ModBlocks.FARMLAND.get()), "A dirt variant cannot be tilled");
         }
         for (Block grass : new Block[]{ModBlocks.GRASS_BLOCK.get(), ModBlocks.DARK_GRASS_BLOCK.get()})
-            helper.assertTrue(grass.defaultBlockState().getToolModifiedState(context, ItemAbilities.HOE_TILL, true) == null, "Grass allowed tilling");
-        var vanilla = Blocks.DIRT.defaultBlockState().getToolModifiedState(context, ItemAbilities.HOE_TILL, true);
+            helper.assertTrue(grass.defaultBlockState().getToolModifiedState(context, ToolActions.HOE_TILL, true) == null, "Grass allowed tilling");
+        var vanilla = Blocks.DIRT.defaultBlockState().getToolModifiedState(context, ToolActions.HOE_TILL, true);
         helper.assertTrue(vanilla != null && vanilla.is(Blocks.FARMLAND), "Vanilla dirt must keep its original target");
         level.setBlock(pos.above(), Blocks.STONE.defaultBlockState(), 3);
-        helper.assertTrue(ModBlocks.DIRT.get().defaultBlockState().getToolModifiedState(context, ItemAbilities.HOE_TILL, true) == null, "Covered dirt allowed tilling");
+        helper.assertTrue(ModBlocks.DIRT.get().defaultBlockState().getToolModifiedState(context, ToolActions.HOE_TILL, true) == null, "Covered dirt allowed tilling");
         helper.succeed();
     }
 

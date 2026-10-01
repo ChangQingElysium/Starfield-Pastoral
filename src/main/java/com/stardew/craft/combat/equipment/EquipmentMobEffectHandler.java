@@ -7,7 +7,7 @@ import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import net.minecraftforge.event.entity.living.MobEffectEvent;
 
 /**
@@ -41,7 +41,7 @@ public final class EquipmentMobEffectHandler {
 
         EquipmentStats equipment = EquipmentResolver.getMergedStats(player);
         if (ImmunitySystem.tryResistEffect(equipment.getImmunity())) {
-            event.setResult(MobEffectEvent.Applicable.Result.DO_NOT_APPLY);
+            event.setResult(net.minecraftforge.eventbus.api.Event.Result.DENY); // PORT(1.20.1): Forge DENY == NeoForge DO_NOT_APPLY
             return;
         }
 
@@ -53,10 +53,11 @@ public final class EquipmentMobEffectHandler {
             return;
         }
 
-        event.setResult(MobEffectEvent.Applicable.Result.DO_NOT_APPLY);
+        event.setResult(net.minecraftforge.eventbus.api.Event.Result.DENY); // PORT(1.20.1): Forge DENY == NeoForge DO_NOT_APPLY
         REAPPLYING_STURDY_EFFECT.set(true);
         try {
-            player.addEffect(copyWithDuration(effect, adjustedDuration), event.getEffectSource());
+            player.addEffect(copyWithDuration(effect, adjustedDuration),
+                    com.stardew.craft.port.event.PortEventHooks.effectSource()); // PORT(1.20.1): Applicable has no source
         } finally {
             REAPPLYING_STURDY_EFFECT.remove();
         }

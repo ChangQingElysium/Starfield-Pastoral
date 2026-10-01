@@ -1,5 +1,6 @@
 package com.stardew.craft.item;
 
+import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.core.ModTags;
 import com.stardew.craft.entity.ModEntities;
 import com.stardew.craft.entity.seat.CushionEntity;
@@ -79,7 +80,7 @@ public final class CushionItem extends StardewBlockItem {
 
             Direction facing = Direction.fromYRot(blockPlaceContext.getRotation());
             cushion.moveTo(entityPos.x, entityPos.y, entityPos.z, facing.toYRot(), 0.0F);
-            Component customName = stack.get(DataComponents.CUSTOM_NAME);
+            Component customName = PortItemData.get(stack, DataComponents.CUSTOM_NAME);
             if (customName != null) {
                 cushion.setCustomName(customName);
             }
@@ -91,7 +92,7 @@ public final class CushionItem extends StardewBlockItem {
             level.playSound(null, cushion.getX(), cushion.getY(), cushion.getZ(),
                     SoundEvents.WOOL_PLACE, SoundSource.BLOCKS, 0.75F, 0.8F);
             cushion.gameEvent(GameEvent.ENTITY_PLACE);
-            stack.consume(1, blockPlaceContext.getPlayer());
+            com.stardew.craft.port.PortItemStacks.consume(stack, 1, blockPlaceContext.getPlayer());
         }
 
         return InteractionResult.SUCCESS;

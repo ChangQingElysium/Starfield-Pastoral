@@ -75,7 +75,7 @@ public class DwarvishTranslationGuideItem extends Item implements IStardewItem {
     }
 
     @Override
-    public int getUseDuration(@Nonnull ItemStack stack, @Nonnull LivingEntity entity) {
+    public int getUseDuration(@Nonnull ItemStack stack) {
         return USE_DURATION_TICKS;
     }
 
@@ -119,7 +119,7 @@ public class DwarvishTranslationGuideItem extends Item implements IStardewItem {
     }
 
     @Override
-    public boolean canBeHurtBy(@Nonnull ItemStack stack, @Nonnull net.minecraft.world.damagesource.DamageSource source) {
+    public boolean canBeHurtBy(@Nonnull net.minecraft.world.damagesource.DamageSource source) {
         return false;
     }
 
@@ -130,8 +130,10 @@ public class DwarvishTranslationGuideItem extends Item implements IStardewItem {
     }
 
     @Override
-    public void appendHoverText(@Nonnull ItemStack stack, @Nonnull TooltipContext context,
-                                @Nonnull List<Component> tooltipComponents, @Nonnull TooltipFlag tooltipFlag) {
+    public void appendHoverText(@Nonnull ItemStack stack,
+                                @javax.annotation.Nullable Level level,
+                                @Nonnull List<Component> tooltipComponents,
+                                @Nonnull TooltipFlag tooltipFlag) {
         tooltipComponents.add(Component.translatable("stardewcraft.item.dwarvish_translation_guide.tooltip.flavor")
             .withStyle(Style.EMPTY.withColor(TextColor.fromRgb(0x9B6A3A))));
         tooltipComponents.add(Component.translatable("stardewcraft.item.dwarvish_translation_guide.tooltip.granted")

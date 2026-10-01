@@ -31,9 +31,9 @@ public final class NpcExecutionRepairGameTests {
     public static void turningRetainsSecondPlayerWhenFirstLeaves(GameTestHelper h) throws ReflectiveOperationException {
         var npc=actor(h,h.absolutePos(new BlockPos(3,2,3)));var level=h.getLevel();
         var first=new net.minecraft.server.level.ServerPlayer(level.getServer(),level,
-                new com.mojang.authlib.GameProfile(UUID.randomUUID(),"FirstObserver"),com.stardew.craft.port.net.minecraft.server.level.ClientInformation.createDefault());
+                new com.mojang.authlib.GameProfile(UUID.randomUUID(),"FirstObserver"));
         var second=new net.minecraft.server.level.ServerPlayer(level.getServer(),level,
-                new com.mojang.authlib.GameProfile(UUID.randomUUID(),"SecondObserver"),com.stardew.craft.port.net.minecraft.server.level.ClientInformation.createDefault());
+                new com.mojang.authlib.GameProfile(UUID.randomUUID(),"SecondObserver"));
         first.setPos(npc.position().add(1,0,0));second.setPos(npc.position().add(0,0,1));
         var calls=new java.util.ArrayList<Integer>();
         npc.facePlayerTemporarily(first,20,()->calls.add(1));npc.facePlayerTemporarily(second,20,()->calls.add(2));
@@ -133,7 +133,7 @@ public final class NpcExecutionRepairGameTests {
         npc.setDeltaMovement(.2,0,0);
         h.assertTrue(!npc.getNavigation().isDone(),"Fixture requires an active old navigation path");
         var reader=new net.minecraft.server.level.ServerPlayer(h.getLevel().getServer(),h.getLevel(),
-                new com.mojang.authlib.GameProfile(UUID.randomUUID(),"DialogueReader"),com.stardew.craft.port.net.minecraft.server.level.ClientInformation.createDefault());
+                new com.mojang.authlib.GameProfile(UUID.randomUUID(),"DialogueReader"));
         var begin=NpcInteractionService.class.getDeclaredMethod("beginDialogueSession",net.minecraft.server.level.ServerPlayer.class,String.class);begin.setAccessible(true);
         begin.invoke(null,reader,npc.getNpcId());
         h.assertTrue(NpcInteractionService.isDialogueMovementLocked(npc.getNpcId()),"Fixture requires an old dialogue lock");

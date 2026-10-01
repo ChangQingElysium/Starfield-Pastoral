@@ -409,7 +409,7 @@ public class FarmSelectionScreen extends Screen {
     }
 
     @Override
-    public boolean mouseScrolled(double x, double y, double horizontal, double vertical) {
+    public boolean mouseScrolled(double x, double y, double vertical) {
         if (!insideBody(x, y)) return false;
         scrollTo(scroll - (int) (vertical * 30));
         return true;

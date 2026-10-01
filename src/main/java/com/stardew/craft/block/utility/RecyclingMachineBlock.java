@@ -56,7 +56,7 @@ public class RecyclingMachineBlock extends MapUtilityStaticBlock implements Enti
 
 	@SuppressWarnings("null")
 	@Override
-	protected List<ItemStack> getDrops(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") LootParams.Builder params) {
+	public List<ItemStack> getDrops(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") LootParams.Builder params) {
 		if (state.getValue(PART) == Part.EXTENSION) {
 			return List.of();
 		}
@@ -91,7 +91,7 @@ public class RecyclingMachineBlock extends MapUtilityStaticBlock implements Enti
 
 	@SuppressWarnings("null")
 	@Override
-	protected ItemInteractionResult useItemOn(@SuppressWarnings("null") ItemStack stack, @SuppressWarnings("null") BlockState state, @SuppressWarnings("null") Level level, @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") Player player, @SuppressWarnings("null") InteractionHand hand, @SuppressWarnings("null") BlockHitResult hit) {
+	public ItemInteractionResult useItemOn(@SuppressWarnings("null") ItemStack stack, @SuppressWarnings("null") BlockState state, @SuppressWarnings("null") Level level, @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") Player player, @SuppressWarnings("null") InteractionHand hand, @SuppressWarnings("null") BlockHitResult hit) {
 		if (state.getValue(PART) == Part.EXTENSION) {
 			BlockPos mainPos = findMainPos(level, pos, state);
 			if (mainPos == null) {
@@ -139,7 +139,7 @@ public class RecyclingMachineBlock extends MapUtilityStaticBlock implements Enti
 
 	@SuppressWarnings("null")
 	@Override
-	protected InteractionResult useWithoutItem(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") Level level, @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") Player player, @SuppressWarnings("null") BlockHitResult hit) {
+	public InteractionResult useWithoutItem(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") Level level, @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") Player player, @SuppressWarnings("null") BlockHitResult hit) {
 		if (state.getValue(PART) == Part.EXTENSION) {
 			BlockPos mainPos = findMainPos(level, pos, state);
 			if (mainPos == null) {

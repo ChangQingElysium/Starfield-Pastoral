@@ -1,5 +1,6 @@
 package com.stardew.craft.block.utility;
 
+import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.blockentity.TableDisplayBlockEntity;
 import com.stardew.craft.block.shape.ModelVoxelShapeCache;
 import net.minecraft.core.BlockPos;
@@ -20,10 +21,13 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.*;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.Level;
+import com.stardew.craft.port.PortBlockInteraction;
 import net.minecraft.world.phys.shapes.*;
 
 /** Each connected cell keeps its own displayed item and saved wood variant. */
-public final class OutdoorTableBlock extends Block implements EntityBlock {
+public final class OutdoorTableBlock extends Block implements EntityBlock, PortBlockInteraction {
     public static final IntegerProperty CONNECTIONS = IntegerProperty.create("connections", 0, 255);
     public static final IntegerProperty VARIANT = IntegerProperty.create("variant", 0, 2);
     private static final int[][] OFFSETS = {{0,-1},{1,0},{0,1},{-1,0},{1,-1},{1,1},{-1,1},{-1,-1}};
@@ -44,7 +48,7 @@ public final class OutdoorTableBlock extends Block implements EntityBlock {
         return state.setValue(CONNECTIONS,canonical(mask));
     }
     @Override public BlockState getStateForPlacement(BlockPlaceContext context) {
-        Integer fixed=context.getItemInHand().getOrDefault(DataComponents.BLOCK_STATE,BlockItemStateProperties.EMPTY).get(VARIANT);
+        Integer fixed=PortItemData.getOrDefault(context.getItemInHand(), DataComponents.BLOCK_STATE,BlockItemStateProperties.EMPTY).get(VARIANT);
         int variant=fixed==null ? (context.getLevel().isClientSide?0:context.getLevel().random.nextInt(3)):fixed;
         return connected(defaultBlockState().setValue(VARIANT,variant),context.getLevel(),context.getClickedPos());
     }
@@ -59,13 +63,13 @@ public final class OutdoorTableBlock extends Block implements EntityBlock {
     @Override public void onPlace(BlockState state,Level level,BlockPos pos,BlockState old,boolean moving){
         super.onPlace(state,level,pos,old,moving);if(!old.is(this))refresh(level,pos);
     }
-    @Override protected BlockState updateShape(BlockState state,Direction side,BlockState neighbor,LevelAccessor level,BlockPos pos,BlockPos other){
+    @Override public BlockState updateShape(BlockState state,Direction side,BlockState neighbor,LevelAccessor level,BlockPos pos,BlockPos other){
         return connected(state,level,pos);
     }
     @Override public VoxelShape getShape(BlockState state,BlockGetter level,BlockPos pos,CollisionContext context){
         return ModelVoxelShapeCache.shapeFromModelId("stardewcraft:block/outdoor_table/spring/"+canonical(state.getValue(CONNECTIONS))+"_0");
     }
-    @Override protected boolean isPathfindable(BlockState state,net.minecraft.world.level.pathfinder.PathComputationType type){return false;}
+    @Override public boolean isPathfindable(BlockState state, net.minecraft.world.level.BlockGetter level, BlockPos pos, net.minecraft.world.level.pathfinder.PathComputationType type){return false;}
     @Override public BlockEntity newBlockEntity(BlockPos pos,BlockState state){return new TableDisplayBlockEntity(pos,state);}
     @Override public void onRemove(BlockState state,Level level,BlockPos pos,BlockState next,boolean moving){
         if(!next.is(this)&&!level.isClientSide&&level.getBlockEntity(pos) instanceof TableDisplayBlockEntity table&&table.hasDisplayItem())
@@ -73,8 +77,15 @@ public final class OutdoorTableBlock extends Block implements EntityBlock {
         super.onRemove(state,level,pos,next,moving);
         if(!next.is(this))refresh(level,pos);
     }
+    // PORT(1.20.1): replay the 1.21 useItemOn/useWithoutItem dispatch.
     @Override
-    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player,
+            InteractionHand hand, BlockHitResult hit) {
+        return PortBlockInteraction.dispatch(this, state, level, pos, player, hand, hit);
+    }
+
+    @Override
+    public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         if (OakTableBlock.isTableclothItem(stack)) {
             return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         }
@@ -111,7 +122,7 @@ public final class OutdoorTableBlock extends Block implements EntityBlock {
     }
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+    public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         if (player.isShiftKeyDown()) {
             return InteractionResult.PASS;
         }

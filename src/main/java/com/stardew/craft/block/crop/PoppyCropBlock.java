@@ -1,5 +1,6 @@
 package com.stardew.craft.block.crop;
 
+import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.item.ModItems;
 import com.stardew.craft.item.quality.QualityHelper;
 import net.minecraft.world.item.Item;
@@ -63,11 +64,11 @@ public class PoppyCropBlock extends BlueJazzCropBlock {
             @SuppressWarnings("null")
 			int color = state.getValue(COLOR);
             @SuppressWarnings("null")
-			var customData = stack.getOrDefault(com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_DATA,
+			var customData = PortItemData.getOrDefault(stack, com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_DATA,
                     com.stardew.craft.port.net.minecraft.world.item.component.CustomData.EMPTY);
             var tag = customData.copyTag();
             tag.putInt("FlowerColor", color);
-            stack.set(com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_DATA,
+            PortItemData.set(stack, com.stardew.craft.port.net.minecraft.core.component.DataComponents.CUSTOM_DATA,
                     com.stardew.craft.port.net.minecraft.world.item.component.CustomData.of(tag));
             setFlowerVariantModelData(stack, color);
         }

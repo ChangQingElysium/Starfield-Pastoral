@@ -1,5 +1,6 @@
 package com.stardew.craft.entity.npc;
 
+import com.stardew.craft.port.PortLevels;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.level.Level;
@@ -174,7 +175,7 @@ public class NpcPathNavigation extends GroundPathNavigation {
                 // For level turns check the whole body, not just the centre ray.
                 if (Math.abs(getGroundY(following) - mob.getY()) < .05) {
                     Vec3 delta = following.subtract(mob.position());
-                    clearTurn = level.noBlockCollision(mob, mob.getBoundingBox()
+                    clearTurn = PortLevels.noBlockCollision(level, mob, mob.getBoundingBox()
                             .expandTowards(delta.x, 0, delta.z).deflate(1.0E-7));
                 }
             }

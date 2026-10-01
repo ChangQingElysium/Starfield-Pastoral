@@ -43,7 +43,7 @@ public final class BuildingPreviewService {
                 if (hit.getType() != net.minecraft.world.phys.HitResult.Type.BLOCK || hit.getDirection() != net.minecraft.core.Direction.UP
                         || !BuildingBlueprintItem.targetAnchor(stack,hit.getBlockPos(),request.facing()).equals(request.anchor())) return;
             }
-        } else if (request.anchor().distToCenterSqr(player.getEyePosition()) > Math.pow(player.blockInteractionRange() + 2, 2)) return;
+        } else if (request.anchor().distToCenterSqr(player.getEyePosition()) > Math.pow(player.getBlockReach() + 2, 2)) return;
         if (moving != null) BuildingMovePreview.send(player,moving); else if (!request.self()) sendTemplate(player, family, tier);
         var probe = BuildingPlacementService.probe(player.serverLevel(), player, request.anchor(), request.facing(), request.self() || moving != null && moving.mode() == BuildingRecord.Mode.SELF_BUILT, family, moving);
         String issue = probe.issue();

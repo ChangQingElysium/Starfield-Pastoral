@@ -1,5 +1,6 @@
 package com.stardew.craft.entity;
 
+import com.stardew.craft.port.PortItemStacks;
 import com.stardew.craft.sound.ModSounds;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -85,7 +86,7 @@ public class FallenPrefabTreeEntity extends Entity {
 				if (s == null || s.isEmpty()) {
 					continue;
 				}
-				drops.add(s.copy().save(level.registryAccess()));
+				drops.add(PortItemStacks.save(s.copy(), level.registryAccess()));
 			}
 		}
 		tag.put(TAG_DROPS, drops);
@@ -138,7 +139,7 @@ public class FallenPrefabTreeEntity extends Entity {
 		for (int i = 0; i < list.size(); i++) {
 			CompoundTag t = list.getCompound(i);
 			if (t.contains("id")) {
-				out.add(ItemStack.parse(level.registryAccess(), t).orElse(ItemStack.EMPTY));
+				out.add(PortItemStacks.parse(level.registryAccess(), t).orElse(ItemStack.EMPTY));
 			}
 		}
 		return out;
@@ -273,10 +274,10 @@ public class FallenPrefabTreeEntity extends Entity {
 
 	@SuppressWarnings("null")
 	@Override
-	protected void defineSynchedData(@SuppressWarnings("null") SynchedEntityData.Builder builder) {
-		builder.define(TREE_DATA, new CompoundTag());
-		builder.define(DURATION_TICKS, 20);
-		builder.define(FALL_DIR, (byte) Direction.NORTH.get3DDataValue());
+	protected void defineSynchedData() {
+		this.entityData.define(TREE_DATA, new CompoundTag());
+		this.entityData.define(DURATION_TICKS, 20);
+		this.entityData.define(FALL_DIR, (byte) Direction.NORTH.get3DDataValue());
 	}
 
 	@SuppressWarnings("null")

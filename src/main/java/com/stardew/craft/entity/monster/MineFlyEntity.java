@@ -38,11 +38,11 @@ public final class MineFlyEntity extends StardewMonsterEntity {
     @Override protected void configureSpawn(MonsterDefinition d,MonsterSpawnContext c){var r=MonsterStatResolver.base(d,c,random);setInitialHealth(r.initialHealth());replaceCombatStats(r.combat());
         steering.initialize(random);entityData.set(BIRTH,level().getGameTime());
         flightLift=.04;setPos(getX(),getY()+flightLift,getZ());MonsterFlightPlacement.ensureSpawnAir(this);}
-    @Override protected void defineSynchedData(SynchedEntityData.Builder b){super.defineSynchedData(b);b.define(BIRTH,0L);b.define(HIT,-100L);}
+    @Override protected void defineSynchedData(){super.defineSynchedData();this.entityData.define(BIRTH,0L);this.entityData.define(HIT,-100L);}
     public double spawnTime(float p){return (level().getGameTime()-entityData.get(BIRTH)+p)/20.;}
     public double hitTime(float p){return (level().getGameTime()-entityData.get(HIT)+p)/20.;}
     public FlySteering steering(){return steering;}
-    private boolean valid(Player p){return p.isAlive()&&!p.isCreative()&&!p.isSpectator()&&!p.hasEffect(ModMobEffects.AVOID_MONSTERS)
+    private boolean valid(Player p){return p.isAlive()&&!p.isCreative()&&!p.isSpectator()&&!p.hasEffect(ModMobEffects.AVOID_MONSTERS.get())
             &&(monsterState().context().generation()==null||com.stardew.craft.mining.OrdinaryMineRuntime.floorAt(p.blockPosition())==monsterState().context().floor());}
     @Override protected void customServerAiStep(){
         if(!initialized())initialize(MonsterSpawnContext.capture((ServerLevel)level(),MonsterSpawnContext.Source.WORLD,1));

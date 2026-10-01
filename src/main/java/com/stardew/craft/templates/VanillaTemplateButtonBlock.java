@@ -11,7 +11,8 @@ import net.minecraft.world.level.block.state.properties.BlockSetType;
 
 public final class VanillaTemplateButtonBlock extends ButtonBlock implements EntityBlock, TemplateBlock {
     public VanillaTemplateButtonBlock(BlockBehaviour.Properties properties) {
-        super(BlockSetType.OAK, 20, properties);
+        // PORT(1.20.1): Properties first; 1.21 derives arrow presses from BlockSetType (true for OAK).
+        super(properties, BlockSetType.OAK, 20, true);
     }
 
     @Override public TemplateShape templateShape() { return TemplateShape.BUTTON; }

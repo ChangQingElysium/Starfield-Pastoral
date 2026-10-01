@@ -118,7 +118,7 @@ public class FiberCropBlock extends StardewCropBlock {
     }
 
     @Override
-    protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+    public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         VoxelShape model = CropModelShapes.shape(state, level, pos);
         if (model != null) return model;
         if (com.stardew.craft.block.utility.GardenPotBlock.isPottedPlant(level, pos, state)) return net.minecraft.world.phys.shapes.Shapes.empty();
@@ -126,7 +126,7 @@ public class FiberCropBlock extends StardewCropBlock {
     }
 
     @Override
-    protected VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+    public VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return net.minecraft.world.phys.shapes.Shapes.empty();
     }
 
@@ -152,7 +152,7 @@ public class FiberCropBlock extends StardewCropBlock {
 
     @SuppressWarnings({"null", "deprecation"})
     @Override
-    protected boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
+    public boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
         if (state.getValue(HALF) == DoubleBlockHalf.UPPER) {
             BlockState below = level.getBlockState(pos.below());
             return below.getBlock() == this && below.getValue(HALF) == DoubleBlockHalf.LOWER;
@@ -170,7 +170,7 @@ public class FiberCropBlock extends StardewCropBlock {
 
     @SuppressWarnings("null")
     @Override
-    protected BlockState updateShape(BlockState state, Direction direction, BlockState neighborState, net.minecraft.world.level.LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
+    public BlockState updateShape(BlockState state, Direction direction, BlockState neighborState, net.minecraft.world.level.LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
         if (!state.canSurvive(level, pos)) {
             return net.minecraft.world.level.block.Blocks.AIR.defaultBlockState();
         }
@@ -179,7 +179,7 @@ public class FiberCropBlock extends StardewCropBlock {
 
     @SuppressWarnings("null")
     @Override
-    protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean isMoving) {
+    public void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean isMoving) {
         if (state.getValue(HALF) == DoubleBlockHalf.UPPER) {
             return;
         }
@@ -202,7 +202,7 @@ public class FiberCropBlock extends StardewCropBlock {
 
     @SuppressWarnings("null")
     @Override
-    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
+    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
         if (state.is(newState.getBlock())) {
             super.onRemove(state, level, pos, newState, isMoving);
             return;

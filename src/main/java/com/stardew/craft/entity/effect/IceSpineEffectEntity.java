@@ -1,5 +1,6 @@
 package com.stardew.craft.entity.effect;
 
+import com.stardew.craft.port.PortItemStacks;
 import com.stardew.craft.combat.skill.SkillContext;
 import com.stardew.craft.combat.skill.WeaponDamageSnapshot;
 import com.stardew.craft.combat.skill.WeaponSkillDamage;
@@ -97,8 +98,8 @@ public class IceSpineEffectEntity extends Entity {
     }
 
     @Override
-    protected void defineSynchedData(@SuppressWarnings("null") net.minecraft.network.syncher.SynchedEntityData.Builder builder) {
-        builder.define(GROUND_WAVE, false);
+    protected void defineSynchedData() {
+        this.entityData.define(GROUND_WAVE, false);
     }
 
     @Override
@@ -282,7 +283,7 @@ public class IceSpineEffectEntity extends Entity {
             return;
         }
         tag.putString("ReleaseWeaponId", snapshot.weaponId().toString());
-        tag.put("ReleaseWeapon", weapon.saveOptional(registries));
+        tag.put("ReleaseWeapon", PortItemStacks.saveOptional(weapon, registries));
     }
 
     static WeaponDamageSnapshot readReleaseWeaponSnapshot(
@@ -297,7 +298,7 @@ public class IceSpineEffectEntity extends Entity {
         if (weaponId == null) {
             return null;
         }
-        ItemStack weapon = ItemStack.parseOptional(
+        ItemStack weapon = PortItemStacks.parseOptional(
             registries,
             tag.getCompound("ReleaseWeapon")
         );
@@ -308,7 +309,7 @@ public class IceSpineEffectEntity extends Entity {
 
     @SuppressWarnings("null")
     @Override
-    public Packet<ClientGamePacketListener> getAddEntityPacket(@SuppressWarnings("null") net.minecraft.server.level.ServerEntity serverEntity) {
-        return new ClientboundAddEntityPacket(this, serverEntity);
+    public Packet<ClientGamePacketListener> getAddEntityPacket() {
+        return new ClientboundAddEntityPacket(this);
     }
 }

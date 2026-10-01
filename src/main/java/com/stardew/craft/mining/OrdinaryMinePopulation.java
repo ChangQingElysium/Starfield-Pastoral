@@ -118,8 +118,8 @@ public final class OrdinaryMinePopulation {
         double itemChance=floor==1 || (floor<=120 && floor%5==0) ? 0 : .0025;
         if(floor==1) monsterChance=0;
         // Monster musk and oil of garlic are source-wide party modifiers.
-        boolean musk=level.getServer().getPlayerList().getPlayers().stream().anyMatch(p->p.hasEffect(com.stardew.craft.effect.ModMobEffects.MONSTER_MUSK));
-        boolean garlic=level.getServer().getPlayerList().getPlayers().stream().anyMatch(p->p.hasEffect(com.stardew.craft.effect.ModMobEffects.AVOID_MONSTERS));
+        boolean musk=level.getServer().getPlayerList().getPlayers().stream().anyMatch(p->p.hasEffect(com.stardew.craft.effect.ModMobEffects.MONSTER_MUSK.get()));
+        boolean garlic=level.getServer().getPlayerList().getPlayers().stream().anyMatch(p->p.hasEffect(com.stardew.craft.effect.ModMobEffects.AVOID_MONSTERS.get()));
         if(garlic && !musk && floor<=120) monsterChance=0; else if(musk && (!garlic || floor>120)) monsterChance*=2;
         edgeBarrels();
         int platforms=0; var progress=OrdinaryMineProgress.get(level); int limit=progress.platformLimit(floor);

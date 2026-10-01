@@ -141,7 +141,7 @@ public final class StardewItemDataApi {
     }
 
     private static StardewItemData dataMapValue(ItemStack stack) {
-        return BuiltInRegistries.ITEM.wrapAsHolder(stack.getItem()).getData(StardewDataMaps.ITEM_DATA);
+        return com.stardew.craft.port.PortDataMaps.getData(BuiltInRegistries.ITEM.wrapAsHolder(stack.getItem()), StardewDataMaps.ITEM_DATA);
     }
 
     static ResourceLocation legacyCategory(String typeKey) {

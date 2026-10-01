@@ -1,5 +1,6 @@
 package com.stardew.craft.entity.projectile;
 
+import com.stardew.craft.port.PortItemStacks;
 import com.stardew.craft.combat.skill.SkillContext;
 import com.stardew.craft.combat.skill.WeaponDamageSnapshot;
 import com.stardew.craft.combat.skill.WeaponSkillDamage;
@@ -101,9 +102,9 @@ public class ElfBladeLeafEntity extends ThrowableProjectile {
 
     @Override
     @SuppressWarnings("null")
-    protected void defineSynchedData(@SuppressWarnings("null") SynchedEntityData.Builder builder) {
-        builder.define(STATE, STATE_ORBIT);
-        builder.define(ORBIT_INDEX, 0);
+    protected void defineSynchedData() {
+        this.entityData.define(STATE, STATE_ORBIT);
+        this.entityData.define(ORBIT_INDEX, 0);
     }
 
     @SuppressWarnings("null")
@@ -400,7 +401,7 @@ public class ElfBladeLeafEntity extends ThrowableProjectile {
             return;
         }
         tag.putString("ReleaseWeaponId", snapshot.weaponId().toString());
-        tag.put("ReleaseWeapon", weapon.saveOptional(registries));
+        tag.put("ReleaseWeapon", PortItemStacks.saveOptional(weapon, registries));
     }
 
     static WeaponDamageSnapshot readReleaseWeaponSnapshot(
@@ -415,7 +416,7 @@ public class ElfBladeLeafEntity extends ThrowableProjectile {
         if (weaponId == null) {
             return null;
         }
-        ItemStack weapon = ItemStack.parseOptional(
+        ItemStack weapon = PortItemStacks.parseOptional(
             registries,
             tag.getCompound("ReleaseWeapon")
         );

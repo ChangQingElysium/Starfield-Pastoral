@@ -1,5 +1,6 @@
 package com.stardew.craft.enchantment;
 
+import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.StardewCraft;
 import java.util.Set;
 import net.minecraft.core.Holder;
@@ -62,7 +63,7 @@ public final class StardewEnchantments {
         if (stack == null || stack.isEmpty()) {
             return 0;
         }
-        return getLevel(stack.get(DataComponents.ENCHANTMENTS), enchantment);
+        return getLevel(PortItemData.get(stack, DataComponents.ENCHANTMENTS), enchantment);
     }
 
     public static boolean isBugKillerTarget(LivingEntity target) {

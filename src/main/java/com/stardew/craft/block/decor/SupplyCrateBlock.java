@@ -1,5 +1,6 @@
 package com.stardew.craft.block.decor;
 
+import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.blockentity.SupplyCrateBlockEntity;
 import com.stardew.craft.farm.SupplyCrateRewards;
 import com.stardew.craft.item.tool.HoeItem;
@@ -29,7 +30,7 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import com.stardew.craft.port.net.neoforged.neoforge.common.ItemAbilities;
+import net.minecraftforge.common.ToolActions;
 
 import java.util.List;
 
@@ -52,24 +53,24 @@ public final class SupplyCrateBlock extends Block implements EntityBlock {
         return state.canSurvive(context.getLevel(), context.getClickedPos()) ? state : null;
     }
 
-    @Override protected boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
+    @Override public boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
         var support = level.getBlockState(pos.below());
         var fluid = support.getFluidState();
         return support.getBlock() instanceof LiquidBlock && fluid.is(FluidTags.WATER) && fluid.isSource()
                 && level.getFluidState(pos).isEmpty();
     }
 
-    @Override protected BlockState updateShape(BlockState state, Direction side, BlockState neighbor,
+    @Override public BlockState updateShape(BlockState state, Direction side, BlockState neighbor,
             LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
         // Losing water removes the decoration without issuing a reward or a reusable reward crate.
         return !state.canSurvive(level, pos) ? Blocks.AIR.defaultBlockState() : state;
     }
 
-    @Override protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) { return SHAPE; }
+    @Override public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) { return SHAPE; }
 
     public static boolean isHeavyHitter(ItemStack tool) {
-        return tool.canPerformAction(ItemAbilities.AXE_DIG) || tool.canPerformAction(ItemAbilities.PICKAXE_DIG)
-                || tool.canPerformAction(ItemAbilities.HOE_DIG) || tool.canPerformAction(ItemAbilities.SWORD_DIG)
+        return tool.canPerformAction(ToolActions.AXE_DIG) || tool.canPerformAction(ToolActions.PICKAXE_DIG)
+                || tool.canPerformAction(ToolActions.HOE_DIG) || tool.canPerformAction(ToolActions.SWORD_DIG)
                 || tool.getItem() instanceof com.stardew.craft.item.tool.ScytheItem;
     }
 
@@ -80,13 +81,13 @@ public final class SupplyCrateBlock extends Block implements EntityBlock {
         return (3 + tier) / (tier + 1);
     }
 
-    @Override protected float getDestroyProgress(BlockState state, Player player, BlockGetter level, BlockPos pos) {
+    @Override public float getDestroyProgress(BlockState state, Player player, BlockGetter level, BlockPos pos) {
         var tool = player.getMainHandItem();
         // SDV has 3 HP, each heavy-tool swing removes upgradeLevel + 1. Native MC hold-to-break input.
         return isHeavyHitter(tool) ? Math.nextUp(1F / (12 * swingsToBreak(tool))) : 0;
     }
 
-    @Override protected List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
+    @Override public List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
         var breaker = params.getOptionalParameter(LootContextParams.THIS_ENTITY);
         var tool = params.getOptionalParameter(LootContextParams.TOOL);
         if (!(breaker instanceof Player player) || player.isCreative() || tool == null || !isHeavyHitter(tool)) return List.of();
@@ -99,12 +100,12 @@ public final class SupplyCrateBlock extends Block implements EntityBlock {
 
     public ItemStack variantStack(int variant) {
         ItemStack stack = new ItemStack(this);
-        stack.set(DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY.with(VARIANT, defaultBlockState().setValue(VARIANT, variant)));
-        stack.set(DataComponents.CUSTOM_MODEL_DATA, new CustomModelData(variant));
+        PortItemData.set(stack, DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY.with(VARIANT, defaultBlockState().setValue(VARIANT, variant)));
+        PortItemData.set(stack, DataComponents.CUSTOM_MODEL_DATA, new CustomModelData(variant));
         return stack;
     }
 
-    @Override public ItemStack getCloneItemStack(BlockState state, HitResult target, LevelReader level, BlockPos pos, Player player) {
+    @Override public ItemStack getCloneItemStack(BlockState state, HitResult target, BlockGetter level, BlockPos pos, Player player) {
         return variantStack(state.getValue(VARIANT));
     }
 }

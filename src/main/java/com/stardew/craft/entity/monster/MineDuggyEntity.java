@@ -37,12 +37,12 @@ public final class MineDuggyEntity extends StardewMonsterEntity {
     @Override protected void registerGoals(){}
     @Override protected ResourceLocation definitionId(){return new ResourceLocation("stardewcraft:duggy");}
     @Override protected void configureSpawn(MonsterDefinition d,MonsterSpawnContext c){var r=MonsterStatResolver.base(d,c,random);setInitialHealth(r.initialHealth());replaceCombatStats(r.combat());syncDamage();}
-    @Override protected void defineSynchedData(SynchedEntityData.Builder b){super.defineSynchedData(b);b.define(CURSOR,0F);b.define(HIT,-100L);}
+    @Override protected void defineSynchedData(){super.defineSynchedData();this.entityData.define(CURSOR,0F);this.entityData.define(HIT,-100L);}
     public double cursor(float p){double c=entityData.get(CURSOR),edge=c<2?2:c<4?4:c<8?8:10;return Math.min(edge-.00001,c+p*.05/(c<4?.1:.22));}
     public double hitTime(float p){return (level().getGameTime()-entityData.get(HIT)+p)/20.;}
     public DuggyLifecycle lifecycle(){return lifecycle;}
     public void stunFor(int milliseconds){stunMilliseconds=Math.max(stunMilliseconds,milliseconds);}
-    private boolean valid(Player p){return p.isAlive()&&!p.isCreative()&&!p.isSpectator()&&!p.hasEffect(ModMobEffects.AVOID_MONSTERS)
+    private boolean valid(Player p){return p.isAlive()&&!p.isCreative()&&!p.isSpectator()&&!p.hasEffect(ModMobEffects.AVOID_MONSTERS.get())
             &&(monsterState().context().generation()==null||OrdinaryMineRuntime.floorAt(p.blockPosition())==monsterState().context().floor());}
     private boolean diggable(Player p){
         BlockPos floor=p.blockPosition().below();var state=level().getBlockState(floor);boolean soil=state.is(Blocks.DIRT)||state.is(Blocks.COARSE_DIRT)||state.is(Blocks.ROOTED_DIRT);
@@ -97,7 +97,7 @@ public final class MineDuggyEntity extends StardewMonsterEntity {
     @Override public void knockback(double strength,double x,double z){}
     @Override public void travel(Vec3 input){setDeltaMovement(Vec3.ZERO);}
     @Override public boolean causeFallDamage(float d,float m,DamageSource s){return false;}
-    @Override public void lerpTo(double x,double y,double z,float yaw,float pitch,int steps){super.lerpTo(x,y,z,yaw,pitch,1);}
+    @Override public void lerpTo(double x, double y, double z, float yaw, float pitch, int steps, boolean teleport){super.lerpTo(x, y, z, yaw, pitch, 1, teleport);}
     @Override protected SoundEvent getHurtSound(DamageSource s){return ModSounds.MONSTER_BAT_HIT.get();}
     @Override protected SoundEvent getDeathSound(){return ModSounds.MONSTER_CRAB_DEATH.get();}
     @Override protected void onFinalDeath(DamageSource s){((ServerLevel)level()).sendParticles(new DustParticleOptions(new Vector3f(.55F,.13F,.16F),.65F),getX(),getY()+.4,getZ(),16,.2,.2,.2,.03);}

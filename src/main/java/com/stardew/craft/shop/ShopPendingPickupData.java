@@ -1,5 +1,6 @@
 package com.stardew.craft.shop;
 
+import com.stardew.craft.port.PortItemStacks;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
@@ -26,7 +27,7 @@ public final class ShopPendingPickupData extends SavedData {
     private final Map<UUID, List<ItemStack>> pendingByPlayer = new LinkedHashMap<>();
 
     public static ShopPendingPickupData get(MinecraftServer server) {
-        return server.overworld().getDataStorage().computeIfAbsent(factory(), DATA_NAME);
+        return server.overworld().getDataStorage().computeIfAbsent(com.stardew.craft.port.PortSavedData.loader(factory()), com.stardew.craft.port.PortSavedData.constructor(factory()), DATA_NAME);
     }
 
     public void add(UUID playerId, ItemStack stack) {
@@ -70,14 +71,14 @@ public final class ShopPendingPickupData extends SavedData {
 
     @Override
     @Nonnull
-    public CompoundTag save(@Nonnull CompoundTag tag, @Nonnull HolderLookup.Provider registries) {
+    public CompoundTag save(@Nonnull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
         ListTag playersTag = new ListTag();
         for (Map.Entry<UUID, List<ItemStack>> entry : pendingByPlayer.entrySet()) {
             CompoundTag playerTag = new CompoundTag();
             playerTag.putUUID("Player", entry.getKey());
             ListTag stacksTag = new ListTag();
             for (ItemStack stack : entry.getValue()) {
-                if (!stack.isEmpty()) stacksTag.add(stack.save(registries));
+                if (!stack.isEmpty()) stacksTag.add(PortItemStacks.save(stack, registries));
             }
             if (!stacksTag.isEmpty()) {
                 playerTag.put("Stacks", stacksTag);
@@ -98,7 +99,7 @@ public final class ShopPendingPickupData extends SavedData {
             List<ItemStack> stacks = new ArrayList<>();
             ListTag stacksTag = playerTag.getList("Stacks", Tag.TAG_COMPOUND);
             for (int j = 0; j < stacksTag.size(); j++) {
-                ItemStack stack = ItemStack.parse(registries, stacksTag.getCompound(j)).orElse(ItemStack.EMPTY);
+                ItemStack stack = PortItemStacks.parse(registries, stacksTag.getCompound(j)).orElse(ItemStack.EMPTY);
                 if (!stack.isEmpty()) stacks.add(stack);
             }
             if (!stacks.isEmpty()) data.pendingByPlayer.put(playerTag.getUUID("Player"), stacks);
@@ -106,7 +107,7 @@ public final class ShopPendingPickupData extends SavedData {
         return data;
     }
 
-    private static SavedData.Factory<ShopPendingPickupData> factory() {
-        return new SavedData.Factory<>(ShopPendingPickupData::new, ShopPendingPickupData::load);
+    private static com.stardew.craft.port.PortSavedData.Factory<ShopPendingPickupData> factory() {
+        return new com.stardew.craft.port.PortSavedData.Factory<>(ShopPendingPickupData::new, ShopPendingPickupData::load);
     }
 }

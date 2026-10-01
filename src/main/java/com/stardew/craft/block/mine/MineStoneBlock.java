@@ -77,16 +77,16 @@ public final class MineStoneBlock extends Block {
         return state.canSurvive(context.getLevel(), context.getClickedPos()) ? state : null;
     }
 
-    @Override protected boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
+    @Override public boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
         return level.getBlockState(pos.below()).isFaceSturdy(level, pos.below(), Direction.UP);
     }
 
-    @Override protected BlockState updateShape(BlockState state, Direction side, BlockState neighbor,
+    @Override public BlockState updateShape(BlockState state, Direction side, BlockState neighbor,
                                                LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
         return side == Direction.DOWN && !state.canSurvive(level, pos) ? Blocks.AIR.defaultBlockState() : state;
     }
 
-    @Override protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+    @Override public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         int turns = (state.getValue(FACING).get2DDataValue() + 2) % 4;
         if (shapes[turns] == null) {
             String modelId = "stardewcraft:block/mine/nodes/stone_" + modelStem(sourceId);
@@ -99,11 +99,11 @@ public final class MineStoneBlock extends Block {
         return shapes[turns];
     }
 
-    @Override protected VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+    @Override public VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return getShape(state, level, pos, context);
     }
 
-    @Override protected float getDestroyProgress(BlockState state, Player player, BlockGetter level, BlockPos pos) {
+    @Override public float getDestroyProgress(BlockState state, Player player, BlockGetter level, BlockPos pos) {
         int power = MineStoneMining.pickaxePower(player.getMainHandItem());
         // Server multiplies this rate by elapsed ticks; the client uses absolute progress from its tick counter.
         // Bypass vanilla material speed, Efficiency and tool components for these nodes only.
@@ -111,10 +111,10 @@ public final class MineStoneBlock extends Block {
                 state.getValue(STONE_HEALTH), player.getMainHandItem()));
     }
 
-    @Override protected BlockState rotate(BlockState state, Rotation rotation) {
+    @Override public BlockState rotate(BlockState state, Rotation rotation) {
         return state.setValue(FACING, rotation.rotate(state.getValue(FACING)));
     }
-    @Override protected BlockState mirror(BlockState state, Mirror mirror) {
+    @Override public BlockState mirror(BlockState state, Mirror mirror) {
         return state.rotate(mirror.getRotation(state.getValue(FACING)));
     }
 }

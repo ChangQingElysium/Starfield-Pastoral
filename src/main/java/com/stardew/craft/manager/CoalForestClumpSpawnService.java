@@ -60,7 +60,7 @@ public final class CoalForestClumpSpawnService {
         }
 
         CoalForestClumpInitData data = level.getDataStorage().computeIfAbsent(
-                CoalForestClumpInitData.factory(), INIT_DATA_ID);
+                com.stardew.craft.port.PortSavedData.loader(CoalForestClumpInitData.factory()), com.stardew.craft.port.PortSavedData.constructor(CoalForestClumpInitData.factory()), INIT_DATA_ID);
         if (data.initialized()) {
             return;
         }
@@ -156,8 +156,8 @@ public final class CoalForestClumpSpawnService {
             this.initialized = initialized;
         }
 
-        static SavedData.Factory<CoalForestClumpInitData> factory() {
-            return new SavedData.Factory<>(
+        static com.stardew.craft.port.PortSavedData.Factory<CoalForestClumpInitData> factory() {
+            return new com.stardew.craft.port.PortSavedData.Factory<>(
                     () -> new CoalForestClumpInitData(false),
                     CoalForestClumpInitData::load);
         }
@@ -178,7 +178,7 @@ public final class CoalForestClumpSpawnService {
         }
 
         @Override
-        public CompoundTag save(@Nonnull CompoundTag tag, @Nonnull HolderLookup.Provider registries) {
+        public CompoundTag save(@Nonnull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
             tag.putBoolean("Initialized", initialized);
             return tag;
         }

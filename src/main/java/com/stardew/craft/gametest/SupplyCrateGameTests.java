@@ -1,5 +1,6 @@
 package com.stardew.craft.gametest;
 
+import com.stardew.craft.port.PortItemData;
 import com.mojang.authlib.GameProfile;
 import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.block.decor.SupplyCrateBlock;
@@ -135,7 +136,7 @@ public final class SupplyCrateGameTests {
         h.assertTrue(stacks.size() == 3, "Missing creative variants");
         for (int variant = 0; variant < 3; variant++) {
             var state = block.defaultBlockState().setValue(SupplyCrateBlock.VARIANT, variant);
-            h.assertTrue(stacks.get(variant).get(DataComponents.BLOCK_STATE).apply(block.defaultBlockState()).equals(state), "Variant lost on placement");
+            h.assertTrue(PortItemData.get(stacks.get(variant), DataComponents.BLOCK_STATE).apply(block.defaultBlockState()).equals(state), "Variant lost on placement");
             var box = state.getShape(level, pos).bounds();
             h.assertTrue(box.minX >= 0 && box.minZ >= 0 && box.maxX <= 1 && box.maxZ <= 1, "Crate hitbox exceeds cell");
             for (var support : List.of(Blocks.DIRT.defaultBlockState(), Blocks.LAVA.defaultBlockState(),

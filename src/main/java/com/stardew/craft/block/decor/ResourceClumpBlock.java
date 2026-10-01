@@ -110,7 +110,7 @@ public class ResourceClumpBlock extends MapDecorStaticBlock {
     }
 
     @Override
-    protected List<ItemStack> getDrops(@Nonnull BlockState state, @Nonnull LootParams.Builder params) {
+    public List<ItemStack> getDrops(@Nonnull BlockState state, @Nonnull LootParams.Builder params) {
         return List.of();
     }
 

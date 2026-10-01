@@ -1,5 +1,6 @@
 package com.stardew.craft.entity.projectile;
 
+import com.stardew.craft.port.PortItemStacks;
 import com.stardew.craft.combat.skill.SkillContext;
 import com.stardew.craft.combat.skill.TideMarkTracker;
 import com.stardew.craft.combat.skill.WeaponDamageSnapshot;
@@ -79,7 +80,7 @@ public class TideAnchorProjectileEntity extends ThrowableProjectile {
     }
 
     @Override
-    protected void defineSynchedData(@SuppressWarnings("null") net.minecraft.network.syncher.SynchedEntityData.Builder builder) {
+    protected void defineSynchedData() {
     }
 
     @Override
@@ -296,7 +297,7 @@ public class TideAnchorProjectileEntity extends ThrowableProjectile {
             return;
         }
         tag.putString("ReleaseWeaponId", snapshot.weaponId().toString());
-        tag.put("ReleaseWeapon", weapon.saveOptional(registries));
+        tag.put("ReleaseWeapon", PortItemStacks.saveOptional(weapon, registries));
     }
 
     static WeaponDamageSnapshot readReleaseWeaponSnapshot(
@@ -311,7 +312,7 @@ public class TideAnchorProjectileEntity extends ThrowableProjectile {
         if (weaponId == null) {
             return null;
         }
-        ItemStack weapon = ItemStack.parseOptional(
+        ItemStack weapon = PortItemStacks.parseOptional(
                 registries,
                 tag.getCompound("ReleaseWeapon")
         );

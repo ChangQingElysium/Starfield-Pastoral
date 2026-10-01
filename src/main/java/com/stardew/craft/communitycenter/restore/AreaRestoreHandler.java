@@ -127,7 +127,7 @@ public final class AreaRestoreHandler {
                         normalized.putInt("y", y);
                         normalized.putInt("z", z);
                         if (normalized.contains("id", Tag.TAG_STRING)) {
-                            BlockEntity be = BlockEntity.loadStatic(pos, level.getBlockState(pos), normalized, level.registryAccess());
+                            BlockEntity be = BlockEntity.loadStatic(pos, level.getBlockState(pos), normalized);
                             if (be != null) {
                                 level.setBlockEntity(be);
                                 be.setChanged();

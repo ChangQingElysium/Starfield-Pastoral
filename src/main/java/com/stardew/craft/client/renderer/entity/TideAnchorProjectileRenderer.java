@@ -48,7 +48,7 @@ public class TideAnchorProjectileRenderer extends EntityRenderer<TideAnchorProje
         if (wakeLevel != entity.level()) { wakes.clear(); wakeLevel = entity.level(); }
         long tick = entity.level().getGameTime();
         wakes.entrySet().removeIf(e -> e.getValue().isEmpty() || tick - e.getValue().getLast().tick > 8);
-        if (!com.stardew.craft.Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()) { wakes.clear(); return; }
+        if (!com.stardew.craft.Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()) { wakes.clear(); return; }
         var camera = this.entityRenderDispatcher.camera.getPosition();
         if (entity.distanceToSqr(camera) > 48 * 48) return;
         if (!wakes.containsKey(entity.getId()) && wakes.size() >= 64) wakes.remove(wakes.keySet().iterator().next());

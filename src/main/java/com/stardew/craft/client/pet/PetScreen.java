@@ -17,7 +17,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import com.stardew.craft.port.net.neoforged.neoforge.network.PacketDistributor;
 
 @OnlyIn(Dist.CLIENT)
-@net.minecraftforge.fml.common.Mod.EventBusSubscriber(modid = com.stardew.craft.StardewCraft.MODID, value = Dist.CLIENT)
+@com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber(modid = com.stardew.craft.StardewCraft.MODID, value = Dist.CLIENT)
 public final class PetScreen extends FarmFolioScreen implements com.stardew.craft.client.gui.common.StardewGuiContentSize {
     private static CompoundTag deferredInitial;
     @Override public int minimumCanvasWidth() { return preferredWidth() + 16; }

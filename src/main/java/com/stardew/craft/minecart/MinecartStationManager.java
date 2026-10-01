@@ -53,7 +53,7 @@ public class MinecartStationManager extends SavedData {
     public static MinecartStationManager get(ServerLevel level) {
         ServerLevel overworld = level.getServer().getLevel(Level.OVERWORLD);
         if (overworld == null) return new MinecartStationManager();
-        return overworld.getDataStorage().computeIfAbsent(factory(), DATA_NAME);
+        return overworld.getDataStorage().computeIfAbsent(com.stardew.craft.port.PortSavedData.loader(factory()), com.stardew.craft.port.PortSavedData.constructor(factory()), DATA_NAME);
     }
 
     /** Surface stations only; the mine station is part of the authored lobby. */
@@ -101,7 +101,7 @@ public class MinecartStationManager extends SavedData {
 
     @Override
     @Nonnull
-    public CompoundTag save(@Nonnull CompoundTag tag, @Nonnull HolderLookup.Provider registries) {
+    public CompoundTag save(@Nonnull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
         tag.putInt("PlacedVersion", placedVersion);
         return tag;
     }
@@ -112,7 +112,7 @@ public class MinecartStationManager extends SavedData {
         return m;
     }
 
-    public static SavedData.Factory<MinecartStationManager> factory() {
-        return new SavedData.Factory<>(MinecartStationManager::new, MinecartStationManager::load);
+    public static com.stardew.craft.port.PortSavedData.Factory<MinecartStationManager> factory() {
+        return new com.stardew.craft.port.PortSavedData.Factory<>(MinecartStationManager::new, MinecartStationManager::load);
     }
 }

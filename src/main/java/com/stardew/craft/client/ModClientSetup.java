@@ -62,7 +62,7 @@ import com.stardew.craft.client.render.StardewHatLayer;
 import com.stardew.craft.menu.ModMenuTypes;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import com.stardew.craft.port.net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
@@ -244,13 +244,15 @@ public final class ModClientSetup {
 	@SuppressWarnings("null")
 	@SubscribeEvent
 	public static void onAddLayers(EntityRenderersEvent.AddLayers event) {
-		for (net.minecraft.world.entity.EntityType<?> type : event.getEntityTypes()) {
-			net.minecraft.client.renderer.entity.EntityRenderer<?> renderer = event.getRenderer(type);
+		// PORT(1.20.1): Forge's AddLayers exposes no key set; every registered type is looked up (null = no renderer).
+		for (net.minecraft.world.entity.EntityType<?> type : net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE) {
+			net.minecraft.client.renderer.entity.EntityRenderer<?> renderer = event.getEntityRenderer(type);
 			addFreezeLayer(renderer);
 		}
 
-		for (com.stardew.craft.port.net.minecraft.client.resources.PlayerSkin.Model skin : event.getSkins()) {
-			net.minecraft.client.renderer.entity.EntityRenderer<? extends net.minecraft.world.entity.player.Player> renderer = event.getSkin(skin);
+		// PORT(1.20.1): 1.20.1 player skins are keyed by model name ("default"/"slim") instead of PlayerSkin.Model.
+		for (String skin : event.getSkins()) {
+			net.minecraft.client.renderer.entity.EntityRenderer<? extends net.minecraft.world.entity.player.Player> renderer = event.getPlayerSkin(skin);
 			addFreezeLayer(renderer);
 			addHatLayer(renderer);
 		}

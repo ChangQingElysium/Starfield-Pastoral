@@ -1,5 +1,6 @@
 package com.stardew.craft.item.trinket;
 
+import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.item.IStardewItem;
 import com.stardew.craft.item.ModItems;
 import com.stardew.craft.player.PlayerDataManager;
@@ -87,8 +88,8 @@ public class StardewTrinketItem extends Item implements IStardewItem {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
+    public void appendHoverText(ItemStack stack, @javax.annotation.Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
+        super.appendHoverText(stack, level, tooltipComponents, tooltipFlag);
         CompoundTag tag = getGeneratedTagForDisplay(stack);
         Component description = descriptionFromTag(tag);
         tooltipComponents.add(description.copy().withStyle(Style.EMPTY.withColor(TextColor.fromRgb(descriptionTextRgb()))));
@@ -211,7 +212,7 @@ public class StardewTrinketItem extends Item implements IStardewItem {
         }
         ItemStack stack = new ItemStack(item);
         if (tag.contains(TAG_CUSTOM_DATA, Tag.TAG_COMPOUND)) {
-            stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag.getCompound(TAG_CUSTOM_DATA)));
+            PortItemData.set(stack, DataComponents.CUSTOM_DATA, CustomData.of(tag.getCompound(TAG_CUSTOM_DATA)));
         }
         return stack;
     }
@@ -375,14 +376,14 @@ public class StardewTrinketItem extends Item implements IStardewItem {
     }
 
     private static CompoundTag getCustomDataCopy(ItemStack stack) {
-        return stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
+        return PortItemData.getOrDefault(stack, DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
     }
 
     private static void setCustomData(ItemStack stack, CompoundTag tag) {
         if (tag.isEmpty()) {
-            stack.remove(DataComponents.CUSTOM_DATA);
+            PortItemData.remove(stack, DataComponents.CUSTOM_DATA);
         } else {
-            stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+            PortItemData.set(stack, DataComponents.CUSTOM_DATA, CustomData.of(tag));
         }
     }
 

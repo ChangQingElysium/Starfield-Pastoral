@@ -187,7 +187,7 @@ public class CookingDishItem extends Item implements IStardewItem {
 
             if (net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(this).toString().equals("stardewcraft:squid_ink_ravioli"))
                 serverPlayer.addEffect(new net.minecraft.world.effect.MobEffectInstance(
-                        com.stardew.craft.effect.ModMobEffects.SQUID_INK_RAVIOLI, 3600, 0));
+                        com.stardew.craft.effect.ModMobEffects.SQUID_INK_RAVIOLI.get(), 3600, 0));
             for (DishBuff buff : buffs) {
                 applyBuff(serverPlayer, buff);
             }
@@ -208,7 +208,7 @@ public class CookingDishItem extends Item implements IStardewItem {
             case SPEED -> {
                 // Speed buff in dishes is level-based (+1 in vanilla cooking).
                 player.addEffect(new net.minecraft.world.effect.MobEffectInstance(
-                    com.stardew.craft.effect.ModMobEffects.SPEED,
+                    com.stardew.craft.effect.ModMobEffects.SPEED.get(),
                         buff.durationTicks(),
                         Math.max(0, buff.amount() - 1)
                 ));
@@ -220,7 +220,7 @@ public class CookingDishItem extends Item implements IStardewItem {
             case DEFENSE -> PlayerStardewDataAPI.applyDefenseBuff(player, buff.amount(), buff.durationTicks());
             case MAGNETIC_RADIUS -> PlayerStardewDataAPI.applyMagneticRadiusBuff(player, buff.amount(), buff.durationTicks());
             case AVOID_MONSTERS -> player.addEffect(new net.minecraft.world.effect.MobEffectInstance(
-                    com.stardew.craft.effect.ModMobEffects.AVOID_MONSTERS,
+                    com.stardew.craft.effect.ModMobEffects.AVOID_MONSTERS.get(),
                     buff.durationTicks(),
                     Math.max(0, buff.amount() - 1),
                     false,

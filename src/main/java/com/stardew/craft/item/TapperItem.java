@@ -1,5 +1,6 @@
 package com.stardew.craft.item;
 
+import com.stardew.craft.port.PortEntities;
 import com.stardew.craft.api.v1.internal.tree.StardewTreeRuntimeRegistry;
 import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.core.ModDimensions;
@@ -70,7 +71,7 @@ public final class TapperItem extends StardewBlockItem {
             for (Direction face : Direction.Plane.HORIZONTAL) {
                 BlockPos place = support.relative(face);
                 if (!level.hasChunkAt(place) || !level.isEmptyBlock(place)
-                        || !level.getFluidState(place).isEmpty() || !player.canInteractWithBlock(place, 0)) continue;
+                        || !level.getFluidState(place).isEmpty() || !PortEntities.canInteractWithBlock(player, place, 0)) continue;
                 if (player instanceof ServerPlayer serverPlayer && level.dimension() == ModDimensions.STARDEW_VALLEY
                         && !FarmAreaProtectionEvents.canModifyAt(serverPlayer, place)) continue;
                 Vec3 hit = Vec3.atCenterOf(support).add(Vec3.atLowerCornerOf(face.getNormal()).scale(.499));

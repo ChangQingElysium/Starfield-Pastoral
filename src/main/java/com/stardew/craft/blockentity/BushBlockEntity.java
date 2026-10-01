@@ -54,14 +54,14 @@ public class BushBlockEntity extends BlockEntity implements GeoBlockEntity {
     }
 
     @Override
-    protected void saveAdditional(@Nonnull CompoundTag tag, @Nonnull net.minecraft.core.HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
+    protected void saveAdditional(@Nonnull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        super.saveAdditional(tag);
         tag.putInt(TAG_LAST_HARVEST_ABSOLUTE_DAY, lastHarvestAbsoluteDay);
     }
 
     @Override
-    protected void loadAdditional(@Nonnull CompoundTag tag, @Nonnull net.minecraft.core.HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
+    public void load(@Nonnull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        super.load(tag);
         lastHarvestAbsoluteDay = tag.contains(TAG_LAST_HARVEST_ABSOLUTE_DAY) ? tag.getInt(TAG_LAST_HARVEST_ABSOLUTE_DAY) : Integer.MIN_VALUE;
     }
 
@@ -72,9 +72,9 @@ public class BushBlockEntity extends BlockEntity implements GeoBlockEntity {
     }
 
     @Override
-    public CompoundTag getUpdateTag(@Nonnull net.minecraft.core.HolderLookup.Provider registries) {
-        CompoundTag tag = super.getUpdateTag(registries);
-        saveAdditional(tag, registries);
+    public CompoundTag getUpdateTag() { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        CompoundTag tag = super.getUpdateTag();
+        saveAdditional(tag);
         return tag;
     }
 

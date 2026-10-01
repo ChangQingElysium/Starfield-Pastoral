@@ -1,5 +1,6 @@
 package com.stardew.craft.blockentity;
 
+import com.stardew.craft.port.PortItemStacks;
 import com.stardew.craft.animal.runtime.*;
 import com.stardew.craft.building.runtime.*;
 import com.stardew.craft.block.utility.IncubatorBlock;
@@ -172,22 +173,22 @@ public class IncubatorBlockEntity extends TimedProductionBlockEntity {
         return AutomationStackHelper.remainderAfterInsert(stack, 1);
     }
     @Override public ClientboundBlockEntityDataPacket getUpdatePacket() { return ClientboundBlockEntityDataPacket.create(this); }
-    @Override public CompoundTag getUpdateTag(HolderLookup.Provider registries) { return saveCustomOnly(registries); }
-    @Override protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
-        if (!input.isEmpty()) tag.put("Input", input.save(registries)); tag.putLong("ReadyAt", readyAtAbsMinute); tag.putBoolean("Ready", ready);
+    @Override public CompoundTag getUpdateTag() { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup(); return saveCustomOnly(registries); }
+    @Override protected void saveAdditional(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        super.saveAdditional(tag);
+        if (!input.isEmpty()) tag.put("Input", PortItemStacks.save(input, registries)); tag.putLong("ReadyAt", readyAtAbsMinute); tag.putBoolean("Ready", ready);
         if (receipt != null) tag.putUUID("NewbornReceipt", receipt); if (owner != null) tag.putUUID("Caretaker", owner);
         tag.putBoolean("LegacyClock", legacyClock); tag.putString("LegacyIncubationKey", legacyIncubationKey);
     }
-    @Override protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
-        input = tag.contains("Input") ? ItemStack.parse(registries, tag.getCompound("Input")).orElse(ItemStack.EMPTY) : ItemStack.EMPTY;
+    @Override public void load(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        super.load(tag);
+        input = tag.contains("Input") ? PortItemStacks.parse(registries, tag.getCompound("Input")).orElse(ItemStack.EMPTY) : ItemStack.EMPTY;
         readyAtAbsMinute = tag.contains("ReadyAt") ? tag.getLong("ReadyAt") : -1; ready = tag.getBoolean("Ready");
         receipt = tag.hasUUID("NewbornReceipt") ? tag.getUUID("NewbornReceipt") : null;
         owner = tag.hasUUID("Caretaker") ? tag.getUUID("Caretaker") : null;
         legacyClock = tag.getBoolean("LegacyClock"); legacyIncubationKey = tag.getString("LegacyIncubationKey");
         if (!tag.contains("ReadyAt") && tag.contains("input")) {
-            input = ItemStack.parse(registries, tag.getCompound("input")).orElse(ItemStack.EMPTY);
+            input = PortItemStacks.parse(registries, tag.getCompound("input")).orElse(ItemStack.EMPTY);
             readyAtAbsMinute = tag.getLong("readyAtAbsMinute"); ready = tag.getBoolean("ready");
             product = ItemStack.EMPTY; legacyClock = !input.isEmpty();
         }

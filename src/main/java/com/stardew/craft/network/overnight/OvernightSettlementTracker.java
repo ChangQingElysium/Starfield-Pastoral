@@ -1,5 +1,6 @@
 package com.stardew.craft.network.overnight;
 
+import com.stardew.craft.port.PortItemStacks;
 import com.stardew.craft.api.v1.item.StardewItemDataApi;
 import com.stardew.craft.time.StardewTimeManager;
 import net.minecraft.core.HolderLookup;
@@ -124,7 +125,7 @@ public final class OvernightSettlementTracker extends SavedData {
 
     public static OvernightSettlementTracker get(MinecraftServer server) {
         return server.overworld().getDataStorage().computeIfAbsent(
-            new SavedData.Factory<>(OvernightSettlementTracker::new, OvernightSettlementTracker::load),
+            com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(OvernightSettlementTracker::new, OvernightSettlementTracker::load)), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(OvernightSettlementTracker::new, OvernightSettlementTracker::load)),
             DATA_NAME
         );
     }
@@ -143,7 +144,7 @@ public final class OvernightSettlementTracker extends SavedData {
             ListTag items = playerTag.getList("Items", Tag.TAG_COMPOUND);
             for (int j = 0; j < items.size(); j++) {
                 CompoundTag itemTag = items.getCompound(j);
-                ItemStack stack = ItemStack.parse(provider, itemTag.getCompound("Stack")).orElse(ItemStack.EMPTY);
+                ItemStack stack = PortItemStacks.parse(provider, itemTag.getCompound("Stack")).orElse(ItemStack.EMPTY);
                 int pricePerItem = itemTag.getInt("PricePerItem");
                 if (stack.isEmpty() || pricePerItem <= 0) {
                     continue;
@@ -168,7 +169,7 @@ public final class OvernightSettlementTracker extends SavedData {
 
     @Override
     @SuppressWarnings("null")
-    public CompoundTag save(CompoundTag tag, HolderLookup.Provider provider) {
+    public CompoundTag save(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
         ListTag players = new ListTag();
         for (Map.Entry<UUID, PlayerLedger> playerEntry : ledgerByPlayer.entrySet()) {
             ListTag items = new ListTag();
@@ -178,7 +179,7 @@ public final class OvernightSettlementTracker extends SavedData {
                     continue;
                 }
                 CompoundTag itemTag = new CompoundTag();
-                itemTag.put("Stack", item.stack().save(provider));
+                itemTag.put("Stack", PortItemStacks.save(item.stack(), provider));
                 itemTag.putInt("Category", item.category());
                 itemTag.putInt("PricePerItem", item.pricePerItem());
                 itemTag.putInt("AvailableDay", pending.availableDay());
@@ -243,7 +244,7 @@ public final class OvernightSettlementTracker extends SavedData {
         ListTag shipped = new ListTag();
         for (OvernightSettlementPayload.ShippedItem item : payload.shippedItems()) {
             CompoundTag raw = new CompoundTag();
-            raw.put("Stack", item.stack().save(provider));
+            raw.put("Stack", PortItemStacks.save(item.stack(), provider));
             raw.putInt("Category", item.category());
             raw.putInt("PricePerItem", item.pricePerItem());
             shipped.add(raw);
@@ -264,7 +265,7 @@ public final class OvernightSettlementTracker extends SavedData {
         ListTag lost = new ListTag();
         for (ItemStack stack : payload.passOutLostItems()) {
             if (!stack.isEmpty()) {
-                lost.add(stack.save(provider));
+                lost.add(PortItemStacks.save(stack, provider));
             }
         }
         tag.put("PassOutItems", lost);
@@ -290,7 +291,7 @@ public final class OvernightSettlementTracker extends SavedData {
         ListTag shippedTag = tag.getList("Shipped", Tag.TAG_COMPOUND);
         for (int i = 0; i < shippedTag.size(); i++) {
             CompoundTag raw = shippedTag.getCompound(i);
-            ItemStack stack = ItemStack.parse(provider, raw.getCompound("Stack"))
+            ItemStack stack = PortItemStacks.parse(provider, raw.getCompound("Stack"))
                     .orElse(ItemStack.EMPTY);
             if (!stack.isEmpty()) {
                 shipped.add(new OvernightSettlementPayload.ShippedItem(
@@ -309,7 +310,7 @@ public final class OvernightSettlementTracker extends SavedData {
         List<ItemStack> lost = new ArrayList<>();
         ListTag lostTag = tag.getList("PassOutItems", Tag.TAG_COMPOUND);
         for (int i = 0; i < lostTag.size(); i++) {
-            ItemStack stack = ItemStack.parse(provider, lostTag.getCompound(i))
+            ItemStack stack = PortItemStacks.parse(provider, lostTag.getCompound(i))
                     .orElse(ItemStack.EMPTY);
             if (!stack.isEmpty()) {
                 lost.add(stack);

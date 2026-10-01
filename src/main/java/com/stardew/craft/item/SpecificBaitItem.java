@@ -1,5 +1,6 @@
 package com.stardew.craft.item;
 
+import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.item.artisan.PreservesIngredientDataManager;
 import com.stardew.craft.item.catalog.StardewItemCatalog;
 import net.minecraft.ChatFormatting;
@@ -51,10 +52,10 @@ public class SpecificBaitItem extends Item implements IStardewItem {
     @SuppressWarnings("null")
     @Override
     public void appendHoverText(@SuppressWarnings("null") ItemStack stack,
-                                @SuppressWarnings("null") TooltipContext context,
+                                @javax.annotation.Nullable net.minecraft.world.level.Level level,
                                 @SuppressWarnings("null") List<Component> tooltipComponents,
                                 @SuppressWarnings("null") TooltipFlag tooltipFlag) {
-        super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
+        super.appendHoverText(stack, level, tooltipComponents, tooltipFlag);
         ItemStack fishStack = getTargetFishStack(stack);
         if (!fishStack.isEmpty()) {
             tooltipComponents.add(Component.translatable("item.stardewcraft.targeted_bait.target_desc", fishStack.getHoverName())
@@ -139,7 +140,7 @@ public class SpecificBaitItem extends Item implements IStardewItem {
         if (baitStack == null || baitStack.isEmpty() || variantIndex < 0) {
             return;
         }
-        baitStack.set(DataComponents.CUSTOM_MODEL_DATA, new CustomModelData(CREATIVE_VARIANT_CMD_BASE + variantIndex));
+        PortItemData.set(baitStack, DataComponents.CUSTOM_MODEL_DATA, new CustomModelData(CREATIVE_VARIANT_CMD_BASE + variantIndex));
     }
 
     private static ItemStack getCreativeVariantFishStack(ItemStack stack) {
@@ -160,7 +161,7 @@ public class SpecificBaitItem extends Item implements IStardewItem {
     }
 
     private static int resolveCreativeVariantIndex(ItemStack stack) {
-        CustomModelData cmd = stack.getOrDefault(DataComponents.CUSTOM_MODEL_DATA, CustomModelData.DEFAULT);
+        CustomModelData cmd = PortItemData.getOrDefault(stack, DataComponents.CUSTOM_MODEL_DATA, CustomModelData.DEFAULT);
         if (cmd.equals(CustomModelData.DEFAULT)) {
             return -1;
         }
@@ -182,16 +183,16 @@ public class SpecificBaitItem extends Item implements IStardewItem {
     }
 
     private static CompoundTag getOrCreateTag(ItemStack stack) {
-        CustomData data = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY);
+        CustomData data = PortItemData.getOrDefault(stack, DataComponents.CUSTOM_DATA, CustomData.EMPTY);
         return data.copyTag();
     }
 
     private static void applyTag(ItemStack stack, CompoundTag tag) {
-        stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+        PortItemData.set(stack, DataComponents.CUSTOM_DATA, CustomData.of(tag));
     }
 
     private static int getIntTag(ItemStack stack, String key, int fallback) {
-        CustomData data = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY);
+        CustomData data = PortItemData.getOrDefault(stack, DataComponents.CUSTOM_DATA, CustomData.EMPTY);
         CompoundTag tag = data.copyTag();
         if (tag.contains(key)) {
             return tag.getInt(key);
@@ -200,7 +201,7 @@ public class SpecificBaitItem extends Item implements IStardewItem {
     }
 
     private static String getStringTag(ItemStack stack, String key, String fallback) {
-        CustomData data = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY);
+        CustomData data = PortItemData.getOrDefault(stack, DataComponents.CUSTOM_DATA, CustomData.EMPTY);
         CompoundTag tag = data.copyTag();
         if (tag.contains(key)) {
             return tag.getString(key);

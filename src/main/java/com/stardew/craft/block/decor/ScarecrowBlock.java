@@ -51,7 +51,7 @@ public class ScarecrowBlock extends MapDecorStaticBlock implements EntityBlock {
     }
 
     @Override
-    protected ItemInteractionResult useItemOn(@Nonnull ItemStack stack, @Nonnull BlockState state,
+    public ItemInteractionResult useItemOn(@Nonnull ItemStack stack, @Nonnull BlockState state,
                                               @Nonnull Level level, @Nonnull BlockPos pos,
                                               @Nonnull Player player, @Nonnull InteractionHand hand,
                                               @Nonnull BlockHitResult hit) {

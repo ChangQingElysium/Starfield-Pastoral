@@ -23,7 +23,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import com.stardew.craft.port.net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.minecraftforge.client.event.RenderGuiEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
@@ -152,7 +152,7 @@ public final class BuildingPlacementPreview {
             return;
         }
         BlockPos pin = manager ? null : BuildingBlueprintItem.pinned(stack, mc.level);
-        var hitResult = manager ? mc.player.pick(mc.player.blockInteractionRange(), 1, false) : BuildingBlueprintItem.target(mc.player);
+        var hitResult = manager ? mc.player.pick(mc.player.getBlockReach(), 1, false) : BuildingBlueprintItem.target(mc.player);
         BlockPos next;
         if (pin != null) next = pin;
         else if (hitResult instanceof BlockHitResult hit && hitResult.getType() == HitResult.Type.BLOCK && (manager || hit.getDirection() == Direction.UP))
@@ -169,7 +169,7 @@ public final class BuildingPlacementPreview {
         }
         Direction nextFacing = manager ? mc.player.getDirection().getOpposite() : BuildingBlueprintItem.facing(stack,mc.player);
         boolean changed = !next.equals(target) || nextFacing != facing || manager != self || !nextFamily.equals(family)
-                || pinned != (pin != null) || !ItemStack.isSameItemSameComponents(document, stack);
+                || pinned != (pin != null) || !ItemStack.isSameItemSameTags(document, stack);
         if (changed) {
             target = next; facing = nextFacing; self = manager; family = nextFamily; pinned = pin != null; sequence++;
             document = stack.copy();

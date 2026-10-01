@@ -8,14 +8,11 @@ import net.minecraft.world.level.block.state.StateDefinition;
 
 /** A full road cube; the surface choice is saved, while curbs follow neighbors. */
 public final class AsphaltRoadBlock extends Block {
-    public static final MapCodec<AsphaltRoadBlock> CODEC = simpleCodec(AsphaltRoadBlock::new);
 
     public AsphaltRoadBlock(Properties properties) {
         super(properties);
         registerDefaultState(defaultBlockState().setValue(TerrainVariants.ASPHALT, 0));
     }
-
-    @Override public MapCodec<AsphaltRoadBlock> codec() { return CODEC; }
 
     @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(TerrainVariants.ASPHALT);

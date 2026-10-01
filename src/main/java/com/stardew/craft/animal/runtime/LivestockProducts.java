@@ -1,5 +1,6 @@
 package com.stardew.craft.animal.runtime;
 
+import com.stardew.craft.port.PortItemStacks;
 import com.stardew.craft.building.runtime.*;
 import com.stardew.craft.item.ModItems;
 import com.stardew.craft.item.quality.QualityHelper;
@@ -25,7 +26,7 @@ public final class LivestockProducts {
         for (int i = 0; i < 36; i++) {
             var slot = player.getInventory().getItem(i);
             if (slot.isEmpty()) room += stack.getMaxStackSize();
-            else if (ItemStack.isSameItemSameComponents(slot, stack)) room += Math.max(0, slot.getMaxStackSize() - slot.getCount());
+            else if (ItemStack.isSameItemSameTags(slot, stack)) room += Math.max(0, slot.getMaxStackSize() - slot.getCount());
         }
         return room >= stack.getCount();
     }
@@ -42,7 +43,7 @@ public final class LivestockProducts {
     }
     public static ItemStack held(ServerLevel level,LivestockRecord animal){
         var saved=animal.extra().getCompound("HeldProduce");
-        var stack=saved.isEmpty()?stack(animal.produce(),1,animal.care().quality()):ItemStack.parseOptional(level.registryAccess(),saved);
+        var stack=saved.isEmpty()?stack(animal.produce(),1,animal.care().quality()):PortItemStacks.parseOptional(level.registryAccess(),saved);
         if(animal.cracker())stack.setCount(Math.multiplyExact(stack.getCount(),2));return stack;
     }
     public static boolean interact(ServerPlayer player, net.minecraft.world.entity.PathfinderMob entity) {

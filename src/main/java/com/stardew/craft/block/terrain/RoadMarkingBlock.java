@@ -20,7 +20,6 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 /** Separately placeable paint on asphalt. The thin outline is selectable, never collidable. */
 public final class RoadMarkingBlock extends HorizontalDirectionalBlock {
-    public static final MapCodec<RoadMarkingBlock> CODEC = simpleCodec(RoadMarkingBlock::new);
     private static final VoxelShape OUTLINE = Block.box(0, 0, 0, 16, 1, 16);
 
     public RoadMarkingBlock(Properties properties) {
@@ -28,23 +27,22 @@ public final class RoadMarkingBlock extends HorizontalDirectionalBlock {
         registerDefaultState(defaultBlockState().setValue(FACING, Direction.NORTH));
     }
 
-    @Override public MapCodec<RoadMarkingBlock> codec() { return CODEC; }
     @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) { builder.add(FACING); }
     @Override public BlockState getStateForPlacement(BlockPlaceContext context) {
         return defaultBlockState().setValue(FACING, context.getHorizontalDirection());
     }
-    @Override protected boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
+    @Override public boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
         return level.getBlockState(pos.below()).getBlock() instanceof AsphaltRoadBlock;
     }
-    @Override protected BlockState updateShape(BlockState state, Direction direction, BlockState neighbor,
+    @Override public BlockState updateShape(BlockState state, Direction direction, BlockState neighbor,
             LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
         return direction == Direction.DOWN && !state.canSurvive(level, pos) ? Blocks.AIR.defaultBlockState()
                 : super.updateShape(state, direction, neighbor, level, pos, neighborPos);
     }
-    @Override protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) { return OUTLINE; }
-    @Override protected boolean isPathfindable(BlockState state, PathComputationType type) { return type == PathComputationType.LAND; }
-    @Override protected BlockState rotate(BlockState state, Rotation rotation) { return state.setValue(FACING, rotation.rotate(state.getValue(FACING))); }
-    @Override protected BlockState mirror(BlockState state, Mirror mirror) { return state.setValue(FACING, mirror.mirror(state.getValue(FACING))); }
+    @Override public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) { return OUTLINE; }
+    @Override public boolean isPathfindable(BlockState state, BlockGetter level, BlockPos pos, PathComputationType type) { return type == PathComputationType.LAND; }
+    @Override public BlockState rotate(BlockState state, Rotation rotation) { return state.setValue(FACING, rotation.rotate(state.getValue(FACING))); }
+    @Override public BlockState mirror(BlockState state, Mirror mirror) { return state.setValue(FACING, mirror.mirror(state.getValue(FACING))); }
 
     /** Atlas order is north/east/south/west, clockwise in top-face UV space. */
     public static int rotationIndex(BlockState state) { return (state.getValue(FACING).get2DDataValue() + 2) & 3; }

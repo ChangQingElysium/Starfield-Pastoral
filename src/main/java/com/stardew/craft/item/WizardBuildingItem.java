@@ -1,5 +1,6 @@
 package com.stardew.craft.item;
 
+import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.farm.FarmInstance;
 import com.stardew.craft.farm.FarmInstanceRegistry;
 import com.stardew.craft.player.PlayerDisplayName;
@@ -56,23 +57,23 @@ public final class WizardBuildingItem extends StardewBlockItem {
      * Binds an unowned stack. Existing ownership is intentionally immutable.
      */
     public static void bindTo(ItemStack stack, UUID owner, String ownerName) {
-        CompoundTag tag = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
+        CompoundTag tag = PortItemData.getOrDefault(stack, DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
         if (tag.hasUUID(TAG_OWNER)) {
             return;
         }
         tag.putUUID(TAG_OWNER, owner);
         tag.putString(TAG_OWNER_NAME, ownerName == null ? "" : ownerName);
-        stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+        PortItemData.set(stack, DataComponents.CUSTOM_DATA, CustomData.of(tag));
     }
 
     @Nullable
     public static UUID getOwner(ItemStack stack) {
-        CompoundTag tag = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
+        CompoundTag tag = PortItemData.getOrDefault(stack, DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
         return tag.hasUUID(TAG_OWNER) ? tag.getUUID(TAG_OWNER) : null;
     }
 
     public static String getOwnerName(ItemStack stack) {
-        CompoundTag tag = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
+        CompoundTag tag = PortItemData.getOrDefault(stack, DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
         return tag.getString(TAG_OWNER_NAME);
     }
 
@@ -112,9 +113,11 @@ public final class WizardBuildingItem extends StardewBlockItem {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context,
-                                List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
+    public void appendHoverText(ItemStack stack,
+                                @javax.annotation.Nullable Level level,
+                                List<Component> tooltipComponents,
+                                TooltipFlag tooltipFlag) {
+        super.appendHoverText(stack, level, tooltipComponents, tooltipFlag);
         UUID owner = getOwner(stack);
         if (owner == null) {
             tooltipComponents.add(Component.translatable(
@@ -156,7 +159,7 @@ public final class WizardBuildingItem extends StardewBlockItem {
     }
 
     @Override
-    public boolean canBeHurtBy(ItemStack stack, net.minecraft.world.damagesource.DamageSource source) {
+    public boolean canBeHurtBy(net.minecraft.world.damagesource.DamageSource source) {
         return false;
     }
 

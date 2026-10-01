@@ -38,12 +38,12 @@ public class HorizontalMasteryBlock extends Block {
     }
 
     @Override
-    protected List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
+    public List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
         return List.of(new ItemStack(asItem()));
     }
 
     @Override
-    protected boolean canBeReplaced(BlockState state, Fluid fluid) {
+    public boolean canBeReplaced(BlockState state, Fluid fluid) {
         return false;
     }
 

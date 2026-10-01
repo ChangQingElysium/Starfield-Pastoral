@@ -45,7 +45,7 @@ final class WeaponItemSupport {
                         EquipmentSlotGroup.MAINHAND
                 )
                 .add(
-                        Attributes.ENTITY_INTERACTION_RANGE,
+                        net.minecraftforge.common.ForgeMod.ENTITY_REACH.get(), // PORT(1.20.1): Forge's entity interaction range
                         modifier(weaponId, "attack_range", attackRangeModifier),
                         EquipmentSlotGroup.MAINHAND
                 )
@@ -82,13 +82,13 @@ final class WeaponItemSupport {
     }
 
     private static AttributeModifier modifier(String weaponId, String attribute, double value) {
-        return new AttributeModifier(
+        return com.stardew.craft.port.PortAttributeModifiers.create(
                 new ResourceLocation(
                         StardewCraft.MODID,
                         "weapon." + weaponId + "." + attribute
                 ),
                 value,
-                AttributeModifier.Operation.ADD_VALUE
+                AttributeModifier.Operation.ADDITION
         );
     }
 }

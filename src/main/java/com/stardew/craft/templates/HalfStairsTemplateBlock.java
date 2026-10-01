@@ -13,16 +13,10 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 /** Handedness is independent of facing and the upside-down placement. */
 public final class HalfStairsTemplateBlock extends MaterialTemplateBlock {
     public static final BooleanProperty MIRRORED = BooleanProperty.create("mirrored");
-    public static final MapCodec<HalfStairsTemplateBlock> CODEC = simpleCodec(HalfStairsTemplateBlock::new);
 
     public HalfStairsTemplateBlock(Properties properties) {
         super(TemplateShape.HALF_STAIRS, properties);
         registerDefaultState(defaultBlockState().setValue(MIRRORED, false));
-    }
-
-    @Override
-    protected MapCodec<HalfStairsTemplateBlock> codec() {
-        return CODEC;
     }
 
     @Override
@@ -41,7 +35,7 @@ public final class HalfStairsTemplateBlock extends MaterialTemplateBlock {
     }
 
     @Override
-    protected BlockState mirror(BlockState state, Mirror mirror) {
+    public BlockState mirror(BlockState state, Mirror mirror) {
         return mirror == Mirror.NONE ? state
                 : state.setValue(FACING, mirror.mirror(state.getValue(FACING))).cycle(MIRRORED);
     }

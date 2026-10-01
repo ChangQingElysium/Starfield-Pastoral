@@ -1,5 +1,6 @@
 package com.stardew.craft.blockentity;
 
+import com.stardew.craft.port.PortItemStacks;
 import com.stardew.craft.block.mine.MineChestBlock;
 import com.stardew.craft.block.mine.MineChestLidMotion;
 import com.stardew.craft.block.utility.WoodenChestColorPalette;
@@ -275,8 +276,8 @@ public class MineChestBlockEntity extends net.minecraft.world.level.block.entity
     // ── NBT ──
 
     @Override
-    protected void saveAdditional(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
+    protected void saveAdditional(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        super.saveAdditional(tag);
         tag.putInt("colorSelection", colorSelection);
         tag.putInt("rewardKey",rewardKey);
 
@@ -291,7 +292,7 @@ public class MineChestBlockEntity extends net.minecraft.world.level.block.entity
                 if (stack.isEmpty()) continue;
                 CompoundTag itemTag = new CompoundTag();
                 itemTag.putInt("Slot", i);
-                itemTag.put("Stack", stack.save(registries));
+                itemTag.put("Stack", PortItemStacks.save(stack, registries));
                 itemsList.add(itemTag);
             }
             playerTag.put("Items", itemsList);
@@ -301,8 +302,8 @@ public class MineChestBlockEntity extends net.minecraft.world.level.block.entity
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
+    public void load(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        super.load(tag);
         colorSelection = tag.contains("colorSelection")
                 ? WoodenChestColorPalette.clampIndex(tag.getInt("colorSelection")) : -1;
         rewardKey = tag.getInt("rewardKey");
@@ -319,7 +320,7 @@ public class MineChestBlockEntity extends net.minecraft.world.level.block.entity
                     CompoundTag itemTag = itemsList.getCompound(i);
                     int slot = itemTag.getInt("Slot");
                     if (slot >= 0 && slot < SLOT_COUNT) {
-                        inv.set(slot, ItemStack.parse(registries, itemTag.getCompound("Stack"))
+                        inv.set(slot, PortItemStacks.parse(registries, itemTag.getCompound("Stack"))
                                 .orElse(ItemStack.EMPTY));
                     }
                 }
@@ -335,8 +336,8 @@ public class MineChestBlockEntity extends net.minecraft.world.level.block.entity
     }
 
     @Override
-    public CompoundTag getUpdateTag(net.minecraft.core.HolderLookup.Provider registries) {
-        CompoundTag tag = super.getUpdateTag(registries);
+    public CompoundTag getUpdateTag() { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
+        CompoundTag tag = super.getUpdateTag();
         // 客户端只需要颜色信息，不需要玩家库存
         tag.putInt("colorSelection", colorSelection);
         tag.putInt("rewardKey",rewardKey);

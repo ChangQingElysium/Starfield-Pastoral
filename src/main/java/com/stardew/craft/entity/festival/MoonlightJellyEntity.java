@@ -41,8 +41,8 @@ public class MoonlightJellyEntity extends Entity implements GeoEntity {
     }
 
     @Override
-    protected void defineSynchedData(SynchedEntityData.Builder builder) {
-        builder.define(DATA_ALPHA, 0.0F);
+    protected void defineSynchedData() {
+        this.entityData.define(DATA_ALPHA, 0.0F);
     }
 
     @Override
@@ -107,7 +107,7 @@ public class MoonlightJellyEntity extends Entity implements GeoEntity {
     }
 
     @Override
-    public Packet<ClientGamePacketListener> getAddEntityPacket(ServerEntity serverEntity) {
-        return new ClientboundAddEntityPacket(this, serverEntity);
+    public Packet<ClientGamePacketListener> getAddEntityPacket() {
+        return new ClientboundAddEntityPacket(this);
     }
 }

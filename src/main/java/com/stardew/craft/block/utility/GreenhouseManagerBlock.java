@@ -17,7 +17,7 @@ public final class GreenhouseManagerBlock extends ResidenceManagerBlock {
     }
 
     @Override
-    protected InteractionResult useWithoutItem(
+    public InteractionResult useWithoutItem(
             BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         if (player instanceof ServerPlayer serverPlayer) {
             if (!BuildingManagerInteraction.open(serverPlayer, pos)) {

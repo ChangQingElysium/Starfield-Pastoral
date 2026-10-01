@@ -34,7 +34,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.server.ServerStoppingEvent;
 import com.stardew.craft.port.net.neoforged.neoforge.event.tick.ServerTickEvent;
@@ -493,7 +493,7 @@ public class PlayerDataEventHandler {
         }
 
         @SuppressWarnings("null")
-        MobEffectInstance shelter = player.getEffect(ModMobEffects.SHELTER);
+        MobEffectInstance shelter = player.getEffect(ModMobEffects.SHELTER.get());
         float shelterMultiplier = 1.0f;
         if (shelter != null) {
             shelterMultiplier = ModMobEffects.shelterDamageMultiplier(shelter.getAmplifier());
@@ -632,7 +632,7 @@ public class PlayerDataEventHandler {
         com.stardew.craft.combat.equipment.EquipmentStats eqStats = com.stardew.craft.combat.equipment.EquipmentResolver.getMergedStats(player);
         float equipDefense = eqStats.getDefense();
         float totalDefense = weaponDefense + foodDefense + equipDefense + bookDefense
-                - (player.hasEffect(ModMobEffects.JINXED) ? 8 : 0);
+                - (player.hasEffect(ModMobEffects.JINXED.get()) ? 8 : 0);
         incomingDamage
                 .defense(totalDefense, false)
                 .defenseRule(DamageRequest.DefenseRule.STARDEW_PLAYER_DEFENSE);
@@ -880,7 +880,7 @@ public class PlayerDataEventHandler {
             boolean changed = false;
 
             @SuppressWarnings("null")
-            MobEffectInstance vigorous = player.getEffect(ModMobEffects.VIGOROUS);
+            MobEffectInstance vigorous = player.getEffect(ModMobEffects.VIGOROUS.get());
             if (vigorous != null) {
                 int bonus = ModMobEffects.vigorousMaxEnergyBonus(vigorous.getAmplifier());
                 long endTick = now + vigorous.getDuration();
@@ -890,7 +890,7 @@ public class PlayerDataEventHandler {
             }
 
             @SuppressWarnings("null")
-            MobEffectInstance seaKing = player.getEffect(ModMobEffects.SEA_KING_BLESSING);
+            MobEffectInstance seaKing = player.getEffect(ModMobEffects.SEA_KING_BLESSING.get());
             if (seaKing != null) {
                 int bonus = ModMobEffects.seaKingFishingLevelBonus(seaKing.getAmplifier());
                 long endTick = now + seaKing.getDuration();
@@ -900,9 +900,9 @@ public class PlayerDataEventHandler {
             }
 
             @SuppressWarnings("null")
-            MobEffectInstance spirit = player.getEffect(ModMobEffects.SPIRIT_BLESSING);
+            MobEffectInstance spirit = player.getEffect(ModMobEffects.SPIRIT_BLESSING.get());
             @SuppressWarnings("null")
-            MobEffectInstance statueLuck = player.getEffect(ModMobEffects.STATUE_OF_BLESSINGS_1);
+            MobEffectInstance statueLuck = player.getEffect(ModMobEffects.STATUE_OF_BLESSINGS_1.get());
             if (spirit != null || statueLuck != null) {
                 int bonus = (spirit != null ? ModMobEffects.spiritLuckLevelBonus(spirit.getAmplifier()) : 0)
                           + (statueLuck != null ? 1 : 0); // SDV Buffs.json: LuckLevel=1.0
@@ -915,7 +915,7 @@ public class PlayerDataEventHandler {
             }
 
             @SuppressWarnings("null")
-            MobEffectInstance farmerBlessing = player.getEffect(ModMobEffects.FARMER_BLESSING);
+            MobEffectInstance farmerBlessing = player.getEffect(ModMobEffects.FARMER_BLESSING.get());
             if (farmerBlessing != null) {
                 int bonus = ModMobEffects.farmerFarmingLevelBonus(farmerBlessing.getAmplifier());
                 long endTick = now + farmerBlessing.getDuration();
@@ -925,7 +925,7 @@ public class PlayerDataEventHandler {
             }
 
             @SuppressWarnings("null")
-            MobEffectInstance foragerBlessing = player.getEffect(ModMobEffects.FORAGER_BLESSING);
+            MobEffectInstance foragerBlessing = player.getEffect(ModMobEffects.FORAGER_BLESSING.get());
             if (foragerBlessing != null) {
                 int bonus = ModMobEffects.foragerForagingLevelBonus(foragerBlessing.getAmplifier());
                 long endTick = now + foragerBlessing.getDuration();
@@ -935,7 +935,7 @@ public class PlayerDataEventHandler {
             }
 
             @SuppressWarnings("null")
-            MobEffectInstance minerBlessing = player.getEffect(ModMobEffects.MINER_BLESSING);
+            MobEffectInstance minerBlessing = player.getEffect(ModMobEffects.MINER_BLESSING.get());
             if (minerBlessing != null) {
                 int bonus = ModMobEffects.minerMiningLevelBonus(minerBlessing.getAmplifier());
                 long endTick = now + minerBlessing.getDuration();
@@ -945,7 +945,7 @@ public class PlayerDataEventHandler {
             }
 
             @SuppressWarnings("null")
-            MobEffectInstance warriorBlessing = player.getEffect(ModMobEffects.WARRIOR_BLESSING);
+            MobEffectInstance warriorBlessing = player.getEffect(ModMobEffects.WARRIOR_BLESSING.get());
             if (warriorBlessing != null) {
                 int bonus = ModMobEffects.warriorAttackBonus(warriorBlessing.getAmplifier());
                 long endTick = now + warriorBlessing.getDuration();
@@ -955,7 +955,7 @@ public class PlayerDataEventHandler {
             }
 
             @SuppressWarnings("null")
-            MobEffectInstance guardianBlessing = player.getEffect(ModMobEffects.GUARDIAN_BLESSING);
+            MobEffectInstance guardianBlessing = player.getEffect(ModMobEffects.GUARDIAN_BLESSING.get());
             if (guardianBlessing != null) {
                 int bonus = ModMobEffects.guardianDefenseBonus(guardianBlessing.getAmplifier());
                 long endTick = now + guardianBlessing.getDuration();
@@ -965,7 +965,7 @@ public class PlayerDataEventHandler {
             }
 
             @SuppressWarnings("null")
-            MobEffectInstance magnetism = player.getEffect(ModMobEffects.MAGNETISM);
+            MobEffectInstance magnetism = player.getEffect(ModMobEffects.MAGNETISM.get());
             if (magnetism != null) {
                 int bonus = ModMobEffects.magnetismRadiusBonus(magnetism.getAmplifier());
                 long endTick = now + magnetism.getDuration();

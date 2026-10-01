@@ -1,5 +1,6 @@
 package com.stardew.craft.gametest;
 
+import com.stardew.craft.port.PortItemStacks;
 import com.mojang.authlib.GameProfile;
 import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.block.decor.MapDecorStaticBlock;
@@ -68,7 +69,7 @@ public final class CraftablesModelIntegrationGameTests {
                     var bounds=level.getBlockState(origin).getCollisionShape(level,origin).bounds();
                     h.assertTrue(bounds.maxY==1&&Math.max(bounds.getXsize(),bounds.getZsize())<=2,"Keg exceeds 2x1x1");
                 } else if(block!=ModBlocks.SOLAR_PANEL.get()) h.assertTrue(extension.equals(origin.above()),"Tall machine did not reserve upper cell");
-                if(block!=ModBlocks.FARM_COMPUTER.get()) h.assertTrue(level.getCapability(Capabilities.ItemHandler.BLOCK,extension,Direction.UP)!=null,"Extension automation lost owner "+block);
+                if(block!=ModBlocks.FARM_COMPUTER.get()) h.assertTrue(com.stardew.craft.port.PortCapabilities.getCapability(level, Capabilities.ItemHandler.BLOCK,extension,Direction.UP)!=null,"Extension automation lost owner "+block);
                 level.getEntitiesOfClass(ItemEntity.class,new AABB(origin).inflate(4)).forEach(ItemEntity::discard);
                 // Exercise normal player mining, including the furnace's existing upper-part drop hook.
                 var removed = level.getBlockState(extension);
@@ -115,15 +116,15 @@ public final class CraftablesModelIntegrationGameTests {
             var state=block.defaultBlockState();var original=factory.newBlockEntity(pos,state);
             var data=new net.minecraft.nbt.CompoundTag();
             var stack=new ItemStack(net.minecraft.world.item.Items.DIAMOND);
-            data.put("input",stack.save(level.registryAccess()));data.put("product",stack.save(level.registryAccess()));
+            data.put("input",PortItemStacks.save(stack, level.registryAccess()));data.put("product",PortItemStacks.save(stack, level.registryAccess()));
             data.putLong("readyAtAbsMinute",Long.MAX_VALUE/2);data.putBoolean("ready",false);
-            original.loadWithComponents(data,level.registryAccess());
+            original.load(data);
             var received=factory.newBlockEntity(pos,state);
-            received.loadWithComponents(original.getUpdateTag(level.registryAccess()),level.registryAccess());
+            received.load(original.getUpdateTag());
             var working=received.getClass().getMethod("isWorking");
             h.assertTrue((boolean)working.invoke(received),"Work flag lost through packet "+block);
-            data.putBoolean("ready",true);original.loadWithComponents(data,level.registryAccess());
-            received.loadWithComponents(original.getUpdateTag(level.registryAccess()),level.registryAccess());
+            data.putBoolean("ready",true);original.load(data);
+            received.load(original.getUpdateTag());
             h.assertTrue(!(boolean)working.invoke(received),"Ready machine continues working "+block);
         }
         h.succeed();

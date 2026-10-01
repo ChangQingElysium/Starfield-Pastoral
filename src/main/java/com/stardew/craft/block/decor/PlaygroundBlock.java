@@ -117,7 +117,7 @@ public final class PlaygroundBlock extends MapDecorStaticBlock implements Entity
     }
 
     @Override
-    protected net.minecraft.world.InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos,
+    public net.minecraft.world.InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos,
             net.minecraft.world.entity.player.Player player, net.minecraft.world.phys.BlockHitResult hit) {
         if (!modelName.equals("bird_spring_rider") || player.isShiftKeyDown() || player.isPassenger())
             return net.minecraft.world.InteractionResult.PASS;

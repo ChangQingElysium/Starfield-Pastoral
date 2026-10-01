@@ -45,8 +45,9 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import com.stardew.craft.port.PortBlockInteraction;
 
-public class BerryBushBlock extends Block implements EntityBlock {
+public class BerryBushBlock extends Block implements EntityBlock, PortBlockInteraction {
     public enum Part implements StringRepresentable {
         MAIN("main"),
         EXTENSION("extension");
@@ -197,13 +198,13 @@ public class BerryBushBlock extends Block implements EntityBlock {
 
     @Override
     @SuppressWarnings("deprecation")
-    protected boolean canSurvive(@Nonnull BlockState state, @Nonnull LevelReader level, @Nonnull BlockPos pos) {
+    public boolean canSurvive(@Nonnull BlockState state, @Nonnull LevelReader level, @Nonnull BlockPos pos) {
         return state.getValue(PART) == Part.MAIN || findMainPos(level, pos, state) != null;
     }
 
     @Override
     @SuppressWarnings("deprecation")
-    protected BlockState updateShape(@Nonnull BlockState state,
+    public BlockState updateShape(@Nonnull BlockState state,
                                      @Nonnull net.minecraft.core.Direction direction,
                                      @Nonnull BlockState neighborState,
                                      @Nonnull LevelAccessor level,
@@ -212,8 +213,15 @@ public class BerryBushBlock extends Block implements EntityBlock {
         return state.canSurvive(level, pos) ? state : Blocks.AIR.defaultBlockState();
     }
 
+    // PORT(1.20.1): replay the 1.21 useItemOn/useWithoutItem dispatch.
     @Override
-    protected ItemInteractionResult useItemOn(@Nonnull ItemStack stack,
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player,
+            InteractionHand hand, BlockHitResult hit) {
+        return PortBlockInteraction.dispatch(this, state, level, pos, player, hand, hit);
+    }
+
+    @Override
+    public ItemInteractionResult useItemOn(@Nonnull ItemStack stack,
                                               @Nonnull BlockState state,
                                               @Nonnull Level level,
                                               @Nonnull BlockPos pos,
@@ -227,7 +235,7 @@ public class BerryBushBlock extends Block implements EntityBlock {
     }
 
     @Override
-    protected InteractionResult useWithoutItem(@Nonnull BlockState state,
+    public InteractionResult useWithoutItem(@Nonnull BlockState state,
                                                @Nonnull Level level,
                                                @Nonnull BlockPos pos,
                                                @Nonnull Player player,
@@ -325,7 +333,7 @@ public class BerryBushBlock extends Block implements EntityBlock {
     }
 
     @Override
-    public BlockState playerWillDestroy(@Nonnull Level level, @Nonnull BlockPos pos, @Nonnull BlockState state, @Nonnull Player player) {
+    public void playerWillDestroy(@Nonnull Level level, @Nonnull BlockPos pos, @Nonnull BlockState state, @Nonnull Player player) {
         if (!level.isClientSide) {
             BlockPos mainPos = findMainPos(level, pos, state);
             if (mainPos != null) {
@@ -340,7 +348,7 @@ public class BerryBushBlock extends Block implements EntityBlock {
                 }
             }
         }
-        return super.playerWillDestroy(level, pos, state, player);
+        super.playerWillDestroy(level, pos, state, player);
     }
 
     private VoxelShape shapeForCell(VoxelShape[] shapes, BlockGetter level, BlockPos pos, BlockState state) {

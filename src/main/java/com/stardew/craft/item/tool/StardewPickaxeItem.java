@@ -7,7 +7,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.PickaxeItem;
 import net.minecraft.world.item.Tier;
-import com.stardew.craft.port.net.minecraft.world.item.component.Unbreakable;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -24,11 +23,18 @@ public class StardewPickaxeItem extends PickaxeItem implements IStardewItem {
 	 * @param extraVanillaSpeed Extra speed added on vanilla pickaxe-mineable blocks (used for tier4 being "a bit faster").
 	 */
 	public StardewPickaxeItem(int stardewTier, Tier tier, float extraVanillaSpeed, Properties properties) {
-		super(tier, properties.stacksTo(1)
-				.component(DataComponents.UNBREAKABLE, new Unbreakable(false)));
+		super(tier, properties.stacksTo(1)); // PORT(1.20.1): unbreakable via isDamageable (no default components)
 		this.stardewTier = stardewTier;
 		this.vanillaLikeSpeed = tier.getSpeed();
 		this.extraVanillaSpeed = extraVanillaSpeed;
+	}
+
+	// PORT(1.20.1): 1.21 gave these tools a hidden minecraft:unbreakable default component.
+	// 1.20.1 has no per-item default components; Forge's isDamageable(stack) has the same effect
+	// (no durability loss, no durability bar, no "Unbreakable" tooltip line).
+	@Override
+	public boolean isDamageable(net.minecraft.world.item.ItemStack stack) {
+		return false;
 	}
 
 	public int getStardewTier() {

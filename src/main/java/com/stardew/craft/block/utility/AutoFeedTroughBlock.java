@@ -43,9 +43,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import com.stardew.craft.port.PortBlockInteraction;
 
 @SuppressWarnings("null")
-public class AutoFeedTroughBlock extends Block implements EntityBlock {
+public class AutoFeedTroughBlock extends Block implements EntityBlock, PortBlockInteraction {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final BooleanProperty LEFT_CONNECTED = BooleanProperty.create("left_connected");
     public static final BooleanProperty RIGHT_CONNECTED = BooleanProperty.create("right_connected");
@@ -71,7 +72,7 @@ public class AutoFeedTroughBlock extends Block implements EntityBlock {
 
     @SuppressWarnings("null")
     @Override
-    protected List<ItemStack> getDrops(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") LootParams.Builder params) {
+    public List<ItemStack> getDrops(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") LootParams.Builder params) {
         return List.of(new ItemStack(ModBlocks.AUTOFEED_TROUGH.get()));
     }
 
@@ -143,7 +144,7 @@ public class AutoFeedTroughBlock extends Block implements EntityBlock {
 
     @SuppressWarnings("null")
     @Override
-    protected BlockState updateShape(@SuppressWarnings("null") BlockState state,
+    public BlockState updateShape(@SuppressWarnings("null") BlockState state,
                                      @SuppressWarnings("null") Direction direction,
                                      @SuppressWarnings("null") BlockState neighborState,
                                      @SuppressWarnings("null") LevelAccessor level,
@@ -254,9 +255,16 @@ public class AutoFeedTroughBlock extends Block implements EntityBlock {
         return false;
     }
 
+    // PORT(1.20.1): replay the 1.21 useItemOn/useWithoutItem dispatch.
+    @Override
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player,
+            InteractionHand hand, BlockHitResult hit) {
+        return PortBlockInteraction.dispatch(this, state, level, pos, player, hand, hit);
+    }
+
     @SuppressWarnings("null")
     @Override
-    protected ItemInteractionResult useItemOn(@SuppressWarnings("null") ItemStack stack,
+    public ItemInteractionResult useItemOn(@SuppressWarnings("null") ItemStack stack,
                                               @SuppressWarnings("null") BlockState state,
                                               @SuppressWarnings("null") Level level,
                                               @SuppressWarnings("null") BlockPos pos,
@@ -288,7 +296,7 @@ public class AutoFeedTroughBlock extends Block implements EntityBlock {
 
     @SuppressWarnings("null")
     @Override
-    protected InteractionResult useWithoutItem(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") Level level, @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") Player player, @SuppressWarnings("null") BlockHitResult hit) {
+    public InteractionResult useWithoutItem(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") Level level, @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") Player player, @SuppressWarnings("null") BlockHitResult hit) {
         if (level.isClientSide) {
             return InteractionResult.SUCCESS;
         }

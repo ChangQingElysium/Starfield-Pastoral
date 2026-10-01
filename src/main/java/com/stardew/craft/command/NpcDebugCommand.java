@@ -1,5 +1,6 @@
 package com.stardew.craft.command;
 
+import com.stardew.craft.port.PortLevels;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -356,11 +357,11 @@ public final class NpcDebugCommand {
                 feet.getX() + 0.5D - halfWidth, feet.getY(), feet.getZ() + 0.5D - halfWidth,
                 feet.getX() + 0.5D + halfWidth, feet.getY() + entity.getBbHeight(), feet.getZ() + 0.5D + halfWidth
         ).deflate(1.0E-7D);
-        if (!level.noBlockCollision(entity, body)) {
+        if (!PortLevels.noBlockCollision(level, entity, body)) {
             return '#';
         }
         AABB supportProbe = body.move(0.0D, -0.08D, 0.0D);
-        return level.noBlockCollision(entity, supportProbe) ? '~' : '.';
+        return PortLevels.noBlockCollision(level, entity, supportProbe) ? '~' : '.';
     }
 
     private static String formatVec(Vec3 v) {

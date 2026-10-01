@@ -1,5 +1,6 @@
 package com.stardew.craft.item.equipment;
 
+import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.item.ModItems;
 import java.util.ArrayList;
 import java.util.List;
@@ -72,7 +73,7 @@ public final class CombinedRingData {
         if (stack == null || stack.isEmpty()) {
             return List.of();
         }
-        CustomData data = stack.get(DataComponents.CUSTOM_DATA);
+        CustomData data = PortItemData.get(stack, DataComponents.CUSTOM_DATA);
         if (data == null) {
             return List.of();
         }
@@ -122,7 +123,7 @@ public final class CombinedRingData {
     }
 
     private static void write(ItemStack stack, List<String> ringIds) {
-        CustomData data = stack.get(DataComponents.CUSTOM_DATA);
+        CustomData data = PortItemData.get(stack, DataComponents.CUSTOM_DATA);
         CompoundTag root = data != null ? data.copyTag() : new CompoundTag();
         CompoundTag combinedTag = new CompoundTag();
         ListTag ringList = new ListTag();
@@ -133,7 +134,7 @@ public final class CombinedRingData {
         }
         combinedTag.put(TAG_RING_IDS, ringList);
         root.put(TAG_COMBINED_RING, combinedTag);
-        stack.set(DataComponents.CUSTOM_DATA, CustomData.of(root));
+        PortItemData.set(stack, DataComponents.CUSTOM_DATA, CustomData.of(root));
     }
 
     private static List<String> ringIdsFromEquipmentSlot(String value) {

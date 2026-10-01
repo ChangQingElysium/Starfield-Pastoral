@@ -31,7 +31,7 @@ public final class NpcDialogueEventData extends SavedData {
 
     public static NpcDialogueEventData get(MinecraftServer server) {
         return server.overworld().getDataStorage().computeIfAbsent(
-                new SavedData.Factory<>(NpcDialogueEventData::new, NpcDialogueEventData::load),
+                com.stardew.craft.port.PortSavedData.loader(new com.stardew.craft.port.PortSavedData.Factory<>(NpcDialogueEventData::new, NpcDialogueEventData::load)), com.stardew.craft.port.PortSavedData.constructor(new com.stardew.craft.port.PortSavedData.Factory<>(NpcDialogueEventData::new, NpcDialogueEventData::load)),
                 DATA_NAME
         );
     }
@@ -124,7 +124,7 @@ public final class NpcDialogueEventData extends SavedData {
     }
 
     @Override
-    public CompoundTag save(CompoundTag tag, HolderLookup.Provider provider) {
+    public CompoundTag save(CompoundTag tag) { net.minecraft.core.HolderLookup.Provider provider = com.stardew.craft.port.PortRegistries.lookup();
         ListTag playerList = new ListTag();
         for (Map.Entry<UUID, PlayerState> entry : players.entrySet()) {
             CompoundTag playerTag = entry.getValue().save();

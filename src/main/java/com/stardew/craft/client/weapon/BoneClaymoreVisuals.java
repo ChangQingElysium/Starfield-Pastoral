@@ -13,7 +13,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import com.stardew.craft.port.net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import static com.stardew.craft.client.weapon.MeleeWeaponVisuals.*;
@@ -42,7 +42,7 @@ public final class BoneClaymoreVisuals {
     public static void trace(BoneFractureTracePayload p) {
         ensureLevel(); var mc=Minecraft.getInstance();
         if(level==null || mc.player==null || !(level.getEntity(p.target()) instanceof LivingEntity target)
-                || !target.isAlive() || target.distanceToSqr(mc.player)>32*32 || !Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()) return;
+                || !target.isAlive() || target.distanceToSqr(mc.player)>32*32 || !Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()) return;
         if(p.remaining()<=0) {TRACES.remove(p.target());return;}
         Trace previous=TRACES.get(p.target());
         if(previous!=null && previous.target.equals(target.getUUID()) && p.endTick()<=previous.serverEnd) return;
@@ -59,8 +59,8 @@ public final class BoneClaymoreVisuals {
     @SubscribeEvent public static void render(RenderLevelStageEvent event) {
         if(event.getStage()!=RenderLevelStageEvent.Stage.AFTER_PARTICLES) return;
         ensureLevel(); var mc=Minecraft.getInstance();
-        if(level==null || TRACES.isEmpty() || !Config.ENABLE_WEAPON_SPECIAL_EFFECTS.getAsBoolean()) return;
-        float partial=event.getPartialTick().getGameTimeDeltaPartialTick(false);
+        if(level==null || TRACES.isEmpty() || !Config.ENABLE_WEAPON_SPECIAL_EFFECTS.get()) return;
+        float partial=event.getPartialTick();
         Vec3 camera=event.getCamera().getPosition(); var buffers=mc.renderBuffers().bufferSource();
         var out=buffers.getBuffer(WeaponEffectRenderTypes.MOLTEN_GLOW); var pose=event.getPoseStack().last().pose();
         for(var entry:TRACES.entrySet()) {

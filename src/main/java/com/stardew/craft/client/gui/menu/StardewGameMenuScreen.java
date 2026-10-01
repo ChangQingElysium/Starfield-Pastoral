@@ -857,7 +857,7 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
         if (this.minecraft == null || this.minecraft.player == null) {
             return;
         }
-        ResourceLocation skin = this.minecraft.player.getSkin().texture();
+        ResourceLocation skin = com.stardew.craft.port.net.minecraft.client.resources.PlayerSkin.of(this.minecraft.player).texture();
         int faceSize = ui(32);
         int faceX = tabX + ui(16);
         int faceY = tabY + ui(16);
@@ -4888,9 +4888,9 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
             List<Component> lines = new ArrayList<>();
             // Item tooltip lines (name, category, description, etc.)
             if (this.minecraft != null && this.minecraft.player != null) {
-                Item.TooltipContext context = Item.TooltipContext.of(this.minecraft.level);
+                // PORT(1.20.1): no Item.TooltipContext; the tooltip reads the player's level itself.
                 TooltipFlag flag = this.minecraft.options.advancedItemTooltips ? TooltipFlag.ADVANCED : TooltipFlag.NORMAL;
-                lines.addAll(output.getTooltipLines(context, this.minecraft.player, flag));
+                lines.addAll(output.getTooltipLines(this.minecraft.player, flag));
             } else {
                 lines.add(output.getHoverName().copy());
             }
@@ -5354,7 +5354,8 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollY) {
+        double scrollX = 0.0D; // PORT(1.20.1): no horizontal scroll before 1.20.2
         if (currentTab == TAB_SOCIAL && socialTuneMode) {
             if (scrollY > 0) {
                 socialTuneStep = Math.min(16, socialTuneStep + 1);
@@ -5430,7 +5431,7 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
         }
 
         if (currentTab != 4 || craftingRecipeIds.isEmpty()) {
-            return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
+            return super.mouseScrolled(mouseX, mouseY, scrollY);
         }
 
         if (scrollY > 0 && changeCraftingPage(-1, false)
@@ -5438,7 +5439,7 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
             return true;
         }
 
-        return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
+        return super.mouseScrolled(mouseX, mouseY, scrollY);
     }
 
     @Override
