@@ -16,10 +16,10 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import org.joml.Matrix4f;
-import software.bernie.geckolib.renderer.GeoEntityRenderer;
+import com.stardew.craft.client.model.nativebb.BlockbenchEntityRenderer;
 
 @SuppressWarnings("null")
-public class NpcGeoRenderer extends GeoEntityRenderer<StardewNpcEntity> {
+public class NpcGeoRenderer extends BlockbenchEntityRenderer<StardewNpcEntity> {
     public NpcGeoRenderer(EntityRendererProvider.Context context) {
         super(context, new NpcGeoModel());
         this.shadowRadius = 0.35F;

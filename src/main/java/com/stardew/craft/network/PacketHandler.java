@@ -92,7 +92,7 @@ public class PacketHandler {
         // Adds per-player daily-info and Robin construction snapshots for HUD addons.
         // Fishing now carries use identities and complete catch stacks plus their world origins.
         // Pet selection now carries namespaced breed IDs and validates the addon catalog before login.
-        final PayloadRegistrar registrar = event.registrar("30");
+        final PayloadRegistrar registrar = event.registrar("31");
 
         registrar.configurationToClient(com.stardew.craft.pet.PetCatalogHandshake.Offer.TYPE, com.stardew.craft.pet.PetCatalogHandshake.Offer.CODEC, com.stardew.craft.pet.PetCatalogHandshake.Offer::handle);
         registrar.configurationToServer(com.stardew.craft.pet.PetCatalogHandshake.Ack.TYPE, com.stardew.craft.pet.PetCatalogHandshake.Ack.CODEC, com.stardew.craft.pet.PetCatalogHandshake.Ack::handle);
@@ -1995,6 +1995,11 @@ public class PacketHandler {
         );
 
         // Marlon adventure guild dialog (S→C) and choice response (C→S)
+        registrar.playToClient(
+            com.stardew.craft.network.payload.MarlonRecoveryConfirmedPayload.TYPE,
+            com.stardew.craft.network.payload.MarlonRecoveryConfirmedPayload.STREAM_CODEC,
+            com.stardew.craft.network.payload.MarlonRecoveryConfirmedPayload::handle
+        );
         registrar.playToClient(
             com.stardew.craft.network.payload.OpenMarlonMenuPayload.TYPE,
             com.stardew.craft.network.payload.OpenMarlonMenuPayload.STREAM_CODEC,

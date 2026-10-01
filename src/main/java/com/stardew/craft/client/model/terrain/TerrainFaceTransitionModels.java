@@ -48,7 +48,9 @@ import net.neoforged.neoforge.client.model.data.ModelProperty;
 @SuppressWarnings("removal")
 @EventBusSubscriber(modid = StardewCraft.MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public final class TerrainFaceTransitionModels {
-    private record Faces(int season, List<List<TerrainFaceConnections.Connection>> connections) {}
+    private record Faces(int season, int calendarSeason,
+                         net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level> dimension,
+                         BlockPos pos, List<List<TerrainFaceConnections.Connection>> connections) {}
     private static final ModelProperty<Faces> FACES = new ModelProperty<>();
     private TerrainFaceTransitionModels() {}
 
@@ -108,7 +110,9 @@ public final class TerrainFaceTransitionModels {
         private int season(ModelData data) { Faces faces=data.get(FACES); return faces == null ? TerrainSeasonTextures.currentTextureSet() : faces.season(); }
 
         @Override public ModelData getModelData(BlockAndTintGetter level, BlockPos pos, BlockState state, ModelData data) {
-            int season=TerrainSeasonTextures.currentTextureSet();
+            int calendarSeason=TerrainSeasonTextures.currentTextureSet();
+            var dimension=GrassTransitionModels.dimension(level);
+            int season=TerrainSeasonTextures.textureSetAt(calendarSeason,dimension,pos,state);
             ModelData base=surface(season).getModelData(level,pos,state,data);
             List<List<TerrainFaceConnections.Connection>> connections=new ArrayList<>(6);
             for (Direction face : Direction.values()) {
@@ -120,7 +124,7 @@ public final class TerrainFaceTransitionModels {
                         .toList();
                 connections.add(list);
             }
-            return base.derive().with(FACES,new Faces(season,List.copyOf(connections))).build();
+            return base.derive().with(FACES,new Faces(season,calendarSeason,dimension,pos.immutable(),List.copyOf(connections))).build();
         }
 
         @Override public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, RandomSource random) {
@@ -140,7 +144,9 @@ public final class TerrainFaceTransitionModels {
                     donor=TerrainSoils.substrate(donor).defaultBlockState();
                 else if (TerrainSoils.farmland(donor) && TerrainSoils.farmland(this.state))
                     donor=this.state.setValue(FarmBlock.MOISTURE, donor.getValue(FarmBlock.MOISTURE));
-                paints.add(new TerrainFaceQuads.Paint(connection,nativeFace(raw.get(donor)[season],donor,connection.face())));
+                int donorSeason=TerrainSeasonTextures.textureSetAt(faces.calendarSeason(),faces.dimension(),
+                        faces.pos().offset(connection.offset()),donor);
+                paints.add(new TerrainFaceQuads.Paint(connection,nativeFace(raw.get(donor)[donorSeason],donor,connection.face())));
             }
             BakedQuad nativeQuad=nativeFace(raw.get(this.state)[season],this.state,side);
             List<BakedQuad> result=new ArrayList<>();

@@ -10,6 +10,9 @@ public final class ConfigMigration {
     }
 
     public static void onConfigEvent(ModConfigEvent event) {
+        if (event.getConfig().getSpec() == Config.CLIENT_SPEC) {
+            migratePlayerVitalsLayout();
+        }
         if (event.getConfig().getSpec() == Config.COMMON_SPEC
                 || event.getConfig().getSpec() == Config.CLIENT_SPEC) {
             migrateClientValuesWhenReady();
@@ -18,6 +21,19 @@ public final class ConfigMigration {
                 || event.getConfig().getSpec() == Config.SERVER_SPEC) {
             migrateServerValuesWhenReady();
         }
+    }
+
+    private static void migratePlayerVitalsLayout() {
+        if (!Config.CLIENT_SPEC.isLoaded() || Config.CLIENT.PLAYER_VITALS_LAYOUT_IMPORTED.get()) return;
+        Config.HudElementSettings settings = Config.CLIENT.HUD_ELEMENTS.get(Config.HudElement.PLAYER_BARS);
+        if (settings.scalePercent().get() == 100
+                && settings.horizontalAnchor().get() == Config.HudHorizontalAnchor.CENTER
+                && settings.verticalAnchor().get() == Config.HudVerticalAnchor.BOTTOM
+                && settings.offsetX().get() == 0 && settings.offsetY().get() == 31) {
+            settings.offsetY().set(Config.HudElement.PLAYER_BARS.defaultOffsetY());
+        }
+        Config.CLIENT.PLAYER_VITALS_LAYOUT_IMPORTED.set(true);
+        Config.CLIENT_SPEC.save();
     }
 
     private static void migrateClientValuesWhenReady() {

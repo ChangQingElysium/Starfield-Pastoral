@@ -188,5 +188,15 @@
         }
       }
     ]
+  },
+  {
+    "id": "FlameSpirits",
+    "translation_key": "stardewcraft.slayer.goal.magma_sprites",
+    "required_kills": 150,
+    "monster_tags": [
+      "sd_mob_magma_sprite",
+      "sd_mob_magma_sparker"
+    ],
+    "rewards": []
   }
 ]

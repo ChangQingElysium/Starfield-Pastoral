@@ -1,5 +1,6 @@
 package com.stardew.craft.blockentity;
 
+import com.stardew.craft.model.AnimatedModel;
 import com.stardew.craft.api.v1.agriculture.StardewAgricultureDataApi;
 import com.stardew.craft.api.v1.agriculture.StardewTreeData;
 import com.stardew.craft.block.tree.fruit.FruitTreeBlock;
@@ -22,20 +23,15 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
-import software.bernie.geckolib.animatable.GeoBlockEntity;
-import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.animation.AnimatableManager;
-import software.bernie.geckolib.util.GeckoLibUtil;
 
 import javax.annotation.Nullable;
 
-public class FruitTreeBlockEntity extends BlockEntity implements GeoBlockEntity {
+public class FruitTreeBlockEntity extends BlockEntity implements AnimatedModel {
     private static final String TAG_TYPE = "Type";
     private static final String TAG_FRUIT_COUNT = "FruitCount";
     private static final String TAG_DAYS_SINCE_MATURE = "DaysSinceMature";
     private static final String TAG_LIGHTNING_DAYS = "LightningDays";
 
-    private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
     private FruitTreeType type = FruitTreeType.CHERRY;
     private int fruitCount;
     private int daysSinceMature;
@@ -184,15 +180,6 @@ public class FruitTreeBlockEntity extends BlockEntity implements GeoBlockEntity 
         if (level != null && !level.isClientSide()) {
             level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_ALL);
         }
-    }
-
-    @Override
-    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-    }
-
-    @Override
-    public AnimatableInstanceCache getAnimatableInstanceCache() {
-        return cache;
     }
 
     @SuppressWarnings("null")

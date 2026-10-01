@@ -1,5 +1,6 @@
 package com.stardew.craft.blockentity;
 
+import com.stardew.craft.model.AnimatedModel;
 import com.stardew.craft.block.crop.StardewCropBlock;
 import com.stardew.craft.api.v1.agriculture.StardewCropRuntime;
 import com.stardew.craft.api.v1.agriculture.StardewCropState;
@@ -45,10 +46,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.phys.AABB;
-import software.bernie.geckolib.animatable.GeoBlockEntity;
-import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.animation.AnimatableManager;
-import software.bernie.geckolib.util.GeckoLibUtil;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -60,7 +57,7 @@ import java.util.UUID;
 /** Inventory and original-style harvesting runtime shared by the Wizard buildings. */
 @SuppressWarnings("null")
 public final class WizardBuildingBlockEntity extends net.minecraft.world.level.block.entity.BlockEntity
-        implements Container, MenuProvider, GeoBlockEntity {
+        implements Container, MenuProvider, AnimatedModel {
     private static final int SLOT_COUNT = 36;
     private static final int HARVEST_RADIUS = 8;
     private static final int MAX_HARVESTERS = 3;
@@ -76,7 +73,6 @@ public final class WizardBuildingBlockEntity extends net.minecraft.world.level.b
     };
 
     private final NonNullList<ItemStack> items = NonNullList.withSize(SLOT_COUNT, ItemStack.EMPTY);
-    private final AnimatableInstanceCache animationCache = GeckoLibUtil.createInstanceCache(this);
     @Nullable
     private UUID owner;
     private int raisinDaysLeft;
@@ -624,13 +620,6 @@ public final class WizardBuildingBlockEntity extends net.minecraft.world.level.b
     public ClientboundBlockEntityDataPacket getUpdatePacket() {
         return ClientboundBlockEntityDataPacket.create(this);
     }
-
-    @Override
-    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-    }
-
-    @Override
-    public AnimatableInstanceCache getAnimatableInstanceCache() { return animationCache; }
 
     public AABB getRenderBoundingBox() { return new AABB(worldPosition).inflate(6.0); }
 }

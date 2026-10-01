@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "stardewcraft:item/forage/morel",
+    "particle": "stardewcraft:item/forage/morel",
+    "layer1": "stardewcraft:item/quality/iridium_star"
+  }
+}

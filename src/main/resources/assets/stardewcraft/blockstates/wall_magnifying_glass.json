@@ -1,0 +1,124 @@
+{
+  "multipart": [
+    {
+      "when": {
+        "facing": "north",
+        "part": "main"
+      },
+      "apply": {
+        "model": "stardewcraft:block/decor/house/wall_magnifying_glass",
+        "y": 0
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "main"
+      },
+      "apply": {
+        "model": "stardewcraft:block/decor/house/wall_magnifying_glass_glass",
+        "y": 0
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "extension"
+      },
+      "apply": {
+        "model": "stardewcraft:block/decor/house/wall_magnifying_glass_empty",
+        "y": 0
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "main"
+      },
+      "apply": {
+        "model": "stardewcraft:block/decor/house/wall_magnifying_glass",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "main"
+      },
+      "apply": {
+        "model": "stardewcraft:block/decor/house/wall_magnifying_glass_glass",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "extension"
+      },
+      "apply": {
+        "model": "stardewcraft:block/decor/house/wall_magnifying_glass_empty",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "main"
+      },
+      "apply": {
+        "model": "stardewcraft:block/decor/house/wall_magnifying_glass",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "main"
+      },
+      "apply": {
+        "model": "stardewcraft:block/decor/house/wall_magnifying_glass_glass",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "extension"
+      },
+      "apply": {
+        "model": "stardewcraft:block/decor/house/wall_magnifying_glass_empty",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "main"
+      },
+      "apply": {
+        "model": "stardewcraft:block/decor/house/wall_magnifying_glass",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "main"
+      },
+      "apply": {
+        "model": "stardewcraft:block/decor/house/wall_magnifying_glass_glass",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "extension"
+      },
+      "apply": {
+        "model": "stardewcraft:block/decor/house/wall_magnifying_glass_empty",
+        "y": 270
+      }
+    }
+  ]
+}

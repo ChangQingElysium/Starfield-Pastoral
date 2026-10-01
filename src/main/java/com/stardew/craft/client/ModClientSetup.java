@@ -91,6 +91,7 @@ public final class ModClientSetup {
 	@SuppressWarnings("null")
 	@SubscribeEvent
 	public static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {
+        event.registerBlockEntityRenderer(ModBlockEntities.FRIDGE.get(), com.stardew.craft.client.render.FridgeBlockEntityRenderer::new);
 		event.registerBlockEntityRenderer(ModBlockEntities.JOJA_BILLBOARD.get(), com.stardew.craft.client.render.JojaBillboardBlockEntityRenderer::new);
 		event.registerBlockEntityRenderer(ModBlockEntities.ICE_CREAM_STAND.get(), com.stardew.craft.client.render.IceCreamStandBlockEntityRenderer::new);
 		event.registerBlockEntityRenderer(ModBlockEntities.BOOKSELLER_DECOR.get(), com.stardew.craft.client.render.BooksellerDecorBlockEntityRenderer::new);
@@ -239,6 +240,7 @@ public final class ModClientSetup {
 		event.register(ModMenuTypes.FAIR_GRANGE_DISPLAY.get(), com.stardew.craft.client.gui.festival.FairGrangeDisplayScreen::new);
 		event.register(ModMenuTypes.BUNDLE.get(), com.stardew.craft.communitycenter.client.BundleScreen::new);
 		event.register(ModMenuTypes.BUNDLE_REWARD.get(), com.stardew.craft.communitycenter.client.BundleRewardScreen::new);
+        event.register(ModMenuTypes.GIL_REWARD.get(), com.stardew.craft.client.gui.GilRewardScreen::new);
 	}
 
 	@SuppressWarnings("null")

@@ -1,27 +1,14 @@
 package com.stardew.craft.blockentity;
 
+import com.stardew.craft.model.AnimatedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
-import software.bernie.geckolib.animatable.GeoBlockEntity;
-import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.animation.AnimatableManager;
-import software.bernie.geckolib.util.GeckoLibUtil;
 
-public class FairStrengthTesterBlockEntity extends net.minecraft.world.level.block.entity.BlockEntity implements GeoBlockEntity {
-    private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
+public class FairStrengthTesterBlockEntity extends net.minecraft.world.level.block.entity.BlockEntity implements AnimatedModel {
 
     public FairStrengthTesterBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.FAIR_STRENGTH_TESTER.get(), pos, state);
-    }
-
-    @Override
-    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-    }
-
-    @Override
-    public AnimatableInstanceCache getAnimatableInstanceCache() {
-        return cache;
     }
 
     @SuppressWarnings("null")

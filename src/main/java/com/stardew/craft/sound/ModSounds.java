@@ -290,6 +290,16 @@ public final class ModSounds {
     /** SDV cue "batFlap" — wings flapping (used by crows in SDV). */
     public static final DeferredHolder<SoundEvent, SoundEvent> CROW_FLAP = register("crow_flap");
 
+    // ─── Volcano Dungeon (Ginger Island) ───
+    /** SDV cue "cowboy_gunload" — dwarf gate opens (Wavebank 272 / 0x110). */
+    public static final DeferredHolder<SoundEvent, SoundEvent> COWBOY_GUNLOAD = register("cowboy_gunload");
+    /** SDV cue "magma_sprite_spot" — magma sprite notices the player (Wavebank 381 / 0x17d). */
+    public static final DeferredHolder<SoundEvent, SoundEvent> MAGMA_SPRITE_SPOT = register("magma_sprite_spot");
+    /** SDV cue "fallDown" — volcano shortcut jump (Wavebank 318 / 0x13e). */
+    public static final DeferredHolder<SoundEvent, SoundEvent> FALL_DOWN = register("fall_down");
+    /** SDV cue "clubSmash" — volcano shortcut landing (Wavebank 174 / 0xae). */
+    public static final DeferredHolder<SoundEvent, SoundEvent> CLUB_SMASH = register("club_smash");
+
 	@SuppressWarnings("null")
 	private static DeferredHolder<SoundEvent, SoundEvent> register(String path) {
 		@SuppressWarnings("null")

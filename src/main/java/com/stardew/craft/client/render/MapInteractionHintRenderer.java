@@ -136,16 +136,16 @@ public final class MapInteractionHintRenderer {
         RenderSystem.setShaderColor(
                 1.0F, 1.0F, 1.0F,
                 fadeAlpha * stateOpacity);
-        graphics.blit(
+        // GUI sprites are loaded together on resource reload, not lazily from disk on first hover.
+        graphics.blitSprite(
                 icon.texture(),
-                x, y, 0, 0,
-                icon.width(), icon.height(),
+                x, y,
                 icon.width(), icon.height());
         RenderSystem.setShaderColor(
                 1.0F, 1.0F, 1.0F, 1.0F);
     }
 
-    private static Icon iconFor(
+    static Icon iconFor(
             StardewInteractionHintType type,
             boolean done
     ) {
@@ -162,8 +162,7 @@ public final class MapInteractionHintRenderer {
         return new Icon(
                 ResourceLocation.fromNamespaceAndPath(
                         StardewCraft.MODID,
-                        "textures/gui/interaction_hint/"
-                                + name + ".png"),
+                        "interaction_hint/" + name),
                 width,
                 height);
     }
@@ -249,7 +248,7 @@ public final class MapInteractionHintRenderer {
         lastFadeUpdateMs = 0L;
     }
 
-    private record Icon(
+    record Icon(
             ResourceLocation texture,
             int width,
             int height

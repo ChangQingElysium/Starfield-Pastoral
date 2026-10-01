@@ -257,8 +257,8 @@ public final class InteriorSubspaceManager {
     private static final BlockPos CARPENTER_SHOP_ORIGIN = BlockPos.ZERO;
     private static final BlockPos CARPENTER_SHOP_INDOOR_SPAWN_OFFSET = new BlockPos(30, 51, -117);
     private static final BlockPos CARPENTER_SHOP_INDOOR_EXIT_PORTAL_OFFSET = new BlockPos(29, 51, -116);
-    private static final BlockPos CARPENTER_SHOP_OUTDOOR_ENTRY_POS = new BlockPos(28, 85, -115);
-    private static final BlockPos CARPENTER_SHOP_OUTDOOR_EXIT_POS = new BlockPos(29, 85, -113);
+    private static final BlockPos CARPENTER_SHOP_OUTDOOR_ENTRY_POS = new BlockPos(28, 81, -114);
+    private static final BlockPos CARPENTER_SHOP_OUTDOOR_EXIT_POS = new BlockPos(29, 81, -113);
 
     private static final String TAG_PORTAL_MARKER_CARPENTER_SHOP_OUTSIDE = "sdv_portal_marker:carpenter_shop_outside";
     private static final String TAG_PORTAL_MARKER_CARPENTER_SHOP_INSIDE = "sdv_portal_marker:carpenter_shop_inside";
@@ -1560,23 +1560,7 @@ public final class InteriorSubspaceManager {
         placePortalTriggerArea(level, trailerIndoorExitPortal, 3, 3, 1,
             TAG_PORTAL_MARKER_TRAILER_INSIDE, "sdv_portal_target:trailer_exit");
 
-        // 沙漠公交站传送区域：在空气位置放置触发方块（默认行为，跳过已有非空气方块）
-        placePortalTriggerArea(level,
-            com.stardew.craft.desert.DesertConstants.BUS_PORTAL_BASE,
-            com.stardew.craft.desert.DesertConstants.BUS_PORTAL_H,
-            com.stardew.craft.desert.DesertConstants.BUS_PORTAL_X,
-            com.stardew.craft.desert.DesertConstants.BUS_PORTAL_Z,
-            com.stardew.craft.desert.DesertConstants.TAG_BUS_PORTAL_MARKER,
-            com.stardew.craft.desert.DesertConstants.TAG_BUS_PORTAL_TARGET);
-
-        // 沙漠返程公交站：沙漠侧 2x2x1 区域，在空气位置放置触发方块
-        placePortalTriggerArea(level,
-            com.stardew.craft.desert.DesertConstants.BUS_RETURN_PORTAL_BASE,
-            com.stardew.craft.desert.DesertConstants.BUS_RETURN_PORTAL_H,
-            com.stardew.craft.desert.DesertConstants.BUS_RETURN_PORTAL_X,
-            com.stardew.craft.desert.DesertConstants.BUS_RETURN_PORTAL_Z,
-            com.stardew.craft.desert.DesertConstants.TAG_BUS_RETURN_PORTAL_MARKER,
-            com.stardew.craft.desert.DesertConstants.TAG_BUS_RETURN_PORTAL_TARGET);
+        // Bus travel now belongs to the ticket machine and the desert bus themselves.
 
         // 矿井室外入口：3高 x 2宽 x 1深。
         placePortalTriggerArea(level, MINE_OUTDOOR_ENTRY_POS, 3, 2, 1,
@@ -1749,7 +1733,8 @@ public final class InteriorSubspaceManager {
                                                String markerTag,
                                                String targetTag,
                                                boolean solidOnly) {
-        if (TownDoorSystem.replacesLegacy(level.dimension(), targetTag)) return;
+        if (TownDoorSystem.replacesLegacy(level.dimension(), targetTag)
+                || com.stardew.craft.desert.DesertConstants.isLegacyBusTarget(targetTag)) return;
         // ── 注册到自修复注册表 ──
         PORTAL_REGISTRY.put(portalKey(level.dimension(), basePos),
                 new PortalPlacement(level.dimension(), basePos, heightBlocks, xBlocks, zBlocks, markerTag, targetTag, solidOnly));
@@ -1798,14 +1783,22 @@ public final class InteriorSubspaceManager {
                     if (solidOnly && level.getBlockState(pos).isAir()) {
                         continue;
                     }
-                    level.setBlock(pos,
+                    Runnable place = () -> level.setBlock(pos,
                             com.stardew.craft.block.ModBlocks.PORTAL_TRIGGER.get().defaultBlockState(),
                             net.minecraft.world.level.block.Block.UPDATE_ALL);
+                    // The greenhouse protects its whole reservation, including the air in front
+                    // of its door. This trusted write must also apply to deferred placement/repair.
+                    if (TAG_PORTAL_MARKER_GREENHOUSE_OUTSIDE.equals(markerTag)
+                            && "greenhouse_enter".equals(targetId)) {
+                        com.stardew.craft.building.runtime.BuildingProtection.internal(place);
+                    } else {
+                        place.run();
+                    }
                     if (level.getBlockEntity(pos) instanceof
                             com.stardew.craft.blockentity.PortalTriggerBlockEntity be) {
                         be.configure(targetId, markerTag);
+                        placed++;
                     }
-                    placed++;
                 }
             }
         }
@@ -1835,7 +1828,6 @@ public final class InteriorSubspaceManager {
             TAG_PORTAL_MARKER_GREENHOUSE_OUTSIDE,
             "sdv_portal_target:greenhouse_enter"
         );
-        StardewCraft.LOGGER.info("[INTERIOR] Greenhouse outdoor portal placed at {}", pos);
     }
 
     /** Remove both the trigger blocks and their self-repair registration before a greenhouse moves. */
@@ -1844,7 +1836,9 @@ public final class InteriorSubspaceManager {
         var pending = PENDING_PORTALS.get(level);
         if (pending != null) pending.remove(portalKey(level.dimension(), pos));
         InteriorPortalTickets.release(level, pos);
-        for (int dy = 0; dy < 2; dy++) removePortalTriggerIfPresent(level, pos.above(dy));
+        com.stardew.craft.building.runtime.BuildingProtection.internal(() -> {
+            for (int dy = 0; dy < 2; dy++) removePortalTriggerIfPresent(level, pos.above(dy));
+        });
     }
 
     /**

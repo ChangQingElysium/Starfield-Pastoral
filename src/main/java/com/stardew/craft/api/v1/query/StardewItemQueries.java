@@ -21,6 +21,7 @@ import java.util.Set;
 /** Public registry and codec for item selection used by content definitions. */
 public final class StardewItemQueries {
     private static final Map<ResourceLocation, StardewItemQueryType<?>> TYPES = new LinkedHashMap<>();
+    private static final Map<ResourceLocation, StardewItemQueryResolver<?>> PREVIEWS = new LinkedHashMap<>();
     private static final Map<ResourceLocation, StardewTypedContentReferenceProvider<?>>
             REFERENCE_PROVIDERS = new LinkedHashMap<>();
 
@@ -30,6 +31,24 @@ public final class StardewItemQueries {
     );
 
     private StardewItemQueries() {
+    }
+
+    /** Optional pure candidate enumeration for JEI. Never run gameplay selection to build a preview. */
+    public static synchronized <T> void registerPreview(ResourceLocation id, StardewItemQueryResolver<T> preview) {
+        if (!TYPES.containsKey(id)) throw new IllegalArgumentException("Register query type before its preview: " + id);
+        if (PREVIEWS.putIfAbsent(id, Objects.requireNonNull(preview)) != null)
+            throw new IllegalStateException("Query preview already registered: " + id);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static DataResult<List<ItemStack>> preview(StardewItemQuery query, StardewItemQueryContext context) {
+        var resolver = (StardewItemQueryResolver<Object>) PREVIEWS.get(query.type());
+        if (resolver == null) return DataResult.success(List.of());
+        try {
+            var pureContext = new StardewItemQueryContext(context.level(), context.player(), context.random(), context.parameters(), action -> {});
+            return DataResult.success(resolver.resolve(pureContext, query.data()).stream()
+                    .filter(Objects::nonNull).filter(s -> !s.isEmpty()).map(ItemStack::copy).toList());
+        } catch (RuntimeException ex) { return DataResult.error(() -> "Query preview " + query.type() + " failed: " + ex.getMessage()); }
     }
 
     public static synchronized <T> void register(ResourceLocation id, StardewItemQueryType<T> type) {

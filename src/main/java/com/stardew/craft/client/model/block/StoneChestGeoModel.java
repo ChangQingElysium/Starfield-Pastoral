@@ -4,10 +4,10 @@ import com.stardew.craft.StardewCraft;
 import com.stardew.craft.block.utility.WoodenChestColorPalette;
 import com.stardew.craft.blockentity.StoneChestBlockEntity;
 import net.minecraft.resources.ResourceLocation;
-import software.bernie.geckolib.model.GeoModel;
+import com.stardew.craft.client.model.nativebb.BlockbenchModel;
 
 @SuppressWarnings("null")
-public class StoneChestGeoModel extends GeoModel<StoneChestBlockEntity> {
+public class StoneChestGeoModel extends BlockbenchModel<StoneChestBlockEntity> {
     private static final ResourceLocation MODEL = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "geo/block/utility/stone_chest.geo.json");
     private static final ResourceLocation ANIMATION = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "animations/block/utility/stone_chest.animation.json");
     private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/block/utility/stone_chest.png");

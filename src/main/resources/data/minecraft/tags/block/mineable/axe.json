@@ -278,6 +278,7 @@
     "stardewcraft:cream_siding",
     "stardewcraft:ivory_siding",
     "stardewcraft:brown_glass_door",
+    "stardewcraft:red_brown_door",
     "stardewcraft:pierre_sign",
     "stardewcraft:clinic_sign",
     "stardewcraft:ship_wheel_ornament",
@@ -288,6 +289,11 @@
     "stardewcraft:blue_glass_door",
     "stardewcraft:deconstructor",
     "stardewcraft:wood_chipper",
-    "stardewcraft:farm_twig"
+    "stardewcraft:farm_twig",
+    "stardewcraft:forest_green_siding",
+    "stardewcraft:blacksmith_door",
+    "stardewcraft:purple_panel_door",
+    "stardewcraft:library_book_sign",
+    "stardewcraft:timber_awning"
   ]
 }

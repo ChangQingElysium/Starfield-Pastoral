@@ -478,11 +478,6 @@ public class StardewJeiPlugin implements IModPlugin {
 
         List<GeodeProcessingCategory.DisplayEntry> geodeRecipes = new ArrayList<>(
                 GeodeProcessingCategory.buildAllEntries());
-        if (hasServerCatalog) {
-            geodeRecipes.addAll(serverCatalog.geodes().stream()
-                    .map(entry -> new GeodeProcessingCategory.DisplayEntry(entry.geode(), entry.output()))
-                    .toList());
-        }
         refreshRecipeTypeBySignature(recipeManager, GeodeProcessingCategory.RECIPE_TYPE,
                 publishedGeodeRecipes, geodeRecipes,
                 GeodeProcessingCategory.DisplayEntry::contentSignature);

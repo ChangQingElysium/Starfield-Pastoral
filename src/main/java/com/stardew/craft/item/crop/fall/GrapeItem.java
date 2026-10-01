@@ -39,14 +39,6 @@ public class GrapeItem extends Item implements IStardewItem {
         Component baseName = Component.translatable(this.getDescriptionId(stack))
                 .withStyle(ChatFormatting.WHITE);
 
-        @SuppressWarnings("null")
-        var customData = stack.getOrDefault(net.minecraft.core.component.DataComponents.CUSTOM_MODEL_DATA,
-                net.minecraft.world.item.component.CustomModelData.DEFAULT);
-        if (quality != QualityHelper.NORMAL && customData.equals(net.minecraft.world.item.component.CustomModelData.DEFAULT)) {
-            stack.set(net.minecraft.core.component.DataComponents.CUSTOM_MODEL_DATA,
-                    new net.minecraft.world.item.component.CustomModelData(quality));
-        }
-
         if (quality == QualityHelper.NORMAL) {
             return baseName;
         }

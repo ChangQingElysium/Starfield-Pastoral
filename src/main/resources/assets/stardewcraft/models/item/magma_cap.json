@@ -1,7 +1,27 @@
 {
-    "parent":  "minecraft:item/generated",
-    "textures":  {
-                     "layer0":  "stardewcraft:item/forage/magma_cap",
-                     "particle":  "stardewcraft:item/forage/magma_cap"
-                 }
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "stardewcraft:item/forage/magma_cap",
+    "particle": "stardewcraft:item/forage/magma_cap"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "custom_model_data": 1
+      },
+      "model": "stardewcraft:item/magma_cap_silver"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 2
+      },
+      "model": "stardewcraft:item/magma_cap_gold"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 3
+      },
+      "model": "stardewcraft:item/magma_cap_iridium"
+    }
+  ]
 }

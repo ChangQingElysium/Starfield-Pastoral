@@ -147,7 +147,7 @@ public class FarmAreaProtectionEvents {
 
     /**
      * 判断玩家是否可以在指定位置修改方块。
-     * - 非农场区域 → 不可以
+     * - 非农场区域 → 由公共区域游戏规则决定
      * - 自己的实例化农场 → 可以
      * - 别人的实例化农场 → 需要 PERM_FULL(2)
      *
@@ -162,7 +162,12 @@ public class FarmAreaProtectionEvents {
         }
         // 查找该位置属于哪个农场
         java.util.UUID ownerUUID = FarmAreaResolver.getOwnerAt(pos);
-        if (ownerUUID == null) return false; // 不在任何农场内
+        if (ownerUUID == null) {
+            return player.serverLevel().getGameRules().getBoolean(ModGameRules.RULE_STARDEW_ALLOW_PUBLIC_BUILDING)
+                    && isKnownPublicPlacementTarget(player.serverLevel(), pos)
+                    && !com.stardew.craft.greenhouse.GreenhouseManager
+                            .isInGreenhouseExterior(player.serverLevel(), pos);
+        }
 
         // 自己的农场（owner 或 member）
         FarmInstance farm = com.stardew.craft.farm.FarmInstanceRegistry.get().getFarm(ownerUUID);
@@ -173,14 +178,9 @@ public class FarmAreaProtectionEvents {
                 .canModify(ownerUUID, player.getUUID());
     }
 
-    /** Construction only: do not grant crop, machine or inventory access with this rule. */
+    /** Construction and interaction share the public-area rule; farm ownership still takes precedence. */
     public static boolean canBuildAt(ServerPlayer player, BlockPos pos) {
-        if (com.stardew.craft.building.runtime.BuildingProtection.protects(player.serverLevel(),pos)) return false;
-        return canModifyAt(player, pos)
-                || (player.serverLevel().getGameRules().getBoolean(ModGameRules.RULE_STARDEW_ALLOW_PUBLIC_BUILDING)
-                    && isKnownPublicPlacementTarget(player.serverLevel(), pos)
-                    && !com.stardew.craft.greenhouse.GreenhouseManager
-                            .isInGreenhouseExterior(player.serverLevel(), pos));
+        return canModifyAt(player, pos);
     }
 
     /** Permission gate for entity-backed decorations which do not emit BlockEvent placement/break events. */
@@ -219,7 +219,7 @@ public class FarmAreaProtectionEvents {
     /**
      * 判断玩家是否在别人的受保护农场上（没有 PERM_FULL 权限）。
      * 与 canModifyAt 的区别：非农场区域（城镇等）返回 false（允许交互），
-     * 而 canModifyAt 对非农场区域返回 false（禁止修改方块）。
+     * 而 canModifyAt 对非农场区域按公共区域游戏规则判断。
      */
     public static boolean isOnProtectedFarm(ServerPlayer player, BlockPos pos) {
         java.util.UUID ownerUUID = FarmAreaResolver.getOwnerAt(pos);

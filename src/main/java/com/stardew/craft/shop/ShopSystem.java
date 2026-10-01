@@ -27,6 +27,7 @@ public final class ShopSystem {
         event.addListener(new MonsterSlayerGoalRegistry.ReloadListener());
         event.addListener(new com.stardew.craft.museum.MuseumRewardRegistry.ReloadListener());
         event.addListener(new GeodeDropData.ReloadListener());
+        event.addListener(new ToolUpgradeData.ReloadListener());
         event.addListener(new PrizeTicketRewardData.ReloadListener());
         event.addListener(new com.stardew.craft.mining.MineChestRewardData.ReloadListener());
     }

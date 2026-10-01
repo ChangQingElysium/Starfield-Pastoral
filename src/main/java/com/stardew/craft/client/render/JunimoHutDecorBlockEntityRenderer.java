@@ -31,7 +31,7 @@ public class JunimoHutDecorBlockEntityRenderer extends StardewGeoBlockRenderer<J
 
         poseStack.pushPose();
         poseStack.translate(0.5D, 0.0D, 0.5D);
-        poseStack.mulPose(Axis.YP.rotationDegrees(-facing.toYRot()));
+        poseStack.mulPose(Axis.YP.rotationDegrees(-facing.toYRot() + 180.0F));
         poseStack.translate(-0.5D, 0.0D, -0.5D);
         super.render(animatable, partialTick, poseStack, bufferSource, packedLight, packedOverlay);
         poseStack.popPose();

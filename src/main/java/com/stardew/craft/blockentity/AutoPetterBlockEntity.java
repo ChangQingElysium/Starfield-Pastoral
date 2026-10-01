@@ -1,5 +1,7 @@
 package com.stardew.craft.blockentity;
 
+import com.stardew.craft.model.AnimatedModel;
+import com.stardew.craft.model.ModelAnimation;
 import com.stardew.craft.block.utility.AutoPetterBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -7,22 +9,13 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
-import software.bernie.geckolib.animatable.GeoBlockEntity;
-import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.animation.AnimatableManager;
-import software.bernie.geckolib.animation.AnimationController;
-import software.bernie.geckolib.animation.PlayState;
-import software.bernie.geckolib.animation.RawAnimation;
-import software.bernie.geckolib.util.GeckoLibUtil;
 
 import java.util.Objects;
 
-public class AutoPetterBlockEntity extends net.minecraft.world.level.block.entity.BlockEntity implements GeoBlockEntity {
+public class AutoPetterBlockEntity extends net.minecraft.world.level.block.entity.BlockEntity implements AnimatedModel {
     private static final String TAG_BUILDING_ID = "buildingId";
-    private static final RawAnimation IDLE = RawAnimation.begin().thenLoop("idle");
     private static final int CHECK_INTERVAL_TICKS = 20;
 
-    private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
     private String buildingId = "";
     private boolean working;
 
@@ -81,21 +74,8 @@ public class AutoPetterBlockEntity extends net.minecraft.world.level.block.entit
 
     @SuppressWarnings("null")
     @Override
-    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "main", 5, state -> {
-            BlockState blockState = getBlockState();
-            boolean shouldAnimate = blockState.hasProperty(AutoPetterBlock.WORKING) && blockState.getValue(AutoPetterBlock.WORKING);
-            if (shouldAnimate) {
-                state.setAndContinue(IDLE);
-                return PlayState.CONTINUE;
-            }
-            return PlayState.STOP;
-        }));
-    }
-
-    @Override
-    public AnimatableInstanceCache getAnimatableInstanceCache() {
-        return cache;
+    public ModelAnimation modelAnimation(boolean moving, float partialTick) {
+        return getBlockState().hasProperty(AutoPetterBlock.WORKING) && getBlockState().getValue(AutoPetterBlock.WORKING) ? ModelAnimation.loop("idle") : null;
     }
 
     @SuppressWarnings("null")

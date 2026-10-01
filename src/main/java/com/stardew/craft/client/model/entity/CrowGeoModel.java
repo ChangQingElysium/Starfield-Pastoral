@@ -3,9 +3,9 @@ package com.stardew.craft.client.model.entity;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.entity.passive.CrowEntity;
 import net.minecraft.resources.ResourceLocation;
-import software.bernie.geckolib.model.GeoModel;
+import com.stardew.craft.client.model.nativebb.BlockbenchModel;
 
-public class CrowGeoModel extends GeoModel<CrowEntity> {
+public class CrowGeoModel extends BlockbenchModel<CrowEntity> {
     private static final ResourceLocation MODEL =
             ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "geo/entity/crow.geo.json");
     private static final ResourceLocation TEXTURE =

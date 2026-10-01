@@ -366,6 +366,7 @@ public final class NpcInteractionService {
         if (addonResult != InteractionResult.PASS) {
             return addonResult;
         }
+        if ("gil".equals(npcId)) return com.stardew.craft.shop.GilService.interact(serverPlayer);
         // Joja-line NPCs: 不进入通用好感/打招呼流程。
         // 女收银员（joja_cashier）— 无论玩家站在哪里，右键直接打开 Joja 超市商店界面。
         if ("joja_cashier".equals(npcId)) {

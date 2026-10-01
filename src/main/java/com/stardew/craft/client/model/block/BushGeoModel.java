@@ -8,9 +8,9 @@ import com.stardew.craft.client.hud.StardewTimeHud;
 import com.stardew.craft.time.StardewTimeManager;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
-import software.bernie.geckolib.model.GeoModel;
+import com.stardew.craft.client.model.nativebb.BlockbenchModel;
 
-public class BushGeoModel extends GeoModel<BushBlockEntity> {
+public class BushGeoModel extends BlockbenchModel<BushBlockEntity> {
     private static final ResourceLocation MODEL_SMALL = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "geo/block/nature/small_bush.geo.json");
     private static final ResourceLocation MODEL_LARGE = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "geo/block/nature/berry_bush.geo.json");
     private static final ResourceLocation MODEL_SALMONBERRY = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "geo/block/nature/berry_bush_salmonberry.geo.json");

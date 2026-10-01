@@ -1,5 +1,12 @@
 package com.stardew.craft.client.model.terrain;
 
+import com.stardew.craft.block.ModBlocks;
+import com.stardew.craft.desert.DesertConstants;
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+
 /** Texture selection only: never changes saved variants, block states or placement weights. */
 public final class TerrainSeasonTextures {
     private static final String[] GRASS = {"grass_block", "grass_blades", "grass_flowers"};
@@ -36,6 +43,15 @@ public final class TerrainSeasonTextures {
 
     public static int currentTextureSet() {
         return textureSet(currentSeason);
+    }
+
+    public static int sandTextureSet(int season, ResourceKey<Level> dimension, BlockPos pos) {
+        return DesertConstants.isInDesertRegion(dimension, pos) ? 0 : textureSet(season);
+    }
+
+    public static int textureSetAt(int season, ResourceKey<Level> dimension, BlockPos pos, BlockState state) {
+        return state.is(ModBlocks.SAND.get()) || state.is(ModBlocks.SANDY_FARMLAND.get())
+                ? sandTextureSet(season, dimension, pos) : textureSet(season);
     }
 
     /** Returns true once per actual calendar change, not on every time-sync packet. */

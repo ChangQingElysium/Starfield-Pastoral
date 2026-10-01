@@ -58,6 +58,17 @@ public class PortalTriggerBlockEntity extends BlockEntity {
         }
     }
 
+    @Override
+    public void onLoad() {
+        super.onLoad();
+        if (level instanceof net.minecraft.server.level.ServerLevel serverLevel
+                && com.stardew.craft.core.ModDimensions.STARDEW_VALLEY.equals(level.dimension())
+                && com.stardew.craft.desert.DesertConstants.isLegacyBusTarget(targetId)) {
+            // Defer writes until chunk loading has finished; never force-load the old sites.
+            serverLevel.scheduleTick(worldPosition, getBlockState().getBlock(), 1);
+        }
+    }
+
     // ── NBT 持久化 ──
 
     @Override

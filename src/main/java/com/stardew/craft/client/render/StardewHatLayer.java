@@ -32,7 +32,7 @@ public class StardewHatLayer extends RenderLayer<AbstractClientPlayer, PlayerMod
 
         poseStack.pushPose();
         getParentModel().head.translateAndRotate(poseStack);
-        BlockbenchElementRenderer.renderHeadDisplay(hat.getModelLocation(), poseStack, buffer, packedLight,
+        BlockbenchElementRenderer.renderHat(hat, poseStack, buffer, packedLight,
                 net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY);
         poseStack.popPose();
     }

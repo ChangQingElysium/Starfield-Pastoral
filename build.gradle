@@ -28,10 +28,6 @@ repositories {
         url = "https://maven.blamejared.com/"
     }
     maven {
-        name = "GeckoLib"
-        url = "https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/"
-    }
-    maven {
         name = "AppleSkin"
         url = "https://maven.ryanliptak.com/"
     }
@@ -109,7 +105,7 @@ neoForge {
             type = "gameTestServer"
             // Never inherit client-only jars from the normal development modpack in ./run/mods.
             gameDirectory = project.file('run-game-test')
-            systemProperty 'neoforge.enabledGameTestNamespaces', providers.gradleProperty('gameTestNamespaces').getOrElse("${project.mod_id},minecraft,stardewcraft_overnight_transition,stardewcraft_festival_dialogue,stardewcraft_chest_controls,stardewcraft_crop_chunk_load,stardewcraft_giant_growth,stardewcraft_utility_facing,stardewcraft_tapper_placement,stardewcraft_fishing_rules,stardewcraft_daily_info,stardewcraft_planter,stardewcraft_paving,stardewcraft_surface_floor,stardewcraft_bench,stardewcraft_fountain,stardewcraft_swing,stardewcraft_playground,stardewcraft_lamps,stardewcraft_entrances,stardewcraft_backpacks,stardewcraft_mine_assets,stardewcraft_plaza,stardewcraft_spiral_column,stardewcraft_skull_finish,stardewcraft_skull_lobby,stardewcraft_buildings,stardewcraft_pond_prefab,stardewcraft_prefab_ground,stardewcraft_animal_addons,stardewcraft_documents,stardewcraft_livestock,stardewcraft_pets,stardewcraft_pet_refinement,stardewcraft_ground_stone,stardewcraft_ordinary_mine,stardewcraft_signs,stardewcraft_npc_runtime,stardewcraft_taro,stardewcraft_pineapple,stardewcraft_cactus,stardewcraft_sweet_gem,stardewcraft_fiber,stardewcraft_qi_fruit,stardewcraft_summer_squash,stardewcraft_carrot,stardewcraft_garlic,stardewcraft_hot_pepper,stardewcraft_aquarium,stardewcraft_login,stardewcraft_play_fixes,stardewcraft_blueprint_sync,stardewcraft_sandy_soil,stardewcraft_farm_debris,stardewcraft_b008,stardewcraft_cauldrons,stardewcraft_craftables,stardewcraft_farm_twig,stardewcraft_hard_soil,stardewcraft_mini_shipping,stardewcraft_planting_soil,stardewcraft_reclamation,stardewcraft_special_orders,stardewcraft_trash_can,stardewcraft_tree_seasons,stardewcraft_supply_crate,stardewcraft_farm_golem,stardewcraft_fluid_protection")
+            systemProperty 'neoforge.enabledGameTestNamespaces', providers.gradleProperty('gameTestNamespaces').getOrElse("${project.mod_id},minecraft,stardewcraft_overnight_transition,stardewcraft_festival_dialogue,stardewcraft_chest_controls,stardewcraft_crop_chunk_load,stardewcraft_giant_growth,stardewcraft_utility_facing,stardewcraft_tapper_placement,stardewcraft_fishing_rules,stardewcraft_daily_info,stardewcraft_planter,stardewcraft_paving,stardewcraft_surface_floor,stardewcraft_bench,stardewcraft_fountain,stardewcraft_swing,stardewcraft_playground,stardewcraft_lamps,stardewcraft_entrances,stardewcraft_backpacks,stardewcraft_mine_assets,stardewcraft_plaza,stardewcraft_spiral_column,stardewcraft_skull_finish,stardewcraft_skull_lobby,stardewcraft_buildings,stardewcraft_pond_prefab,stardewcraft_prefab_ground,stardewcraft_animal_addons,stardewcraft_documents,stardewcraft_livestock,stardewcraft_pets,stardewcraft_pet_refinement,stardewcraft_ground_stone,stardewcraft_ordinary_mine,stardewcraft_signs,stardewcraft_npc_runtime,stardewcraft_taro,stardewcraft_pineapple,stardewcraft_cactus,stardewcraft_sweet_gem,stardewcraft_fiber,stardewcraft_qi_fruit,stardewcraft_summer_squash,stardewcraft_carrot,stardewcraft_garlic,stardewcraft_hot_pepper,stardewcraft_aquarium,stardewcraft_login,stardewcraft_play_fixes,stardewcraft_blueprint_sync,stardewcraft_sandy_soil,stardewcraft_farm_debris,stardewcraft_b008,stardewcraft_cauldrons,stardewcraft_craftables,stardewcraft_farm_twig,stardewcraft_hard_soil,stardewcraft_mini_shipping,stardewcraft_planting_soil,stardewcraft_reclamation,stardewcraft_special_orders,stardewcraft_trash_can,stardewcraft_tree_seasons,stardewcraft_supply_crate,stardewcraft_farm_golem,stardewcraft_fluid_protection,stardewcraft_wizard_placement")
             systemProperty 'stardewcraft.npcHeadlessScheduleTest',
                     providers.gradleProperty('npcHeadlessScheduleTest').getOrElse('false')
         }
@@ -184,9 +180,6 @@ dependencies {
     localRuntime "mezz.jei:jei-1.21.1-neoforge:${jei_version}"
     testImplementation "mezz.jei:jei-1.21.1-neoforge:${jei_version}"
 
-    // GeckoLib (embedded via JarJar like ConfluenceOtherworld)
-    implementation "software.bernie.geckolib:geckolib-neoforge-1.21.1:${geckolib_version}"
-    jarJar "software.bernie.geckolib:geckolib-neoforge-1.21.1:${geckolib_version}"
 
     // AppleSkin API (optional soft dependency — hide its vanilla hunger overlays in Stardew HUD dimensions)
     compileOnly "squeek.appleskin:appleskin-neoforge:mc1.21-3.0.9:api"

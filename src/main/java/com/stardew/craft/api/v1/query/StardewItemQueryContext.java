@@ -11,11 +11,20 @@ import java.util.random.RandomGenerator;
 public record StardewItemQueryContext(
         ServerLevel level,
         @Nullable ServerPlayer player,
-        RandomGenerator random
+        RandomGenerator random,
+        java.util.Map<String, Double> parameters,
+        java.util.function.Consumer<com.stardew.craft.api.v1.action.StardewAction> deferredActions
 ) {
     public StardewItemQueryContext {
         Objects.requireNonNull(level, "level");
         Objects.requireNonNull(random, "random");
+        parameters = java.util.Map.copyOf(parameters);
+        Objects.requireNonNull(deferredActions, "deferredActions");
+    }
+
+    /** Queries never execute actions. Legacy/preview callers discard deferred effects. */
+    public StardewItemQueryContext(ServerLevel level, @Nullable ServerPlayer player, RandomGenerator random) {
+        this(level, player, random, java.util.Map.of(), action -> {});
     }
 
     public static StardewItemQueryContext forPlayer(ServerPlayer player, RandomGenerator random) {

@@ -1,5 +1,7 @@
 package com.stardew.craft.blockentity;
 
+import com.stardew.craft.model.AnimatedModel;
+import com.stardew.craft.model.ModelAnimation;
 import com.stardew.craft.block.utility.GarbageCanLootTable;
 import com.stardew.craft.block.utility.TrashBinBlock;
 import com.stardew.craft.core.ModDimensions;
@@ -21,13 +23,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
-import software.bernie.geckolib.animatable.GeoBlockEntity;
-import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.animation.AnimatableManager;
-import software.bernie.geckolib.animation.AnimationController;
-import software.bernie.geckolib.animation.PlayState;
-import software.bernie.geckolib.animation.RawAnimation;
-import software.bernie.geckolib.util.GeckoLibUtil;
 
 /**
  * 垃圾桶方块实体 — 对齐原版 CheckGarbage / TryGetGarbageItem 逻辑。
@@ -35,11 +30,7 @@ import software.bernie.geckolib.util.GeckoLibUtil;
  * 每日每桶限翻一次，掉落物通过 {@link GarbageCanLootTable} 计算。
  */
 @SuppressWarnings("null")
-public class TrashBinBlockEntity extends net.minecraft.world.level.block.entity.BlockEntity implements GeoBlockEntity {
-
-    private static final RawAnimation OPEN_ANIM = RawAnimation.begin().thenPlayAndHold("animation");
-
-    private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
+public class TrashBinBlockEntity extends net.minecraft.world.level.block.entity.BlockEntity implements AnimatedModel {
 
     /** 上次被翻的绝对天数，-1 表示从未被翻过 */
     private int lastCheckedDay = -1;
@@ -48,7 +39,6 @@ public class TrashBinBlockEntity extends net.minecraft.world.level.block.entity.
     private int openTicks;
 
     /** 动画状态追踪 */
-    private boolean lastAnimatedOpen;
 
     public TrashBinBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.TRASH_BIN.get(), pos, state);
@@ -193,28 +183,14 @@ public class TrashBinBlockEntity extends net.minecraft.world.level.block.entity.
         return tag;
     }
 
-    // ==================== GeckoLib ====================
+    // ==================== Native model animation ====================
 
     @Override
-    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "main", 0, state -> {
-            BlockState blockState = getBlockState();
-            boolean openNow = blockState.hasProperty(TrashBinBlock.OPEN) && blockState.getValue(TrashBinBlock.OPEN);
-            if (openNow && !lastAnimatedOpen) {
-                state.setAndContinue(OPEN_ANIM);
-                lastAnimatedOpen = true;
-            } else if (!openNow && lastAnimatedOpen) {
-                state.getController().forceAnimationReset();
-                lastAnimatedOpen = false;
-            }
-            return PlayState.CONTINUE;
-        }));
+    public ModelAnimation modelAnimation(boolean moving, float partialTick) {
+        return getBlockState().getValue(TrashBinBlock.OPEN) ? ModelAnimation.hold("animation") : null;
     }
 
-    @Override
-    public AnimatableInstanceCache getAnimatableInstanceCache() {
-        return cache;
-    }
+    @Override public int modelTransitionTicks() { return 0; }
 
     @SuppressWarnings("null")
     public AABB getRenderBoundingBox() {

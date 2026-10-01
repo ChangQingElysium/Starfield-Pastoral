@@ -52,7 +52,7 @@ public final class StardewHudLayoutEditorScreen extends Screen {
     private void loadPlacements() {
         boxes.clear();
         for (Config.HudElement element : EDITABLE_ELEMENTS) {
-            int baseWidth = element.baseWidth();
+            int baseWidth = element == Config.HudElement.PLAYER_BARS ? StardewPlayerHud.baseWidth() : element.baseWidth();
             int baseHeight = element.baseHeight();
             StardewHudLayout.Placement placement = StardewHudLayout.current(
                     element, width, height, baseWidth, baseHeight);
@@ -162,7 +162,8 @@ public final class StardewHudLayoutEditorScreen extends Screen {
                 StardewHudLayout.MIN_SCALE_PERCENT / 100.0F * visualScale,
                 StardewHudLayout.MAX_SCALE_PERCENT / 100.0F * visualScale);
 
-        if (com.stardew.craft.client.font.StardewFonts.readingScale() != 1.0F) {
+        if (selected == Config.HudElement.PLAYER_BARS
+                || com.stardew.craft.client.font.StardewFonts.readingScale() != 1.0F) {
             nextScale = com.stardew.craft.client.gui.common.ReadingTextLayout.fitHudScale(
                     nextScale, baseWidth, baseHeight, width, height);
         }

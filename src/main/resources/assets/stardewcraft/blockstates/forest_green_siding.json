@@ -1,0 +1,15 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "stardewcraft:block/forest_green_siding"
+      },
+      {
+        "model": "stardewcraft:block/forest_green_siding_1"
+      },
+      {
+        "model": "stardewcraft:block/forest_green_siding_2"
+      }
+    ]
+  }
+}

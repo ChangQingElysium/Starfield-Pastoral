@@ -1,0 +1,18 @@
+// Focused quality/stack component regressions, including the real ItemStack Mixin.
+// ./gradlew -I compatibility/item-quality-tests.gradle classes test
+allprojects {
+    afterEvaluate {
+        if (plugins.hasPlugin('java')) {
+            sourceSets.test.java.setSrcDirs([file('compatibility/item-quality')])
+            sourceSets.test.resources.setSrcDirs([])
+            tasks.named('test') {
+                include 'com/stardew/craft/item/quality/**', 'com/stardew/craft/client/render/InteractionHintAssetsTest*'
+                inputs.dir('src/main/resources/assets/stardewcraft/textures/gui/sprites/interaction_hint')
+                inputs.file('src/main/java/com/stardew/craft/block/ModBlocks.java')
+                inputs.dir('src/main/resources/assets/stardewcraft/models/item')
+                reports.junitXml.outputLocation = layout.buildDirectory.dir('test-results/item-quality')
+                reports.html.outputLocation = layout.buildDirectory.dir('reports/tests/item-quality')
+            }
+        }
+    }
+}

@@ -91,6 +91,21 @@ public final class NativeNpcPose {
         }
     }
 
+    /** Sample an explicitly managed clock without applying the authored loop flag again. */
+    public void applyAt(String name, double time) {
+        var clip = model.clips().get(name);
+        if (clip == null) throw new IllegalArgumentException("Missing clip: " + name);
+        for (var track : clip.tracks()) {
+            float[] target = switch (track.channel()) {
+                case "position" -> positions[track.bone()];
+                case "rotation" -> rotations[track.bone()];
+                case "scale" -> scales[track.bone()];
+                default -> throw new IllegalArgumentException("Unsupported channel: " + track.channel());
+            };
+            sample(track, Math.max(0, Math.min(time, clip.length())), target);
+        }
+    }
+
     /** Keep the actual inflated soles out of the ground during idle/walk cross-fades. */
     public void groundFeet(float groundOffset) {
         var transforms=matrices();

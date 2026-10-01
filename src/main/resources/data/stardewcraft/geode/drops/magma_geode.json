@@ -1,0 +1,460 @@
+{
+  "priority": -100,
+  "inputs": [
+    "stardewcraft:magma_geode"
+  ],
+  "crusher_allowed": true,
+  "animation": "magma_geode",
+  "entries": [
+    {
+      "weight": 20000,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:bixite",
+          "count": 1
+        }
+      }
+    },
+    {
+      "weight": 20000,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:baryte",
+          "count": 1
+        }
+      }
+    },
+    {
+      "weight": 20000,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:dolomite",
+          "count": 1
+        }
+      }
+    },
+    {
+      "weight": 20000,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:helvite",
+          "count": 1
+        }
+      }
+    },
+    {
+      "weight": 20000,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:neptunite",
+          "count": 1
+        }
+      }
+    },
+    {
+      "weight": 20000,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:lemon_stone",
+          "count": 1
+        }
+      }
+    },
+    {
+      "weight": 20000,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:tigerseye",
+          "count": 1
+        }
+      }
+    },
+    {
+      "weight": 20000,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:jasper",
+          "count": 1
+        }
+      }
+    },
+    {
+      "weight": 20000,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:fire_opal",
+          "count": 1
+        }
+      }
+    },
+    {
+      "weight": 20000,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:basalt",
+          "count": 1
+        }
+      }
+    },
+    {
+      "weight": 20000,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:obsidian",
+          "count": 1
+        }
+      }
+    },
+    {
+      "weight": 20000,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:star_shards",
+          "count": 1
+        }
+      }
+    },
+    {
+      "weight": 20000,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:dwarf_gadget",
+          "count": 1
+        }
+      }
+    },
+    {
+      "weight": 19305,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:stone",
+          "count": 1
+        }
+      }
+    },
+    {
+      "weight": 19305,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:stone",
+          "count": 3
+        }
+      }
+    },
+    {
+      "weight": 19305,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:stone",
+          "count": 5
+        }
+      }
+    },
+    {
+      "weight": 6435,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:stone",
+          "count": 10
+        }
+      }
+    },
+    {
+      "weight": 650,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:stone",
+          "count": 20
+        }
+      }
+    },
+    {
+      "weight": 32500,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:clay",
+          "count": 1
+        }
+      }
+    },
+    {
+      "weight": 32500,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:fire_quartz",
+          "count": 1
+        }
+      }
+    },
+    {
+      "weight": 7722,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:copper_ore",
+          "count": 1
+        }
+      }
+    },
+    {
+      "weight": 7722,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:copper_ore",
+          "count": 3
+        }
+      }
+    },
+    {
+      "weight": 7722,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:copper_ore",
+          "count": 5
+        }
+      }
+    },
+    {
+      "weight": 2574,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:copper_ore",
+          "count": 10
+        }
+      }
+    },
+    {
+      "weight": 260,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:copper_ore",
+          "count": 20
+        }
+      }
+    },
+    {
+      "weight": 7722,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:iron_ore",
+          "count": 1
+        }
+      }
+    },
+    {
+      "weight": 7722,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:iron_ore",
+          "count": 3
+        }
+      }
+    },
+    {
+      "weight": 7722,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:iron_ore",
+          "count": 5
+        }
+      }
+    },
+    {
+      "weight": 2574,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:iron_ore",
+          "count": 10
+        }
+      }
+    },
+    {
+      "weight": 260,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:iron_ore",
+          "count": 20
+        }
+      }
+    },
+    {
+      "weight": 7722,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:coal",
+          "count": 1
+        }
+      }
+    },
+    {
+      "weight": 7722,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:coal",
+          "count": 3
+        }
+      }
+    },
+    {
+      "weight": 7722,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:coal",
+          "count": 5
+        }
+      }
+    },
+    {
+      "weight": 2574,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:coal",
+          "count": 10
+        }
+      }
+    },
+    {
+      "weight": 260,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:coal",
+          "count": 20
+        }
+      }
+    },
+    {
+      "weight": 7722,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:gold_ore",
+          "count": 1
+        }
+      }
+    },
+    {
+      "weight": 7722,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:gold_ore",
+          "count": 3
+        }
+      }
+    },
+    {
+      "weight": 7722,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:gold_ore",
+          "count": 5
+        }
+      }
+    },
+    {
+      "weight": 2574,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:gold_ore",
+          "count": 10
+        }
+      }
+    },
+    {
+      "weight": 260,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:gold_ore",
+          "count": 20
+        }
+      }
+    },
+    {
+      "weight": 7722,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:iridium_ore",
+          "count": 1
+        }
+      }
+    },
+    {
+      "weight": 7722,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:iridium_ore",
+          "count": 2
+        }
+      }
+    },
+    {
+      "weight": 7722,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:iridium_ore",
+          "count": 3
+        }
+      }
+    },
+    {
+      "weight": 2574,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:iridium_ore",
+          "count": 6
+        }
+      }
+    },
+    {
+      "weight": 260,
+      "query": {
+        "type": "stardewcraft:item",
+        "data": {
+          "item": "stardewcraft:iridium_ore",
+          "count": 11
+        }
+      }
+    }
+  ]
+}

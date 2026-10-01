@@ -3,9 +3,9 @@ package com.stardew.craft.client.model.entity;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.entity.animal.DuckEntity;
 import net.minecraft.resources.ResourceLocation;
-import software.bernie.geckolib.model.GeoModel;
+import com.stardew.craft.client.model.nativebb.BlockbenchModel;
 
-public class DuckGeoModel extends GeoModel<DuckEntity> {
+public class DuckGeoModel extends BlockbenchModel<DuckEntity> {
 	private static final ResourceLocation MODEL = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "geo/entity/animal/duck.geo.json");
 	private static final ResourceLocation ANIMATION = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "animations/entity/animal/duck.animation.json");
 	private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/entity/animal/duck.png");

@@ -1,12 +1,17 @@
 package com.stardew.craft.block.utility;
 
 import com.stardew.craft.blockentity.FridgeBlockEntity;
+import com.stardew.craft.blockentity.ModBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 
@@ -24,6 +29,23 @@ public class FridgeBlock extends MapUtilityStaticBlock implements EntityBlock {
             return null;
         }
         return new FridgeBlockEntity(pos, state);
+    }
+
+    @Override
+    public <T extends BlockEntity> @Nullable BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
+        return level.isClientSide && state.getValue(PART) == Part.MAIN && type == ModBlockEntities.FRIDGE.get()
+                ? (world, pos, blockState, entity) -> FridgeBlockEntity.clientTick(world, pos, blockState, (FridgeBlockEntity) entity)
+                : null;
+    }
+
+    @Override
+    protected void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+        if (level.getBlockEntity(pos) instanceof FridgeBlockEntity fridge) fridge.recheckOpeners();
+    }
+
+    @Override
+    protected boolean triggerEvent(BlockState state, Level level, BlockPos pos, int id, int value) {
+        return level.getBlockEntity(pos) instanceof FridgeBlockEntity fridge && fridge.triggerEvent(id, value);
     }
 
     @Override

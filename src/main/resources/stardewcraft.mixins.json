@@ -19,6 +19,7 @@
     "ContainerMixin",
     "InventoryMaxStackMixin",
     "ItemStackCodecCountRangeMixin",
+    "ItemStackQualityComponentsMixin",
     "ItemStackStardewFoodContextMixin",
     "PlayerStardewFoodMixin",
     "PlayerRingLightMixin",
@@ -73,6 +74,7 @@
     "StardewGuiTickMixin",
     "StardewGuiScissorMixin",
     "StardewReadingHudTextMixin",
+    "StardewHotbarSpriteMixin",
     "RingLightLevelRendererMixin",
     "RingLightEntityRendererMixin",
     "SodiumRingLightPipelineMixin",
@@ -125,7 +127,8 @@
     "FishingKeyboardInputMixin",
     "FishingPlayerRendererMixin",
     "FishingWorldRenderMixin",
-    "FishingArmorLayerMixin"
+    "FishingArmorLayerMixin",
+    "OptionalAnimatedArmorFishingMixin"
   ],
   "injectors": {
     "defaultRequire": 1

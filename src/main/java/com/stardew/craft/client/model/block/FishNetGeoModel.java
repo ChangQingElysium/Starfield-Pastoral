@@ -3,9 +3,9 @@ package com.stardew.craft.client.model.block;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.blockentity.FishNetBlockEntity;
 import net.minecraft.resources.ResourceLocation;
-import software.bernie.geckolib.model.GeoModel;
+import com.stardew.craft.client.model.nativebb.BlockbenchModel;
 
-public class FishNetGeoModel extends GeoModel<FishNetBlockEntity> {
+public class FishNetGeoModel extends BlockbenchModel<FishNetBlockEntity> {
     private static final ResourceLocation MODEL = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "geo/block/utility/fish_net.geo.json");
     private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/block/utility/fish_net.png");
     private static final ResourceLocation ANIMATION = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "animations/block/utility/fish_net.animation.json");

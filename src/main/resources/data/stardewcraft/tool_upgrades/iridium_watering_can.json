@@ -1,0 +1,10 @@
+{
+  "family": "stardewcraft:watering_can",
+  "tier": 4,
+  "output": "stardewcraft:iridium_watering_can",
+  "price": 25000,
+  "material": "stardewcraft:iridium_bar",
+  "material_count": 5,
+  "days": 2,
+  "input": "stardewcraft:gold_watering_can"
+}

@@ -255,6 +255,8 @@ public class PlayerStardewData {
 
     // ============ 工具升级（铁匠铺） ============
     // SDV parity: Farmer.toolBeingUpgraded + Farmer.daysLeftForToolUpgrade
+    private CompoundTag toolUpgradeStack = new CompoundTag();
+    private CompoundTag guildRewardClaims = new CompoundTag();
     private String toolBeingUpgraded = "";   // item ID e.g. "stardewcraft:copper_axe", empty = none
     private int daysLeftForToolUpgrade;      // 0 = ready for pickup
     private boolean toolUpgradeNotified;     // true = already notified player this morning
@@ -266,6 +268,7 @@ public class PlayerStardewData {
     private boolean passedOutFromCombat;
     // 上次死亡丢失的物品（供 Marlon 物品找回商店使用）
     private final List<net.minecraft.world.item.ItemStack> itemsLostLastDeath = new ArrayList<>();
+    private net.minecraft.world.item.ItemStack marlonRecoveredItem = net.minecraft.world.item.ItemStack.EMPTY;
     // Last confirmed Stardew bed, equivalent to Farmer.lastSleepPoint.
     private net.minecraft.core.BlockPos lastSleepPoint;
     
@@ -368,6 +371,10 @@ public class PlayerStardewData {
         data.passedOutFromCombat = tag.getBoolean("PassedOutFromCombat");
         if (tag.contains("LastSleepPoint", Tag.TAG_LONG)) {
             data.lastSleepPoint = net.minecraft.core.BlockPos.of(tag.getLong("LastSleepPoint"));
+        }
+        if (registries != null && tag.contains("MarlonRecoveredItem", Tag.TAG_COMPOUND)) {
+            data.marlonRecoveredItem = net.minecraft.world.item.ItemStack.parse(registries, tag.getCompound("MarlonRecoveredItem"))
+                    .orElse(net.minecraft.world.item.ItemStack.EMPTY);
         }
         data.itemsLostLastDeath.clear();
         if (tag.contains("ItemsLostLastDeath")) {
@@ -731,6 +738,8 @@ public class PlayerStardewData {
         data.equippedPants = tag.contains("EquippedPants") ? tag.getString("EquippedPants") : "";
         data.lastPhoenixReviveDay = tag.contains("LastPhoenixReviveDay") ? tag.getLong("LastPhoenixReviveDay") : -1;
 
+        data.toolUpgradeStack = tag.getCompound("ToolUpgradeStack").copy();
+        data.guildRewardClaims = tag.getCompound("GuildRewardClaims").copy();
         data.toolBeingUpgraded = tag.contains("ToolBeingUpgraded") ? tag.getString("ToolBeingUpgraded") : "";
         data.daysLeftForToolUpgrade = tag.contains("DaysLeftForToolUpgrade") ? tag.getInt("DaysLeftForToolUpgrade") : 0;
         data.toolUpgradeNotified = tag.getBoolean("ToolUpgradeNotified");
@@ -860,6 +869,7 @@ public class PlayerStardewData {
         if (lastSleepPoint != null) {
             tag.putLong("LastSleepPoint", lastSleepPoint.asLong());
         }
+        if (registries != null && !marlonRecoveredItem.isEmpty()) tag.put("MarlonRecoveredItem", marlonRecoveredItem.save(registries));
         if (!itemsLostLastDeath.isEmpty()) {
             ListTag lostItemsTag = new ListTag();
             for (net.minecraft.world.item.ItemStack stack : itemsLostLastDeath) {
@@ -1168,6 +1178,8 @@ public class PlayerStardewData {
         if (lastPhoenixReviveDay >= 0) tag.putLong("LastPhoenixReviveDay", lastPhoenixReviveDay);
 
         // 工具升级
+        tag.put("ToolUpgradeStack", toolUpgradeStack.copy());
+        tag.put("GuildRewardClaims", guildRewardClaims.copy());
         tag.putString("ToolBeingUpgraded", toolBeingUpgraded != null ? toolBeingUpgraded : "");
         tag.putInt("DaysLeftForToolUpgrade", daysLeftForToolUpgrade);
         tag.putBoolean("ToolUpgradeNotified", toolUpgradeNotified);
@@ -1826,6 +1838,8 @@ public class PlayerStardewData {
         itemsLostLastDeath.addAll(items);
         markDirty();
     }
+    public net.minecraft.world.item.ItemStack getMarlonRecoveredItem() { return marlonRecoveredItem.copy(); }
+    public void setMarlonRecoveredItem(net.minecraft.world.item.ItemStack stack) { marlonRecoveredItem = stack.copy(); markDirty(); }
     public void clearItemsLostLastDeath() { itemsLostLastDeath.clear(); markDirty(); }
 
     public java.util.Optional<net.minecraft.core.BlockPos> getLastSleepPoint() {
@@ -2824,7 +2838,19 @@ public class PlayerStardewData {
 
     // ──── Tool Upgrade (Blacksmith) ────
     public String getToolBeingUpgraded() { return toolBeingUpgraded; }
-    public void setToolBeingUpgraded(String id) { this.toolBeingUpgraded = id != null ? id : ""; markDirty(); }
+    public CompoundTag getGuildRewardClaims() { return guildRewardClaims.copy(); }
+    public void setGuildRewardClaims(CompoundTag claims) { guildRewardClaims = claims.copy(); markDirty(); }
+    public void setToolBeingUpgraded(String id) {
+        this.toolBeingUpgraded = id != null ? id : "";
+        this.toolUpgradeStack = new CompoundTag();
+        markDirty();
+    }
+    public void setToolUpgradeStack(net.minecraft.world.item.ItemStack stack, net.minecraft.core.HolderLookup.Provider registries) {
+        toolUpgradeStack = (CompoundTag) stack.saveOptional(registries); markDirty();
+    }
+    public net.minecraft.world.item.ItemStack getToolUpgradeStack(net.minecraft.core.HolderLookup.Provider registries) {
+        return net.minecraft.world.item.ItemStack.parseOptional(registries, toolUpgradeStack);
+    }
     public int getDaysLeftForToolUpgrade() { return daysLeftForToolUpgrade; }
     public void setDaysLeftForToolUpgrade(int days) { this.daysLeftForToolUpgrade = days; markDirty(); }
     public boolean isToolUpgradeNotified() { return toolUpgradeNotified; }

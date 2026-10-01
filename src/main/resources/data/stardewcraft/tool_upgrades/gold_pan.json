@@ -1,0 +1,10 @@
+{
+  "family": "stardewcraft:pan",
+  "tier": 3,
+  "output": "stardewcraft:gold_pan",
+  "price": 10000,
+  "material": "stardewcraft:gold_bar",
+  "material_count": 5,
+  "days": 2,
+  "input": "stardewcraft:steel_pan"
+}

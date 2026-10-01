@@ -1,12 +1,11 @@
 package com.stardew.craft.client.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.stardew.craft.block.ModBlocks;
 import net.minecraft.client.renderer.LightTexture;
-import software.bernie.geckolib.cache.object.GeoBone;
+import com.stardew.craft.client.model.nativebb.BlockbenchFrame;
 import com.mojang.math.Axis;
 import com.stardew.craft.block.decor.MapDecorStaticBlock;
 import com.stardew.craft.blockentity.LuauFestivalDecorBlockEntity;
@@ -65,24 +64,13 @@ public class LuauFestivalDecorBlockEntityRenderer extends StardewGeoBlockRendere
     }
 
     @Override
-    public void renderRecursively(PoseStack pose, LuauFestivalDecorBlockEntity entity, GeoBone bone,
-                                  RenderType type, MultiBufferSource source, VertexConsumer consumer,
-                                  boolean reRender, float partialTick, int light, int overlay, int color) {
-        if (isCauldron(entity)) {
-            // Steam is last in the exported hierarchy, culls its duplicate back face and never writes depth.
-            for (GeoBone parent = bone; parent != null; parent = parent.getParent()) {
-                if (parent.getName().equals("steam")) {
-                    type = SteamType.forTexture(getTextureLocation(entity));
-                    consumer = source.getBuffer(type);
-                    break;
-                }
-                if (parent.getName().equals("fire")) {
-                    light = LightTexture.FULL_BRIGHT;
-                    break;
-                }
-            }
-        }
-        super.renderRecursively(pose, entity, bone, type, source, consumer, reRender, partialTick, light, overlay, color);
+    protected RenderType boneType(LuauFestivalDecorBlockEntity entity, BlockbenchFrame frame, int bone, RenderType type) {
+        return isCauldron(entity) && frame.under(bone, "steam") ? SteamType.forTexture(getTextureLocation(entity)) : type;
+    }
+
+    @Override
+    protected int boneLight(LuauFestivalDecorBlockEntity entity, BlockbenchFrame frame, int bone, int light) {
+        return isCauldron(entity) && frame.under(bone, "fire") ? LightTexture.FULL_BRIGHT : light;
     }
 
     private static final class SteamType extends RenderType {

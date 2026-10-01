@@ -28,6 +28,19 @@ public final class MapInteractionService {
     private MapInteractionService() {
     }
 
+    public static boolean acceptsHeldItems(ServerPlayer player, BlockPos pos) {
+        for (var definition : MapInteractionRegistry.at(player.serverLevel().dimension().location(), pos)) {
+            if (!definition.matches(player.serverLevel(), pos)) continue;
+            for (var branch : definition.branches()) {
+                if (!conditionsMatch(branch, player)) continue;
+                return branch.action() != null && (branch.action().type().equals(
+                        ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "mr_qi_anchor"))
+                        || branch.action().type().equals(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "guild_board")));
+            }
+        }
+        return false;
+    }
+
     public static InteractionResult interact(
             ServerPlayer player,
             InteractionHand hand,

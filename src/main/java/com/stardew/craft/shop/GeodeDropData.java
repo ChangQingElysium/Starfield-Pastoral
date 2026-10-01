@@ -29,7 +29,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 
-/** Namespaced custom geode identities shared by Clint and the geode crusher. */
+/** Namespaced builtin and addon geode identities shared by Clint and the geode crusher. */
 @SuppressWarnings("null")
 public final class GeodeDropData {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
@@ -50,7 +50,19 @@ public final class GeodeDropData {
                 BuiltInRegistries.ITEM.getKey(stack.getItem()));
     }
 
+    /** Effective inputs only: a lower-priority builtin must not leak into menu or JEI. */
+    public static List<ResourceLocation> inputsFor(ResourceLocation definitionId) {
+        return catalog.inputToDefinition().entrySet().stream()
+                .filter(entry -> entry.getValue().equals(definitionId))
+                .map(Map.Entry::getKey).sorted(java.util.Comparator.comparing(ResourceLocation::toString)).toList();
+    }
+
     public static Optional<ItemStack> roll(ResourceLocation id, ServerPlayer player, Random random) {
+        return roll(id, player, random, action -> {});
+    }
+
+    public static Optional<ItemStack> roll(ResourceLocation id, ServerPlayer player, Random random,
+            java.util.function.Consumer<com.stardew.craft.api.v1.action.StardewAction> effects) {
         Catalog current = catalog;
         StardewGeodeDropDefinition definition =
                 current.definitions().definitions().get(id);
@@ -68,7 +80,7 @@ public final class GeodeDropData {
             }
         }
         List<ItemStack> stacks = StardewItemQueries.resolve(selected.query(),
-                        StardewItemQueryContext.forPlayer(player, random))
+                        new StardewItemQueryContext(player.serverLevel(), player, random, Map.of(), effects))
                 .resultOrPartial(message -> StardewCraft.LOGGER.error(
                         "[Geode drop] Definition {} failed: {}", id, message))
                 .orElse(List.of());
@@ -120,16 +132,19 @@ public final class GeodeDropData {
                 new ArrayList<>(diagnostics);
         Map<ResourceLocation, ResourceLocation> inputIndex =
                 new LinkedHashMap<>();
-        for (Map.Entry<ResourceLocation, StardewGeodeDropDefinition> entry
-                : definitions.entrySet()) {
+        // Resolve winners first so ties between shadowed definitions cannot reject a valid catalog.
+        var ordered = new ArrayList<>(definitions.entrySet());
+        ordered.sort(java.util.Comparator
+                .<Map.Entry<ResourceLocation, StardewGeodeDropDefinition>>comparingInt(entry -> entry.getValue().priority())
+                .reversed().thenComparing(entry -> entry.getKey().toString()));
+        for (Map.Entry<ResourceLocation, StardewGeodeDropDefinition> entry : ordered) {
             for (ResourceLocation input : entry.getValue().inputs()) {
-                ResourceLocation previous =
-                        inputIndex.putIfAbsent(input, entry.getKey());
-                if (previous != null) {
-                    preparedDiagnostics.add(DefinitionDiagnostic.error(
-                            null, entry.getKey(),
-                            "Input " + input
-                                    + " is already assigned to " + previous));
+                ResourceLocation previous = inputIndex.get(input);
+                if (previous == null || entry.getValue().priority() > definitions.get(previous).priority()) {
+                    inputIndex.put(input, entry.getKey());
+                } else if (entry.getValue().priority() == definitions.get(previous).priority()) {
+                    preparedDiagnostics.add(DefinitionDiagnostic.error(null, entry.getKey(),
+                            "Input " + input + " has equal-priority definitions " + previous + " and " + entry.getKey()));
                 }
                 if (!BuiltInRegistries.ITEM.containsKey(input)) {
                     preparedDiagnostics.add(DefinitionDiagnostic.error(
@@ -152,13 +167,13 @@ public final class GeodeDropData {
         }
         if (!result.accepted()) {
             StardewCraft.LOGGER.error(
-                    "[Geode drop] Rejected reload; keeping {} custom geodes",
+                    "[Geode drop] Rejected reload; keeping {} geode definitions",
                     catalog.definitions().definitions().size());
             return;
         }
         catalog = new Catalog(result.snapshot(), inputIndex);
         StardewCraft.LOGGER.info(
-                "[Geode drop] Applied {} custom geodes",
+                "[Geode drop] Applied {} geode definitions",
                 catalog.definitions().definitions().size());
     }
 
@@ -174,15 +189,19 @@ public final class GeodeDropData {
             diagnostics.add(DefinitionDiagnostic.error(entry.getKey(), null, "Invalid geode definition path"));
             return;
         }
-        StardewGeodeDropDefinition.CODEC.parse(JsonOps.INSTANCE, entry.getValue())
-                .resultOrPartial(message -> diagnostics.add(DefinitionDiagnostic.error(entry.getKey(), id, message)))
-                .ifPresent(definition -> {
-                    definitions.put(id, definition);
-                    StardewGeodeDropDefinition.CODEC.encodeStart(JsonOps.INSTANCE, definition)
-                            .resultOrPartial(message -> diagnostics.add(
-                                    DefinitionDiagnostic.error(entry.getKey(), id, message)))
-                            .ifPresent(encoded -> sources.put(id, GSON.toJson(encoded)));
-                });
+        try {
+            StardewGeodeDropDefinition.CODEC.parse(JsonOps.INSTANCE, entry.getValue())
+                    .resultOrPartial(message -> diagnostics.add(DefinitionDiagnostic.error(entry.getKey(), id, message)))
+                    .ifPresent(definition -> {
+                        definitions.put(id, definition);
+                        StardewGeodeDropDefinition.CODEC.encodeStart(JsonOps.INSTANCE, definition)
+                                .resultOrPartial(message -> diagnostics.add(
+                                        DefinitionDiagnostic.error(entry.getKey(), id, message)))
+                                .ifPresent(encoded -> sources.put(id, GSON.toJson(encoded)));
+                    });
+        } catch (RuntimeException exception) {
+            diagnostics.add(DefinitionDiagnostic.error(entry.getKey(), id, exception.getMessage()));
+        }
     }
 
     static Catalog catalog() {

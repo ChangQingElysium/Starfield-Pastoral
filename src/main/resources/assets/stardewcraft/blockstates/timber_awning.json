@@ -1,0 +1,260 @@
+{
+  "variants": {
+    "facing=north,part=main,cell=0": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_3_2",
+      "y": 0
+    },
+    "facing=north,part=extension,cell=0": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_3_2",
+      "y": 0
+    },
+    "facing=east,part=main,cell=0": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_3_2",
+      "y": 90
+    },
+    "facing=east,part=extension,cell=0": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_3_2",
+      "y": 90
+    },
+    "facing=south,part=main,cell=0": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_3_2",
+      "y": 180
+    },
+    "facing=south,part=extension,cell=0": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_3_2",
+      "y": 180
+    },
+    "facing=west,part=main,cell=0": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_3_2",
+      "y": 270
+    },
+    "facing=west,part=extension,cell=0": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_3_2",
+      "y": 270
+    },
+    "facing=north,part=main,cell=1": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_0_0",
+      "y": 0
+    },
+    "facing=north,part=extension,cell=1": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_0_0",
+      "y": 0
+    },
+    "facing=east,part=main,cell=1": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_0_0",
+      "y": 90
+    },
+    "facing=east,part=extension,cell=1": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_0_0",
+      "y": 90
+    },
+    "facing=south,part=main,cell=1": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_0_0",
+      "y": 180
+    },
+    "facing=south,part=extension,cell=1": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_0_0",
+      "y": 180
+    },
+    "facing=west,part=main,cell=1": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_0_0",
+      "y": 270
+    },
+    "facing=west,part=extension,cell=1": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_0_0",
+      "y": 270
+    },
+    "facing=north,part=main,cell=2": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_0_1",
+      "y": 0
+    },
+    "facing=north,part=extension,cell=2": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_0_1",
+      "y": 0
+    },
+    "facing=east,part=main,cell=2": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_0_1",
+      "y": 90
+    },
+    "facing=east,part=extension,cell=2": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_0_1",
+      "y": 90
+    },
+    "facing=south,part=main,cell=2": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_0_1",
+      "y": 180
+    },
+    "facing=south,part=extension,cell=2": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_0_1",
+      "y": 180
+    },
+    "facing=west,part=main,cell=2": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_0_1",
+      "y": 270
+    },
+    "facing=west,part=extension,cell=2": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_0_1",
+      "y": 270
+    },
+    "facing=north,part=main,cell=3": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_0_2",
+      "y": 0
+    },
+    "facing=north,part=extension,cell=3": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_0_2",
+      "y": 0
+    },
+    "facing=east,part=main,cell=3": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_0_2",
+      "y": 90
+    },
+    "facing=east,part=extension,cell=3": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_0_2",
+      "y": 90
+    },
+    "facing=south,part=main,cell=3": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_0_2",
+      "y": 180
+    },
+    "facing=south,part=extension,cell=3": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_0_2",
+      "y": 180
+    },
+    "facing=west,part=main,cell=3": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_0_2",
+      "y": 270
+    },
+    "facing=west,part=extension,cell=3": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_0_2",
+      "y": 270
+    },
+    "facing=north,part=main,cell=4": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_1_2",
+      "y": 0
+    },
+    "facing=north,part=extension,cell=4": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_1_2",
+      "y": 0
+    },
+    "facing=east,part=main,cell=4": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_1_2",
+      "y": 90
+    },
+    "facing=east,part=extension,cell=4": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_1_2",
+      "y": 90
+    },
+    "facing=south,part=main,cell=4": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_1_2",
+      "y": 180
+    },
+    "facing=south,part=extension,cell=4": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_1_2",
+      "y": 180
+    },
+    "facing=west,part=main,cell=4": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_1_2",
+      "y": 270
+    },
+    "facing=west,part=extension,cell=4": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_1_2",
+      "y": 270
+    },
+    "facing=north,part=main,cell=5": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_2_2",
+      "y": 0
+    },
+    "facing=north,part=extension,cell=5": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_2_2",
+      "y": 0
+    },
+    "facing=east,part=main,cell=5": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_2_2",
+      "y": 90
+    },
+    "facing=east,part=extension,cell=5": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_2_2",
+      "y": 90
+    },
+    "facing=south,part=main,cell=5": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_2_2",
+      "y": 180
+    },
+    "facing=south,part=extension,cell=5": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_2_2",
+      "y": 180
+    },
+    "facing=west,part=main,cell=5": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_2_2",
+      "y": 270
+    },
+    "facing=west,part=extension,cell=5": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_2_2",
+      "y": 270
+    },
+    "facing=north,part=main,cell=6": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_3_0",
+      "y": 0
+    },
+    "facing=north,part=extension,cell=6": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_3_0",
+      "y": 0
+    },
+    "facing=east,part=main,cell=6": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_3_0",
+      "y": 90
+    },
+    "facing=east,part=extension,cell=6": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_3_0",
+      "y": 90
+    },
+    "facing=south,part=main,cell=6": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_3_0",
+      "y": 180
+    },
+    "facing=south,part=extension,cell=6": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_3_0",
+      "y": 180
+    },
+    "facing=west,part=main,cell=6": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_3_0",
+      "y": 270
+    },
+    "facing=west,part=extension,cell=6": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_3_0",
+      "y": 270
+    },
+    "facing=north,part=main,cell=7": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_3_1",
+      "y": 0
+    },
+    "facing=north,part=extension,cell=7": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_3_1",
+      "y": 0
+    },
+    "facing=east,part=main,cell=7": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_3_1",
+      "y": 90
+    },
+    "facing=east,part=extension,cell=7": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_3_1",
+      "y": 90
+    },
+    "facing=south,part=main,cell=7": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_3_1",
+      "y": 180
+    },
+    "facing=south,part=extension,cell=7": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_3_1",
+      "y": 180
+    },
+    "facing=west,part=main,cell=7": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_3_1",
+      "y": 270
+    },
+    "facing=west,part=extension,cell=7": {
+      "model": "stardewcraft:block/decor/house/timber_awning/timber_awning_3_1",
+      "y": 270
+    }
+  }
+}

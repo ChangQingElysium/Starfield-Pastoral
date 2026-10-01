@@ -1,0 +1,32 @@
+{
+  "variants": {
+    "part=main,facing=north": {
+      "model": "stardewcraft:decor/wall_decor/common/guild_monster_board",
+      "y": 0
+    },
+    "part=extension,facing=north": {
+      "model": "stardewcraft:block/decor/extensions/guild_monster_board_extension_empty"
+    },
+    "part=main,facing=east": {
+      "model": "stardewcraft:decor/wall_decor/common/guild_monster_board",
+      "y": 90
+    },
+    "part=extension,facing=east": {
+      "model": "stardewcraft:block/decor/extensions/guild_monster_board_extension_empty"
+    },
+    "part=main,facing=south": {
+      "model": "stardewcraft:decor/wall_decor/common/guild_monster_board",
+      "y": 180
+    },
+    "part=extension,facing=south": {
+      "model": "stardewcraft:block/decor/extensions/guild_monster_board_extension_empty"
+    },
+    "part=main,facing=west": {
+      "model": "stardewcraft:decor/wall_decor/common/guild_monster_board",
+      "y": 270
+    },
+    "part=extension,facing=west": {
+      "model": "stardewcraft:block/decor/extensions/guild_monster_board_extension_empty"
+    }
+  }
+}

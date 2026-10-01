@@ -1,0 +1,17 @@
+// Tracked-only, headless importer/playback regression checks. No animation-library dependency.
+// ./gradlew -I compatibility/native-blockbench-tests.gradle classes test
+allprojects {
+    afterEvaluate {
+        if (plugins.hasPlugin('java')) {
+            sourceSets.test.java.setSrcDirs([file('compatibility/native-blockbench')])
+            sourceSets.test.resources.setSrcDirs([])
+            tasks.named('test') {
+                include 'com/stardew/craft/model/nativebb/**'
+                inputs.dir('src/main/resources/assets/stardewcraft/geo')
+                inputs.dir('src/main/resources/assets/stardewcraft/animations')
+                reports.junitXml.outputLocation = layout.buildDirectory.dir('test-results/native-blockbench')
+                reports.html.outputLocation = layout.buildDirectory.dir('reports/tests/native-blockbench')
+            }
+        }
+    }
+}

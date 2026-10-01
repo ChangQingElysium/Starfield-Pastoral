@@ -212,6 +212,15 @@ public class MailService {
 
         // 构建附件列表 & 发放物品到玩家背包
         List<OpenMailPayload.ItemAttachment> items = new ArrayList<>();
+        if ("MarlonRecovery".equals(mailId)) {
+            var recovered = data.getMarlonRecoveredItem();
+            if (!recovered.isEmpty()) {
+                items.add(new OpenMailPayload.ItemAttachment(
+                        net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(recovered.getItem()).toString(), recovered.getCount()));
+                data.setMarlonRecoveredItem(net.minecraft.world.item.ItemStack.EMPTY);
+                if (!player.getInventory().add(recovered)) player.drop(recovered, false);
+            }
+        }
         for (MailEntry.AttachedItem ai : entry.getAttachedItems()) {
             items.add(new OpenMailPayload.ItemAttachment(ai.id(), ai.count()));
             // 服务端直接给玩家物品
