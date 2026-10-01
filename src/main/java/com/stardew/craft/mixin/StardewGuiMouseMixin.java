@@ -30,10 +30,12 @@ public abstract class StardewGuiMouseMixin {
     @Shadow private double xpos;
     @Shadow private double ypos;
     @Shadow private boolean ignoreFirstMove;
-    @Unique private double stardewcraft$rawX;
-    @Unique private double stardewcraft$rawY;
-    @Unique private double stardewcraft$previousX;
-    @Unique private double stardewcraft$previousY;
+    // Static: the mouseMoved callback lives in a static lambda (m_263857_), and Mixin only injects a "*" selector into
+    // static targets from a static handler. MouseHandler is the client singleton, so static state is equivalent.
+    @Unique private static double stardewcraft$rawX;
+    @Unique private static double stardewcraft$rawY;
+    @Unique private static double stardewcraft$previousX;
+    @Unique private static double stardewcraft$previousY;
 
     @WrapMethod(method = "onPress")
     private void stardewcraft$press(long window, int button, int action, int modifiers, Operation<Void> original) {
@@ -52,11 +54,11 @@ public abstract class StardewGuiMouseMixin {
     @WrapMethod(method = "onMove")
     private void stardewcraft$move(long window, double x, double y, Operation<Void> original) {
         var previous = stardewcraft$enter();
-        this.stardewcraft$rawX = x;
-        this.stardewcraft$rawY = y;
+        stardewcraft$rawX = x;
+        stardewcraft$rawY = y;
         // onMove first snaps xpos/ypos to the new position when ignoreFirstMove is set (zero drag delta).
-        this.stardewcraft$previousX = this.ignoreFirstMove ? x : this.xpos;
-        this.stardewcraft$previousY = this.ignoreFirstMove ? y : this.ypos;
+        stardewcraft$previousX = this.ignoreFirstMove ? x : this.xpos;
+        stardewcraft$previousY = this.ignoreFirstMove ? y : this.ypos;
         try { original.call(window, x, y); }
         finally { StardewGuiViewport.restore(previous); }
     }
@@ -79,7 +81,7 @@ public abstract class StardewGuiMouseMixin {
 
     @WrapOperation(method = "*", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/client/gui/screens/Screen;mouseMoved(DD)V"))
-    private void stardewcraft$moved(Screen screen, double mouseX, double mouseY, Operation<Void> original) {
+    private static void stardewcraft$moved(Screen screen, double mouseX, double mouseY, Operation<Void> original) {
         var layout = StardewGuiViewport.active();
         if (layout == null) { original.call(screen, mouseX, mouseY); return; }
         original.call(screen, stardewcraft$guiX(layout), stardewcraft$guiY(layout));
@@ -118,30 +120,30 @@ public abstract class StardewGuiMouseMixin {
     }
 
     @Unique
-    private double stardewcraft$guiX(GuiLayoutMath.Viewport layout) {
+    private static double stardewcraft$guiX(GuiLayoutMath.Viewport layout) {
         var window = Minecraft.getInstance().getWindow();
-        return layout.windowMouseX(this.stardewcraft$rawX, window.getScreenWidth())
+        return layout.windowMouseX(stardewcraft$rawX, window.getScreenWidth())
                 * (double) window.getGuiScaledWidth() / (double) window.getScreenWidth();
     }
 
     @Unique
-    private double stardewcraft$guiY(GuiLayoutMath.Viewport layout) {
+    private static double stardewcraft$guiY(GuiLayoutMath.Viewport layout) {
         var window = Minecraft.getInstance().getWindow();
-        return layout.windowMouseY(this.stardewcraft$rawY, window.getScreenHeight())
+        return layout.windowMouseY(stardewcraft$rawY, window.getScreenHeight())
                 * (double) window.getGuiScaledHeight() / (double) window.getScreenHeight();
     }
 
     @Unique
-    private double stardewcraft$dragX(GuiLayoutMath.Viewport layout) {
+    private static double stardewcraft$dragX(GuiLayoutMath.Viewport layout) {
         var window = Minecraft.getInstance().getWindow();
-        return layout.windowDeltaX(this.stardewcraft$rawX - this.stardewcraft$previousX)
+        return layout.windowDeltaX(stardewcraft$rawX - stardewcraft$previousX)
                 * (double) window.getGuiScaledWidth() / (double) window.getScreenWidth();
     }
 
     @Unique
-    private double stardewcraft$dragY(GuiLayoutMath.Viewport layout) {
+    private static double stardewcraft$dragY(GuiLayoutMath.Viewport layout) {
         var window = Minecraft.getInstance().getWindow();
-        return layout.windowDeltaY(this.stardewcraft$rawY - this.stardewcraft$previousY)
+        return layout.windowDeltaY(stardewcraft$rawY - stardewcraft$previousY)
                 * (double) window.getGuiScaledHeight() / (double) window.getScreenHeight();
     }
 

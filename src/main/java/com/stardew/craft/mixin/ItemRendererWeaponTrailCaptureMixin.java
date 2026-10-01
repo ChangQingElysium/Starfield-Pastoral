@@ -19,7 +19,9 @@ public class ItemRendererWeaponTrailCaptureMixin {
             at = @At(
                     value = "INVOKE",
                     target = "Lnet/minecraftforge/client/ForgeHooksClient;handleCameraTransforms(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/resources/model/BakedModel;Lnet/minecraft/world/item/ItemDisplayContext;Z)Lnet/minecraft/client/resources/model/BakedModel;",
-                    shift = At.Shift.AFTER
+                    shift = At.Shift.AFTER,
+                    // PORT(1.20.1): ForgeHooksClient is a Forge class (not obfuscated).
+                    remap = false
             )
     )
     private void stardewcraft$captureWeaponBladeTransform(

@@ -21,7 +21,9 @@ public abstract class GardenPotCropRenderMixin {
     @Inject(
             method = "renderBatched(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/BlockAndTintGetter;Lcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;ZLnet/minecraft/util/RandomSource;Lnet/minecraftforge/client/model/data/ModelData;Lnet/minecraft/client/renderer/RenderType;)V",
             at = @At("HEAD"),
-            cancellable = true
+            cancellable = true,
+            // PORT(1.20.1): the ModelData/RenderType overload is Forge-added (not obfuscated).
+            remap = false
     )
     private void stardewcraft$hidePottedCrop(
             BlockState state,

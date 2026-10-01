@@ -22,10 +22,16 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class OptionalAnimatedArmorFishingMixin {
     @Shadow protected Entity currentEntity;
     @Shadow protected ItemStack currentStack;
-    @Inject(method="renderToBuffer(Lcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;III)V",
+    // PORT(1.20.1): GeckoLib 4.8.2 for Forge 1.20.1 overrides the 1.20.1 Model#renderToBuffer
+    // (PoseStack, VertexConsumer, light, overlay, r, g, b, a) instead of 1.21's (..., light, overlay, color). The
+    // override carries the vanilla SRG name (m_7695_) in production and the official name in a deobfuscated dev
+    // environment; the AP cannot remap a method of a @Pseudo third-party class, so both names are listed.
+    @Inject(method={"renderToBuffer(Lcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;IIFFFF)V",
+            "m_7695_(Lcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;IIFFFF)V"},
             at=@At("HEAD"), cancellable=true, require=0)
     private void stardewcraft$hideFishingArmor(PoseStack pose, VertexConsumer buffer, int light,
-                                              int overlay, int color, CallbackInfo ci) {
+                                              int overlay, float red, float green, float blue, float alpha,
+                                              CallbackInfo ci) {
         if(currentEntity instanceof AbstractClientPlayer player && FishingPresentationClient.worldOwned(player)
                 && FishingArmorVisibility.shouldHide(player,currentStack))ci.cancel();
     }

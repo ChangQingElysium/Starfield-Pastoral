@@ -21,6 +21,7 @@
     "ItemStackLargeCountMixin",
     "FriendlyByteBufLargeItemCountMixin",
     "ItemStackQualityComponentsMixin",
+    "FriendlyByteBufQualityComponentsMixin",
     "ItemStackStardewFoodContextMixin",
     "PlayerStardewFoodMixin",
     "PlayerRingLightMixin",
@@ -57,7 +58,13 @@
     "PortFenceGateBlockAccessor",
     "PortMinecraftServerSprintMixin",
     "PortGameTestServerParityMixin",
-    "PortGameTestRunnerBatchMixin"
+    "PortGameTestRunnerBatchMixin",
+    "PortEnchantmentApplicabilityMixin",
+    "PortEnchantmentSubclassApplicabilityMixin",
+    "PortAnvilEnchantmentRulesMixin",
+    "PortAnvilEnchantmentCostMixin",
+    "PortEnchantCommandRulesMixin",
+    "PortEnchantmentSelectionRulesMixin"
   ],
   "client": [
     "PortIntegratedServerAccessor",
@@ -94,7 +101,6 @@
     "StardewGuiKeyboardMixin",
     "StardewGuiTickMixin",
     "StardewGuiScissorMixin",
-    "StardewReadingHudTextMixin",
     "StardewHotbarSpriteMixin",
     "PortContainerScreenAccessor",
     "PortScreenBackgroundMixin",

@@ -23,6 +23,12 @@ sourceSets {
     main {
         java {
             srcDirs = ['src/main/java', 'src/port/java']
+            // Seasonal inventory mixins are not registered in stardewcraft.mixins.json (also unregistered on the
+            // 1.21.1 mainline) and target 1.21-only GuiGraphics#blitSprite/renderSlotHighlight. Excluded from the
+            // Gradle compile so the Mixin annotation processor does not fail on their 1.21 targets; nothing
+            // references them. scripts/port/javac_all.sh still compiles them.
+            exclude 'com/stardew/craft/mixin/StardewInventoryTextureMixin.java'
+            exclude 'com/stardew/craft/mixin/StardewInventorySlotHighlightMixin.java'
         }
         resources {
             srcDirs = ['src/main/resources', 'src/port/resources', 'src/generated/resources']
@@ -120,6 +126,12 @@ dependencies {
 
 jarJar.enable()
 
+// The jar-in-jar artifact (bundles MixinExtras, which every mixin using @WrapOperation etc. needs at runtime) is the
+// distributable mod jar; the plain jar is kept as "-slim".
+tasks.named('jarJar').configure {
+    archiveClassifier = ''
+}
+
 tasks.named('processResources', ProcessResources).configure {
     def replaceProperties = [
             minecraft_version      : minecraft_version,
@@ -152,6 +164,7 @@ tasks.named('jar', Jar).configure {
                 'MixinConfigs'            : "${mod_id}.mixins.json",
         ])
     }
+    archiveClassifier = 'slim'
     finalizedBy 'reobfJar'
 }
 

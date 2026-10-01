@@ -18,6 +18,14 @@ import org.spongepowered.asm.mixin.injection.At;
  * {@code (x + width / 2, y)}. 1.20.1 draws the selected item name as {@code fill} + {@code drawString}; both calls get
  * that same transform here, which is pixel-identical to scaling them together. The action-bar message is drawn by
  * {@code ForgeGui#renderRecordOverlay} ({@link StardewReadingOverlayMessageMixin}).
+ *
+ * <p>PORT(1.20.1): NOT registered in stardewcraft.mixins.json, for parity with 1.21.1's runtime behaviour. The 1.21.1
+ * mixin selects {@code method = {"renderOverlayMessage", "renderSelectedItemName"}}; a descriptor-less selector
+ * matches only the first overload, which in NeoForge 21.1 is the private {@code renderSelectedItemName(GuiGraphics)}
+ * delegate that contains no {@code drawStringWithBackdrop} call. The selected-item name is therefore never scaled in
+ * 1.21.1 (only the action-bar message is, ported by {@link StardewReadingOverlayMessageMixin}). Register this class
+ * again once the 1.21.1 selector is fixed to {@code renderSelectedItemName(Lnet/minecraft/client/gui/GuiGraphics;I)V}
+ * (see docs/porting/bulk-port-gaps.md).
  */
 @Mixin(Gui.class)
 public abstract class StardewReadingHudTextMixin {

@@ -18,7 +18,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class ArmorLayerCombatCollapseMixin {
     @Unique private CollapseArmorModel stardewcraft$inner;
     @Unique private CollapseArmorModel stardewcraft$outer;
-    @Inject(method="getArmorModelHook",at=@At("RETURN"),cancellable=true)
+    // PORT(1.20.1): getArmorModelHook is a Forge-added method (not obfuscated), so it is not remapped.
+    @Inject(method="getArmorModelHook",at=@At("RETURN"),cancellable=true,remap=false)
     private void stardewcraft$articulatedArmor(LivingEntity entity,ItemStack stack,EquipmentSlot slot,
             HumanoidModel<?> original,CallbackInfoReturnable<Model> cir) {
         // A mod-provided custom armor model retains its own rendering contract.

@@ -23,8 +23,9 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 public abstract class TemplateModelAmbientOcclusionMixin {
     @Redirect(method = "tesselateBlock(Lnet/minecraft/world/level/BlockAndTintGetter;Lnet/minecraft/client/resources/model/BakedModel;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/core/BlockPos;Lcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;ZLnet/minecraft/util/RandomSource;JILnet/minecraftforge/client/model/data/ModelData;Lnet/minecraft/client/renderer/RenderType;)V",
             at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/client/resources/model/BakedModel;useAmbientOcclusion(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/client/renderer/RenderType;)Z",
-                    remap = false))
+                    target = "Lnet/minecraft/client/resources/model/BakedModel;useAmbientOcclusion(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/client/renderer/RenderType;)Z"),
+            // Both the ModelData tesselateBlock overload and useAmbientOcclusion(BlockState, RenderType) are Forge-added.
+            remap = false)
     private boolean stardewcraft$templateAmbientOcclusion(BakedModel model, BlockState state, RenderType renderType,
                                                           BlockAndTintGetter level, BakedModel tesselated,
                                                           BlockState tesselatedState, BlockPos pos, PoseStack pose,

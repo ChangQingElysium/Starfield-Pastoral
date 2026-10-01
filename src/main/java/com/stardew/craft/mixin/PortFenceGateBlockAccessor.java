@@ -8,9 +8,9 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 /** PORT(1.20.1): NeoForge 1.21 exposes {@code FenceGateBlock#openSound/closeSound}; 1.20.1 keeps them private. */
 @Mixin(FenceGateBlock.class)
 public interface PortFenceGateBlockAccessor {
-    @Accessor("openSound")
+    @Accessor(value = "openSound", remap = false) // Forge-added field (not obfuscated)
     SoundEvent stardewcraft$getOpenSound();
 
-    @Accessor("closeSound")
+    @Accessor(value = "closeSound", remap = false)
     SoundEvent stardewcraft$getCloseSound();
 }

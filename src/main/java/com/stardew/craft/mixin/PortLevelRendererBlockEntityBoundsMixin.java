@@ -27,7 +27,8 @@ public abstract class PortLevelRendererBlockEntityBoundsMixin {
     private BlockEntityRenderDispatcher blockEntityRenderDispatcher;
 
     @Redirect(method = "renderLevel", require = 0, expect = 2, at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/level/block/entity/BlockEntity;getRenderBoundingBox()Lnet/minecraft/world/phys/AABB;"))
+            target = "Lnet/minecraft/world/level/block/entity/BlockEntity;getRenderBoundingBox()Lnet/minecraft/world/phys/AABB;",
+            remap = false)) // Forge IForgeBlockEntity method (not obfuscated)
     private AABB stardewcraft$rendererBounds(BlockEntity blockEntity) {
         return stardewcraft$bounds(blockEntityRenderDispatcher, blockEntity);
     }

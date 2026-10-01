@@ -45,8 +45,10 @@ public abstract class PortBlockDropsMixin {
         }
     }
 
+    // The 7-argument (dropXp) overload is Forge-added and therefore not obfuscated; the vanilla 6-argument
+    // overload delegates to it with dropXp = true.
     @Inject(method = "dropResources(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/entity/BlockEntity;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/item/ItemStack;Z)V",
-            at = @At("HEAD"), cancellable = true)
+            at = @At("HEAD"), cancellable = true, remap = false)
     private static void stardewcraft$dropsEventWithBreaker(BlockState state, Level level, BlockPos pos, @Nullable BlockEntity blockEntity,
             @Nullable Entity breaker, ItemStack tool, boolean dropXp, CallbackInfo ci) {
         if (level instanceof ServerLevel server) {

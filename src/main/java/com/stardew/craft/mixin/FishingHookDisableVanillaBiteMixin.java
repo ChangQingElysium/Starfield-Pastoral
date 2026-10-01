@@ -19,7 +19,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(FishingHook.class)
 public abstract class FishingHookDisableVanillaBiteMixin {
 	/** 让鱼钩在岩浆中不受伤害，支持岩浆钓鱼 */
-	@Inject(method = "lavaHurt", at = @At("HEAD"), cancellable = true, require = 0)
+	// PORT(1.20.1): FishingHook declares no lavaHurt in 1.20.1 or 1.21.1 (it is inherited from Entity), so this
+	// optional injector matches nothing on either version; kept unchanged for parity (see bulk-port-gaps.md).
+	// The explicit descriptor only lets the AP report the (intentional) miss as a suppressible TARGET warning.
+	@SuppressWarnings("target")
+	@Inject(method = "lavaHurt()V", at = @At("HEAD"), cancellable = true, require = 0)
 	private void stardewcraft$preventLavaDamage(CallbackInfo ci) {
 		ci.cancel();
 	}

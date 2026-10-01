@@ -45,7 +45,8 @@ public abstract class PortContainerScreenMixin {
     }
 
     @WrapOperation(method = "render", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/client/gui/screens/inventory/AbstractContainerScreen;renderSlotHighlight(Lnet/minecraft/client/gui/GuiGraphics;IIII)V"))
+            target = "Lnet/minecraft/client/gui/screens/inventory/AbstractContainerScreen;renderSlotHighlight(Lnet/minecraft/client/gui/GuiGraphics;IIII)V",
+            remap = false)) // Forge-added color overload (not obfuscated)
     private void port$renderSlotHighlight(GuiGraphics graphics, int x, int y, int blitOffset, int color,
                                           Operation<Void> original,
                                           @Local(argsOnly = true, ordinal = 0) int mouseX,
