@@ -63,6 +63,8 @@ minecraft {
 
         server {
             property 'forge.enabledGameTestNamespaces', mod_id
+            // Lets scripts/port/server_smoke.sh find (and cleanly stop) exactly this server process.
+            property 'stardewcraft.runTag', providers.gradleProperty('runTag').getOrElse('none')
             args '--nogui'
         }
 
