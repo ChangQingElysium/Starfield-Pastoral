@@ -9,6 +9,7 @@
     "TownDoorMovementMixin",
     "ChunkSerializerTerrainVariantsMixin",
     "SurfaceFloorSupportMixin",
+    "PalettedContainerStateAccessMixin",
     "FarmBlockMixin",
     "GardenPlanterPlantShapeMixin",
     "GardenPlanterSporeBlossomMixin",

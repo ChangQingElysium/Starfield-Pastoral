@@ -16,6 +16,7 @@
 - 动画模型改用本模组的原生加载与播放，不再内嵌 GeckoLib；完善 NPC 动作、日程、寻路和交互，以及箱子、机器与家具的动画表现。
 - 加入季节快捷栏、普通生存背包界面及 Jade 提示框主题，重制生命与体力 HUD，并更新相关图标、装饰材料和模型。
 - 修复建筑放置预览、障碍反馈、室内空间与温室相关问题，更新公共城镇地图和公会设施；温室模板及旧存档土壤升级为模组泥土／耕地，保留已有作物、装修和耕地含水量。
+- 修复批量放置方块时，后台光照线程并发读取调色板可能造成的崩溃；保持方块、生成顺序和光照规则不变。
 - 接入 147 项姜岛方块资源及对应物品，包含家具、场景装饰、重型树液采集器、鸵鸟孵化器、火山地面开关与浇水冷却熔岩等交互；金色核桃记录可绑定所属农场。**这不代表姜岛整岛建造或全部原版玩法已经完成。**
 
 #### Forge 1.20.1 适配
@@ -38,6 +39,7 @@
 - Moves animated models to the mod's native loading and playback, without bundling GeckoLib, and improves NPC animation, schedules, navigation and interaction alongside chest, machine and furniture animations.
 - Adds seasonal hotbar, normal Survival inventory and Jade tooltip themes, refreshes the health and energy HUD, and updates related icons, decorative materials and models.
 - Fixes building previews, obstruction feedback, interior-space and greenhouse issues, and updates the public-town map and Guild facilities. Greenhouse templates and existing interiors use the mod's dirt/farmland, preserving crops, player furnishings and farmland moisture.
+- Fixes a concurrent palette-read crash in background lighting during bulk block placement, without changing block states, generation order or lighting rules.
 - Registers 147 Ginger Island block assets and their items, including furniture, scenery, the Heavy Tapper, Ostrich Incubator, volcano floor switches and watering-can lava cooling. Golden Walnut records can be bound to their owning farm. **This does not mean that the complete island build or all original island gameplay is finished.**
 
 #### Forge 1.20.1 Support

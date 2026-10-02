@@ -22,6 +22,11 @@ ABI_FAILURE_PATTERNS = (
     r"\bCritical injection failure\b",
 )
 
+PALETTE_FAILURE_PATTERNS = (
+    r"\bMissingPaletteEntryException\b",
+    r"\b(?:Accessing|Writing into) PalettedContainer from multiple threads\b",
+)
+
 CLIENT_WORLD_MARKERS = (
     ("resource reload", r"Reloading ResourceManager:"),
     ("player login", r"logged in with entity id"),
@@ -130,6 +135,14 @@ def verify_log(
             line = text.count("\n", 0, match.start()) + 1
             raise ValueError(
                 f"ABI or Mixin failure matched {pattern!r} at line {line}"
+            )
+
+    for pattern in PALETTE_FAILURE_PATTERNS:
+        match = re.search(pattern, text, flags=re.IGNORECASE)
+        if match is not None:
+            line = text.count("\n", 0, match.start()) + 1
+            raise ValueError(
+                f"Palette concurrency failure matched {pattern!r} at line {line}"
             )
 
     lines = text.splitlines()
