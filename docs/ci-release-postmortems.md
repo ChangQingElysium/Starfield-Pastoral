@@ -38,6 +38,11 @@ The complete Forge suite ran 695 tests and rejected Auto-Grabber main/extension 
 
 ## Recurring structural cause
 
+### 0.6.3 NeoForge candidate — entity visibility is not synchronous block loading (2026-10-02)
+
+GitHub run `36972384365` on `14b23a67` completed all 658 tests but rejected only `liveProjectionRejectsStaleEntitiesAndReplayedFloorProducts` at its immediate migrated-animal lookup. Both clean local suites passed. The fixture operates on a separately allocated farm and only synchronously loads its block chunks. The official server implementation does not make this an entity-tracking guarantee: `getChunk(FULL)` uses a short-lived level-33 ticket; entity sections default to hidden, `addFreshEntity` can register an entity without adding it to visible lookup, and `ServerLevel.getEntity(UUID)` reads only that visible lookup. Even adding a forced ticket does not synchronously complete its full-status callback. The remote log does not capture the exact visibility state, but the source audit proves that the fixture lacks this required precondition. Hold only its own home-chunk tickets and wait, within a bounded tick budget, for the actual entity-loading and entity-ticking predicates before invoking migration/projection once. Entity-ticking readiness is a sufficient observable fixture condition, not a new production tracking requirement. Preserve every stale-entity, sold-animal, floor-product receipt, disk-save and replay assertion; release only tickets owned by the fixture on success, failure or timeout. No production projection, animal rules, persistence or chunk-loading policy is changed. The revised exact candidates must repeat the complete clean workflow and pass remote CI before publication.
+
+
 ### 0.6.1 candidate — local clean-checkout gate (2026-09-14)
 
 Before pushing, `build check` rejected the API maturity manifest: its documentation evidence had been generated with local, ignored audit notes present. The clean checkout correctly reported `StardewGiantCrops.doc_ref=no` where the manifest claimed `yes`. Restrict evidence collection to Git-indexed files and regenerate the conservative experimental classification from the published tree. Local modelling/audit directories remain excluded; they are not added to satisfy a gate. This failure occurred locally before GitHub publication.
