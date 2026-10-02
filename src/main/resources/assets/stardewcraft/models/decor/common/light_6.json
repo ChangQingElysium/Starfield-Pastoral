@@ -416,7 +416,7 @@
             1.75
           ],
           "texture": "#1",
-          "neoforge_data": {
+          "forge_data": {
             "block_light": 15,
             "sky_light": 15,
             "ambient_occlusion": false
@@ -430,7 +430,7 @@
             1.75
           ],
           "texture": "#1",
-          "neoforge_data": {
+          "forge_data": {
             "block_light": 15,
             "sky_light": 15,
             "ambient_occlusion": false
@@ -444,7 +444,7 @@
             1.75
           ],
           "texture": "#1",
-          "neoforge_data": {
+          "forge_data": {
             "block_light": 15,
             "sky_light": 15,
             "ambient_occlusion": false
@@ -458,7 +458,7 @@
             0.75
           ],
           "texture": "#1",
-          "neoforge_data": {
+          "forge_data": {
             "block_light": 15,
             "sky_light": 15,
             "ambient_occlusion": false
@@ -472,7 +472,7 @@
             0.75
           ],
           "texture": "#1",
-          "neoforge_data": {
+          "forge_data": {
             "block_light": 15,
             "sky_light": 15,
             "ambient_occlusion": false
@@ -502,7 +502,7 @@
             0.5
           ],
           "texture": "#1",
-          "neoforge_data": {
+          "forge_data": {
             "block_light": 15,
             "sky_light": 15,
             "ambient_occlusion": false
@@ -516,7 +516,7 @@
             0.5
           ],
           "texture": "#1",
-          "neoforge_data": {
+          "forge_data": {
             "block_light": 15,
             "sky_light": 15,
             "ambient_occlusion": false
@@ -530,7 +530,7 @@
             0.5
           ],
           "texture": "#1",
-          "neoforge_data": {
+          "forge_data": {
             "block_light": 15,
             "sky_light": 15,
             "ambient_occlusion": false
@@ -544,7 +544,7 @@
             0.5
           ],
           "texture": "#1",
-          "neoforge_data": {
+          "forge_data": {
             "block_light": 15,
             "sky_light": 15,
             "ambient_occlusion": false
@@ -574,7 +574,7 @@
             0.5
           ],
           "texture": "#1",
-          "neoforge_data": {
+          "forge_data": {
             "block_light": 15,
             "sky_light": 15,
             "ambient_occlusion": false
@@ -588,7 +588,7 @@
             0.5
           ],
           "texture": "#1",
-          "neoforge_data": {
+          "forge_data": {
             "block_light": 15,
             "sky_light": 15,
             "ambient_occlusion": false
@@ -602,7 +602,7 @@
             0.5
           ],
           "texture": "#1",
-          "neoforge_data": {
+          "forge_data": {
             "block_light": 15,
             "sky_light": 15,
             "ambient_occlusion": false
@@ -616,7 +616,7 @@
             0.5
           ],
           "texture": "#1",
-          "neoforge_data": {
+          "forge_data": {
             "block_light": 15,
             "sky_light": 15,
             "ambient_occlusion": false
@@ -646,7 +646,7 @@
             3.5
           ],
           "texture": "#1",
-          "neoforge_data": {
+          "forge_data": {
             "block_light": 15,
             "sky_light": 15,
             "ambient_occlusion": false
@@ -660,7 +660,7 @@
             3.5
           ],
           "texture": "#1",
-          "neoforge_data": {
+          "forge_data": {
             "block_light": 15,
             "sky_light": 15,
             "ambient_occlusion": false
@@ -674,7 +674,7 @@
             2.25
           ],
           "texture": "#1",
-          "neoforge_data": {
+          "forge_data": {
             "block_light": 15,
             "sky_light": 15,
             "ambient_occlusion": false
@@ -688,7 +688,7 @@
             2.25
           ],
           "texture": "#1",
-          "neoforge_data": {
+          "forge_data": {
             "block_light": 15,
             "sky_light": 15,
             "ambient_occlusion": false
@@ -718,7 +718,7 @@
             3.5
           ],
           "texture": "#1",
-          "neoforge_data": {
+          "forge_data": {
             "block_light": 15,
             "sky_light": 15,
             "ambient_occlusion": false
@@ -732,7 +732,7 @@
             3.5
           ],
           "texture": "#1",
-          "neoforge_data": {
+          "forge_data": {
             "block_light": 15,
             "sky_light": 15,
             "ambient_occlusion": false
@@ -746,7 +746,7 @@
             2.25
           ],
           "texture": "#1",
-          "neoforge_data": {
+          "forge_data": {
             "block_light": 15,
             "sky_light": 15,
             "ambient_occlusion": false
@@ -760,7 +760,7 @@
             2.25
           ],
           "texture": "#1",
-          "neoforge_data": {
+          "forge_data": {
             "block_light": 15,
             "sky_light": 15,
             "ambient_occlusion": false

@@ -1,6 +1,7 @@
 package com.stardew.craft.mixin;
 
 import com.stardew.craft.port.PortAttributes;
+import com.stardew.craft.port.PortInheritance;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Pose;
@@ -18,8 +19,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * <li>1.21 {@code maxUpStep()} returns the step-height attribute (at least 1 with a player controlling passenger);
  * subclass overrides calling {@code super.maxUpStep()} see that value.</li>
  * <li>1.21 {@code getDimensions(pose)} multiplies the (age-scaled) default dimensions by {@code getScale()} except
- * when sleeping; 1.20.1's {@code getDimensions} already applies the age scale, the attribute scale is applied on
- * top. Like 1.21 ({@code appliedScale} at the end of {@code LivingEntity#tick}), a changed scale refreshes the
+ * when sleeping; {@code PortLivingEntityScaleMixin} owns that result for mod entities, so this fallback must not
+ * multiply it a second time. Like 1.21 ({@code appliedScale} at the end of {@code LivingEntity#tick}), a changed scale refreshes the
  * dimensions at the end of the entity's living tick on both sides.</li>
  * </ul>
  */
@@ -36,8 +37,9 @@ public abstract class PortLivingEntityAttributesMixin {
 
     @Inject(method = "getDimensions", at = @At("RETURN"), cancellable = true)
     private void stardewcraft$scaleAttribute(Pose pose, CallbackInfoReturnable<EntityDimensions> cir) {
-        if (pose == Pose.SLEEPING) return;
-        float scale = PortAttributes.scale((LivingEntity) (Object) this);
+        LivingEntity self = (LivingEntity) (Object) this;
+        if (pose == Pose.SLEEPING || PortInheritance.isModEntity(self)) return;
+        float scale = PortAttributes.scale(self);
         if (scale != 1.0F) cir.setReturnValue(cir.getReturnValue().scale(scale));
     }
 

@@ -29,12 +29,15 @@ public abstract class PortPitcherCropBlockPlantSupportMixin extends DoublePlantB
 
     @Inject(method = "mayPlaceOn", at = @At("HEAD"), cancellable = true)
     private void stardewcraft$port121MayPlaceOn(BlockState state, BlockGetter level, BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
+        if (!PortPlantSupport.portRules(state, this)) return;
         cir.setReturnValue(PortPlantSupport.farmland(state));
     }
 
     @Inject(method = "canSurvive", at = @At("HEAD"), cancellable = true)
     private void stardewcraft$port121CanSurvive(BlockState state, LevelReader level, BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
-        TriState decision = PortPlantSupport.decision(level.getBlockState(pos.below()), level, pos.below(), Direction.UP, state);
+        BlockState soil = level.getBlockState(pos.below());
+        if (!PortPlantSupport.portRules(soil, this)) return;
+        TriState decision = PortPlantSupport.decision(soil, level, pos.below(), Direction.UP, state);
         cir.setReturnValue(isLower(state) && !PortPlantSupport.sufficientCropLight(level, pos)
                 ? decision.isTrue() : super.canSurvive(state, level, pos));
     }

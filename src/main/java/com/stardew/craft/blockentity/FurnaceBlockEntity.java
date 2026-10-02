@@ -23,7 +23,6 @@ import java.util.Optional;
 
 @SuppressWarnings("all")
 public class FurnaceBlockEntity extends TimedProductionBlockEntity {
-    private static final int EFFECTIVE_MINUTES_PER_DAY = 1260;
 
     private static final int MAX_COAL_BUFFER = 64;
 
@@ -158,7 +157,7 @@ public class FurnaceBlockEntity extends TimedProductionBlockEntity {
         ItemStack output = new ItemStack(
                 outputItem, recipe.rollOutputCount(level.random));
         var plan = prepareProduction(
-                stack, output, recipe.minutes(),
+                stack, output, recipeMinutes(recipe),
                 player, false);
         if (plan.isEmpty()) {
             return InsertResult.fail();
@@ -227,7 +226,7 @@ public class FurnaceBlockEntity extends TimedProductionBlockEntity {
         ItemStack output = new ItemStack(
                 outputItem, (simulate ? recipe.outputCount() : recipe.rollOutputCount(level.random)));
         var plan = prepareProduction(
-                stack, output, recipe.minutes(),
+                stack, output, recipeMinutes(recipe),
                 null, true);
         if (plan.isEmpty()) {
             return stack;

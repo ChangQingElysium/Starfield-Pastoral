@@ -49,14 +49,15 @@ public final class PortVertex {
 
     /**
      * 1.21 {@code PoseStack.Pose#transformNormal}: 1.21 normalizes when the pose is not "trusted" (a non-uniform
-     * scale or non-orthonormal matrix was applied). 1.20.1 has no trust flag; its normal matrix is orthonormal
-     * exactly when 1.21's would be trusted (1.20.1 only differs by a scalar factor on non-uniform scales), so
-     * normalizing whenever the 1.20.1 normal matrix is not orthonormal yields the 1.21 result.
+     * scale or non-orthonormal matrix was applied). The runtime pose Mixin preserves that history;
+     * an untransformed development JVM can infer the ordinary case from the matrix instead.
      */
     public static Vector3f transformNormal(PoseStack.Pose pose, float x, float y, float z, Vector3f destination) {
         Matrix3f normal = pose.normal();
         Vector3f result = normal.transform(x, y, z, destination);
-        return isOrthonormal(normal) ? result : result.normalize();
+        boolean trusted = (Object) pose instanceof PortNormalPose state
+                ? state.stardewcraft$trustedNormals() : isOrthonormal(normal);
+        return trusted ? result : result.normalize();
     }
 
     public static Vector3f transformNormal(PoseStack.Pose pose, Vector3f vector, Vector3f destination) {
@@ -78,8 +79,7 @@ public final class PortVertex {
     /**
      * 1.21 {@code PoseStack#mulPose(Matrix4f)}. 1.20.1 {@code mulPoseMatrix} leaves the normal matrix untouched;
      * 1.21 rotates it for orthonormal matrices and recomputes it (inverse transpose, normalized per vertex)
-     * otherwise. The recomputed matrix is rescaled to unit |determinant| (direction kept), which is exact for uniformly scaled
-     * rotations and matches how 1.20.1 vanilla consumers (which never normalize) treat non-uniform scales.
+     * otherwise. Keep the exact inverse transpose: baked normals use it unchanged in NeoForge too.
      */
     public static void mulPose(PoseStack stack, Matrix4f matrix) {
         PoseStack.Pose pose = stack.last();
@@ -93,10 +93,7 @@ public final class PortVertex {
         } else {
             Matrix3f normal = pose.normal();
             normal.set(pose.pose()).invert().transpose();
-            float determinant = Math.abs(normal.determinant());
-            if (determinant != 0.0F && Float.isFinite(determinant)) {
-                normal.scale((float) (1.0 / Math.cbrt(determinant)));
-            }
+            trust(pose, false);
         }
     }
 
@@ -106,7 +103,23 @@ public final class PortVertex {
         PoseStack.Pose copy = holder.last();
         copy.pose().set(pose.pose());
         copy.normal().set(pose.normal());
+        if ((Object) pose instanceof PortNormalPose state) trust(copy, state.stardewcraft$trustedNormals());
         return copy;
+    }
+
+    /** Exact 1.21 PoseStack.scale, including mixed-sign uniform reflections. */
+    public static void scale(PoseStack.Pose pose, float x, float y, float z) {
+        pose.pose().scale(x, y, z);
+        if (Math.abs(x) == Math.abs(y) && Math.abs(y) == Math.abs(z)) {
+            if (x < 0 || y < 0 || z < 0) pose.normal().scale(Math.signum(x), Math.signum(y), Math.signum(z));
+        } else {
+            pose.normal().scale(1.0F / x, 1.0F / y, 1.0F / z);
+            trust(pose, false);
+        }
+    }
+
+    private static void trust(PoseStack.Pose pose, boolean trusted) {
+        if ((Object) pose instanceof PortNormalPose state) state.stardewcraft$trustedNormals(trusted);
     }
 
     /**
@@ -116,6 +129,13 @@ public final class PortVertex {
      */
     public static void putBulkData(VertexConsumer consumer, PoseStack.Pose pose, BakedQuad quad, float red,
             float green, float blue, float alpha, int packedLight, int packedOverlay) {
+        putBulkData(consumer, pose, quad, new float[]{1, 1, 1, 1}, red, green, blue, alpha,
+                new int[]{packedLight, packedLight, packedLight, packedLight}, packedOverlay, false);
+    }
+
+    /** Exact 1.21 bulk body; does not call the overwritten VertexConsumer default method. */
+    public static void putBulkData(VertexConsumer consumer, PoseStack.Pose pose, BakedQuad quad, float[] brightness,
+            float red, float green, float blue, float alpha, int[] lights, int packedOverlay, boolean readColor) {
         int[] vertices = quad.getVertices();
         Vec3i direction = quad.getDirection().getNormal();
         Matrix4f matrix = pose.pose();
@@ -131,17 +151,22 @@ public final class PortVertex {
                 float x = buffer.getFloat(0);
                 float y = buffer.getFloat(4);
                 float z = buffer.getFloat(8);
-                float r = red * 255.0F;
-                float g = green * 255.0F;
-                float b = blue * 255.0F;
-                int color = FastColor.ARGB32.color(a, (int) r, (int) g, (int) b);
-                int light = consumer.applyBakedLighting(packedLight, buffer);
+                float r = readColor ? (buffer.get(12) & 255) * brightness[i] * red : brightness[i] * red * 255.0F;
+                float g = readColor ? (buffer.get(13) & 255) * brightness[i] * green : brightness[i] * green * 255.0F;
+                float b = readColor ? (buffer.get(14) & 255) * brightness[i] * blue : brightness[i] * blue * 255.0F;
+                int vertexAlpha = readColor ? (int) ((alpha * (buffer.get(15) & 255) / 255.0F) * 255) : a;
+                int color = FastColor.ARGB32.color(vertexAlpha, (int) r, (int) g, (int) b);
+                int light = consumer.applyBakedLighting(lights[i], buffer);
                 float u = buffer.getFloat(16);
                 float v = buffer.getFloat(20);
                 Vector3f position = matrix.transformPosition(x, y, z, new Vector3f());
                 consumer.applyBakedNormals(normal, buffer, pose.normal());
-                addVertex(consumer, position.x(), position.y(), position.z(), color, u, v, packedOverlay, light,
-                        normal.x(), normal.y(), normal.z());
+                // Bulk quads use BLOCK/NEW_ENTITY's fixed attribute order. Emit each attribute once,
+                // just like the native default, rather than the generic any-format Builder replay.
+                VertexConsumer vertex = consumer.vertex(position.x(), position.y(), position.z()).color(color)
+                        .uv(u, v).overlayCoords(packedOverlay).uv2(light)
+                        .normal(normal.x(), normal.y(), normal.z());
+                vertex.endVertex();
             }
         }
     }

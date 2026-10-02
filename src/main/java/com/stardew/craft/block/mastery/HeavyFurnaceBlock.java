@@ -57,7 +57,7 @@ public class HeavyFurnaceBlock extends FurnaceBlock {
     @Override
     @Nullable
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-        if (state.getValue(PART) == Part.EXTENSION) return null;
+        if (state.getValue(PART) == Part.EXTENSION) return com.stardew.craft.port.PortMachineExtensions.createExtension(pos, state);
         return new HeavyFurnaceBlockEntity(pos, state);
     }
 

@@ -341,17 +341,17 @@ public final class LivestockManagementScreen extends FarmFolioScreen {
         int pw = w - 182;
         paper(g, x + 16, y + 36, pw, h - 80);
         LivestockPortrait.draw(
-                g, a, x + 32, y + 56, Math.min(110, pw - 32), Math.max(32, h - 212), false);
-        label(g, Component.literal(a.getString("Name")), x + 32, y + h - 146, pw - 32, INK);
-        BuildingUiIcons.hearts(g, x + 32, y + h - 126, a.getInt("Friendship"));
+                g, a, x + 32, y + 56, Math.min(110, pw - 32), Math.max(32, h - 230), false);
+        label(g, Component.literal(a.getString("Name")), x + 32, y + h - 164, pw - 32, INK);
+        BuildingUiIcons.hearts(g, x + 32, y + h - 144, a.getInt("Friendship"));
         label(
                 g,
                 Component.translatable("stardewcraft.animal.query.age", a.getInt("Age")),
                 x + 32,
-                y + h - 106,
+                y + h - 124,
                 pw - 32,
                 MUTED);
-        label(g, homeName(a), x + 32, y + h - 86, pw - 32, MUTED);
+        label(g, homeName(a), x + 32, y + h - 104, pw - 32, MUTED);
         label(
                 g,
                 ui(a.getInt("Fullness") >= 200 ? "fed" : "hungry")
@@ -359,9 +359,25 @@ public final class LivestockManagementScreen extends FarmFolioScreen {
                         .append(" · ")
                         .append(ui(a.getBoolean("Petted") ? "petted" : "unpetted")),
                 x + 32,
-                y + h - 66,
+                y + h - 84,
                 pw - 32,
                 INK);
+        paragraph(
+                g,
+                Component.translatable(moodKey(a.getInt("MoodMessage"), a.getBoolean("Baby")), a.getString("Name")),
+                x + 32,
+                y + h - 64,
+                pw - 32,
+                y + h - 46,
+                MUTED);
+    }
+
+    private static String moodKey(int message, boolean baby) {
+        return switch (message) {
+            case 0 -> baby ? "stardewcraft.animal.query.mood.0_baby" : "stardewcraft.animal.query.mood.0_adult";
+            case 1, 3, 4, 5, 6 -> "stardewcraft.animal.query.mood." + message;
+            default -> "stardewcraft.animal.query.mood.2";
+        };
     }
 
     private final class SellScreen extends FarmFolioScreen {

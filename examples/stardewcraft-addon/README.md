@@ -1,4 +1,4 @@
-# StardewCraft 0.5 附属 Mod 示例
+# StardewCraft 附属 Mod 示例（Forge 1.20.1）
 
 这个小工程集中展示当前 `api.v1` 的主要 Java 扩展入口：
 
@@ -71,17 +71,14 @@
 - 声明一个可选、版本化的客户端目录展示能力；远端缺失时连接继续且展示安全降级。
 - 在客户端读取有管理权限的罗宾建造／升级订单列表、剩余工作日和本地化建筑名，不读取服务端建筑存档。
 
-先在仓库根目录构建本体 JAR，再编译示例：
+本分支示例使用 Forge 1.20.1、Forge 47.4.10 和 Java 17。先在仓库根目录构建包含 MixinExtras 的完整本体 JAR，再编译示例；示例从根目录 `gradle.properties` 读取本体版本，使用 ForgeGradle 解混淆，不接受 `-slim` 包：
 
 ```bash
-./gradlew jar
+./gradlew build
 ./gradlew -p examples/stardewcraft-addon build
 ```
 
-日常源码验证可直接在仓库根目录运行 `./gradlew compileNpcAddonCompatibility`，它会让示例
-针对当前 `main` 类输出编译，不需要先打包 JAR。
-
-真实附属工程应把本地 `fileTree` 依赖替换为 StardewCraft 发布后的 Maven 坐标，并保留 `neoforge.mods.toml` 中对 `stardewcraft` 的 `required + AFTER` 依赖。
+真实附属工程应把本地 `flatDir` 依赖替换为 StardewCraft 发布后的 Maven 坐标，并保留 `mods.toml` 中对 `stardewcraft` 的 `mandatory=true + AFTER` 依赖。客户端初始化事件订阅 Forge 的 MOD 总线，HUD 事件订阅 FORGE 总线。
 
 注册 ID 必须使用附属自己的命名空间。重复 ID 会直接抛出异常，不按加载顺序覆盖。
 

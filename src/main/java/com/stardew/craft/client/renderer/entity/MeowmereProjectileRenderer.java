@@ -1,5 +1,6 @@
 package com.stardew.craft.client.renderer.entity;
 
+import com.stardew.craft.port.PortCamera;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.stardew.craft.entity.projectile.MeowmereProjectileEntity;
@@ -33,7 +34,7 @@ public class MeowmereProjectileRenderer extends EntityRenderer<MeowmereProjectil
         
         // 缩放和定位
         poseStack.scale(0.8f, 0.8f, 0.8f);
-        poseStack.mulPose(this.entityRenderDispatcher.cameraOrientation());
+        poseStack.mulPose(PortCamera.cameraOrientation(this.entityRenderDispatcher));
         poseStack.mulPose(Axis.YP.rotationDegrees(180.0F));
 
         // The original cat face is an intentional exception to procedural weapon effects.

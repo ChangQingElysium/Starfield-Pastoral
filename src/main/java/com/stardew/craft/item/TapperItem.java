@@ -26,7 +26,11 @@ import java.util.List;
 /** Server-authoritative attachment search; the item still uses normal BlockItem placement. */
 public final class TapperItem extends StardewBlockItem {
     public TapperItem(Properties properties) {
-        super(ModBlocks.TAPPER.get(), "stardewcraft.type.utility", -1, properties);
+        this(ModBlocks.TAPPER.get(), properties);
+    }
+
+    public TapperItem(net.minecraft.world.level.block.Block block, Properties properties) {
+        super(block, "stardewcraft.type.utility", -1, properties);
     }
 
     private record Attachment(BlockPos support, Direction face, double score) {}
@@ -74,6 +78,8 @@ public final class TapperItem extends StardewBlockItem {
                         || !level.getFluidState(place).isEmpty() || !PortEntities.canInteractWithBlock(player, place, 0)) continue;
                 if (player instanceof ServerPlayer serverPlayer && level.dimension() == ModDimensions.STARDEW_VALLEY
                         && !FarmAreaProtectionEvents.canModifyAt(serverPlayer, place)) continue;
+                if (player instanceof ServerPlayer serverPlayer
+                        && !com.stardew.craft.gingerisland.IslandContext.canModifyAt(serverPlayer, place)) continue;
                 Vec3 hit = Vec3.atCenterOf(support).add(Vec3.atLowerCornerOf(face.getNormal()).scale(.499));
                 var sight = level.clip(new ClipContext(player.getEyePosition(), hit,
                         ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, player));

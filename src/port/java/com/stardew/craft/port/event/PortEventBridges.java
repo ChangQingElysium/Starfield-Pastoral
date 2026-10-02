@@ -1,10 +1,8 @@
 package com.stardew.craft.port.event;
 
-import com.stardew.craft.port.net.neoforged.neoforge.common.util.TriState;
 import com.stardew.craft.port.net.neoforged.neoforge.event.brewing.RegisterBrewingRecipesEvent;
 import com.stardew.craft.port.net.neoforged.neoforge.event.entity.living.FinalizeSpawnEvent;
 import com.stardew.craft.port.net.neoforged.neoforge.event.entity.player.CanContinueSleepingEvent;
-import com.stardew.craft.port.net.neoforged.neoforge.event.entity.player.ItemEntityPickupEvent;
 import com.stardew.craft.port.net.neoforged.neoforge.event.level.BlockGrowFeatureEvent;
 import com.stardew.craft.port.net.neoforged.neoforge.event.level.block.CropGrowEvent;
 import com.stardew.craft.port.net.neoforged.neoforge.event.tick.LevelTickEvent;
@@ -18,8 +16,6 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.MobSpawnEvent;
-import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.SleepingLocationCheckEvent;
 import net.minecraftforge.event.entity.player.SleepingTimeCheckEvent;
 import net.minecraftforge.event.level.BlockEvent;
@@ -58,10 +54,6 @@ public final class PortEventBridges {
                         ? new PlayerTickEvent.Pre(event.player)
                         : new PlayerTickEvent.Post(event.player)));
 
-        forge.addListener(EventPriority.NORMAL, false, EntityItemPickupEvent.class, PortEventBridges::onItemPickupPre);
-        forge.addListener(EventPriority.NORMAL, false, PlayerEvent.ItemPickupEvent.class, event -> forge.post(
-                new ItemEntityPickupEvent.Post(event.getEntity(), event.getOriginalEntity(), event.getStack())));
-
         forge.addListener(EventPriority.NORMAL, false, SleepingTimeCheckEvent.class, PortEventBridges::onSleepingTimeCheck);
         forge.addListener(EventPriority.NORMAL, false, SleepingLocationCheckEvent.class, PortEventBridges::onSleepingLocationCheck);
 
@@ -80,15 +72,6 @@ public final class PortEventBridges {
                 event -> event.enqueueWork(() -> forge.post(new RegisterBrewingRecipesEvent())));
 
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> PortClientEventBridges.install(modBus));
-    }
-
-    private static void onItemPickupPre(EntityItemPickupEvent event) {
-        ItemEntityPickupEvent.Pre pre = new ItemEntityPickupEvent.Pre(event.getEntity(), event.getItem());
-        if (event.getResult() == Event.Result.ALLOW) pre.setCanPickup(TriState.TRUE);
-        MinecraftForge.EVENT_BUS.post(pre);
-        // PORT(1.20.1): only FALSE is mapped. Forge's ALLOW means "already handled" and skips the inventory insert,
-        // which is not NeoForge's TRUE (force the normal pickup); the mod never sets TRUE.
-        if (pre.canPickup().isFalse()) event.setCanceled(true);
     }
 
     private static void onSleepingTimeCheck(SleepingTimeCheckEvent event) {

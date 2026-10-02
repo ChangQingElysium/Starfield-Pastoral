@@ -1,11 +1,17 @@
 package com.stardew.craft.mixin;
 
 import com.llamalad7.mixinextras.injector.WrapWithCondition;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.stardew.craft.time.StardewTimePauseService;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.NaturalSpawner;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.LocalMobCapCalculator;
+import net.minecraft.world.entity.Entity;
+import org.jetbrains.annotations.Nullable;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
@@ -22,6 +28,22 @@ import org.spongepowered.asm.mixin.injection.At;
  */
 @Mixin(ServerChunkCache.class)
 public abstract class ServerChunkCacheStardewPauseMixin {
+
+    @Shadow @Nullable private NaturalSpawner.SpawnState lastSpawnState;
+
+    /**
+     * 1.21 computes the spawn state and stores it in {@code lastSpawnState} only inside the {@code runsNormally()}
+     * branch, so a paused level keeps the previous state (read by the F3 screen and the debug report). 1.20.1 computes
+     * it unconditionally: while paused the previous value is handed back, so the assignment leaves it unchanged.
+     */
+    @WrapOperation(method = "tickChunks", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/level/NaturalSpawner;createState(ILjava/lang/Iterable;Lnet/minecraft/world/level/NaturalSpawner$ChunkGetter;Lnet/minecraft/world/level/LocalMobCapCalculator;)Lnet/minecraft/world/level/NaturalSpawner$SpawnState;"))
+    private NaturalSpawner.SpawnState stardewcraft$freezeSpawnState(int spawnableChunks, Iterable<Entity> entities,
+            NaturalSpawner.ChunkGetter chunkGetter, LocalMobCapCalculator calculator,
+            Operation<NaturalSpawner.SpawnState> original) {
+        return stardewcraft$runsNormally() ? original.call(spawnableChunks, entities, chunkGetter, calculator)
+                : this.lastSpawnState;
+    }
 
     @WrapWithCondition(method = "tickChunks", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/level/chunk/LevelChunk;incrementInhabitedTime(J)V"))

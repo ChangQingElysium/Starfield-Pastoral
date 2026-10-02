@@ -16,11 +16,6 @@ public abstract class StardewInventoryTextureMixin {
         return StardewInventoryGui.replaceResource(texture);
     }
 
-    @ModifyVariable(method = {
-            "blitSprite(Lnet/minecraft/resources/ResourceLocation;IIIII)V",
-            "blitSprite(Lnet/minecraft/resources/ResourceLocation;IIIIIIIII)V"
-    }, at = @At("HEAD"), argsOnly = true)
-    private ResourceLocation stardewcraft$inventorySprite(ResourceLocation sprite) {
-        return StardewInventoryGui.replaceResource(sprite);
-    }
+    // 1.20.1 has no GUI sprite atlas. The equivalent sprite substitution lives
+    // at both rendering entry points of PortGuiSprites instead.
 }

@@ -23,6 +23,7 @@ import net.minecraftforge.items.IItemHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
@@ -96,6 +97,8 @@ public final class UtilityAutomationCapabilities {
             (be, ctx) -> be.getAutomationItemHandler());
         event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.TAPPER.get(),
             (be, ctx) -> be.getAutomationItemHandler());
+        event.registerBlock(Capabilities.ItemHandler.BLOCK, UtilityAutomationCapabilities::getAutomationFromMultiblock,
+                com.stardew.craft.gingerisland.GingerIslandBlocks.get("ginger_heavy_tapper"));
         event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.MUSHROOM_BOX.get(),
             (be, ctx) -> be.getAutomationItemHandler());
         event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.FISH_POND_BUCKET.get(),
@@ -114,6 +117,12 @@ public final class UtilityAutomationCapabilities {
             (be, ctx) -> be.getAutomationFluidHandler());
 
         event.registerBlock(Capabilities.ItemHandler.BLOCK, UtilityAutomationCapabilities::getAutomationFromMultiblock,
+            multiblockAutomationBlocks());
+    }
+
+    // PORT(1.20.1): the Forge extension bridge must use exactly the registered block-capability owners.
+    public static Block[] multiblockAutomationBlocks() {
+        return new Block[] {
             ModBlocks.BEE_HOUSE.get(),
             ModBlocks.SEED_MAKER.get(),
             ModBlocks.WORM_BIN.get(),
@@ -132,13 +141,14 @@ public final class UtilityAutomationCapabilities {
             ModBlocks.CHARCOAL_KILN.get(),
             ModBlocks.MAYONNAISE_MACHINE.get(),
             ModBlocks.INCUBATOR.get(),
+            com.stardew.craft.gingerisland.GingerIslandBlocks.get("ginger_ostrich_incubator_empty"),
             ModBlocks.CRYSTALARIUM.get(),
             ModBlocks.AUTO_GRABBER.get(),
             ModBlocks.LIGHTNING_ROD.get(),
             ModBlocks.SOLAR_PANEL.get(),
             ModBlocks.GEODE_CRUSHER.get(),
             ModBlocks.COFFEE_MAKER.get(),
-            ModBlocks.BONE_MILL.get());
+            ModBlocks.BONE_MILL.get()};
     }
 
     @Nullable
@@ -153,6 +163,8 @@ public final class UtilityAutomationCapabilities {
     }
 
     public static BlockPos resolveMainPos(Level level, BlockPos pos, BlockState state) {
+        if (state.getBlock() instanceof com.stardew.craft.gingerisland.HeavyTapperBlock
+                && state.getValue(com.stardew.craft.gingerisland.HeavyTapperBlock.UPPER)) return pos.below();
         if (state.getBlock() instanceof com.stardew.craft.block.utility.MapUtilityStaticBlock block) {
             BlockPos main = block.findMainPos(level, pos, state);
             return main == null ? pos : main;

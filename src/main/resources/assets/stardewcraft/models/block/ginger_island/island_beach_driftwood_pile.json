@@ -1,0 +1,2693 @@
+{
+  "parent": "minecraft:block/block",
+  "loader": "forge:composite",
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "0": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_0",
+    "1": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_1",
+    "particle": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_particle"
+  },
+  "children": {
+    "0": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_0",
+        "1": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_1",
+        "particle": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            12.0,
+            0.0,
+            4.0
+          ],
+          "to": [
+            18.0,
+            6.0,
+            28.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                0.5,
+                0.0625,
+                0.875,
+                0.4375
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                1.375,
+                0.0625,
+                2.875,
+                0.4375
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                0.9375,
+                0.0625,
+                1.3125,
+                0.4375
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                2.9375,
+                0.0625,
+                4.4375,
+                0.4375
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                0.0625,
+                0.0625,
+                0.4375,
+                1.5625
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "1": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_0",
+        "1": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_1",
+        "particle": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            0.0,
+            0.0,
+            7.0
+          ],
+          "to": [
+            5.0,
+            6.0,
+            31.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                4.875,
+                0.0625,
+                5.1875,
+                0.4375
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                5.625,
+                0.0625,
+                7.125,
+                0.4375
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                5.25,
+                0.0625,
+                5.5625,
+                0.4375
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                7.1875,
+                0.0625,
+                8.6875,
+                0.4375
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                4.5,
+                0.0625,
+                4.8125,
+                1.5625
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          3.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "2": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_0",
+        "1": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_1",
+        "particle": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            -9.0,
+            6.0,
+            7.0
+          ],
+          "to": [
+            18.0,
+            11.0,
+            15.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                12.25,
+                0.0625,
+                13.9375,
+                0.375
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                0.0625,
+                1.625,
+                0.5625,
+                1.9375
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                14.0,
+                0.0625,
+                15.6875,
+                0.375
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                0.625,
+                1.625,
+                1.125,
+                1.9375
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                8.75,
+                0.0625,
+                10.4375,
+                0.5625
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                10.5,
+                0.0625,
+                12.1875,
+                0.5625
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "3": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_0",
+        "1": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_1",
+        "particle": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            14.0,
+            6.0,
+            9.0
+          ],
+          "to": [
+            26.0,
+            8.0,
+            16.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                2.8125,
+                1.625,
+                3.5625,
+                1.75
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                4.4375,
+                1.625,
+                4.875,
+                1.75
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                3.625,
+                1.625,
+                4.375,
+                1.75
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                4.9375,
+                1.625,
+                5.375,
+                1.75
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                2.0,
+                1.625,
+                2.75,
+                2.0625
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          2.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "4": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_0",
+        "1": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_1",
+        "particle": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            4.0,
+            11.0,
+            4.0
+          ],
+          "to": [
+            26.666666666666668,
+            16.0,
+            13.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                2.895833333333333,
+                2.25,
+                4.3125,
+                2.5625
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                4.375,
+                2.25,
+                5.791666666666667,
+                2.5625
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                9.3125,
+                2.25,
+                9.875,
+                2.5625
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                5.4375,
+                1.625,
+                6.854166666666667,
+                2.1875
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                9.75,
+                1.625,
+                11.166666666666666,
+                2.1875
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "5": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_0",
+        "1": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_1",
+        "particle": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            -5.333333333333332,
+            11.0,
+            4.0
+          ],
+          "to": [
+            17.333333333333336,
+            16.0,
+            13.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                1.4791666666666663,
+                2.25,
+                2.895833333333333,
+                2.5625
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                5.791666666666667,
+                2.25,
+                7.208333333333334,
+                2.5625
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                6.854166666666667,
+                1.625,
+                8.270833333333334,
+                2.1875
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                11.166666666666666,
+                1.625,
+                12.583333333333334,
+                2.1875
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          2.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "6": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_0",
+        "1": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_1",
+        "particle": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            1.3333333333333357,
+            11.0,
+            4.0
+          ],
+          "to": [
+            24.0,
+            16.0,
+            13.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                0.0625,
+                2.25,
+                1.4791666666666663,
+                2.5625
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                8.6875,
+                2.25,
+                9.25,
+                2.5625
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                7.208333333333334,
+                2.25,
+                8.625,
+                2.5625
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                8.270833333333334,
+                1.625,
+                9.6875,
+                2.1875
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                12.583333333333334,
+                1.625,
+                14.0,
+                2.1875
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          3.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "7": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_0",
+        "1": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_1",
+        "particle": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            1.0,
+            12.0,
+            5.0
+          ],
+          "to": [
+            4.0,
+            16.0,
+            12.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                10.4375,
+                2.25,
+                10.625,
+                2.5
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                10.9375,
+                2.25,
+                11.375,
+                2.5
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                10.6875,
+                2.25,
+                10.875,
+                2.5
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                11.4375,
+                2.25,
+                11.875,
+                2.5
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                9.9375,
+                2.25,
+                10.125,
+                2.6875
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                10.1875,
+                2.25,
+                10.375,
+                2.6875
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "8": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_0",
+        "1": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_1",
+        "particle": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            8.0,
+            12.0,
+            5.0
+          ],
+          "to": [
+            12.0,
+            16.0,
+            8.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                12.5625,
+                2.25,
+                12.8125,
+                2.5
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                13.1875,
+                2.25,
+                13.375,
+                2.5
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                12.875,
+                2.25,
+                13.125,
+                2.5
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                13.4375,
+                2.25,
+                13.625,
+                2.5
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                11.9375,
+                2.25,
+                12.1875,
+                2.4375
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                12.25,
+                2.25,
+                12.5,
+                2.4375
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          4.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "9": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_0",
+        "1": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_1",
+        "particle": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            8.0,
+            11.0,
+            8.0
+          ],
+          "to": [
+            10.0,
+            15.0,
+            13.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                14.0625,
+                2.25,
+                14.1875,
+                2.5
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                14.4375,
+                2.25,
+                14.75,
+                2.5
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                14.25,
+                2.25,
+                14.375,
+                2.5
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                14.8125,
+                2.25,
+                15.125,
+                2.5
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                13.6875,
+                2.25,
+                13.8125,
+                2.5625
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                13.875,
+                2.25,
+                14.0,
+                2.5625
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          4.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "10": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_0",
+        "1": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_1",
+        "particle": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            7.0,
+            8.0,
+            8.0
+          ],
+          "to": [
+            24.5,
+            11.0,
+            16.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                5.65625,
+                2.75,
+                6.75,
+                2.9375
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                6.8125,
+                2.75,
+                7.90625,
+                2.9375
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                9.625,
+                2.75,
+                10.125,
+                2.9375
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                0.0625,
+                2.75,
+                1.15625,
+                3.25
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                2.3125,
+                2.75,
+                3.40625,
+                3.25
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          2.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "11": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_0",
+        "1": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_1",
+        "particle": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            8.5,
+            8.0,
+            8.0
+          ],
+          "to": [
+            26.0,
+            11.0,
+            16.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                4.5625,
+                2.75,
+                5.65625,
+                2.9375
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                9.0625,
+                2.75,
+                9.5625,
+                2.9375
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                7.90625,
+                2.75,
+                9.0,
+                2.9375
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                1.15625,
+                2.75,
+                2.25,
+                3.25
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                3.40625,
+                2.75,
+                4.5,
+                3.25
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          3.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "12": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_0",
+        "1": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_1",
+        "particle": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            2.0,
+            6.0,
+            1.0
+          ],
+          "to": [
+            29.5,
+            11.0,
+            9.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                5.28125,
+                3.3125,
+                7.0,
+                3.625
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                7.0625,
+                3.3125,
+                8.78125,
+                3.625
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                11.125,
+                3.3125,
+                11.625,
+                3.625
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                10.1875,
+                2.75,
+                11.90625,
+                3.25
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                0.0625,
+                3.3125,
+                1.78125,
+                3.8125
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          0.0,
+          1.0
+        ]
+      }
+    },
+    "13": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_0",
+        "1": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_1",
+        "particle": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            -2.5,
+            6.0,
+            1.0
+          ],
+          "to": [
+            25.0,
+            11.0,
+            9.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                3.5625,
+                3.3125,
+                5.28125,
+                3.625
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                10.5625,
+                3.3125,
+                11.0625,
+                3.625
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                8.78125,
+                3.3125,
+                10.5,
+                3.625
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                11.90625,
+                2.75,
+                13.625,
+                3.25
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                1.78125,
+                3.3125,
+                3.5,
+                3.8125
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          2.0,
+          0.0,
+          1.0
+        ]
+      }
+    },
+    "14": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_0",
+        "1": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_1",
+        "particle": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            9.0,
+            7.0,
+            2.0
+          ],
+          "to": [
+            14.0,
+            11.0,
+            5.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                12.4375,
+                3.3125,
+                12.75,
+                3.5625
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                13.1875,
+                3.3125,
+                13.375,
+                3.5625
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                12.8125,
+                3.3125,
+                13.125,
+                3.5625
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                13.4375,
+                3.3125,
+                13.625,
+                3.5625
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                11.6875,
+                3.3125,
+                12.0,
+                3.5
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                12.0625,
+                3.3125,
+                12.375,
+                3.5
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          3.0,
+          0.0,
+          1.0
+        ]
+      }
+    },
+    "15": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_0",
+        "1": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_1",
+        "particle": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            9.0,
+            6.0,
+            5.0
+          ],
+          "to": [
+            12.0,
+            10.0,
+            9.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                14.1875,
+                3.3125,
+                14.375,
+                3.5625
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                14.6875,
+                3.3125,
+                14.9375,
+                3.5625
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                14.4375,
+                3.3125,
+                14.625,
+                3.5625
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                15.0,
+                3.3125,
+                15.25,
+                3.5625
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                13.6875,
+                3.3125,
+                13.875,
+                3.5625
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                13.9375,
+                3.3125,
+                14.125,
+                3.5625
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          3.0,
+          0.0,
+          1.0
+        ]
+      }
+    },
+    "16": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_0",
+        "1": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_1",
+        "particle": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            -12.0,
+            0.0,
+            12.0
+          ],
+          "to": [
+            20.0,
+            3.0,
+            17.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                2.125,
+                3.875,
+                4.125,
+                4.0625
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                6.25,
+                3.875,
+                6.5625,
+                4.0625
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                4.1875,
+                3.875,
+                6.1875,
+                4.0625
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                6.625,
+                3.875,
+                6.9375,
+                4.0625
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                0.0625,
+                3.875,
+                2.0625,
+                4.1875
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              4,
+              1.5,
+              14.5
+            ],
+            "axis": "y",
+            "angle": -45,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          0.0,
+          1.0
+        ]
+      }
+    },
+    "17": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_0",
+        "1": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_1",
+        "particle": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            5.0,
+            0.0,
+            13.0
+          ],
+          "to": [
+            32.0,
+            3.0,
+            18.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                8.75,
+                3.875,
+                10.4375,
+                4.0625
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                12.25,
+                3.875,
+                12.5625,
+                4.0625
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                10.5,
+                3.875,
+                12.1875,
+                4.0625
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                12.625,
+                3.875,
+                12.9375,
+                4.0625
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                7.0,
+                3.875,
+                8.6875,
+                4.1875
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              18.5,
+              1.5,
+              15.5
+            ],
+            "axis": "y",
+            "angle": 45,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          2.0,
+          0.0,
+          1.0
+        ]
+      }
+    },
+    "18": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_0",
+        "1": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_1",
+        "particle": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            6.0,
+            0.0,
+            5.0
+          ],
+          "to": [
+            28.0,
+            2.0,
+            11.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                14.4375,
+                3.875,
+                15.8125,
+                4.0
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                1.5,
+                4.3125,
+                1.875,
+                4.4375
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                0.0625,
+                4.3125,
+                1.4375,
+                4.4375
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                1.9375,
+                4.3125,
+                2.3125,
+                4.4375
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                13.0,
+                3.875,
+                14.375,
+                4.25
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          0.0,
+          1.0
+        ]
+      }
+    },
+    "19": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_0",
+        "1": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_1",
+        "particle": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            9.0,
+            3.0,
+            15.0
+          ],
+          "to": [
+            30.5,
+            6.0,
+            21.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                9.21875,
+                4.3125,
+                10.5625,
+                4.5
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                10.625,
+                4.3125,
+                11.96875,
+                4.5
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                13.8125,
+                4.3125,
+                14.1875,
+                4.5
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                2.375,
+                4.3125,
+                3.71875,
+                4.6875
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                5.125,
+                4.3125,
+                6.46875,
+                4.6875
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          0.0,
+          1.0
+        ]
+      }
+    },
+    "20": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_0",
+        "1": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_1",
+        "particle": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            -1.5,
+            3.0,
+            15.0
+          ],
+          "to": [
+            20.0,
+            6.0,
+            21.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                7.875,
+                4.3125,
+                9.21875,
+                4.5
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                13.375,
+                4.3125,
+                13.75,
+                4.5
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                11.96875,
+                4.3125,
+                13.3125,
+                4.5
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                3.71875,
+                4.3125,
+                5.0625,
+                4.6875
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                6.46875,
+                4.3125,
+                7.8125,
+                4.6875
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          2.0,
+          0.0,
+          1.0
+        ]
+      }
+    },
+    "21": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_0",
+        "1": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_1",
+        "particle": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            3.0,
+            5.0,
+            11.0
+          ],
+          "to": [
+            20.0,
+            9.0,
+            17.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                5.5,
+                4.75,
+                6.5625,
+                5.0
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                6.625,
+                4.75,
+                7.6875,
+                5.0
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                9.25,
+                4.75,
+                9.625,
+                5.0
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                0.0625,
+                4.75,
+                1.125,
+                5.125
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                2.25,
+                4.75,
+                3.3125,
+                5.125
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              20,
+              7,
+              14
+            ],
+            "axis": "y",
+            "angle": 45,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          0.0,
+          1.0
+        ]
+      }
+    },
+    "22": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_0",
+        "1": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_1",
+        "particle": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            4.0,
+            5.0,
+            11.0
+          ],
+          "to": [
+            21.0,
+            9.0,
+            17.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                4.4375,
+                4.75,
+                5.5,
+                5.0
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                8.8125,
+                4.75,
+                9.1875,
+                5.0
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                7.6875,
+                4.75,
+                8.75,
+                5.0
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                1.125,
+                4.75,
+                2.1875,
+                5.125
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                3.3125,
+                4.75,
+                4.375,
+                5.125
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              4,
+              7,
+              14
+            ],
+            "axis": "y",
+            "angle": 45,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          2.0,
+          0.0,
+          1.0
+        ]
+      }
+    },
+    "23": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_0",
+        "1": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_1",
+        "particle": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            3.0,
+            2.0,
+            7.0
+          ],
+          "to": [
+            24.0,
+            5.0,
+            11.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                1.375,
+                5.1875,
+                2.6875,
+                5.375
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                2.75,
+                5.1875,
+                4.0625,
+                5.375
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                5.75,
+                5.1875,
+                6.0,
+                5.375
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                9.6875,
+                4.75,
+                11.0,
+                5.0
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                12.375,
+                4.75,
+                13.6875,
+                5.0
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              24,
+              3.5,
+              9
+            ],
+            "axis": "y",
+            "angle": -22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          0.0,
+          1.0
+        ]
+      }
+    },
+    "24": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_0",
+        "1": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_1",
+        "particle": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            8.0,
+            2.0,
+            7.0
+          ],
+          "to": [
+            29.0,
+            5.0,
+            11.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                0.0625,
+                5.1875,
+                1.375,
+                5.375
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                5.4375,
+                5.1875,
+                5.6875,
+                5.375
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                4.0625,
+                5.1875,
+                5.375,
+                5.375
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                11.0,
+                4.75,
+                12.3125,
+                5.0
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                13.6875,
+                4.75,
+                15.0,
+                5.0
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              8,
+              3.5,
+              9
+            ],
+            "axis": "y",
+            "angle": -22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          2.0,
+          0.0,
+          1.0
+        ]
+      }
+    },
+    "25": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_0",
+        "1": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_1",
+        "particle": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            6.0,
+            4.0,
+            4.0
+          ],
+          "to": [
+            12.0,
+            7.0,
+            25.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                6.9375,
+                5.1875,
+                7.3125,
+                5.375
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                7.8125,
+                5.1875,
+                9.125,
+                5.375
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                7.375,
+                5.1875,
+                7.75,
+                5.375
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                9.1875,
+                5.1875,
+                10.5,
+                5.375
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                6.0625,
+                5.1875,
+                6.4375,
+                6.5
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                6.5,
+                5.1875,
+                6.875,
+                6.5
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              9,
+              5.5,
+              14.5
+            ],
+            "axis": "y",
+            "angle": -22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          0.0,
+          1.0
+        ]
+      }
+    },
+    "26": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_0",
+        "1": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_1",
+        "particle": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            6.0,
+            0.0,
+            7.0
+          ],
+          "to": [
+            21.0,
+            2.0,
+            12.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                11.5625,
+                5.1875,
+                12.5,
+                5.3125
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                13.5625,
+                5.1875,
+                13.875,
+                5.3125
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                12.5625,
+                5.1875,
+                13.5,
+                5.3125
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                13.9375,
+                5.1875,
+                14.25,
+                5.3125
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                10.5625,
+                5.1875,
+                11.5,
+                5.5
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              13.5,
+              1,
+              9.5
+            ],
+            "axis": "y",
+            "angle": -22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          0.0,
+          2.0
+        ]
+      }
+    },
+    "27": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_0",
+        "1": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_1",
+        "particle": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            2.0,
+            1.0,
+            12.0
+          ],
+          "to": [
+            4.0,
+            3.0,
+            15.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                14.6875,
+                5.1875,
+                14.8125,
+                5.3125
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                15.0625,
+                5.1875,
+                15.25,
+                5.3125
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                14.875,
+                5.1875,
+                15.0,
+                5.3125
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                15.3125,
+                5.1875,
+                15.5,
+                5.3125
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                14.3125,
+                5.1875,
+                14.4375,
+                5.375
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                14.5,
+                5.1875,
+                14.625,
+                5.375
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              20,
+              1.5,
+              14.5
+            ],
+            "axis": "y",
+            "angle": -45,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          0.0,
+          1.0
+        ]
+      }
+    },
+    "28": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_0",
+        "1": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_1",
+        "particle": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            5.0,
+            5.0,
+            12.0
+          ],
+          "to": [
+            9.0,
+            8.0,
+            15.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                0.375,
+                6.5625,
+                0.625,
+                6.75
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                1.0,
+                6.5625,
+                1.1875,
+                6.75
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                0.6875,
+                6.5625,
+                0.9375,
+                6.75
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                1.25,
+                6.5625,
+                1.4375,
+                6.75
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                15.5625,
+                5.1875,
+                15.8125,
+                5.375
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                0.0625,
+                6.5625,
+                0.3125,
+                6.75
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              -12,
+              7.5,
+              14
+            ],
+            "axis": "y",
+            "angle": 45,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          3.0,
+          0.0,
+          1.0
+        ]
+      }
+    },
+    "29": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_0",
+        "1": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_1",
+        "particle": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            1.0,
+            0.0,
+            4.0
+          ],
+          "to": [
+            4.0,
+            1.0,
+            13.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                2.0,
+                6.5625,
+                2.1875,
+                6.625
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                2.5,
+                6.5625,
+                3.0625,
+                6.625
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                2.25,
+                6.5625,
+                2.4375,
+                6.625
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                3.125,
+                6.5625,
+                3.6875,
+                6.625
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                1.5,
+                6.5625,
+                1.6875,
+                7.125
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                1.75,
+                6.5625,
+                1.9375,
+                7.125
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          1.0,
+          0.0
+        ]
+      }
+    },
+    "30": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_0",
+        "1": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_1",
+        "particle": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            1.0,
+            11.0,
+            13.0
+          ],
+          "to": [
+            4.0,
+            16.0,
+            14.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                4.25,
+                6.5625,
+                4.4375,
+                6.875
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                4.75,
+                6.5625,
+                4.8125,
+                6.875
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                4.5,
+                6.5625,
+                4.6875,
+                6.875
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                4.875,
+                6.5625,
+                4.9375,
+                6.875
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                3.75,
+                6.5625,
+                3.9375,
+                6.625
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                4.0,
+                6.5625,
+                4.1875,
+                6.625
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "31": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_0",
+        "1": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_1",
+        "particle": "stardewcraft:block/ginger_island/island_beach_driftwood_pile_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            1.0,
+            11.0,
+            3.0
+          ],
+          "to": [
+            4.0,
+            16.0,
+            4.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                5.5,
+                6.5625,
+                5.6875,
+                6.875
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                6.0,
+                6.5625,
+                6.0625,
+                6.875
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                5.75,
+                6.5625,
+                5.9375,
+                6.875
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                6.125,
+                6.5625,
+                6.1875,
+                6.875
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                5.0,
+                6.5625,
+                5.1875,
+                6.625
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                5.25,
+                6.5625,
+                5.4375,
+                6.625
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          0.0,
+          0.0
+        ]
+      }
+    }
+  },
+  "stardewcraft:collision": {
+    "mode": "custom",
+    "boxes": [
+      {
+        "from": [
+          1.0,
+          0.0,
+          3.0
+        ],
+        "to": [
+          76.0,
+          17.0,
+          46.6798
+        ]
+      }
+    ],
+    "policy": "aabb"
+  }
+}

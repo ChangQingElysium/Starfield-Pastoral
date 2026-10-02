@@ -1,8 +1,8 @@
 {
   "machine": "dehydrator",
   "recipes": [
-    { "input": "stardewcraft:grape", "output": "stardewcraft:raisins", "minutes": 1260, "consume": 5 },
-    { "tag": "stardewcraft:fruit_crops", "output": "stardewcraft:dried_fruit", "minutes": 1260, "consume": 5, "preserveType": "DRIED_FRUIT" },
-    { "tag": "stardewcraft:mushrooms", "output": "stardewcraft:dried_mushrooms", "minutes": 1260, "consume": 5, "preserveType": "DRIED_MUSHROOMS" }
+    { "input": "stardewcraft:grape", "output": "stardewcraft:raisins", "days": 1, "consume": 5 },
+    { "tag": "stardewcraft:fruit_crops", "output": "stardewcraft:dried_fruit", "days": 1, "consume": 5, "preserveType": "DRIED_FRUIT" },
+    { "tag": "stardewcraft:mushrooms", "output": "stardewcraft:dried_mushrooms", "days": 1, "consume": 5, "preserveType": "DRIED_MUSHROOMS" }
   ]
 }

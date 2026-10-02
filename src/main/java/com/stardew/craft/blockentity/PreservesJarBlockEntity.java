@@ -153,7 +153,7 @@ public class PreservesJarBlockEntity extends TimedProductionBlockEntity {
 				return false;
 			}
 			var plan = prepareProduction(
-					stack, output, recipe.minutes(),
+					stack, output, recipeMinutes(recipe),
 					player, false);
 			if (plan.isEmpty()) {
 				return false;
@@ -180,7 +180,7 @@ public class PreservesJarBlockEntity extends TimedProductionBlockEntity {
 			return false;
 		}
 		var plan = prepareProduction(
-				stack, output, recipe.minutes(),
+				stack, output, recipeMinutes(recipe),
 				player, false);
 		if (plan.isEmpty()) {
 			return false;
@@ -251,7 +251,7 @@ public class PreservesJarBlockEntity extends TimedProductionBlockEntity {
 			if (recipeOpt.isPresent()) {
 				ArtisanRecipeDataManager.Recipe recipe = recipeOpt.get();
 				output = createFlavoredOutput(recipe, ingredientForFlavor, simulate);
-				minutes = recipe.minutes();
+				minutes = recipeMinutes(recipe);
 			}
 		} else if ("stardewcraft.type.crop".equals(StardewItemDataApi.getTypeKey(stack))) {
 			ResourceLocation id = BuiltInRegistries.ITEM.getKey(item);
@@ -260,7 +260,7 @@ public class PreservesJarBlockEntity extends TimedProductionBlockEntity {
 				if (recipeOpt.isPresent()) {
 					ArtisanRecipeDataManager.Recipe recipe = recipeOpt.get();
 					output = createFlavoredOutput(recipe, stack, simulate);
-					minutes = recipe.minutes();
+					minutes = recipeMinutes(recipe);
 				}
 			}
 		}

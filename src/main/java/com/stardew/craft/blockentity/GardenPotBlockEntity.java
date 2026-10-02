@@ -334,8 +334,12 @@ public final class GardenPotBlockEntity extends BlockEntity
             return null;
         }
         if (seed.is(com.stardew.craft.item.ModItems.MIXED_SEEDS.get())) {
-            return com.stardew.craft.item.MixedSeedsItem.pickCropStateForSeason(
-                    StardewTimeManager.get().getCurrentSeason(), level.getRandom());
+            int season = StardewTimeManager.get().getCurrentSeason();
+            // 冬季随机取春夏秋作物：花盆无视季节才种得成
+            if (season == 3 && !com.stardew.craft.farming.SeasonLocationRules.seedsIgnoreSeasonsHere(level, cropPos())) {
+                return null;
+            }
+            return com.stardew.craft.item.MixedSeedsItem.pickCropStateForSeason(season, level.getRandom());
         }
         if (seed.is(com.stardew.craft.item.ModItems.TEA_SAPLING.get())
                 && com.stardew.craft.block.nature.TeaBushBlock.canPlantAt(level, cropPos())) {

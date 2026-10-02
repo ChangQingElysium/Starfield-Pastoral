@@ -195,7 +195,7 @@ public class BeeHouseBlock extends Block implements EntityBlock, PortBlockIntera
 	@Nullable
 	public BlockEntity newBlockEntity(@Nonnull BlockPos pos, @Nonnull BlockState state) {
 		if (state.getValue(PART) == Part.EXTENSION) {
-			return null;
+			return com.stardew.craft.port.PortMachineExtensions.createExtension(pos, state);
 		}
 		return new BeeHouseBlockEntity(pos, state);
 	}

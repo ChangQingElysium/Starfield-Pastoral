@@ -4,10 +4,12 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.stardew.craft.port.PortVanillaEnchantmentRules;
+import com.stardew.craft.port.PortEnchantments;
 import java.util.List;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.EnchantmentInstance;
+import net.minecraft.world.item.enchantment.Enchantment;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
@@ -18,6 +20,18 @@ import org.spongepowered.asm.mixin.injection.At;
  */
 @Mixin(EnchantmentHelper.class)
 public abstract class PortEnchantmentSelectionRulesMixin {
+    @WrapOperation(method = "getAvailableEnchantmentResults", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/item/enchantment/Enchantment;isDiscoverable()Z"))
+    private static boolean stardewcraft$selectionPool(Enchantment enchantment, Operation<Boolean> original) {
+        return PortEnchantments.inSelectionPool(enchantment, original.call(enchantment));
+    }
+
+    @WrapOperation(method = "getAvailableEnchantmentResults", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/item/enchantment/Enchantment;isTreasureOnly()Z"))
+    private static boolean stardewcraft$dataPoolAlreadyFiltersTreasure(Enchantment enchantment, Operation<Boolean> original) {
+        return !(enchantment instanceof PortEnchantments.DataEnchantment) && original.call(enchantment);
+    }
+
     @WrapOperation(method = "selectEnchantment",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/enchantment/EnchantmentHelper;filterCompatibleEnchantments(Ljava/util/List;Lnet/minecraft/world/item/enchantment/EnchantmentInstance;)V"))
     private static void stardewcraft$exclusiveSet(List<EnchantmentInstance> candidates, EnchantmentInstance chosen,

@@ -38,6 +38,7 @@ public final class PortBootstrap {
         PortAttributes.register(modBus); // 1.21-only entity attributes (step_height, scale)
         PortEnchantments.register(modBus); // 1.21 data-driven enchantments registered in code
         PortLivingAttributeDefaults.register(modBus); // 1.21.1 createLivingAttributes includes ATTACK_KNOCKBACK
+        PortMachineExtensions.register(modBus); // Forge external automation needs an inventory-free extension BE
         // Run before the mod's own common-setup listeners, mirroring NeoForge firing these events earlier.
         modBus.addListener(EventPriority.HIGHEST, (FMLCommonSetupEvent event) -> {
             modBus.post(new RegisterDataMapTypesEvent());
@@ -45,6 +46,7 @@ public final class PortBootstrap {
             RegisterTicketControllersEvent tickets = new RegisterTicketControllersEvent();
             modBus.post(tickets);
             event.enqueueWork(tickets::apply);
+            event.enqueueWork(PortCriteria::register); // 1.21 minecraft:default_block_use trigger
             PortAttachments.resolveAll();
         });
         if (!forgeBusInstalled) {

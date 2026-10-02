@@ -19,7 +19,6 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 
 import javax.annotation.Nullable;
 public class DehydratorBlockEntity extends TimedProductionBlockEntity {
-	private static final int EFFECTIVE_MINUTES_PER_DAY = 1260;
 
 	private static final String TAG_INPUT = "input";
 	private static final String TAG_PRODUCT = "product";
@@ -123,7 +122,7 @@ public class DehydratorBlockEntity extends TimedProductionBlockEntity {
 		}
 
 		var plan = prepareProduction(
-				stack, output, recipe.minutes(),
+				stack, output, recipeMinutes(recipe),
 				player, false);
 		if (plan.isEmpty()) {
 			return InsertResult.fail();
@@ -190,7 +189,7 @@ public class DehydratorBlockEntity extends TimedProductionBlockEntity {
 			return stack;
 		}
 		var plan = prepareProduction(
-				stack, output, recipe.minutes(),
+				stack, output, recipeMinutes(recipe),
 				null, true);
 		if (plan.isEmpty()) {
 			return stack;

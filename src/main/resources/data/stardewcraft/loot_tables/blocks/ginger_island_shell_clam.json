@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "conditions": [
+        {
+          "condition": "minecraft:block_state_property",
+          "block": "stardewcraft:ginger_island_shell_clam",
+          "properties": {
+            "part": "main"
+          }
+        },
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "stardewcraft:ginger_island_shell_clam"
+        }
+      ]
+    }
+  ]
+}

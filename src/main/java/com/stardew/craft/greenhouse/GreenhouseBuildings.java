@@ -18,7 +18,10 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.FarmBlock;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.UUID;
 
@@ -292,9 +295,28 @@ public final class GreenhouseBuildings {
 
     public static void ensurePortal(ServerLevel level, BuildingRecord record) {
         if (record != null && record.phase() == BuildingRecord.Phase.READY) {
+            migrateExteriorSoil(level, record);
             restoreDoorIfLegacyPortal(level, record);
             InteriorSubspaceManager.spawnGreenhouseOutdoorPortalAt(level, portal(record));
         }
+    }
+
+    /** Only authored, projected soil cells belong to the prefab; its retained foundation does not. */
+    private static void migrateExteriorSoil(ServerLevel level, BuildingRecord record) {
+        if (!record.family().equals(FAMILY) || record.mode() != BuildingRecord.Mode.PREFAB
+                || !record.dimension().equals(level.dimension().location())) return;
+        var tier = PrefabDefinitions.get(FAMILY).tier(record.tier());
+        Rotation rotation = PrefabDefinitions.rotation(record.facing());
+        BuildingProtection.internal(() -> {
+            for (var cell : PrefabDefinitions.template(level, tier).cells()) {
+                if (!cell.state().is(ModBlocks.DIRT.get()) && !cell.state().is(ModBlocks.FARMLAND.get())) continue;
+                BlockPos pos = PrefabDefinitions.world(cell.pos(), tier.anchor(), record.anchor(), rotation);
+                BlockState state = level.getBlockState(pos), replacement = upgradedSoil(state);
+                if (replacement != state) {
+                    level.setBlock(pos, replacement, Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE);
+                }
+            }
+        });
     }
 
     /**
@@ -324,15 +346,35 @@ public final class GreenhouseBuildings {
     private static void migrateInteriorSoil(ServerLevel level, UUID owner) {
         PlayerInteriorAllocator allocator = PlayerInteriorAllocator.get(level);
         if (!allocator.isGHPlaced(owner)) return;
-        BlockPos origin = allocator.getGreenhouseOrigin(owner);
+        migrateInteriorSoil(level, allocator.getGreenhouseOrigin(owner));
+    }
+
+    /** Upgrade soil in an existing interior without replaying its schematic or touching plants. */
+    public static int migrateInteriorSoil(ServerLevel level, BlockPos origin) {
+        int[] changed = {0};
         BuildingProtection.internal(() -> {
             for (BlockPos pos : BlockPos.betweenClosed(
                     origin, origin.offset(18, 10, 19))) {
-                if (level.getBlockState(pos).is(ModBlocks.YELLOW_DIRT.get())) {
-                    level.setBlock(pos, net.minecraft.world.level.block.Blocks.DIRT.defaultBlockState(),
+                var state = level.getBlockState(pos);
+                var replacement = upgradedSoil(state);
+                if (replacement != state) {
+                    level.setBlock(pos, replacement,
                             Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE);
+                    changed[0]++;
                 }
             }
         });
+        return changed[0];
+    }
+
+    private static BlockState upgradedSoil(BlockState state) {
+        if (state.is(Blocks.DIRT) || state.is(ModBlocks.YELLOW_DIRT.get())) {
+            return ModBlocks.DIRT.get().defaultBlockState();
+        }
+        if (state.is(Blocks.FARMLAND)) {
+            return ModBlocks.FARMLAND.get().defaultBlockState()
+                    .setValue(FarmBlock.MOISTURE, state.getValue(FarmBlock.MOISTURE));
+        }
+        return state;
     }
 }

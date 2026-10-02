@@ -172,8 +172,7 @@ public final class ShopEntryAvailabilityService {
         }
         if ("ShadowShop".equals(shopId)
                 && "stardewcraft:warp_wand".equals(itemId)) {
-            return !data.hasMailFlag(
-                    SewerStoryFlags.RETURN_SCEPTER_PURCHASED);
+            return !SewerStoryFlags.hasPurchasedReturnScepter(data);
         }
         if (FairFestivalService.STAR_TOKEN_SHOP_ID
                         .equals(shopId)

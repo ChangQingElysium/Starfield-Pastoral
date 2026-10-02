@@ -1,5 +1,6 @@
 package com.stardew.craft.client.monsternative;
 
+import com.stardew.craft.port.PortCamera;
 import com.google.gson.Gson;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
@@ -112,7 +113,7 @@ public final class NativeBigSlimeRenderer extends EntityRenderer<MineBigSlimeEnt
             int socket=0;for(int i=0;i<model.bones().size();i++)if(model.bones().get(i).name().equals("held_item"))socket=i;
             matrices[socket].transformPosition(vertex.set(0,8,0));
             stack.pushPose();stack.translate(0,lift+vertex.y*scale,0);
-            stack.mulPose(entityRenderDispatcher.cameraOrientation());stack.scale(.9F,.9F,.9F);
+            stack.mulPose(PortCamera.cameraOrientation(entityRenderDispatcher));stack.scale(.9F,.9F,.9F);
             net.minecraft.client.Minecraft.getInstance().getItemRenderer().renderStatic(entity.heldItem(),net.minecraft.world.item.ItemDisplayContext.FIXED,light,OverlayTexture.NO_OVERLAY,stack,buffers,entity.level(),entity.getId());
             stack.popPose();
         }

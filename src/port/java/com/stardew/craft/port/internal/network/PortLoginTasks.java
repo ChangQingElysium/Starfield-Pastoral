@@ -1,5 +1,6 @@
 package com.stardew.craft.port.internal.network;
 
+import com.stardew.craft.mixin.PortHandshakeHandlerAccessor;
 import com.stardew.craft.port.net.minecraft.network.RegistryFriendlyByteBuf;
 import com.stardew.craft.port.net.minecraft.network.VarInt;
 import com.stardew.craft.port.net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
@@ -23,10 +25,14 @@ import net.minecraft.network.Connection;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.network.ServerLoginPacketListenerImpl;
+import net.minecraft.util.thread.BlockableEventLoop;
+import net.minecraftforge.common.util.LogicalSidedProvider;
 import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.network.HandshakeHandler;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkEvent;
+import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -77,6 +83,17 @@ final class PortLoginTasks {
 
     /** Called by Forge once per incoming modded connection (memory connections included). */
     private static List<Pair<String, TaskMessage>> gather(boolean isLocal) {
+        // Forge gathers during the intention handshake (Netty), before login ticks on the server thread.
+        // NeoForge registers/runs configuration tasks on the server thread; never join that same thread.
+        return onServerThread(PortLoginTasks::gatherOnServer);
+    }
+
+    static <T> T onServerThread(Supplier<T> work) {
+        BlockableEventLoop<?> executor = LogicalSidedProvider.WORKQUEUE.get(LogicalSide.SERVER);
+        return executor.isSameThread() ? work.get() : executor.submit(work).join();
+    }
+
+    private static List<Pair<String, TaskMessage>> gatherOnServer() {
         GatherListener listener = new GatherListener();
         List<Pair<String, TaskMessage>> messages = new ArrayList<>();
         try {
@@ -140,7 +157,7 @@ final class PortLoginTasks {
             PortPayloadContext context = PortPayloadContext.login(connection, LogicalSide.CLIENT, payload -> {
                 requireEntry(payload.type().id(), false);
                 replies.add(payload);
-            }, null);
+            }, null, message.taskId);
             try {
                 for (Decoded decoded : decodeBatch(message.body, true)) {
                     decoded.entry.handle(true, decoded.payload, context);
@@ -163,15 +180,21 @@ final class PortLoginTasks {
         forgeContext.setPacketHandled(true);
         Connection connection = forgeContext.getNetworkManager();
         forgeContext.enqueueWork(() -> {
-            if (DISCONNECT_TASK.equals(message.taskId)) {
-                PortNetwork.disconnect(connection, LogicalSide.SERVER, decodeReason(message.body));
+            TaskMessage original = expectedReply(connection, message, contextSupplier);
+            if (original == null) {
+                PortNetwork.disconnect(connection, LogicalSide.SERVER, Component.translatable("multiplayer.disconnect.unexpected_query_response"));
+                return;
+            }
+            if (DISCONNECT_TASK.equals(original.taskId)) {
+                // The reason belongs to the server's request, not an untrusted client echo.
+                PortNetwork.disconnect(connection, LogicalSide.SERVER, decodeReason(original.body));
                 return;
             }
             Set<String> finished = new HashSet<>();
             PortPayloadContext context = PortPayloadContext.login(connection, LogicalSide.SERVER, payload -> {
                 throw new UnsupportedOperationException("PORT(1.20.1): configuration tasks run as one login round trip; "
                         + "the server cannot reply to " + payload.type().id());
-            }, finished);
+            }, finished, original.taskId);
             try {
                 for (Decoded decoded : decodeBatch(message.body, false)) {
                     decoded.entry.handle(false, decoded.payload, context);
@@ -192,6 +215,33 @@ final class PortLoginTasks {
             HandshakeHandler.<TaskMessage>indexFirst((handshake, msg, ctx) -> {
             }).accept(message, contextSupplier);
         });
+    }
+
+    private static TaskMessage expectedReply(Connection connection, TaskMessage reply, Supplier<NetworkEvent.Context> context) {
+        if (!isLoginConnection(connection)) return null;
+        AtomicReference<HandshakeHandler> handshake = new AtomicReference<>();
+        HandshakeHandler.<TaskMessage>biConsumerFor((handler, ignored, ctx) -> handshake.set(handler)).accept(reply, context);
+        if (!(handshake.get() instanceof PortHandshakeHandlerAccessor accessor)) return null;
+        return expectedReply(accessor.stardewcraft$loginMessages(), accessor.stardewcraft$pendingLoginIndices(), reply);
+    }
+
+    static boolean isLoginConnection(Connection connection) {
+        return connection.channel() != null && connection.isConnected()
+                && connection.getPacketListener() instanceof ServerLoginPacketListenerImpl;
+    }
+
+    /** Validate against this connection's server-issued request, never against client-supplied task identity alone. */
+    static TaskMessage expectedReply(List<NetworkRegistry.LoginPayload> messages, List<Integer> pending, TaskMessage reply) {
+        int index = reply.getAsInt();
+        if (index < 0 || index >= messages.size() || !pending.contains(index)) return null;
+        NetworkRegistry.LoginPayload original = messages.get(index);
+        if (!original.needsResponse() || !PortNetwork.CHANNEL_ID.equals(original.getChannelName())
+                || !original.getMessageContext().equals(reply.taskId)) return null;
+        FriendlyByteBuf data = new FriendlyByteBuf(original.getData().duplicate());
+        data.readerIndex(0); // LoginWrapper may have advanced the source's reader index while sending it.
+        if (!data.isReadable() || data.readUnsignedByte() != PortNetwork.INDEX_LOGIN_TASK) return null;
+        TaskMessage request = TaskMessage.read(data);
+        return request.taskId.equals(reply.taskId) && !data.isReadable() ? request : null;
     }
 
     // ------------------------------------------------------------------ batch codec

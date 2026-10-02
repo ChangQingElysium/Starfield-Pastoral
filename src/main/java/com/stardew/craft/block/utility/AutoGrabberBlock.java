@@ -118,7 +118,7 @@ public class AutoGrabberBlock extends Block implements EntityBlock, PortBlockInt
     @Nullable
     public BlockEntity newBlockEntity(@Nonnull BlockPos pos, @Nonnull BlockState state) {
         if (state.getValue(PART) == Part.EXTENSION) {
-            return null;
+            return com.stardew.craft.port.PortMachineExtensions.createExtension(pos, state);
         }
         return new AutoGrabberBlockEntity(pos, state);
     }

@@ -60,8 +60,17 @@ public final class TownDoorShaderPatcher {
     }
 
     public static String transformIrisVertex(String source) {
-        if (!source.contains("iris_ModelViewMatrix") || !source.contains("getVertexPosition")) return source;
-        return injectAtMainEnd(source, "(iris_ModelViewMatrix * getVertexPosition()).xyz");
+        if (!source.contains("iris_ModelViewMatrix")) return source;
+        if (source.contains("getVertexPosition")) {
+            return injectAtMainEnd(source, "(iris_ModelViewMatrix * getVertexPosition()).xyz");
+        }
+        // PORT(1.20.1): Oculus SodiumCoreTransformer expands vaPosition directly instead of
+        // declaring getVertexPosition(). These are the same audited camera-relative coordinates.
+        if (source.contains("_vert_position") && source.contains("_get_draw_translation(_draw_id)")
+                && source.contains("u_RegionOffset")) {
+            return injectAtMainEnd(source, "(iris_ModelViewMatrix * vec4(_vert_position + u_RegionOffset + _get_draw_translation(_draw_id), 1.0)).xyz");
+        }
+        return source;
     }
 
     private static String inject(String source, String position) {
@@ -81,10 +90,28 @@ public final class TownDoorShaderPatcher {
         if (!matcher.find()) return source;
         String withUniform = matcher.replaceFirst(Matcher.quoteReplacement(
                 "uniform vec4 " + TownDoorClipping.UNIFORM + ";\nvoid main() {"));
-        int closingBrace = withUniform.lastIndexOf('}');
+        Matcher main = MAIN.matcher(withUniform);
+        if (!main.find()) return source;
+        int closingBrace = mainClosingBrace(withUniform, main.end() - 1);
         if (closingBrace < 0) return source;
         String assignment = "\n    gl_ClipDistance[0] = dot(" + position + ", "
                 + TownDoorClipping.UNIFORM + ".xyz) + " + TownDoorClipping.UNIFORM + ".w;\n";
         return withUniform.substring(0, closingBrace) + assignment + withUniform.substring(closingBrace);
+    }
+
+    /** main need not be the last function; braces in shader comments are not scope delimiters. */
+    private static int mainClosingBrace(String source, int openingBrace) {
+        int depth = 0;
+        boolean lineComment = false, blockComment = false;
+        for (int i = openingBrace; i < source.length(); i++) {
+            char c = source.charAt(i), next = i + 1 < source.length() ? source.charAt(i + 1) : '\0';
+            if (lineComment) { if (c == '\n') lineComment = false; continue; }
+            if (blockComment) { if (c == '*' && next == '/') { blockComment = false; i++; } continue; }
+            if (c == '/' && next == '/') { lineComment = true; i++; continue; }
+            if (c == '/' && next == '*') { blockComment = true; i++; continue; }
+            if (c == '{') depth++;
+            else if (c == '}' && --depth == 0) return i;
+        }
+        return -1;
     }
 }

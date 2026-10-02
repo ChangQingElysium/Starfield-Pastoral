@@ -78,8 +78,9 @@ public class SunflowerCropBlock extends StardewCropBlock {
     @Override
     protected void spawnHarvestDrops(ServerLevel level, BlockPos pos, BlockState state,
                                      net.minecraft.util.RandomSource random,
-                                     int fertilizerLevel, int farmingLevel) {
-        super.spawnHarvestDrops(level, pos, state, random, fertilizerLevel, farmingLevel);
+                                     int fertilizerLevel, int farmingLevel,
+                                     @javax.annotation.Nullable net.minecraft.world.entity.player.Player player) {
+        super.spawnHarvestDrops(level, pos, state, random, fertilizerLevel, farmingLevel, player);
 
         if (StardewCropBlock.isPlayerPlacedDecorative(level, pos, state)) {
             return;

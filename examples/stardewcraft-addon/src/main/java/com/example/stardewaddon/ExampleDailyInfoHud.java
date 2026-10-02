@@ -11,12 +11,12 @@ import com.stardew.craft.api.v1.client.StardewToolUpgradeSnapshot;
 import com.stardew.craft.api.v1.client.StardewQueenOfSauceSnapshot;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 
 /** Minimal alignment example. Render an actual ItemStack, using only the public addon API. */
-@EventBusSubscriber(modid = "example_stardew_addon", value = Dist.CLIENT)
+@Mod.EventBusSubscriber(modid = "example_stardew_addon", value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public final class ExampleDailyInfoHud {
     private ExampleDailyInfoHud() {}
 

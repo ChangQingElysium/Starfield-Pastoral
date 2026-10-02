@@ -1,0 +1,60 @@
+{
+  "variants": {
+    "facing=north,part=main,loaded=false": {
+      "model": "stardewcraft:block/ginger_island/ostrich_incubator_empty",
+      "y": 0
+    },
+    "facing=north,part=extension,loaded=false": {
+      "model": "stardewcraft:block/ginger_island/ostrich_incubator_empty_extension"
+    },
+    "facing=north,part=main,loaded=true": {
+      "model": "stardewcraft:block/ginger_island/ostrich_incubator_loaded",
+      "y": 0
+    },
+    "facing=north,part=extension,loaded=true": {
+      "model": "stardewcraft:block/ginger_island/ostrich_incubator_empty_extension"
+    },
+    "facing=east,part=main,loaded=false": {
+      "model": "stardewcraft:block/ginger_island/ostrich_incubator_empty",
+      "y": 90
+    },
+    "facing=east,part=extension,loaded=false": {
+      "model": "stardewcraft:block/ginger_island/ostrich_incubator_empty_extension"
+    },
+    "facing=east,part=main,loaded=true": {
+      "model": "stardewcraft:block/ginger_island/ostrich_incubator_loaded",
+      "y": 90
+    },
+    "facing=east,part=extension,loaded=true": {
+      "model": "stardewcraft:block/ginger_island/ostrich_incubator_empty_extension"
+    },
+    "facing=south,part=main,loaded=false": {
+      "model": "stardewcraft:block/ginger_island/ostrich_incubator_empty",
+      "y": 180
+    },
+    "facing=south,part=extension,loaded=false": {
+      "model": "stardewcraft:block/ginger_island/ostrich_incubator_empty_extension"
+    },
+    "facing=south,part=main,loaded=true": {
+      "model": "stardewcraft:block/ginger_island/ostrich_incubator_loaded",
+      "y": 180
+    },
+    "facing=south,part=extension,loaded=true": {
+      "model": "stardewcraft:block/ginger_island/ostrich_incubator_empty_extension"
+    },
+    "facing=west,part=main,loaded=false": {
+      "model": "stardewcraft:block/ginger_island/ostrich_incubator_empty",
+      "y": 270
+    },
+    "facing=west,part=extension,loaded=false": {
+      "model": "stardewcraft:block/ginger_island/ostrich_incubator_empty_extension"
+    },
+    "facing=west,part=main,loaded=true": {
+      "model": "stardewcraft:block/ginger_island/ostrich_incubator_loaded",
+      "y": 270
+    },
+    "facing=west,part=extension,loaded=true": {
+      "model": "stardewcraft:block/ginger_island/ostrich_incubator_empty_extension"
+    }
+  }
+}

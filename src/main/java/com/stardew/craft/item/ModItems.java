@@ -147,6 +147,9 @@ import com.stardew.craft.port.net.neoforged.neoforge.registries.DeferredRegister
 @SuppressWarnings("null")
 public class ModItems {
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(StardewCraft.MODID);
+
+    public static final java.util.Map<String, DeferredItem<Item>> GINGER_ISLAND =
+            com.stardew.craft.gingerisland.GingerIslandBlocks.registerItems(ITEMS);
     public static final DeferredItem<Item> BUTTERFLY_POWDER = ITEMS.register("butterfly_powder",
             () -> new ButterflyPowderItem(new Item.Properties().stacksTo(999)));
     public static final DeferredItem<Item> PET_BOWL_WOOD = ITEMS.register("pet_bowl_wood", () -> new StardewBlockItem(ModBlocks.PET_BOWL_WOOD.get(), "stardewcraft.type.utility", -1, new Item.Properties()));

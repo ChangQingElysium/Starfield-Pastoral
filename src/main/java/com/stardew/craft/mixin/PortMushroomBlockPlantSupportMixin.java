@@ -8,6 +8,7 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.MushroomBlock;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.IPlantable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -26,6 +27,7 @@ public abstract class PortMushroomBlockPlantSupportMixin {
     private void stardewcraft$port121CanSurvive(BlockState state, LevelReader level, BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
         BlockPos below = pos.below();
         BlockState soil = level.getBlockState(below);
+        if (!PortPlantSupport.portRules(soil, (Block) (Object) this)) return;
         TriState decision = PortPlantSupport.decision(soil, level, below, Direction.UP, state);
         if (soil.is(BlockTags.MUSHROOM_GROW_BLOCK)) cir.setReturnValue(true);
         else if (!decision.isDefault()) cir.setReturnValue(decision.isTrue());

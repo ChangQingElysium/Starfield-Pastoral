@@ -43,7 +43,10 @@ public final class NativeJointSkinChecks {
                     else near(actual,matrices[w==0?s.upper():s.lower()].transformPosition(new Vector3f(v[0],v[1],v[2])),"Rigid endpoint "+id);
                 }
             }
-            boolean waist=m.bones().get(binding.upper()).name().equals("root");
+            // Torso skin is attached to the body's parent, which may be a seated
+            // character's "person" group rather than the scene's "root" group.
+            String lowerName=m.bones().get(binding.lower()).name();
+            boolean waist=lowerName.equals("body")||lowerName.equals("chest_breath");
             if(interior==0||(!waist&&owners.size()<2))throw new AssertionError("Missing continuous bridge "+id);
         }
         return pairs.size();

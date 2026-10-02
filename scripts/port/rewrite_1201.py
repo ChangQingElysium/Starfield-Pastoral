@@ -126,6 +126,7 @@ CODE_RULES = [
     (re.compile(r"(?<![\w.])(" + RL + r")::(?:parse|withDefaultNamespace)\b"), r"\1::new"),
     # JDK 21-only Math.clamp -> exact re-implementation (same overloads and exceptions).
     (re.compile(r"(?<![\w.])(?:java\.lang\.)?(?:Strict)?Math\.clamp\("), "com.stardew.craft.port.PortJava.clamp("),
+    (re.compile(r"(?<![\w.])(?:java\.lang\.)?(?:Strict)?Math\.ceilDiv\("), "com.stardew.craft.port.PortJava.ceilDiv("),
     # NeoForge renamed Forge's default game bus to GAME.
     (re.compile(r"\bEventBusSubscriber\.Bus\.GAME\b"), "EventBusSubscriber.Bus.FORGE"),
     (re.compile(r"\bbus\s*=\s*Bus\.GAME\b"), "bus = Bus.FORGE"),
@@ -188,7 +189,8 @@ _RECEIVER = r"(?<![\w.)\]])((?:[A-Za-z_]\w*(?:\([^()\"]*\))?)(?:\.[A-Za-z_]\w*(?
 _COMPONENTS = r"(?:com\.stardew\.craft\.port\.net\.minecraft\.core\.component\.)?DataComponents\."
 ITEM_DATA_RULES = [
     (re.compile(_RECEIVER + r"\.(get|set|has|remove|getOrDefault|update)\(\s*(?=" + _COMPONENTS + ")"),
-     r"PortItemData.\2(\1, "),
+     lambda match: match.group(0) if match.group(1).rsplit(".", 1)[-1] == "CustomData"
+     else "PortItemData." + match.group(2) + "(" + match.group(1) + ", "),
     (re.compile(r"(?<![\w.])((?:net\.minecraft\.world\.item\.)?ItemStack)(\.|::)isSameItemSameComponents\b"),
      r"\1\2isSameItemSameTags"),
     (re.compile(r"(?<![\w.])(?:net\.minecraft\.world\.item\.)?ItemStack\.(parseOptional|parse)\("),
@@ -220,6 +222,53 @@ def rewrite_item_data(text: str) -> str:
     return _ensure_import(updated, "PortItemStacks", ITEM_STACKS_CLASS)
 
 
+def rewrite_camera_api(text: str) -> str:
+    # Camera's basis flipped in 1.20.5. Direct 1.21 world billboard calls still compile
+    # on 1.20.1 but put their positive-Z icon/count layers behind their backgrounds.
+    # Only rewrite camera/dispatcher getters, not unrelated Quaternionf.rotation calls.
+    updated = re.sub(
+        _RECEIVER + r"\.cameraOrientation\(\)",
+        r"PortCamera.cameraOrientation(\1)", text)
+    updated = re.sub(
+        _RECEIVER + r"\.getCamera\(\)\.rotation\(\)",
+        r"PortCamera.rotation(\1.getCamera())", updated)
+    return _ensure_import(updated, "PortCamera", SHIM_PREFIX + "PortCamera")
+
+
+def rewrite_machine_extensions(text: str) -> str:
+    # Only EntityBlock factories whose extension was inventory-free on the source branch.
+    # The helper additionally checks the actual ItemHandler.BLOCK registration at runtime.
+    factories = {
+        "AbstractTwoBlockUtilityBlock", "AutoGrabberBlock", "BaitMakerBlock", "BeeHouseBlock",
+        "CharcoalKilnBlock", "CheesePressBlock", "CrystalariumBlock", "DehydratorBlock",
+        "DeluxeWormBinBlock", "FishSmokerBlock", "FurnaceBlock", "HeavyFurnaceBlock", "IncubatorBlock", "KegBlock",
+        "LightningRodBlock", "LoomBlock", "MayonnaiseMachineBlock", "PreservesJarBlock",
+        "ReclamationMachineBlock", "SeedMakerBlock", "SolarPanelBlock", "WormBinBlock",
+    }
+    match = re.search(r"\bclass\s+(\w+)\b", text)
+    if match and match.group(1) in factories:
+        text = re.sub(
+            r"(\bBlockEntity newBlockEntity\([^\n]+\) \{\s*"
+            r"if \(state.getValue\(PART\) == Part.EXTENSION\) (?:\{\s*)?return )null;",
+            r"\1com.stardew.craft.port.PortMachineExtensions.createExtension(pos, state);", text)
+    # Keep the BE type's valid blocks and the NeoForge block-provider registration one source of truth.
+    if match and match.group(1) == "UtilityAutomationCapabilities" and "Block[] multiblockAutomationBlocks()" not in text:
+        registration = re.search(
+            r"event.registerBlock\(Capabilities.ItemHandler.BLOCK, UtilityAutomationCapabilities::getAutomationFromMultiblock,"
+            r"\s*(ModBlocks\.[\s\S]+?)\);", text)
+        if registration:
+            blocks = registration.group(1)
+            text = text[:registration.start()] + (
+                "event.registerBlock(Capabilities.ItemHandler.BLOCK, UtilityAutomationCapabilities::getAutomationFromMultiblock,\n"
+                "            multiblockAutomationBlocks());") + text[registration.end():]
+            insertion = text.rfind("}")
+            text = text[:insertion] + (
+                "    // PORT(1.20.1): exactly the existing multiblock ItemHandler.BLOCK registrations.\n"
+                "    public static net.minecraft.world.level.block.Block[] multiblockAutomationBlocks() {\n"
+                "        return new net.minecraft.world.level.block.Block[] {\n            " + blocks + "};\n    }\n") + text[insertion:]
+    return text
+
+
 def rewrite(text: str, rules) -> str:
     for pattern, repl in rules:
         text = pattern.sub(repl, text)
@@ -230,7 +279,7 @@ def rewrite(text: str, rules) -> str:
         text = pattern.sub(repl, text)
     for simple in VANILLA_HELPERS:
         text = _ensure_import(text, simple, SHIM_PREFIX + simple)
-    return rewrite_item_data(text)
+    return rewrite_machine_extensions(rewrite_camera_api(rewrite_item_data(text)))
 
 
 def main(argv: list[str]) -> int:

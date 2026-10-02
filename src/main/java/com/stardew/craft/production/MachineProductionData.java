@@ -31,9 +31,11 @@ public final class MachineProductionData {
             return output == null ? ItemStack.EMPTY : new ItemStack(BuiltInRegistries.ITEM.get(output),
                 minCount == maxCount ? minCount : minCount + random.nextInt(maxCount - minCount + 1));
         }
+        /** Mornings use Utility.CalculateMinutesUntilMorning on the 1600-minute machine day. */
         public int rawMinutes(long now) {
-            long base = mornings ? (Math.floorDiv(now, 1260) + duration) * 1260 : now + duration;
-            return Math.toIntExact(base - now);
+            return mornings
+                    ? com.stardew.craft.blockentity.TimedProductionBlockEntity.minutesUntilMorning(now, duration)
+                    : duration;
         }
         public long deadline(long now, String machine) {
             return now + minutes(machine, rawMinutes(now));

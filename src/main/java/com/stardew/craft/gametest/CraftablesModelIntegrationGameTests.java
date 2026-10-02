@@ -60,7 +60,11 @@ public final class CraftablesModelIntegrationGameTests {
                 h.assertTrue(cells.size()==2,"Expected exactly two occupied cells "+block+facing+cells);
                 h.assertTrue((level.getBlockEntity(origin)!=null)==(block!=ModBlocks.FARM_COMPUTER.get()),"Unexpected production entity");
                 BlockPos extension=cells.stream().filter(p->!p.equals(origin)).findFirst().orElseThrow();
-                h.assertTrue(level.getBlockEntity(extension)==null,"Duplicate BE on extension");
+                // PORT(1.20.1): only registered machines get an inventory-free Forge capability bridge.
+                h.assertTrue(block == ModBlocks.FARM_COMPUTER.get() ? level.getBlockEntity(extension) == null
+                    : level.getBlockEntity(extension) instanceof com.stardew.craft.port.PortMachineExtensions.ExtensionBlockEntity
+                        && !(level.getBlockEntity(extension) instanceof com.stardew.craft.blockentity.UtilityAutomationAccess),
+                    "Extension must not add production or inventory (nor a BE to decorative farm computers)");
                 for(BlockPos cell:cells) {
                     var shape=level.getBlockState(cell).getCollisionShape(level,cell);
                     h.assertTrue(shape.toAabbs().size()==1,"Must use one overall box per part");

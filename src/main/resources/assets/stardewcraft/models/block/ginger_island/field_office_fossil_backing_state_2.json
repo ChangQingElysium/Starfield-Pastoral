@@ -1,0 +1,59 @@
+{
+  "parent": "minecraft:block/block",
+  "loader": "forge:composite",
+  "textures": {
+    "particle": "stardewcraft:block/ginger_island/field_office_fossil_backing_particle"
+  },
+  "children": {
+    "0": {
+      "parent": "stardewcraft:block/ginger_island/field_office_fossil_backing",
+      "transform": {
+        "translation": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "1": {
+      "parent": "stardewcraft:block/ginger_island/field_office_fossil_frog",
+      "transform": {
+        "translation": [
+          0.0,
+          0.021875,
+          0.0
+        ]
+      }
+    }
+  },
+  "stardewcraft:collision": {
+    "mode": "custom",
+    "boxes": [
+      {
+        "from": [
+          0,
+          0,
+          13.5
+        ],
+        "to": [
+          16,
+          16,
+          16
+        ]
+      },
+      {
+        "from": [
+          0.8,
+          0.12929999999999997,
+          10.8
+        ],
+        "to": [
+          15.2,
+          15.65,
+          14.2
+        ]
+      }
+    ],
+    "policy": "compound_assembly"
+  }
+}

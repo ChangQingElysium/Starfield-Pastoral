@@ -122,7 +122,7 @@ public class FishSmokerBlock extends Block implements EntityBlock, PortBlockInte
     @Nullable
     public BlockEntity newBlockEntity(@SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") BlockState state) {
         if (state.getValue(PART) == Part.EXTENSION) {
-            return null;
+            return com.stardew.craft.port.PortMachineExtensions.createExtension(pos, state);
         }
         return new FishSmokerBlockEntity(pos, state);
     }

@@ -67,9 +67,9 @@ public final class GreenSlimeEntity extends StardewMonsterEntity {
     @Override protected void registerGoals() {}
 
     // PORT(1.20.1): 1.21 LivingEntity#getDimensions is sleeping ? SLEEPING_DIMENSIONS : getDefaultDimensions(pose)
-    // (times the 1.20.5+ scale attribute, always 1 here); 1.20.1 only has getDimensions.
+    // .scale(getScale()); 1.20.1 only has getDimensions.
     @Override public net.minecraft.world.entity.EntityDimensions getDimensions(net.minecraft.world.entity.Pose pose) {
-        return pose == net.minecraft.world.entity.Pose.SLEEPING ? SLEEPING_DIMENSIONS : getDefaultDimensions(pose);
+        return pose == net.minecraft.world.entity.Pose.SLEEPING ? SLEEPING_DIMENSIONS : getDefaultDimensions(pose).scale(getScale());
     }
     public net.minecraft.world.entity.EntityDimensions getDefaultDimensions(net.minecraft.world.entity.Pose pose) {
         return net.minecraft.world.entity.EntityDimensions.scalable(GreenSlimeRules.collisionWidth(antenna()) * growth(),

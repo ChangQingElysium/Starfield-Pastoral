@@ -8,6 +8,67 @@ import json
 from pathlib import Path
 
 
+SOIL_REPLACEMENTS = {
+    'stardewcraft:yellow_dirt': 'stardewcraft:dirt',
+    'minecraft:dirt': 'stardewcraft:dirt',
+    'minecraft:farmland': 'stardewcraft:farmland',
+}
+
+
+def normalize_soil_state(state):
+    name, separator, properties = state.partition('[')
+    return SOIL_REPLACEMENTS.get(name, name) + separator + properties
+
+
+def normalize_soil_palette(intake, root):
+    """Only change soil identities; retain palette indices and state properties."""
+    replacements = {}
+    if 'palette' in root:
+        for state in intake.value(root, 'palette')[1]:
+            old = intake.value(state, 'Name')
+            new = SOIL_REPLACEMENTS.get(old, old)
+            if old != new:
+                state['Name'] = (8, new)
+                replacements[old] = new
+    else:
+        schematic = intake.value(root, 'Schematic', root)
+        blocks = intake.value(schematic, 'Blocks')
+        palette = intake.value(blocks, 'Palette')
+        normalized = {}
+        for old, index in palette.items():
+            new = normalize_soil_state(old)
+            if new in normalized:
+                # Merging indices would rewrite BlockData, not just the palette.
+                raise ValueError(f'Soil normalization would merge palette indices: {new}')
+            normalized[new] = index
+            if old != new:
+                replacements[old] = new
+        palette.clear()
+        palette.update(normalized)
+    return replacements
+
+
+def normalize_packaged_soil(intake, resource_dir):
+    """Repair tracked templates in place without WorldEdit sources or re-importing."""
+    paths = sorted((resource_dir / 'structures' / 'greenhouse').glob('*.schem'))
+    for directory in ('structure', 'structures'):
+        paths.extend(sorted((resource_dir / directory / 'farm_buildings').glob('greenhouse*.nbt')))
+    if not paths:
+        raise ValueError(f'{resource_dir}: no packaged greenhouse templates')
+    changed = {}
+    for path in paths:
+        root = intake.read_nbt(path)
+        replacements = normalize_soil_palette(intake, root)
+        if normalize_soil_palette(intake, root):
+            raise ValueError(f'{path}: soil normalization is not idempotent')
+        if replacements:
+            intake.write_nbt(path, root)
+            if intake.read_nbt(path) != root:
+                raise ValueError(f'{path}: soil normalization NBT round-trip failed')
+            changed[str(path.relative_to(resource_dir))] = replacements
+    return changed
+
+
 def load_intake(script_dir):
     path = script_dir / 'import_farm_building_prefabs.py'
     spec = importlib.util.spec_from_file_location('farm_building_intake', path)
@@ -41,7 +102,8 @@ def native_structure(intake, source, destination, manager=None):
     root = {
         'DataVersion': (3, intake.value(schematic.root, 'DataVersion')),
         'size': intake.int_list(schematic.size),
-        'palette': (9, (10, [intake.native_state(state) for state in state_names])),
+        'palette': (9, (10, [intake.native_state(normalize_soil_state(state))
+                            for state in state_names])),
         'blocks': (9, (10, blocks)),
         'entities': (9, (10, [])),
     }
@@ -62,7 +124,10 @@ def replace_schematic_palette(intake, source, destination, replacements):
         if new in palette:
             raise ValueError(f'{source}: replacement state already exists: {new}')
         palette[new] = palette.pop(old)
+    normalize_soil_palette(intake, root)
     intake.write_nbt(destination, root)
+    if intake.read_nbt(destination) != root:
+        raise ValueError(f'{destination}: schematic NBT round-trip failed')
 
 
 def main():
@@ -73,10 +138,16 @@ def main():
                         default=Path('src/main/resources/data/stardewcraft'))
     parser.add_argument('--report', type=Path,
                         default=Path('scripts/data/greenhouse_prefab_report.json'))
+    parser.add_argument('--normalize-packaged-soil', action='store_true',
+                        help='Normalize only tracked template palettes; do not read source-dir')
     args = parser.parse_args()
 
     script_dir = Path(__file__).resolve().parent
     intake = load_intake(script_dir)
+    if args.normalize_packaged_soil:
+        print(json.dumps(normalize_packaged_soil(intake, args.resource_dir),
+                         ensure_ascii=False, indent=2))
+        return
     manager = [12, 1, 11]
     structure_dir = args.resource_dir / 'structure' / 'farm_buildings'
     built, built_removed = native_structure(
@@ -125,7 +196,8 @@ def main():
     replace_schematic_palette(
         intake, args.source_dir / 'green_house_interior.schem',
         packaged_schematics / 'green_house_interior.schem',
-        {'stardewcraft:yellow_dirt': 'minecraft:dirt'})
+        {})
+    normalize_packaged_soil(intake, args.resource_dir)
 
     report = {
         'built': {'size': list(built.size), 'manager': manager,
@@ -134,8 +206,14 @@ def main():
                   'removed_runtime_fields': ruins_removed},
         'legacy_repaired': {'size': list(legacy_repaired.size),
                             'removed_runtime_fields': legacy_removed},
-        'interior_replacement': {'stardewcraft:yellow_dirt': 'minecraft:dirt'},
-        'verification': 'native NBT and packaged schematic round-trips',
+        'interior_replacement': {
+            'stardewcraft:yellow_dirt': 'stardewcraft:dirt',
+            'minecraft:dirt': 'stardewcraft:dirt',
+        },
+        'soil_replacements': SOIL_REPLACEMENTS,
+        'verification': ('native NBT and packaged schematic round-trips; '
+                         'idempotent soil palette-only normalization preserves '
+                         'indices, properties and all non-palette NBT'),
     }
     args.report.parent.mkdir(parents=True, exist_ok=True)
     args.report.write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n')

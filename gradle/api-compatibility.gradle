@@ -239,7 +239,7 @@ def apiMaturityReviewManifest =
     layout.projectDirectory.file('compatibility/api-maturity-review-v1.tsv')
 def currentApiSignatureFile = layout.buildDirectory.file('reports/api/current-public-api-v1.txt')
 def javapExecutableProvider = javaToolchains.launcherFor {
-    languageVersion = JavaLanguageVersion.of(21)
+    languageVersion = JavaLanguageVersion.of(17)
 }.map { launcher ->
     launcher.metadata.installationPath.file("bin/javap")
 }

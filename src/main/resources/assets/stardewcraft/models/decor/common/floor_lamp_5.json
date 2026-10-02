@@ -1164,7 +1164,7 @@
             4.5
           ],
           "texture": "#3",
-          "neoforge_data": {
+          "forge_data": {
             "block_light": 15,
             "sky_light": 15,
             "ambient_occlusion": false
@@ -1178,7 +1178,7 @@
             4.5
           ],
           "texture": "#3",
-          "neoforge_data": {
+          "forge_data": {
             "block_light": 15,
             "sky_light": 15,
             "ambient_occlusion": false
@@ -1217,7 +1217,7 @@
             4.5
           ],
           "texture": "#3",
-          "neoforge_data": {
+          "forge_data": {
             "block_light": 15,
             "sky_light": 15,
             "ambient_occlusion": false
@@ -1231,7 +1231,7 @@
             4.5
           ],
           "texture": "#3",
-          "neoforge_data": {
+          "forge_data": {
             "block_light": 15,
             "sky_light": 15,
             "ambient_occlusion": false
@@ -1270,7 +1270,7 @@
             4.5
           ],
           "texture": "#3",
-          "neoforge_data": {
+          "forge_data": {
             "block_light": 15,
             "sky_light": 15,
             "ambient_occlusion": false
@@ -1284,7 +1284,7 @@
             4.5
           ],
           "texture": "#3",
-          "neoforge_data": {
+          "forge_data": {
             "block_light": 15,
             "sky_light": 15,
             "ambient_occlusion": false
@@ -1323,7 +1323,7 @@
             4.5
           ],
           "texture": "#3",
-          "neoforge_data": {
+          "forge_data": {
             "block_light": 15,
             "sky_light": 15,
             "ambient_occlusion": false
@@ -1337,7 +1337,7 @@
             4.5
           ],
           "texture": "#3",
-          "neoforge_data": {
+          "forge_data": {
             "block_light": 15,
             "sky_light": 15,
             "ambient_occlusion": false
@@ -1376,7 +1376,7 @@
             4.5
           ],
           "texture": "#3",
-          "neoforge_data": {
+          "forge_data": {
             "block_light": 15,
             "sky_light": 15,
             "ambient_occlusion": false
@@ -1390,7 +1390,7 @@
             4.5
           ],
           "texture": "#3",
-          "neoforge_data": {
+          "forge_data": {
             "block_light": 15,
             "sky_light": 15,
             "ambient_occlusion": false
@@ -1429,7 +1429,7 @@
             4.5
           ],
           "texture": "#3",
-          "neoforge_data": {
+          "forge_data": {
             "block_light": 15,
             "sky_light": 15,
             "ambient_occlusion": false
@@ -1443,7 +1443,7 @@
             4.5
           ],
           "texture": "#3",
-          "neoforge_data": {
+          "forge_data": {
             "block_light": 15,
             "sky_light": 15,
             "ambient_occlusion": false
@@ -1482,7 +1482,7 @@
             4.5
           ],
           "texture": "#3",
-          "neoforge_data": {
+          "forge_data": {
             "block_light": 15,
             "sky_light": 15,
             "ambient_occlusion": false
@@ -1496,7 +1496,7 @@
             5.875
           ],
           "texture": "#3",
-          "neoforge_data": {
+          "forge_data": {
             "block_light": 15,
             "sky_light": 15,
             "ambient_occlusion": false
@@ -1535,7 +1535,7 @@
             5.875
           ],
           "texture": "#3",
-          "neoforge_data": {
+          "forge_data": {
             "block_light": 15,
             "sky_light": 15,
             "ambient_occlusion": false
@@ -1549,7 +1549,7 @@
             5.875
           ],
           "texture": "#3",
-          "neoforge_data": {
+          "forge_data": {
             "block_light": 15,
             "sky_light": 15,
             "ambient_occlusion": false
@@ -1588,7 +1588,7 @@
             0.625
           ],
           "texture": "#1",
-          "neoforge_data": {
+          "forge_data": {
             "block_light": 15,
             "sky_light": 15,
             "ambient_occlusion": false
@@ -1602,7 +1602,7 @@
             0.625
           ],
           "texture": "#1",
-          "neoforge_data": {
+          "forge_data": {
             "block_light": 15,
             "sky_light": 15,
             "ambient_occlusion": false
@@ -1616,7 +1616,7 @@
             0.625
           ],
           "texture": "#1",
-          "neoforge_data": {
+          "forge_data": {
             "block_light": 15,
             "sky_light": 15,
             "ambient_occlusion": false
@@ -1630,7 +1630,7 @@
             0.625
           ],
           "texture": "#1",
-          "neoforge_data": {
+          "forge_data": {
             "block_light": 15,
             "sky_light": 15,
             "ambient_occlusion": false
@@ -1644,7 +1644,7 @@
             0.375
           ],
           "texture": "#1",
-          "neoforge_data": {
+          "forge_data": {
             "block_light": 15,
             "sky_light": 15,
             "ambient_occlusion": false
@@ -1658,7 +1658,7 @@
             0.375
           ],
           "texture": "#1",
-          "neoforge_data": {
+          "forge_data": {
             "block_light": 15,
             "sky_light": 15,
             "ambient_occlusion": false
@@ -1697,7 +1697,7 @@
             0.6875
           ],
           "texture": "#1",
-          "neoforge_data": {
+          "forge_data": {
             "block_light": 15,
             "sky_light": 15,
             "ambient_occlusion": false
@@ -1711,7 +1711,7 @@
             0.6875
           ],
           "texture": "#1",
-          "neoforge_data": {
+          "forge_data": {
             "block_light": 15,
             "sky_light": 15,
             "ambient_occlusion": false
@@ -1725,7 +1725,7 @@
             0.6875
           ],
           "texture": "#1",
-          "neoforge_data": {
+          "forge_data": {
             "block_light": 15,
             "sky_light": 15,
             "ambient_occlusion": false
@@ -1739,7 +1739,7 @@
             0.6875
           ],
           "texture": "#1",
-          "neoforge_data": {
+          "forge_data": {
             "block_light": 15,
             "sky_light": 15,
             "ambient_occlusion": false
@@ -1753,7 +1753,7 @@
             0.45
           ],
           "texture": "#1",
-          "neoforge_data": {
+          "forge_data": {
             "block_light": 15,
             "sky_light": 15,
             "ambient_occlusion": false
@@ -1767,7 +1767,7 @@
             0.45
           ],
           "texture": "#1",
-          "neoforge_data": {
+          "forge_data": {
             "block_light": 15,
             "sky_light": 15,
             "ambient_occlusion": false
@@ -1806,7 +1806,7 @@
             0.73125
           ],
           "texture": "#1",
-          "neoforge_data": {
+          "forge_data": {
             "block_light": 15,
             "sky_light": 15,
             "ambient_occlusion": false
@@ -1820,7 +1820,7 @@
             0.73125
           ],
           "texture": "#1",
-          "neoforge_data": {
+          "forge_data": {
             "block_light": 15,
             "sky_light": 15,
             "ambient_occlusion": false
@@ -1834,7 +1834,7 @@
             0.73125
           ],
           "texture": "#1",
-          "neoforge_data": {
+          "forge_data": {
             "block_light": 15,
             "sky_light": 15,
             "ambient_occlusion": false
@@ -1848,7 +1848,7 @@
             0.73125
           ],
           "texture": "#1",
-          "neoforge_data": {
+          "forge_data": {
             "block_light": 15,
             "sky_light": 15,
             "ambient_occlusion": false
@@ -1862,7 +1862,7 @@
             0.5125
           ],
           "texture": "#1",
-          "neoforge_data": {
+          "forge_data": {
             "block_light": 15,
             "sky_light": 15,
             "ambient_occlusion": false
@@ -1876,7 +1876,7 @@
             0.5125
           ],
           "texture": "#1",
-          "neoforge_data": {
+          "forge_data": {
             "block_light": 15,
             "sky_light": 15,
             "ambient_occlusion": false

@@ -18,7 +18,7 @@ public final class ExampleFarmBuildingIntegration {
             Map<Integer,StardewBuildingFamilies.Display> portraits) {
         // Register the manager item with StardewBuildingFamilies.managerItem(family, properties),
         // the blueprint with blueprintItem(...), and each permit with upgradeItem(...).
-        // Suppliers are evaluated after NeoForge registration, not during this call.
+        // Suppliers are evaluated after Forge registration, not during this call.
         StardewBuildingFamilies.register(family,
                 new StardewBuildingFamilies.Binding(manager, blueprint, upgrades, portraits));
     }

@@ -22,7 +22,6 @@ import javax.annotation.Nullable;
  * Cheese press block entity.
  */
 public class CheesePressBlockEntity extends TimedProductionBlockEntity {
-	private static final int EFFECTIVE_MINUTES_PER_DAY = 1260;
 	private static final String TAG_INPUT = "input";
 	private static final String TAG_PRODUCT = "product";
 	private static final String TAG_READY_AT = "readyAtAbsMinute";
@@ -118,7 +117,7 @@ public class CheesePressBlockEntity extends TimedProductionBlockEntity {
 			return false;
 		}
 		var plan = prepareProduction(
-				stack, output, recipe.minutes(),
+				stack, output, recipeMinutes(recipe),
 				player, false);
 		if (plan.isEmpty()) {
 			return false;
@@ -179,7 +178,7 @@ public class CheesePressBlockEntity extends TimedProductionBlockEntity {
 			return stack;
 		}
 		var plan = prepareProduction(
-				stack, output, recipe.minutes(),
+				stack, output, recipeMinutes(recipe),
 				null, true);
 		if (plan.isEmpty()) {
 			return stack;

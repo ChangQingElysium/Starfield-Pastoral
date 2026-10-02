@@ -15,6 +15,7 @@ public abstract class PortRabbitRaidFarmlandMixin {
     @WrapOperation(method = "isValidTarget", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/level/block/state/BlockState;is(Lnet/minecraft/world/level/block/Block;)Z"))
     private boolean stardewcraft$port121Farmland(BlockState state, Block expected, Operation<Boolean> original) {
-        return expected == Blocks.FARMLAND ? PortPlantSupport.farmland(state) : original.call(state, expected);
+        return expected == Blocks.FARMLAND && PortPlantSupport.portRules(state, Blocks.CARROTS)
+                ? PortPlantSupport.farmland(state) : original.call(state, expected);
     }
 }

@@ -24,9 +24,8 @@ public final class StardewCraftMixinPlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        // PORT(1.20.1): the Sodium/Iris hooks target the NeoForge 1.21 packages (net.caffeinemc.mods.sodium,
-        // net.irisshaders.iris). Forge 1.20.1 only has Embeddium/Oculus, whose classes and mod ids differ; skip
-        // these optional mixins whenever their target class is not on the classpath (see bulk-port-gaps.md).
+        // PORT(1.20.1): audited against Embeddium 0.3.31 / Oculus 1.8.0 release bytecode.
+        // Unknown versions retain the ordinary rendering path without applying internal hooks.
         if (isRendererModMixin(mixinClassName) && !targetClassPresent(targetClassName)) {
             return false;
         }
@@ -56,31 +55,50 @@ public final class StardewCraftMixinPlugin implements IMixinConfigPlugin {
         if (PURPLE_SHORTS_BOBBER_MIXIN.equals(mixinClassName) && isHybridAquaticLoaded()) {
             return false;
         }
-        if (mixinClassName.startsWith("com.stardew.craft.mixin.SodiumRingLight")) {
-            LoadingModList modList = LoadingModList.get();
-            return modList != null && modList.getModFileById("sodium") != null;
+        if (mixinClassName.startsWith("com.stardew.craft.mixin.SodiumRingLight")
+                || mixinClassName.equals("com.stardew.craft.mixin.SodiumBlockEntityBoundsMixin")
+                || mixinClassName.startsWith("com.stardew.craft.mixin.SodiumImmediate")
+                || mixinClassName.equals("com.stardew.craft.mixin.SodiumEntityNormalsMixin")) {
+            return hasAuditedEmbeddium();
         }
         if (mixinClassName.startsWith("com.stardew.craft.mixin.TownDoorSodium")) {
-            return hasRendererVersion("sodium", "0.6.13");
+            return hasAuditedEmbeddium();
         }
-        if (mixinClassName.startsWith("com.stardew.craft.mixin.TownDoorIris")) {
-            return hasRendererVersion("iris", "1.8.12");
+        if (mixinClassName.startsWith("com.stardew.craft.mixin.TownDoorIris")
+                || mixinClassName.startsWith("com.stardew.craft.mixin.TownDoorOculus")) {
+            return hasAuditedOculus();
         }
         // These hooks target renderer internals, not a stable public RGB-light API.
         // Unknown versions retain normal block light instead of risking a startup failure.
         if (mixinClassName.startsWith("com.stardew.craft.mixin.SodiumColoredLight")) {
-            return hasRendererVersion("sodium", "0.6.13");
+            return hasAuditedEmbeddium();
         }
         if (mixinClassName.startsWith("com.stardew.craft.mixin.IrisMineLamp")) {
-            return hasRendererVersion("iris", "1.8.12");
+            return hasAuditedOculus();
         }
         return true;
+    }
+
+    public static boolean hasAuditedEmbeddium() {
+        return hasExactModVersion("embeddium", "0.3.31+mc1.20.1");
+    }
+
+    public static boolean hasAuditedOculus() {
+        return hasExactModVersion("oculus", "1.8.0");
+    }
+
+    private static boolean hasExactModVersion(String id, String version) {
+        LoadingModList list = LoadingModList.get();
+        var file = list == null ? null : list.getModFileById(id);
+        return file != null && file.getMods().stream().anyMatch(mod -> mod.getModId().equals(id)
+                && mod.getVersion().toString().equals(version));
     }
 
     private static boolean isRendererModMixin(String mixinClassName) {
         String simpleName = mixinClassName.substring(mixinClassName.lastIndexOf('.') + 1);
         return simpleName.startsWith("Sodium") || simpleName.startsWith("Iris")
-                || simpleName.startsWith("TownDoorSodium") || simpleName.startsWith("TownDoorIris");
+                || simpleName.startsWith("TownDoorSodium") || simpleName.startsWith("TownDoorIris")
+                || simpleName.startsWith("TownDoorOculus");
     }
 
     private static boolean targetClassPresent(String targetClassName) {

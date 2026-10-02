@@ -1,5 +1,6 @@
 package com.stardew.craft.client.render;
 
+import com.stardew.craft.port.PortCamera;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.stardew.craft.StardewCraft;
@@ -77,7 +78,7 @@ public final class LostBookIndicatorRenderer {
 
             poseStack.pushPose();
             poseStack.translate(center.x - camera.x, center.y - camera.y, center.z - camera.z);
-            poseStack.mulPose(event.getCamera().rotation());
+            poseStack.mulPose(PortCamera.rotation(event.getCamera()));
             Matrix4f pose = poseStack.last().pose();
             float half = SIZE * 0.5F;
             PortVertex.of(consumer).addVertex(pose, -half, half, 0.0F)

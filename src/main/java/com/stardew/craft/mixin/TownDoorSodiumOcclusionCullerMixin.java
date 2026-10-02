@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 /** Disables Sodium cave occlusion only for the nested doorway view, as Immersive Portals does. */
 @Pseudo
-@Mixin(targets = "net.caffeinemc.mods.sodium.client.render.chunk.occlusion.OcclusionCuller", remap = false)
+@Mixin(targets = "me.jellysquid.mods.sodium.client.render.chunk.occlusion.OcclusionCuller", remap = false)
 public abstract class TownDoorSodiumOcclusionCullerMixin {
     @ModifyVariable(method = "findVisible", at = @At("HEAD"), argsOnly = true, ordinal = 0, require = 1)
     private boolean stardewcraft$keepRemoteGroundVisible(boolean useOcclusionCulling) {
@@ -25,7 +25,7 @@ public abstract class TownDoorSodiumOcclusionCullerMixin {
      * Immersive Portals solves the same case by moving the iteration origin to the portal aperture.
      */
     @WrapOperation(method = "init", at = @At(value = "INVOKE",
-            target = "Lnet/caffeinemc/mods/sodium/client/render/viewport/Viewport;getChunkCoord()Lnet/minecraft/core/SectionPos;"),
+            target = "Lme/jellysquid/mods/sodium/client/render/viewport/Viewport;getChunkCoord()Lnet/minecraft/core/SectionPos;"),
             require = 1, remap = false)
     private SectionPos stardewcraft$startAtDestination(@Coerce Object viewport,
                                                         Operation<SectionPos> original) {
@@ -33,7 +33,7 @@ public abstract class TownDoorSodiumOcclusionCullerMixin {
     }
 
     @WrapOperation(method = "initWithinWorld", at = @At(value = "INVOKE",
-            target = "Lnet/caffeinemc/mods/sodium/client/render/viewport/Viewport;getChunkCoord()Lnet/minecraft/core/SectionPos;"),
+            target = "Lme/jellysquid/mods/sodium/client/render/viewport/Viewport;getChunkCoord()Lnet/minecraft/core/SectionPos;"),
             require = 1, remap = false)
     private SectionPos stardewcraft$startInsideDestination(@Coerce Object viewport,
                                                             Operation<SectionPos> original) {

@@ -49,7 +49,9 @@ public final class LivestockShop {
         for(var species:LivestockSpecies.values()) if(species.known() && species.price()>=0) {
             var row=new CompoundTag(); LivestockUiData.describe(row,species);row.putInt("Price",species.price());
             boolean homeFound=rows.stream().map(t->(CompoundTag)t).anyMatch(h->LivestockHomes.offered(h,row) && h.getInt("Used")<h.getInt("Capacity"));
-            String reason=!unlocked(player,species)||!LivestockProjection.supported(player.serverLevel(),species)?"unavailable":!homeFound?"no_home":PlayerStardewDataAPI.getMoney(player)<species.price()?"money":"";
+            // SDV Utility.getPurchaseAnimalStock: the species' RequiredBuilding must exist; placement then accepts any home of the family.
+            boolean requiredBuilt=rows.stream().map(t->(CompoundTag)t).anyMatch(h->h.getString("Family").equals(species.family().toString()) && h.getInt("Tier")>=species.minimumTier());
+            String reason=!unlocked(player,species)||!LivestockProjection.supported(player.serverLevel(),species)||!requiredBuilt?"unavailable":!homeFound?"no_home":PlayerStardewDataAPI.getMoney(player)<species.price()?"money":"";
             row.putBoolean("Available",reason.isEmpty());row.putString("Reason",reason);catalog.add(row);
         }
         tag.put("Catalog",catalog);
@@ -71,6 +73,9 @@ public final class LivestockShop {
         if (session == null || !session.nonce.equals(nonce) || session.expires < server.getTickCount() || session.generation!=com.stardew.craft.animal.model.FarmAnimalDefinitions.generation() || !session.homes.contains(homeId)) return "expired";
         var buildings = BuildingWorldData.get(server); var home = buildings.find(homeId);
         if (home == null || !PrefabDefinitions.available(home) || !BuildingService.canManage(player, home)) return "permission";
+        boolean requiredBuilt = session.homes.stream().map(buildings::find)
+                .anyMatch(b -> b != null && LivestockHomes.accepts(b, species) && b.tier() >= species.minimumTier());
+        if (!requiredBuilt) return "unavailable";
         if (buildings.transfer(home.id()) != null) return "unavailable";
         var level = LivestockService.level(server, home); if (level == null) return "unavailable";
         LivestockHomes.load(level, LivestockHomes.bounds(home));
@@ -80,6 +85,7 @@ public final class LivestockShop {
         if (animals.occupancy(homeId) >= LivestockHomes.capacity(level,home)) return "full";
         name = name.strip();
         if (name.isEmpty() || name.length() > 32 || name.codePoints().anyMatch(c -> Character.isISOControl(c) || c == 0xA7)) return "name_required";
+        if (animals.nameTaken(home.farmId(), name, null)) return "name_taken";
         var selected=LivestockSpecies.parse(com.stardew.craft.animal.service.AnimalShopService.selectPurchasedAnimalType(species.definitionId(),player));
         if(!LivestockProjection.supported(level,selected)||!LivestockHomes.accepts(level,home,selected))return "unavailable";
         if (LivestockHomes.spawn(level, home, selected, selected.matureDays() > 0) == null) return "no_floor";

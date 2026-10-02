@@ -1,5 +1,6 @@
 package com.stardew.craft.client.render;
 
+import com.stardew.craft.port.PortCamera;
 import com.stardew.craft.client.font.StardewFonts;
 
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -66,7 +67,7 @@ public class MineMonsterHpBarRenderer {
             event.getPoseStack().pushPose();
             event.getPoseStack().translate(x, y, z);
             // Billboard: use camera rotation (same as DamageNumberClient)
-            event.getPoseStack().mulPose(event.getCamera().rotation());
+            event.getPoseStack().mulPose(PortCamera.rotation(event.getCamera()));
             float scale = 0.025f;
             event.getPoseStack().scale(scale, -scale, scale);
 

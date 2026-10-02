@@ -24,7 +24,17 @@ public final class GoldenWalnutPickup {
                 || !entity.getItem().is(ModItems.GOLDEN_WALNUT.get()) || event.canPickup() == TriState.FALSE
                 || player.isSpectator() || entity.hasPickUpDelay()
                 || (com.stardew.craft.port.PortEntities.getTarget(entity) != null && !com.stardew.craft.port.PortEntities.getTarget(entity).equals(player.getUUID()))) return;
-        var data = GoldenWalnutData.get(player.server);
+        var owner = com.stardew.craft.gingerisland.WalnutDebris.owner(entity.getItem())
+                .or(() -> com.stardew.craft.gingerisland.IslandContext.farmInstance(entity.level(), entity.blockPosition()));
+        if (owner.isEmpty() && com.stardew.craft.gingerisland.IslandContext.isBound(entity.level(), entity.blockPosition())) {
+            event.setCanPickup(TriState.FALSE);
+            return;
+        }
+        if (owner.isPresent() && !com.stardew.craft.gingerisland.IslandContext.canModify(player, owner.get())) {
+            event.setCanPickup(TriState.FALSE);
+            return;
+        }
+        var data = owner.map(id -> GoldenWalnutData.get(player.server, id)).orElseGet(() -> GoldenWalnutData.get(player.server));
         data.discover(entity.getItem().getCount());
         event.setCanPickup(TriState.FALSE);
         player.take(entity, entity.getItem().getCount());

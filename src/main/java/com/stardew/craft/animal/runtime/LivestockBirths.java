@@ -56,7 +56,7 @@ public final class LivestockBirths {
         var data=LivestockWorldData.get(player.serverLevel().getServer());var animal=data.find(id);
         var farm=FarmInstanceRegistry.get(player.serverLevel().getServer()).getFarmForPlayer(player.getUUID());
         if(animal==null || farm==null || !animal.farm().equals(farm.getInstanceId()) || !data.newborn(id)) return "permission";
-        name=name.strip();if(name.isEmpty() || name.length()>32 || name.codePoints().anyMatch(c->Character.isISOControl(c)||c==0xA7))return "name_required";
+        name=name.strip();if(name.isEmpty() || name.length()>32 || name.codePoints().anyMatch(c->Character.isISOControl(c)||c==0xA7))return "name_required";if(data.nameTaken(animal.farm(),name,id))return "name_taken";
         data.put(animal.rename(name));data.newborn(id,false);prompted.remove(id);LivestockService.project(player.serverLevel().getServer());return "";
     }
 }

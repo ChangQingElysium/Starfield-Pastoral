@@ -3,6 +3,7 @@ package com.stardew.craft.port;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.stardew.craft.StardewCraft;
+import com.stardew.craft.client.gui.common.StardewInventoryGui;
 import com.stardew.craft.port.net.neoforged.fml.common.EventBusSubscriber;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -139,6 +140,7 @@ public final class PortGuiSprites {
 
     public static void blitSprite(GuiGraphics graphics, ResourceLocation sprite, int x, int y, int blitOffset,
                                   int width, int height) {
+        sprite = StardewInventoryGui.replaceResource(sprite);
         ResourceLocation texture = texture(sprite);
         Scaling scaling = scaling(sprite);
         if (scaling instanceof Stretch) {
@@ -158,6 +160,7 @@ public final class PortGuiSprites {
 
     public static void blitSprite(GuiGraphics graphics, ResourceLocation sprite, int textureWidth, int textureHeight,
                                   int uPosition, int vPosition, int x, int y, int blitOffset, int uWidth, int vHeight) {
+        sprite = StardewInventoryGui.replaceResource(sprite);
         ResourceLocation texture = texture(sprite);
         if (scaling(sprite) instanceof Stretch) {
             blitRegion(graphics, texture, textureWidth, textureHeight, uPosition, vPosition, x, y, blitOffset, uWidth, vHeight);

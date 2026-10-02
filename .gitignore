@@ -80,6 +80,9 @@ docs/*
 /启动游戏_录屏1440p.command
 /src/test/
 net/
+# Maintained Forge compatibility APIs are production source, not decompiled scratch output.
+!src/port/java/com/stardew/craft/port/net/
+!src/port/java/com/stardew/craft/port/net/**
 .claude/settings.local.json
 .vscode/
 .codex/
@@ -253,6 +256,8 @@ tools/npc/*
 !tools/art/package_refined_gaits.py
 
 !tools/npc/NpcRuntimeRegression.java
+!tools/gametest/
+!tools/gametest/generate_ginger_asset_fixture.py
 
 !docs/npc-runtime-architecture.md
 
@@ -305,6 +310,10 @@ tools/npc/*
 !/assets-src/npc/george/
 !/assets-src/npc/george/george.bbmodel
 !/assets-src/npc/george/motion.json
+!/assets-src/npc/gil/
+!/assets-src/npc/gil/gil.bbmodel
+!/assets-src/npc/gil/motion.json
+!/assets-src/npc/gil/animation.md
 !/assets-src/npc/gus/
 !/assets-src/npc/gus/gus.bbmodel
 !/assets-src/npc/gus/gus_clean.bbmodel
@@ -440,4 +449,6 @@ tools/npc/*
 build/
 run/
 run-game-test/
+# The isolated Forge playtest directory contains user saves, never release source.
+/run-client-forge-1201/
 run-data/

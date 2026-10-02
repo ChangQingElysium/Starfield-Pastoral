@@ -1,7 +1,7 @@
 package com.stardew.craft.client.model.terrain;
 
 import com.stardew.craft.StardewCraft;
-import com.stardew.craft.block.mine.MineBuildingTheme;
+import com.stardew.craft.block.mine.MineGroundMaterial;
 import com.stardew.craft.block.mine.MineGroundConnections;
 import com.stardew.craft.block.terrain.TerrainFaceConnections;
 import java.util.ArrayList;
@@ -41,14 +41,14 @@ public final class MineGroundTransitionModels {
     private static final ModelProperty<Integer> EDGES = new ModelProperty<>();
     private MineGroundTransitionModels() {}
 
-    private static ModelResourceLocation overlay(MineBuildingTheme theme, int material, int mask) {
+    private static ModelResourceLocation overlay(MineGroundMaterial theme, int material, int mask) {
         return new ModelResourceLocation(new ResourceLocation(StardewCraft.MODID,
-                "block/mine_ground/" + (theme == MineBuildingTheme.EARTH ? "" : theme.id() + "/") + material + "/" + mask), "standalone");
+                "block/mine_ground/" + (theme.id().equals("earth") ? "" : theme.id() + "/") + material + "/" + mask), "standalone");
     }
 
     @SubscribeEvent
     public static void register(ModelEvent.RegisterAdditional event) {
-        for (MineBuildingTheme theme : MineBuildingTheme.values())
+        for (MineGroundMaterial theme : MineGroundMaterial.values())
             for (int material = 1; material <= 2; material++)
                 for (int mask = 1; mask < 256; mask++) event.register(overlay(theme, material, mask));
     }
@@ -57,12 +57,12 @@ public final class MineGroundTransitionModels {
     public static void wrap(ModelEvent.ModifyBakingResult event) {
         var models = event.getModels();
         Map<BlockState, BakedModel> sources = new HashMap<>();
-        for (MineBuildingTheme theme : MineBuildingTheme.values())
+        for (MineGroundMaterial theme : MineGroundMaterial.values())
             for (Block block : List.of(theme.soil(), theme.looseSoil()))
                 for (BlockState state : block.getStateDefinition().getPossibleStates())
                     sources.put(state, Objects.requireNonNull(models.get(BlockModelShaper.stateToModelLocation(state))));
         TerrainFaceQuads painter = new TerrainFaceQuads();
-        for (MineBuildingTheme theme : MineBuildingTheme.values()) {
+        for (MineGroundMaterial theme : MineGroundMaterial.values()) {
             BakedModel[][] edges = new BakedModel[3][256];
             for (int material = 1; material <= 2; material++) for (int mask = 1; mask < 256; mask++)
                 edges[material][mask] = Objects.requireNonNull(models.get(overlay(theme, material, mask)));

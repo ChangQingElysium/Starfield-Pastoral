@@ -1,5 +1,6 @@
 package com.stardew.craft.client.weapon;
 
+import com.stardew.craft.port.PortCamera;
 import com.stardew.craft.Config;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
@@ -35,7 +36,7 @@ public final class ElfBladeMarkRenderer {
                     .add(camera.subtract(center).normalize().scale(0.04)).subtract(camera);
             float fade = Math.min(1, (info.endTick - tick) / 20f);
             stack.pushPose(); stack.translate(point.x, point.y, point.z);
-            stack.mulPose(event.getCamera().rotation());
+            stack.mulPose(PortCamera.rotation(event.getCamera()));
             GroveEffectGeometry.sprig(out, stack.last().pose(), info.stacks, fade);
             stack.popPose();
         }

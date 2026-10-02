@@ -1,17 +1,42 @@
 // Standalone deterministic tests; no client, local SDV source, dev assets, or ignored src/test dependency.
+// Generated copies differ only in Java 21 library calls, not in assertions or test data.
+def npcRuntimeJava17Source = layout.buildDirectory.file('generated/sources/portNpcRuntime/NpcRuntimeRegression.java')
+def npcRuntimeJava17Replacements = [
+        'compiled.get("day").getFirst()': 'com.stardew.craft.port.PortJava.getFirst(compiled.get("day"))',
+        'compiled.get("day").getLast()': 'com.stardew.craft.port.PortJava.getLast(compiled.get("day"))',
+        'check(NpcScheduleCompiler.compile(json(': 'check(com.stardew.craft.port.PortJava.getFirst(NpcScheduleCompiler.compile(json(',
+        '.get("a").getFirst().behavior()': '.get("a")).behavior()',
+        'times.getFirst()': 'com.stardew.craft.port.PortJava.getFirst(times)',
+        'route.destinationSteps.getFirst()': 'com.stardew.craft.port.PortJava.getFirst(route.destinationSteps)',
+        'Thread.currentThread().threadId()': 'Thread.currentThread().getId()']
+def preparePortNpcRuntimeSource = tasks.register('preparePortNpcRuntimeSource') {
+    inputs.file('tools/npc/NpcRuntimeRegression.java')
+    inputs.property('sourceReplacements', npcRuntimeJava17Replacements)
+    outputs.file(npcRuntimeJava17Source)
+    doLast {
+        def content = file('tools/npc/NpcRuntimeRegression.java').getText('UTF-8')
+        npcRuntimeJava17Replacements.each { original, replacement -> content = content.replace(original, replacement) }
+        if (content =~ /\.get(?:First|Last)\(\)|Math\.clamp\(|\.threadId\(\)/) {
+            throw new GradleException('Unadapted Java 21 call in NpcRuntimeRegression; review the Forge test-source bridge.')
+        }
+        def destination = npcRuntimeJava17Source.get().asFile
+        destination.parentFile.mkdirs()
+        destination.setText(content, 'UTF-8')
+    }
+}
 def compileNpcRuntimeRegression = tasks.register('compileNpcRuntimeRegression', JavaCompile) {
-    dependsOn tasks.named('classes')
-    source = files('tools/npc/NpcRuntimeRegression.java')
+    dependsOn tasks.named('classes'), preparePortNpcRuntimeSource
+    source = files(npcRuntimeJava17Source)
     classpath = sourceSets.main.output + sourceSets.main.compileClasspath
     destinationDirectory = layout.buildDirectory.dir('classes/npcRuntimeRegression')
-    javaCompiler = javaToolchains.compilerFor { languageVersion = JavaLanguageVersion.of(21) }
+    javaCompiler = javaToolchains.compilerFor { languageVersion = JavaLanguageVersion.of(17) }
 }
 def npcRuntimeRegression = tasks.register('npcRuntimeRegression', JavaExec) {
     group = 'verification'
     dependsOn compileNpcRuntimeRegression
     classpath = files(compileNpcRuntimeRegression) + sourceSets.main.runtimeClasspath
     mainClass = 'com.stardew.craft.npc.runtime.NpcRuntimeRegression'
-    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(17) }
     args file('src/main/resources/data/stardewcraft/npc').absolutePath
 }
 tasks.named('check') { dependsOn npcRuntimeRegression }
@@ -22,5 +47,5 @@ tasks.register('compileNpcAddonCompatibility', JavaCompile) {
     source = fileTree('examples/stardewcraft-addon/src/main/java') { include '**/*.java' }
     classpath = sourceSets.main.output + sourceSets.main.compileClasspath
     destinationDirectory = layout.buildDirectory.dir('classes/npcAddonCompatibility')
-    javaCompiler = javaToolchains.compilerFor { languageVersion = JavaLanguageVersion.of(21) }
+    javaCompiler = javaToolchains.compilerFor { languageVersion = JavaLanguageVersion.of(17) }
 }

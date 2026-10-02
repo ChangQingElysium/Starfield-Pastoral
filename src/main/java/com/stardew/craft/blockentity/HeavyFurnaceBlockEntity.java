@@ -44,7 +44,7 @@ public class HeavyFurnaceBlockEntity extends FurnaceBlockEntity {
         int outputCount = recipe.rollOutputCount(level.random);
         ItemStack output = new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.get(recipe.outputId()), outputCount);
         var plan = prepareProduction(
-                stack, output, recipe.minutes(),
+                stack, output, recipeMinutes(recipe),
                 null, true);
         if (plan.isEmpty()) {
             return stack;
@@ -80,7 +80,7 @@ public class HeavyFurnaceBlockEntity extends FurnaceBlockEntity {
         ItemStack output = new ItemStack(
                 net.minecraft.core.registries.BuiltInRegistries.ITEM.get(recipe.outputId()), outputCount);
         var plan = prepareProduction(
-                stack, output, recipe.minutes(),
+                stack, output, recipeMinutes(recipe),
                 player, false);
         if (plan.isEmpty()) {
             return InsertResult.fail();

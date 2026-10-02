@@ -162,6 +162,20 @@ public final class PortJava {
 
     // ------------------------------------------------------------ Math (JDK 21)
 
+    public static int ceilDiv(int x, int y) {
+        int quotient = x / y;
+        return (x ^ y) >= 0 && quotient * y != x ? quotient + 1 : quotient;
+    }
+
+    public static long ceilDiv(long x, int y) {
+        return ceilDiv(x, (long) y);
+    }
+
+    public static long ceilDiv(long x, long y) {
+        long quotient = x / y;
+        return (x ^ y) >= 0 && quotient * y != x ? quotient + 1 : quotient;
+    }
+
     public static int clamp(long value, int min, int max) {
         if (min > max) throw new IllegalArgumentException(min + " > " + max);
         return (int) Math.min(max, Math.max(value, min));

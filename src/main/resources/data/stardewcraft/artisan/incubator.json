@@ -8,6 +8,6 @@
     { "input": "stardewcraft:duck_egg", "outputMode": "copy_input", "minutes": 9000 },
     { "input": "stardewcraft:void_egg", "outputMode": "copy_input", "minutes": 9000 },
     { "input": "stardewcraft:golden_egg", "outputMode": "copy_input", "minutes": 9000 },
-    { "input": "stardewcraft:dinosaur_egg", "outputMode": "copy_input", "minutes": 9000 }
+    { "input": "stardewcraft:dinosaur_egg", "outputMode": "copy_input", "minutes": 18000 }
   ]
 }

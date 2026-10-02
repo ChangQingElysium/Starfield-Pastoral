@@ -41,7 +41,9 @@ public final class SpatialBlockModelRenderer {
 
     @SubscribeEvent
     public static void modelsReloaded(ModelEvent.BakingCompleted event) {
-        CACHE.clear();
+        synchronized (CACHE) {
+            CACHE.clear();
+        }
     }
 
     public static void render(ModelBlockRenderer renderer, BlockAndTintGetter level, BakedModel model,
@@ -49,21 +51,50 @@ public final class SpatialBlockModelRenderer {
             RandomSource random, long seed, int overlay) {
         // These machine renderers use static blockstate models and seed zero. Dynamic addon models
         // retain their per-render getQuads result; never cache an inventory/world-dependent result.
-        List<CellModel> cells = model instanceof IDynamicBakedModel || seed != 0
-                ? partition(model, state, random, seed)
-                : CACHE.computeIfAbsent(model, ignored -> new IdentityHashMap<>())
-                    .computeIfAbsent(state, ignored -> partition(model, state, random, seed));
+        List<CellModel> cells;
+        if (model instanceof IDynamicBakedModel || seed != 0) {
+            cells = partition(model, state, random, seed);
+        } else {
+            synchronized (CACHE) {
+                cells = CACHE.computeIfAbsent(model, ignored -> new IdentityHashMap<>())
+                        .computeIfAbsent(state, ignored -> partition(model, state, random, seed));
+            }
+        }
         if (cells.isEmpty()) return;
         if (cells.size() == 1 && com.stardew.craft.port.PortJava.getFirst(cells).offset.equals(BlockPos.ZERO)) {
             renderer.tesselateBlock(level, model, state, pos, pose, vertices, checkSides, random, seed, overlay, ModelData.EMPTY, null);
             return;
         }
+        renderCells(renderer, level, cells, state, pos, pose, vertices, checkSides, random, seed,
+                overlay, ModelData.EMPTY, null);
+    }
+
+    /**
+     * Terrain-rendered map props need the same local lighting as machine BERs. Do not cache
+     * these results: a chunk builder supplies its own seed, ModelData and render layer, and
+     * addon models may depend on all three. CellModel is also the recursion guard for the
+     * tesselateBlock mixin; its vertices are already local to the sampling position.
+     */
+    public static boolean renderMapDecor(ModelBlockRenderer renderer, BlockAndTintGetter level, BakedModel model,
+            BlockState state, BlockPos pos, PoseStack pose, VertexConsumer vertices, boolean checkSides,
+            RandomSource random, long seed, int overlay, ModelData modelData, RenderType renderType) {
+        if (model instanceof CellModel) return false;
+        List<CellModel> cells = partition(model, state, random, seed, modelData, renderType);
+        if (cells.isEmpty() || (cells.size() == 1 && cells.get(0).offset.equals(BlockPos.ZERO))) return false;
+        renderCells(renderer, level, cells, state, pos, pose, vertices, checkSides, random, seed,
+                overlay, modelData, renderType);
+        return true;
+    }
+
+    private static void renderCells(ModelBlockRenderer renderer, BlockAndTintGetter level, List<CellModel> cells,
+            BlockState state, BlockPos pos, PoseStack pose, VertexConsumer vertices, boolean checkSides,
+            RandomSource random, long seed, int overlay, ModelData modelData, RenderType renderType) {
         for (CellModel cell : cells) {
             pose.pushPose();
             try {
                 pose.translate(cell.offset.getX(), cell.offset.getY(), cell.offset.getZ());
                 renderer.tesselateBlock(level, cell, state, pos.offset(cell.offset), pose, vertices,
-                        checkSides, random, seed, overlay, ModelData.EMPTY, null);
+                        checkSides, random, seed, overlay, modelData, renderType);
             } finally {
                 pose.popPose();
             }
@@ -71,12 +102,17 @@ public final class SpatialBlockModelRenderer {
     }
 
     static List<CellModel> partition(BakedModel model, BlockState state, RandomSource random, long seed) {
+        return partition(model, state, random, seed, ModelData.EMPTY, null);
+    }
+
+    static List<CellModel> partition(BakedModel model, BlockState state, RandomSource random, long seed,
+            ModelData modelData, RenderType renderType) {
         Map<BlockPos, Map<Direction, List<BakedQuad>>> cells = new LinkedHashMap<>();
         // null is the unculled face bucket. Preserve authored cull-face selection in each cell.
         for (int sideIndex = -1; sideIndex < Direction.values().length; sideIndex++) {
             Direction side = sideIndex < 0 ? null : Direction.values()[sideIndex];
             random.setSeed(seed);
-            for (BakedQuad quad : model.getQuads(state, side, random, ModelData.EMPTY, null)) {
+            for (BakedQuad quad : model.getQuads(state, side, random, modelData, renderType)) {
                 for (Fragment fragment : split(quad)) {
                     cells.computeIfAbsent(fragment.offset, ignored -> new LinkedHashMap<>())
                             .computeIfAbsent(side, ignored -> new ArrayList<>()).add(fragment.quad);

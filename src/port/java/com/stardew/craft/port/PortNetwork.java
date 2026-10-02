@@ -10,7 +10,7 @@ import net.minecraftforge.network.simple.SimpleChannel;
  * Independent of the mod's payload layer.
  */
 public final class PortNetwork {
-    private static final String VERSION = "1";
+    private static final String VERSION = "2";
     public static final SimpleChannel CHANNEL = NetworkRegistry.ChannelBuilder
             .named(new ResourceLocation(PortBootstrap.NAMESPACE, "port_internal"))
             .networkProtocolVersion(() -> VERSION)
@@ -32,6 +32,11 @@ public final class PortNetwork {
         CHANNEL.messageBuilder(PortAuxLight.SyncMessage.class, 1, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(PortAuxLight.SyncMessage::encode)
                 .decoder(PortAuxLight.SyncMessage::decode)
+                .consumerMainThread((message, context) -> PortClientHandlers.handle(message))
+                .add();
+        CHANNEL.messageBuilder(PortEnchantments.SyncMessage.class, 2, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(PortEnchantments.SyncMessage::encode)
+                .decoder(PortEnchantments.SyncMessage::decode)
                 .consumerMainThread((message, context) -> PortClientHandlers.handle(message))
                 .add();
     }

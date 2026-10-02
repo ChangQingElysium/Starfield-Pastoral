@@ -16,7 +16,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/** PORT(1.20.1): NeoForge 1.21.1 {@code CropBlock} soil, light and growth-speed rules (see {@link PortPlantSupport}). */
+/**
+ * PORT(1.20.1): NeoForge 1.21.1 {@code CropBlock} soil, light and growth-speed rules (see {@link PortPlantSupport});
+ * other mods' crops on non-StardewCraft soils keep the Forge 1.20.1 rules ({@link PortPlantSupport#portRules}).
+ */
 @Mixin(CropBlock.class)
 public abstract class PortCropBlockPlantSupportMixin extends BushBlock {
     protected PortCropBlockPlantSupportMixin(Properties properties) {
@@ -25,13 +28,16 @@ public abstract class PortCropBlockPlantSupportMixin extends BushBlock {
 
     @Inject(method = "mayPlaceOn", at = @At("HEAD"), cancellable = true)
     private void stardewcraft$port121MayPlaceOn(BlockState state, BlockGetter level, BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
+        if (!PortPlantSupport.portRules(state, this)) return;
         cir.setReturnValue(PortPlantSupport.farmland(state));
     }
 
     /** 1.21.1: a non-DEFAULT soil decides alone; otherwise raw light >= 8 (no sky fallback) and the bush rule. */
     @Inject(method = "canSurvive", at = @At("HEAD"), cancellable = true)
     private void stardewcraft$port121CanSurvive(BlockState state, LevelReader level, BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
-        TriState decision = PortPlantSupport.decision(level.getBlockState(pos.below()), level, pos.below(), Direction.UP, state);
+        BlockState soil = level.getBlockState(pos.below());
+        if (!PortPlantSupport.portRules(soil, this)) return;
+        TriState decision = PortPlantSupport.decision(soil, level, pos.below(), Direction.UP, state);
         cir.setReturnValue(decision.isDefault()
                 ? PortPlantSupport.sufficientCropLight(level, pos) && super.canSurvive(state, level, pos)
                 : decision.isTrue());
@@ -49,6 +55,15 @@ public abstract class PortCropBlockPlantSupportMixin extends BushBlock {
                 float local = 0.0F;
                 BlockPos soilPos = below.offset(i, 0, j);
                 BlockState soil = level.getBlockState(soilPos);
+                if (!PortPlantSupport.portRules(soil, block)) {
+                    // Forge 1.20.1 body for a third-party plant/soil pair.
+                    if (block instanceof IPlantable plantable && soil.canSustainPlant(level, soilPos, Direction.UP, plantable)) {
+                        local = soil.isFertile(level, pos.offset(i, 0, j)) ? 3.0F : 1.0F;
+                    }
+                    if (i != 0 || j != 0) local /= 4.0F;
+                    speed += local;
+                    continue;
+                }
                 TriState decision = PortPlantSupport.decision(soil, level, soilPos, Direction.UP, plant);
                 boolean supported;
                 if (!decision.isDefault()) supported = decision.isTrue();
@@ -57,7 +72,7 @@ public abstract class PortCropBlockPlantSupportMixin extends BushBlock {
                 else supported = PortPlantSupport.farmland(soil);
                 if (supported) {
                     local = 1.0F;
-                    if (soil.isFertile(level, pos.offset(i, 0, j))) local = 3.0F;
+                    if (PortPlantSupport.fertile121(soil, level, pos.offset(i, 0, j))) local = 3.0F;
                 }
                 if (i != 0 || j != 0) local /= 4.0F;
                 speed += local;

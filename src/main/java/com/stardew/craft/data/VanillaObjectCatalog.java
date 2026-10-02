@@ -270,8 +270,8 @@ public final class VanillaObjectCatalog {
         aliases.put("golden_pumpkin", "373");
         aliases.put("egg_white", "176");
         aliases.put("egg_brown", "180");
-        aliases.put("large_egg_brown", "174");
-        aliases.put("large_egg_white", "182");
+        aliases.put("large_egg_white", "174");
+        aliases.put("large_egg_brown", "182");
         aliases.put("milk", "184");
         aliases.put("goat_milk", "436");
         return aliases;

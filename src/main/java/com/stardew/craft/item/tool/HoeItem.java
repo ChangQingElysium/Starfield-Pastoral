@@ -212,7 +212,7 @@ public class HoeItem extends Item implements IStardewItem {
         int usedTicks = getUseDuration(stack) - remainingUseDuration;
 
         // 与喷壶保持一致：每级蓄力播放提示音
-        int ticksPerLevel = StardewEnchantments.has(stack, StardewEnchantments.SWIFT) ? 10 : 15;
+        int ticksPerLevel = StardewEnchantments.has(stack, StardewEnchantments.SWIFT) ? 8 : 12;
         if (usedTicks > 0 && usedTicks % ticksPerLevel == 0) {
             int currentLevel = usedTicks / ticksPerLevel;
             int maxChargeLevel = getEffectiveMaxChargeLevel(stack);
@@ -381,18 +381,19 @@ public class HoeItem extends Item implements IStardewItem {
 
     private static float staminaCost(ServerPlayer player, int chargeLevel) {
         int farmingLevel = PlayerStardewDataAPI.getSkillLevel(player, SkillType.FARMING);
-        return Math.max(0.0F, 2.0F * (chargeLevel + 1) - farmingLevel * 0.1F);
+        // 原版 Hoe.DoFunction 的 power 恒为 1：体力与蓄力等级无关，恒为 2 - 0.1×耕种等级。
+        return Math.max(0.0F, 2.0F - farmingLevel * 0.1F);
     }
 
     /**
-     * 与喷壶保持一致：每 15 ticks 升一级。
+     * 与喷壶保持一致：每 12 ticks 升一级（Swift 约 8）。
      */
     public int getChargeLevel(int ticksUsed) {
         return getChargeLevel(ItemStack.EMPTY, ticksUsed);
     }
 
     public int getChargeLevel(ItemStack stack, int ticksUsed) {
-        int ticksPerLevel = StardewEnchantments.has(stack, StardewEnchantments.SWIFT) ? 10 : 15;
+        int ticksPerLevel = StardewEnchantments.has(stack, StardewEnchantments.SWIFT) ? 8 : 12;
         int level = ticksUsed / ticksPerLevel;
         int maxChargeLevel = getEffectiveMaxChargeLevel(stack);
         if (level > maxChargeLevel) {
@@ -478,10 +479,11 @@ public class HoeItem extends Item implements IStardewItem {
                 list.add(base.relative(left));
             }
         } else {
-            // 5x5: 以 startPos 为中心（更符合“大片耕作”直觉）
+            // 5x5: 原版以目标格朝前 2 格为中心
+            BlockPos center5 = startPos.relative(facing, 2);
             for (int dx = -2; dx <= 2; dx++) {
                 for (int dz = -2; dz <= 2; dz++) {
-                    list.add(startPos.offset(dx, 0, dz));
+                    list.add(center5.offset(dx, 0, dz));
                 }
             }
         }

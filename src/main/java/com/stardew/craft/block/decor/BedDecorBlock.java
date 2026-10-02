@@ -19,7 +19,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 /** Two-cell Stardew bed with authored default fabric and optional palette dyeing. */
-public final class BedDecorBlock extends MapDecorStaticBlock {
+public class BedDecorBlock extends MapDecorStaticBlock {
     public static final BooleanProperty DYED = BooleanProperty.create("dyed");
     public static final IntegerProperty COLOR = IntegerProperty.create(
         "color",
@@ -60,6 +60,7 @@ public final class BedDecorBlock extends MapDecorStaticBlock {
 
     @Override
     protected Set<CellOffset> localOccupiedOffsets() {
+        if (usesAuthoredShape()) return super.localOccupiedOffsets();
         Set<CellOffset> cells = new LinkedHashSet<>();
         cells.add(CellOffset.ZERO);
         cells.add(new CellOffset(0, 0, 1));
@@ -87,6 +88,7 @@ public final class BedDecorBlock extends MapDecorStaticBlock {
     }
 
     private VoxelShape stagedShape(BlockState state, BlockGetter level, BlockPos pos) {
+        if (usesAuthoredShape()) return super.getShape(state, level, pos, CollisionContext.empty());
         Direction facing = state.getValue(FACING);
         CellOffset localOffset = CellOffset.ZERO;
         if (state.getValue(PART) == Part.EXTENSION) {
@@ -106,6 +108,20 @@ public final class BedDecorBlock extends MapDecorStaticBlock {
     public BlockPos resolveMainPos(BlockGetter level, BlockPos pos, BlockState state) {
         BlockPos mainPos = findMainPos(level, pos, state);
         return mainPos == null ? pos : mainPos;
+    }
+
+    protected boolean usesAuthoredShape() { return false; }
+
+    public double sleepYOffset() { return SLEEP_Y_OFFSET; }
+
+    /** The clicked lane selects a sleeper in double beds; all cells share one main block. */
+    public BlockPos sleepAnchor(BlockGetter level, BlockPos pos, BlockState state) {
+        BlockPos main = resolveMainPos(level, pos, state);
+        Direction facing = state.getValue(FACING);
+        CellOffset clicked = new CellOffset(pos.getX() - main.getX(), 0, pos.getZ() - main.getZ()).unrotateY(facing);
+        CellOffset head = new CellOffset(doubleBed && clicked.dx() < 0 ? -1 : 0, 0, 1).rotateY(facing);
+        BlockPos target = main.offset(head.dx(), head.dy(), head.dz());
+        return level.getBlockState(target).is(this) ? target : main;
     }
 
     public int currentColor(BlockGetter level, BlockPos pos, BlockState state) {

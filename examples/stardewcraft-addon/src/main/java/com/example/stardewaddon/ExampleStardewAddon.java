@@ -147,7 +147,7 @@ import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.neoforged.fml.common.Mod;
+import net.minecraftforge.fml.common.Mod;
 
 import java.util.List;
 import java.util.Optional;
@@ -239,14 +239,14 @@ public final class ExampleStardewAddon {
                                         StardewContentReferenceRoles.LOCATION,
                                         new StardewContentKey(
                                                 StardewContentTypes.LOCATION,
-                                                ResourceLocation.fromNamespaceAndPath(
+                                                new ResourceLocation(
                                                         "stardewcraft",
                                                         "town"))),
                                 StardewContentReference.required(
                                         StardewContentReferenceRoles.PRODUCT_ITEM,
                                         new StardewContentKey(
                                                 StardewContentTypes.ITEM,
-                                                ResourceLocation.fromNamespaceAndPath(
+                                                new ResourceLocation(
                                                         "minecraft",
                                                         "apple")))))));
         StardewContents.registerAliases(
@@ -327,7 +327,7 @@ public final class ExampleStardewAddon {
                                 StardewContentReferenceRoles.QUERY_ITEM,
                                 new StardewContentKey(
                                         StardewContentTypes.ITEM,
-                                        ResourceLocation.fromNamespaceAndPath(
+                                        new ResourceLocation(
                                                 "minecraft", "apple")))));
     }
 
@@ -468,7 +468,7 @@ public final class ExampleStardewAddon {
 
     private static void registerNpcInteractionProvider() {
         StardewNpcInteractions.register(id("lewis_apple_greeting"), 100, context -> {
-            if (!context.npcId().equals(ResourceLocation.fromNamespaceAndPath("stardewcraft", "lewis"))
+            if (!context.npcId().equals(new ResourceLocation("stardewcraft", "lewis"))
                     || !context.player().getItemInHand(context.hand()).is(Items.APPLE)) {
                 return InteractionResult.PASS;
             }
@@ -620,27 +620,27 @@ public final class ExampleStardewAddon {
             return new StardewCropData(
                     List.of("spring", "summer", "fall"), List.of(1, 1, 1, 1, 1, 1, 1),
                     -1, 12,
-                    ResourceLocation.fromNamespaceAndPath("stardewcraft", "grab"),
-                    ResourceLocation.fromNamespaceAndPath("stardewcraft", "parsnip"),
-                    ResourceLocation.fromNamespaceAndPath("stardewcraft", "parsnip_seeds"));
+                    new ResourceLocation("stardewcraft", "grab"),
+                    new ResourceLocation("stardewcraft", "parsnip"),
+                    new ResourceLocation("stardewcraft", "parsnip_seeds"));
         });
         StardewAgricultureDataApi.registerTreeProvider(id("highland_apple_tree"), 100, (level, pos, state) -> {
             if (pos.getY() <= 80 || !isBlock(state, "apple_tree")) return null;
             return new StardewTreeData(
-                    id("highland_apple_tree"), 28, ResourceLocation.withDefaultNamespace("golden_apple"),
+                    id("highland_apple_tree"), 28, new ResourceLocation("golden_apple"),
                     2, 4, List.of("spring", "summer", "fall", "winter"));
         });
         StardewAgricultureDataApi.registerAnimalProvider(id("highland_cow"), 100, entity -> {
             if (entity.getY() <= 80 || entity.getType() != EntityType.COW) return null;
             return new StardewAnimalData(
                     id("highland_barn"), 1500, 5,
-                    ResourceLocation.withDefaultNamespace("honey_bottle"), 2);
+                    new ResourceLocation("honey_bottle"), 2);
         });
         StardewAgricultureDataApi.registerBuildingProvider(id("highland_manager"), 100, (level, pos, state) -> {
             if (pos.getY() <= 80
                     || (!isBlock(state, "coop_manager") && !isBlock(state, "barn_manager"))) return null;
             return new StardewBuildingData(
-                    id("highland_barn"), 2, List.of(ResourceLocation.withDefaultNamespace("cow")), List.of());
+                    id("highland_barn"), 2, List.of(new ResourceLocation("cow")), List.of());
         });
     }
 
@@ -658,7 +658,7 @@ public final class ExampleStardewAddon {
                                 List.of(1, 2, 2, 3),
                                 4,
                                 18,
-                                ResourceLocation.fromNamespaceAndPath(
+                                new ResourceLocation(
                                         "stardewcraft", "grab"),
                                 id("moonberry"),
                                 id("moonberry_seeds"))
@@ -728,7 +728,7 @@ public final class ExampleStardewAddon {
         StardewEquipmentDataApi.registerProvider(id("enchanted_diamond_sword"), 100, stack -> {
             if (!stack.is(Items.DIAMOND_SWORD) || !stack.hasFoil()) return null;
             return new StardewEquipmentData(
-                    ResourceLocation.fromNamespaceAndPath("stardewcraft", "weapon"),
+                    new ResourceLocation("stardewcraft", "weapon"),
                     0, 0, 3, 0.04F, 0.5F, 0, 0.0F, 0.0F, 0,
                     List.of(id("apple_guard")), Optional.of(new StardewEquipmentData.Weapon(
                     "sword", 22.0F, 30.0F, 0.04F, 0, 0, 0.0F, 1.0F,
@@ -1002,7 +1002,7 @@ public final class ExampleStardewAddon {
                 100,
                 (context, proposed) -> {
                     if (!context.machineId().equals(
-                                    ResourceLocation.fromNamespaceAndPath(
+                                    new ResourceLocation(
                                             "stardewcraft",
                                             "preserves_jar"))
                             || !context.input().is(Items.APPLE)) {
@@ -1043,12 +1043,12 @@ public final class ExampleStardewAddon {
                 id("example_fermenter_registration"),
                 new StardewMachineType(
                         machineId,
-                        ResourceLocation.withDefaultNamespace("barrel"),
+                        new ResourceLocation("barrel"),
                         "jei.example_stardew_addon.example_fermenter",
                         StardewMachineType.Layout.AUXILIARY_INPUT,
                         true,
                         List.of(new StardewMachineType.AuxiliaryInput(
-                                ResourceLocation.withDefaultNamespace("sugar"), 1))
+                                new ResourceLocation("sugar"), 1))
                 )
         );
         StardewMachineRecipeDisplays.register(
@@ -1283,12 +1283,12 @@ public final class ExampleStardewAddon {
     }
 
     private static ResourceLocation id(String path) {
-        return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
+        return new ResourceLocation(MOD_ID, path);
     }
 
     private static boolean isBlock(net.minecraft.world.level.block.state.BlockState state, String path) {
         return BuiltInRegistries.BLOCK.getKey(state.getBlock())
-                .equals(ResourceLocation.fromNamespaceAndPath("stardewcraft", path));
+                .equals(new ResourceLocation("stardewcraft", path));
     }
 
     private record PlayerNamedCondition(String name) {
@@ -1299,7 +1299,7 @@ public final class ExampleStardewAddon {
 
     private record AppleQuery(int count) {
         private static final Codec<AppleQuery> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-                Codec.intRange(1, 999).optionalFieldOf("count", 1).forGetter(AppleQuery::count)
+                com.stardew.craft.port.PortCodecs.optionalFieldOf(Codec.intRange(1, 999), "count", 1).forGetter(AppleQuery::count)
         ).apply(instance, AppleQuery::new));
     }
 

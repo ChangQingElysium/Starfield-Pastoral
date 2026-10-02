@@ -595,13 +595,14 @@ public class MapDecorStaticBlock extends Block implements PortBlockInteraction {
     }
 
     protected record CellOffset(int dx, int dy, int dz) {
+        public CellOffset {}
         static final CellOffset ZERO = new CellOffset(0, 0, 0);
 
         private boolean isZero() {
             return dx == 0 && dy == 0 && dz == 0;
         }
 
-        private CellOffset rotateY(Direction facing) {
+        public CellOffset rotateY(Direction facing) {
             return switch (facing) {
                 case EAST -> new CellOffset(-dz, dy, dx);
                 case SOUTH -> new CellOffset(-dx, dy, -dz);
@@ -610,7 +611,7 @@ public class MapDecorStaticBlock extends Block implements PortBlockInteraction {
             };
         }
 
-        CellOffset unrotateY(Direction facing) {
+        public CellOffset unrotateY(Direction facing) {
             return switch (facing) {
                 case EAST -> new CellOffset(dz, dy, -dx);
                 case SOUTH -> new CellOffset(-dx, dy, -dz);

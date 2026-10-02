@@ -1,5 +1,6 @@
 package com.stardew.craft.client.renderer.entity;
 
+import com.stardew.craft.port.PortCamera;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
@@ -79,7 +80,7 @@ public class PrismaticButterflyRenderer extends EntityRenderer<PrismaticButterfl
         }
 
         poseStack.pushPose();
-        poseStack.mulPose(mc.getEntityRenderDispatcher().cameraOrientation());
+        poseStack.mulPose(PortCamera.cameraOrientation(mc.getEntityRenderDispatcher()));
         float size = entity.isCapturing() ? 0.92f : 1.0f;
         poseStack.scale(size, size, size);
 
@@ -101,7 +102,7 @@ public class PrismaticButterflyRenderer extends EntityRenderer<PrismaticButterfl
         float size = 0.44F + life * 0.12F;
         int alpha = (int) (191.0F * (1.0F - life));
         poseStack.pushPose();
-        poseStack.mulPose(mc.getEntityRenderDispatcher().cameraOrientation());
+        poseStack.mulPose(PortCamera.cameraOrientation(mc.getEntityRenderDispatcher()));
         poseStack.mulPose(Axis.ZP.rotationDegrees((entity.getId() * 47.0F + entity.tickCount * 2.0F) % 360.0F));
         Matrix4f pose = poseStack.last().pose();
         VertexConsumer consumer = buffer.getBuffer(RenderType.entityTranslucent(POWDER_TEXTURE));

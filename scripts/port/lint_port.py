@@ -24,8 +24,12 @@ RULES = [
      "(scripts/port/strict_optional_fields_1201.py)"),
     (re.compile(r"(?<![\w.])Math\s*\.\s*clamp\s*\("),
      "JDK 21 only: use PortJava.clamp"),
+    (re.compile(r"(?<![\w.])(?:java\.lang\.)?(?:Strict)?Math\s*\.\s*ceilDiv\s*\("),
+     "Java 17 has no ceiling division: use PortJava.ceilDiv"),
     (re.compile(r"^(?!.*PortVertex).*\.\s*addVertex\s*\("),
      "1.21 vertex chain: convert with scripts/port/adapt_vertex_api.py (PortVertex)"),
+    (re.compile(r"\.\s*cameraOrientation\s*\(\s*\)|\.\s*getCamera\s*\(\s*\)\s*\.\s*rotation\s*\(\s*\)"),
+     "Camera billboard basis flipped in 1.20.5: use PortCamera.cameraOrientation/rotation"),
 ]
 SKIP_DIRS = ("src/port/",)
 SKIP_FILES = {"PortSprites.java", "PortVertex.java", "PortNbtUtils.java", "PortCodecs.java", "PortJava.java"}

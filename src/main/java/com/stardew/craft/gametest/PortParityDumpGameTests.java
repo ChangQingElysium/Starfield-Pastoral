@@ -16,9 +16,11 @@ import java.lang.reflect.RecordComponent;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.IdentityHashMap;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -29,6 +31,7 @@ import net.minecraft.core.Registry;
 import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.port.net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.SharedConstants;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CollectionTag;
@@ -77,8 +80,11 @@ public final class PortParityDumpGameTests {
         MinecraftServer server = helper.getLevel().getServer();
         Path out = Path.of("port-parity", "dump.jsonl");
         Files.createDirectories(out.getParent());
+        dumpVanillaRegistryFacts(out.getParent().resolve("mc1201-registry-facts.json"));
+        dumpTestSelection(out.getParent().resolve("gametest-selection.json"));
         TreeMap<String, String> lines = new TreeMap<>();
         dumpRegistries(lines);
+        dumpPortAttachments(lines);
         dumpBlocks(lines);
         dumpItems(lines);
         dumpTags(lines);
@@ -105,6 +111,67 @@ public final class PortParityDumpGameTests {
 
     private static void put(TreeMap<String, String> lines, String section, String key, JsonElement value) {
         lines.put(section + "\t" + key, GSON.toJson(value));
+    }
+
+    /** Actual loaded vanilla ids, not inferred Java field names or a developer's decompiler cache. */
+    private static void dumpVanillaRegistryFacts(Path out) throws Exception {
+        String version = SharedConstants.getCurrentVersion().getName();
+        if (!"1.20.1".equals(version)) throw new IllegalStateException("Expected 1.20.1 registry facts, got " + version);
+        List<ResourceLocation> portAttributeIds = List.of(
+                com.stardew.craft.port.PortAttributes.SCALE.getId(),
+                com.stardew.craft.port.PortAttributes.STEP_HEIGHT.getId());
+        TreeMap<String, JsonArray> registries = new TreeMap<>();
+        for (Registry<?> registry : List.of(BuiltInRegistries.ITEM, BuiltInRegistries.BLOCK,
+                BuiltInRegistries.ENTITY_TYPE, BuiltInRegistries.FLUID, BuiltInRegistries.ATTRIBUTE,
+                BuiltInRegistries.ENCHANTMENT)) {
+            JsonArray ids = new JsonArray();
+            registry.keySet().stream().filter(id -> id.getNamespace().equals("minecraft"))
+                    .filter(id -> registry != BuiltInRegistries.ATTRIBUTE || !portAttributeIds.contains(id))
+                    .map(ResourceLocation::toString).sorted().forEach(ids::add);
+            registries.put(registry.key().location().toString(), ids);
+        }
+        // Alphabetic keys and sorted ids match Python's canonical separators=(',', ':') hash input.
+        JsonObject facts = new JsonObject();
+        facts.addProperty("minecraft_version", version);
+        JsonArray portIds = new JsonArray();
+        portAttributeIds.stream().map(ResourceLocation::toString).sorted().forEach(portIds::add);
+        facts.add("port_attribute_ids", portIds);
+        facts.add("registries", GSON.toJsonTree(registries));
+        facts.addProperty("schema", 1);
+        byte[] bytes = GSON.toJson(facts).getBytes(StandardCharsets.UTF_8);
+        facts.addProperty("sha256", HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(bytes)));
+        Files.writeString(out, GSON.toJson(facts) + "\n", StandardCharsets.UTF_8);
+    }
+
+    /** Preserve multiplicity and selection separately; the legacy dump's name-only keys can collide. */
+    private static void dumpTestSelection(Path out) throws Exception {
+        JsonObject selection = new JsonObject();
+        selection.addProperty("namespace_filter", System.getProperty("forge.enabledGameTestNamespaces", ""));
+        JsonArray tests = new JsonArray();
+        net.minecraft.gametest.framework.GameTestRegistry.getAllTestFunctions().stream()
+                .sorted(java.util.Comparator.comparing(fn -> fn.getStructureName() + "/" + fn.getTestName()))
+                .forEach(fn -> {
+                    JsonObject test = new JsonObject();
+                    test.addProperty("name", fn.getTestName());
+                    test.addProperty("template", fn.getStructureName());
+                    test.addProperty("required", fn.isRequired());
+                    tests.add(test);
+                });
+        selection.addProperty("count", tests.size());
+        selection.add("tests", tests);
+        Files.writeString(out, GSON.toJson(selection) + "\n", StandardCharsets.UTF_8);
+    }
+
+    private static void dumpPortAttachments(TreeMap<String, String> lines) throws ReflectiveOperationException {
+        Field field = com.stardew.craft.port.PortAttachments.class.getDeclaredField("TYPES");
+        field.setAccessible(true);
+        Map<?, ?> types = (Map<?, ?>) field.get(null);
+        JsonArray ids = new JsonArray();
+        types.keySet().stream().map(Object::toString).filter(id -> id.startsWith(NS + ":")).sorted().forEach(ids::add);
+        if (!ids.isEmpty()) {
+            put(lines, "registry", "neoforge:attachment_types", ids);
+            put(lines, "dynamic_registry", "neoforge:attachment_types", ids);
+        }
     }
 
     private static void dumpRegistries(TreeMap<String, String> lines) {
@@ -341,7 +408,9 @@ public final class PortParityDumpGameTests {
         if (value != null && value.getClass().isRecord()) {
             for (RecordComponent c : value.getClass().getRecordComponents()) {
                 try {
-                    Object v = c.getAccessor().invoke(value);
+                    var accessor = c.getAccessor();
+                    accessor.setAccessible(true);
+                    Object v = accessor.invoke(value);
                     if (v instanceof String s && (s.startsWith("{") || s.startsWith("["))) {
                         put(lines, section, c.getName(), sortJson(com.google.gson.JsonParser.parseString(s)));
                     } else {
@@ -458,7 +527,9 @@ public final class PortParityDumpGameTests {
             obj.addProperty("@type", o.getClass().getSimpleName());
             if (o.getClass().isRecord()) {
                 for (RecordComponent c : o.getClass().getRecordComponents()) {
-                    obj.add(c.getName(), norm(c.getAccessor().invoke(o), depth + 1, seen));
+                    var accessor = c.getAccessor();
+                    accessor.setAccessible(true);
+                    obj.add(c.getName(), norm(accessor.invoke(o), depth + 1, seen));
                 }
             } else {
                 TreeMap<String, Field> fields = new TreeMap<>();

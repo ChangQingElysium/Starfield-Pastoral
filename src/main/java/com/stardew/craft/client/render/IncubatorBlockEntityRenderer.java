@@ -1,11 +1,13 @@
 package com.stardew.craft.client.render;
 
+import com.stardew.craft.port.PortCamera;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.block.utility.IncubatorBlock;
 import com.stardew.craft.blockentity.IncubatorBlockEntity;
+import com.stardew.craft.gingerisland.OstrichIncubatorBlock;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -26,6 +28,13 @@ public class IncubatorBlockEntityRenderer implements BlockEntityRenderer<Incubat
     private static final ModelResourceLocation EGG = partModel("egg");
     private static final ModelResourceLocation STRAW_FRONT = partModel("straw_front");
     private static final ModelResourceLocation STRAW_BACK = partModel("straw_back");
+    private static final ModelResourceLocation OSTRICH_EMPTY = islandModel("ostrich_incubator_empty");
+    private static final ModelResourceLocation OSTRICH_LOADED = islandModel("ostrich_incubator_loaded");
+
+    private static ModelResourceLocation islandModel(String name) {
+        return new ModelResourceLocation(new ResourceLocation(StardewCraft.MODID,
+                "block/ginger_island/" + name), "standalone");
+    }
     // Seconds, pitch, roll. The quiet interval is added after each brief gesture.
     private static final float[][] PROBE = {
         {0, 0, 0}, {.35f, 0, -6}, {.65f, 0, -6}, {.83f, 0, 5},
@@ -77,6 +86,10 @@ public class IncubatorBlockEntityRenderer implements BlockEntityRenderer<Incubat
     private static void renderNest(IncubatorBlockEntity be, float partialTick, PoseStack pose,
                                    MultiBufferSource buffer, int light, int overlay) {
         if (be.getLevel() == null) return;
+        if (be.getBlockState().getBlock() instanceof OstrichIncubatorBlock) {
+            renderOstrichNest(be, partialTick, pose, buffer, light, overlay);
+            return;
+        }
         var remaining = be.getRemainingTime();
         boolean late = be.isReady() || (be.isWorking() && remaining.days() == 0 && remaining.hours() < 3);
         float[][] keys = late ? PECK : PROBE;
@@ -104,12 +117,33 @@ public class IncubatorBlockEntityRenderer implements BlockEntityRenderer<Incubat
         pose.popPose();
     }
 
+    private static void renderOstrichNest(IncubatorBlockEntity be, float partialTick, PoseStack pose,
+            MultiBufferSource buffer, int light, int overlay) {
+        pose.pushPose();
+        pose.translate(.5, 0, .5);
+        pose.mulPose(Axis.YP.rotationDegrees(180 - be.getBlockState().getValue(IncubatorBlock.FACING).toYRot()));
+        // Source Object.getScale / ShouldWobble: the working machine breathes; ready stops.
+        if (be.isWorking()) {
+            double phase = (be.getLevel().getGameTime() + partialTick) * Math.PI * 2 / 33.333333;
+            float pulse = (float) ((1 - Math.cos(phase)) * .015625);
+            pose.scale(1 + pulse, 1 + .03125f - pulse, 1 + pulse);
+        }
+        pose.translate(-.5, 0, -.5);
+        var minecraft = Minecraft.getInstance();
+        var model = minecraft.getModelManager().getModel(be.hasInput() ? OSTRICH_LOADED : OSTRICH_EMPTY);
+        minecraft.getBlockRenderer().getModelRenderer().renderModel(pose.last(),
+                buffer.getBuffer(Sheets.cutoutBlockSheet()), be.getBlockState(), model,
+                1, 1, 1, light, overlay, ModelData.EMPTY, RenderType.cutout());
+        pose.popPose();
+    }
+
     private static final Map<String, ResourceLocation> ICONS = Map.of(
         "white_chicken", new ResourceLocation(StardewCraft.MODID, "textures/gui/animal_query/icon_white_chicken.png"),
         "golden_chicken", new ResourceLocation(StardewCraft.MODID, "textures/gui/animal_query/icon_golden_chicken.png"),
         "duck", new ResourceLocation(StardewCraft.MODID, "textures/gui/animal_query/icon_duck.png"),
         "void_chicken", new ResourceLocation(StardewCraft.MODID, "textures/gui/animal_query/icon_void_chicken.png"),
-        "dinosaur", new ResourceLocation(StardewCraft.MODID, "textures/gui/animal_query/icon_dinosaur.png")
+        "dinosaur", new ResourceLocation(StardewCraft.MODID, "textures/gui/animal_query/icon_dinosaur.png"),
+        "ostrich", new ResourceLocation(StardewCraft.MODID, "textures/gui/animal_query/icon_ostrich.png")
     );
 
     public IncubatorBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
@@ -135,7 +169,7 @@ public class IncubatorBlockEntityRenderer implements BlockEntityRenderer<Incubat
 
         poseStack.pushPose();
         poseStack.translate(0.5f, 2.1f, 0.5f);
-        poseStack.mulPose(Minecraft.getInstance().getEntityRenderDispatcher().cameraOrientation());
+        poseStack.mulPose(PortCamera.cameraOrientation(Minecraft.getInstance().getEntityRenderDispatcher()));
 
         float w = 20 * PX;
         float h = 24 * PX;

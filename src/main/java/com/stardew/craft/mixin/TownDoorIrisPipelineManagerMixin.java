@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Pseudo
 @Mixin(targets = "net.irisshaders.iris.pipeline.PipelineManager", remap = false)
 public abstract class TownDoorIrisPipelineManagerMixin {
-    @Inject(method = "preparePipeline", at = @At("HEAD"), cancellable = true, require = 0)
+    @Inject(method = "preparePipeline", at = @At("HEAD"), cancellable = true, require = 1)
     @SuppressWarnings("rawtypes")
     private void stardewcraft$useVanillaNestedPipeline(@Coerce Object dimension,
                                                          CallbackInfoReturnable cir) {

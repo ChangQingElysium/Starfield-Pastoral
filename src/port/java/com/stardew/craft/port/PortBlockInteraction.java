@@ -53,11 +53,19 @@ public interface PortBlockInteraction {
         if (itemResult == ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION && hand == InteractionHand.MAIN_HAND) {
             InteractionResult result = block.useWithoutItem(state, level, pos, player, hitResult);
             if (result.consumesAction()) {
+                DEFAULT_BLOCK_USE.set(Boolean.TRUE);
                 return result;
             }
         }
         return InteractionResult.PASS;
     }
+
+    /**
+     * Set by {@link #dispatch} when the click was consumed by {@code useWithoutItem}, i.e. where 1.21.1
+     * {@code ServerPlayerGameMode#useItemOn} fires {@code DEFAULT_BLOCK_USE} instead of {@code ITEM_USED_ON_BLOCK}.
+     * Cleared and read around the {@code BlockState#use} call by {@code PortServerPlayerGameModeDefaultUseMixin}.
+     */
+    ThreadLocal<Boolean> DEFAULT_BLOCK_USE = ThreadLocal.withInitial(() -> Boolean.FALSE);
 
     /** 1.21 {@code BlockStateBase#useItemOn(ItemStack, Level, Player, InteractionHand, BlockHitResult)}. */
     static ItemInteractionResult stateUseItemOn(BlockState state, ItemStack stack, Level level, Player player,

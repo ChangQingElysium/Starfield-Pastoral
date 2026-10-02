@@ -2,9 +2,9 @@ package com.stardew.craft.mixin;
 import net.minecraft.core.BlockPos;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
-import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.gen.Invoker;
 @Pseudo
-@Mixin(targets="net.caffeinemc.mods.sodium.client.render.frapi.render.AbstractBlockRenderContext",remap=false)
+@Mixin(targets="me.jellysquid.mods.sodium.client.render.chunk.compile.pipeline.BlockRenderContext",remap=false)
 public interface SodiumColoredLightPositionAccessor {
-    @Accessor("pos") BlockPos stardewcraft$getLightPosition();
+    @Invoker("pos") BlockPos stardewcraft$getLightPosition();
 }

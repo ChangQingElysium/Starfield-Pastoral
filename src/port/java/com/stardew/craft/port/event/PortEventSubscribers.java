@@ -9,8 +9,12 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
@@ -32,12 +36,14 @@ import org.slf4j.Logger;
  * {@code modid}), and each static {@code @SubscribeEvent} method is registered individually on the bus its event type
  * belongs to: {@link IModBusEvent} types on the mod bus, all others on {@link MinecraftForge#EVENT_BUS}. Priority and
  * {@code receiveCanceled} are honoured; non-public methods are supported (NeoForge supports them, Forge's
- * {@code IEventBus.register(Class)} silently skips them).
+ * {@code IEventBus.register(Class)} silently skips them). Public, single-bus subscribers use the native class
+ * registration so automatic registration shares Forge's deduplication with earlier manual registration.
  */
 public final class PortEventSubscribers {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final org.objectweb.asm.Type SUBSCRIBER = org.objectweb.asm.Type.getType(EventBusSubscriber.class);
     private static final MethodType LISTENER_TYPE = MethodType.methodType(void.class, Event.class);
+    private static final Map<IEventBus, Set<Class<?>>> FALLBACK_REGISTRATIONS = new IdentityHashMap<>();
 
     private PortEventSubscribers() {}
 
@@ -65,13 +71,11 @@ public final class PortEventSubscribers {
     }
 
     /** Routes every static {@code @SubscribeEvent} method of {@code type} to the bus its event belongs to. */
-    public static void register(Class<?> type, IEventBus modBus) {
-        MethodHandles.Lookup lookup;
-        try {
-            lookup = MethodHandles.privateLookupIn(type, MethodHandles.lookup());
-        } catch (IllegalAccessException exception) {
-            throw new IllegalStateException("Cannot access event subscriber " + type.getName(), exception);
-        }
+    public static synchronized void register(Class<?> type, IEventBus modBus) {
+        List<Method> methods = new ArrayList<>();
+        Set<String> nativeHandlerNames = new HashSet<>();
+        IEventBus classBus = null;
+        boolean nativeClassRegistration = Modifier.isPublic(type.getModifiers());
         for (Method method : type.getDeclaredMethods()) {
             SubscribeEvent subscribe = method.getAnnotation(SubscribeEvent.class);
             if (subscribe == null) continue;
@@ -83,8 +87,43 @@ public final class PortEventSubscribers {
                 throw new IllegalArgumentException("Method " + method + " has @SubscribeEvent but does not take exactly one Event");
             }
             Class<? extends Event> eventType = method.getParameterTypes()[0].asSubclass(Event.class);
+            // Forge 6 generates ASM subscriber class names from method name + event simple name, not the complete
+            // event type. overloaded unloaded(LevelEvent.Unload)/unloaded(ChunkEvent.Unload) otherwise share a
+            // generated class whose cast is wrong for one event. NeoForge's method-handle listener has no collision.
+            if (!nativeHandlerNames.add(method.getName() + "_" + eventType.getSimpleName())) {
+                nativeClassRegistration = false;
+            }
             IEventBus bus = IModBusEvent.class.isAssignableFrom(eventType) ? modBus : MinecraftForge.EVENT_BUS;
+            if (!Modifier.isPublic(method.getModifiers()) || classBus != null && classBus != bus) {
+                nativeClassRegistration = false;
+            }
+            classBus = bus;
+            methods.add(method);
+        }
+        // NeoForge also registers a single-bus class as a class. Registering fresh Consumers here bypassed the
+        // native class key, so manually registered ModClientEvents added every tooltip (and tick hook) twice.
+        if (nativeClassRegistration && classBus != null) {
+            classBus.register(type);
+            return;
+        }
+
+        MethodHandles.Lookup lookup;
+        try {
+            lookup = MethodHandles.privateLookupIn(type, MethodHandles.lookup());
+        } catch (IllegalAccessException exception) {
+            throw new IllegalStateException("Cannot access event subscriber " + type.getName(), exception);
+        }
+        for (Method method : methods) {
+            SubscribeEvent subscribe = method.getAnnotation(SubscribeEvent.class);
+            Class<? extends Event> eventType = method.getParameterTypes()[0].asSubclass(Event.class);
+            IEventBus bus = IModBusEvent.class.isAssignableFrom(eventType) ? modBus : MinecraftForge.EVENT_BUS;
+            if (FALLBACK_REGISTRATIONS.getOrDefault(bus, Set.of()).contains(type)) continue;
             addListener(bus, lookup, method, eventType, subscribe);
+        }
+        for (Method method : methods) {
+            IEventBus bus = IModBusEvent.class.isAssignableFrom(method.getParameterTypes()[0])
+                    ? modBus : MinecraftForge.EVENT_BUS;
+            FALLBACK_REGISTRATIONS.computeIfAbsent(bus, ignored -> new HashSet<>()).add(type);
         }
     }
 

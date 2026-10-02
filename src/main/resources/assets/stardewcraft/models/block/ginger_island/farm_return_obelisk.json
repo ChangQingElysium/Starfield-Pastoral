@@ -1,0 +1,6018 @@
+{
+  "parent": "minecraft:block/block",
+  "loader": "forge:composite",
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+    "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+    "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+  },
+  "children": {
+    "0": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            10.0,
+            0.0,
+            5.75736
+          ],
+          "to": [
+            22.0,
+            27.0,
+            5.75736
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                0.0625,
+                1.75,
+                0.8125,
+                3.4375
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "1": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            10.0,
+            -5.0,
+            5.75736
+          ],
+          "to": [
+            22.0,
+            22.0,
+            5.75736
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                0.0625,
+                0.0625,
+                0.8125,
+                1.75
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          2.0,
+          0.0
+        ]
+      }
+    },
+    "2": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            10.242640000000002,
+            0.0,
+            10.0
+          ],
+          "to": [
+            10.242640000000002,
+            27.0,
+            22.0
+          ],
+          "faces": {
+            "east": {
+              "uv": [
+                0.875,
+                1.75,
+                1.625,
+                3.4375
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "3": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            10.242640000000002,
+            -5.0,
+            10.0
+          ],
+          "to": [
+            10.242640000000002,
+            22.0,
+            22.0
+          ],
+          "faces": {
+            "east": {
+              "uv": [
+                0.875,
+                0.0625,
+                1.625,
+                1.75
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          2.0,
+          0.0
+        ]
+      }
+    },
+    "4": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            10.0,
+            0.0,
+            10.242640000000002
+          ],
+          "to": [
+            22.0,
+            27.0,
+            10.242640000000002
+          ],
+          "faces": {
+            "south": {
+              "uv": [
+                1.6875,
+                1.75,
+                2.4375,
+                3.4375
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          0.0,
+          1.0
+        ]
+      }
+    },
+    "5": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            10.0,
+            -5.0,
+            10.242640000000002
+          ],
+          "to": [
+            22.0,
+            22.0,
+            10.242640000000002
+          ],
+          "faces": {
+            "south": {
+              "uv": [
+                1.6875,
+                0.0625,
+                2.4375,
+                1.75
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          2.0,
+          1.0
+        ]
+      }
+    },
+    "6": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            5.75736,
+            0.0,
+            10.0
+          ],
+          "to": [
+            5.75736,
+            27.0,
+            22.0
+          ],
+          "faces": {
+            "west": {
+              "uv": [
+                2.5,
+                1.75,
+                3.25,
+                3.4375
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "7": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            5.75736,
+            -5.0,
+            10.0
+          ],
+          "to": [
+            5.75736,
+            22.0,
+            22.0
+          ],
+          "faces": {
+            "west": {
+              "uv": [
+                2.5,
+                0.0625,
+                3.25,
+                1.75
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          2.0,
+          0.0
+        ]
+      }
+    },
+    "8": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            4.87868,
+            0.0,
+            7.87868
+          ],
+          "to": [
+            10.87868,
+            27.0,
+            7.87868
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                3.3125,
+                1.75,
+                3.6875,
+                3.4375
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              7.87868,
+              0,
+              7.87868
+            ],
+            "axis": "y",
+            "angle": 45,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "9": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            4.87868,
+            -5.0,
+            7.87868
+          ],
+          "to": [
+            10.87868,
+            22.0,
+            7.87868
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                3.3125,
+                0.0625,
+                3.6875,
+                1.75
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              7.87868,
+              -32,
+              7.87868
+            ],
+            "axis": "y",
+            "angle": 45,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          2.0,
+          0.0
+        ]
+      }
+    },
+    "10": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            5.121320000000001,
+            0.0,
+            7.87868
+          ],
+          "to": [
+            11.12132,
+            27.0,
+            7.87868
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                3.75,
+                1.75,
+                4.125,
+                3.4375
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              8.12132,
+              0,
+              7.87868
+            ],
+            "axis": "y",
+            "angle": -45,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "11": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            5.121320000000001,
+            -5.0,
+            7.87868
+          ],
+          "to": [
+            11.12132,
+            22.0,
+            7.87868
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                3.75,
+                0.0625,
+                4.125,
+                1.75
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              8.12132,
+              -32,
+              7.87868
+            ],
+            "axis": "y",
+            "angle": -45,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          2.0,
+          0.0
+        ]
+      }
+    },
+    "12": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            5.121320000000001,
+            0.0,
+            8.12132
+          ],
+          "to": [
+            11.12132,
+            27.0,
+            8.12132
+          ],
+          "faces": {
+            "south": {
+              "uv": [
+                4.1875,
+                1.75,
+                4.5625,
+                3.4375
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              8.12132,
+              0,
+              8.12132
+            ],
+            "axis": "y",
+            "angle": 45,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          0.0,
+          1.0
+        ]
+      }
+    },
+    "13": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            5.121320000000001,
+            -5.0,
+            8.12132
+          ],
+          "to": [
+            11.12132,
+            22.0,
+            8.12132
+          ],
+          "faces": {
+            "south": {
+              "uv": [
+                4.1875,
+                0.0625,
+                4.5625,
+                1.75
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              8.12132,
+              -32,
+              8.12132
+            ],
+            "axis": "y",
+            "angle": 45,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          2.0,
+          1.0
+        ]
+      }
+    },
+    "14": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            4.87868,
+            0.0,
+            8.12132
+          ],
+          "to": [
+            10.87868,
+            27.0,
+            8.12132
+          ],
+          "faces": {
+            "south": {
+              "uv": [
+                4.625,
+                1.75,
+                5.0,
+                3.4375
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              7.87868,
+              0,
+              8.12132
+            ],
+            "axis": "y",
+            "angle": -45,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          0.0,
+          1.0
+        ]
+      }
+    },
+    "15": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            4.87868,
+            -5.0,
+            8.12132
+          ],
+          "to": [
+            10.87868,
+            22.0,
+            8.12132
+          ],
+          "faces": {
+            "south": {
+              "uv": [
+                4.625,
+                0.0625,
+                5.0,
+                1.75
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              7.87868,
+              -32,
+              8.12132
+            ],
+            "axis": "y",
+            "angle": -45,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          2.0,
+          1.0
+        ]
+      }
+    },
+    "16": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            5.75736,
+            0.0,
+            5.75736
+          ],
+          "to": [
+            26.24264,
+            0.0,
+            26.24264
+          ],
+          "faces": {
+            "down": {
+              "uv": [
+                5.0625,
+                0.0625,
+                6.34283,
+                1.34283
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "17": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            6.0,
+            7.0,
+            6.0
+          ],
+          "to": [
+            26.0,
+            7.0,
+            26.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                6.4375,
+                0.0625,
+                7.6875,
+                1.3125
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          3.0,
+          0.0
+        ]
+      }
+    },
+    "18": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            11.0,
+            11.0,
+            4.0
+          ],
+          "to": [
+            21.0,
+            12.0,
+            6.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                0.625,
+                5.625,
+                1.25,
+                5.6875
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                13.5,
+                5.625,
+                13.625,
+                5.6875
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                1.3125,
+                5.625,
+                1.9375,
+                5.6875
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                13.6875,
+                5.625,
+                13.8125,
+                5.6875
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                6.9375,
+                5.375,
+                7.5625,
+                5.5
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                7.625,
+                5.375,
+                8.25,
+                5.5
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          3.0,
+          0.0
+        ]
+      }
+    },
+    "19": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            11.0,
+            6.039999999999999,
+            5.04
+          ],
+          "to": [
+            21.0,
+            10.04,
+            8.04
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                9.4375,
+                4.6875,
+                10.0625,
+                4.9375
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                11.0,
+                5.0625,
+                11.1875,
+                5.3125
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                10.125,
+                4.6875,
+                10.75,
+                4.9375
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                11.25,
+                5.0625,
+                11.4375,
+                5.3125
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                14.5,
+                5.0625,
+                15.125,
+                5.25
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                15.1875,
+                5.0625,
+                15.8125,
+                5.25
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          3.0,
+          0.0
+        ]
+      }
+    },
+    "20": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            11.0,
+            2.0,
+            5.0
+          ],
+          "to": [
+            21.0,
+            12.0,
+            5.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                7.75,
+                0.0625,
+                8.375,
+                0.6875
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                8.4375,
+                0.0625,
+                9.0625,
+                0.6875
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          3.0,
+          0.0
+        ]
+      }
+    },
+    "21": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            3.5,
+            11.079999999999998,
+            6.5
+          ],
+          "to": [
+            13.5,
+            12.079999999999998,
+            8.5
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                2.0,
+                5.625,
+                2.625,
+                5.6875
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                13.875,
+                5.625,
+                14.0,
+                5.6875
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                2.6875,
+                5.625,
+                3.3125,
+                5.6875
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                14.0625,
+                5.625,
+                14.1875,
+                5.6875
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                8.3125,
+                5.375,
+                8.9375,
+                5.5
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                9.0,
+                5.375,
+                9.625,
+                5.5
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              8.5,
+              11.079999999999998,
+              7.5
+            ],
+            "axis": "y",
+            "angle": -45,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          3.0,
+          0.0
+        ]
+      }
+    },
+    "22": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            2.3099999999999987,
+            6.079999999999998,
+            7.19
+          ],
+          "to": [
+            12.309999999999999,
+            10.159999999999997,
+            10.19
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                3.8125,
+                4.6875,
+                4.4375,
+                4.9425
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                7.9375,
+                4.6875,
+                8.125,
+                4.9425
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                4.5,
+                4.6875,
+                5.125,
+                4.9425
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                8.1875,
+                4.6875,
+                8.375,
+                4.9425
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                0.0625,
+                5.375,
+                0.6875,
+                5.5625
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                0.75,
+                5.375,
+                1.375,
+                5.5625
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              7.309999999999999,
+              6.079999999999998,
+              8.69
+            ],
+            "axis": "y",
+            "angle": -45,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          3.0,
+          0.0
+        ]
+      }
+    },
+    "23": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            3.5,
+            2.0,
+            7.5
+          ],
+          "to": [
+            13.5,
+            12.0,
+            7.5
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                9.125,
+                0.0625,
+                9.75,
+                0.6875
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                9.8125,
+                0.0625,
+                10.4375,
+                0.6875
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              8.5,
+              12,
+              7.5
+            ],
+            "axis": "y",
+            "angle": -45,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          3.0,
+          0.0
+        ]
+      }
+    },
+    "24": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            10.0,
+            11.159999999999997,
+            11.0
+          ],
+          "to": [
+            12.0,
+            12.159999999999997,
+            21.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                14.25,
+                5.625,
+                14.375,
+                5.6875
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                3.375,
+                5.625,
+                4.0,
+                5.6875
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                14.4375,
+                5.625,
+                14.5625,
+                5.6875
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                4.0625,
+                5.625,
+                4.6875,
+                5.6875
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                3.8125,
+                3.5,
+                3.9375,
+                4.125
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                4.0,
+                3.5,
+                4.125,
+                4.125
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          3.0,
+          0.0
+        ]
+      }
+    },
+    "25": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            7.960000000000001,
+            6.119999999999997,
+            11.0625
+          ],
+          "to": [
+            10.96,
+            10.280000000000001,
+            21.0625
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                2.8125,
+                4.6875,
+                3.0,
+                4.9475
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                0.0625,
+                4.6875,
+                0.6875,
+                4.9475
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                3.0625,
+                4.6875,
+                3.25,
+                4.9475
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                0.75,
+                4.6875,
+                1.375,
+                4.9475
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                2.8125,
+                3.5,
+                3.0,
+                4.125
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                3.0625,
+                3.5,
+                3.25,
+                4.125
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          3.0,
+          0.0
+        ]
+      }
+    },
+    "26": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            11.0,
+            2.0,
+            11.0
+          ],
+          "to": [
+            11.0,
+            12.0,
+            21.0
+          ],
+          "faces": {
+            "east": {
+              "uv": [
+                10.5,
+                0.0625,
+                11.125,
+                0.6875
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                11.1875,
+                0.0625,
+                11.8125,
+                0.6875
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          3.0,
+          0.0
+        ]
+      }
+    },
+    "27": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            3.5,
+            11.0,
+            7.5
+          ],
+          "to": [
+            13.5,
+            12.0,
+            9.5
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                4.75,
+                5.625,
+                5.375,
+                5.6875
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                14.625,
+                5.625,
+                14.75,
+                5.6875
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                5.4375,
+                5.625,
+                6.0625,
+                5.6875
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                14.8125,
+                5.625,
+                14.9375,
+                5.6875
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                9.6875,
+                5.375,
+                10.3125,
+                5.5
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                10.375,
+                5.375,
+                11.0,
+                5.5
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              8.5,
+              11,
+              8.5
+            ],
+            "axis": "y",
+            "angle": 45,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          3.0,
+          1.0
+        ]
+      }
+    },
+    "28": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            2.3099999999999987,
+            6.159999999999997,
+            5.809999999999999
+          ],
+          "to": [
+            12.309999999999999,
+            10.159999999999997,
+            8.809999999999999
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                10.8125,
+                4.6875,
+                11.4375,
+                4.9375
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                11.5,
+                5.0625,
+                11.6875,
+                5.3125
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                11.5,
+                4.6875,
+                12.125,
+                4.9375
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                11.75,
+                5.0625,
+                11.9375,
+                5.3125
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                1.4375,
+                5.375,
+                2.0625,
+                5.5625
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                2.125,
+                5.375,
+                2.75,
+                5.5625
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              7.309999999999999,
+              6.159999999999997,
+              7.309999999999999
+            ],
+            "axis": "y",
+            "angle": 45,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          3.0,
+          1.0
+        ]
+      }
+    },
+    "29": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            3.5,
+            2.0,
+            8.5
+          ],
+          "to": [
+            13.5,
+            12.0,
+            8.5
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                11.875,
+                0.0625,
+                12.5,
+                0.6875
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                12.5625,
+                0.0625,
+                13.1875,
+                0.6875
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              8.5,
+              12,
+              8.5
+            ],
+            "axis": "y",
+            "angle": 45,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          3.0,
+          1.0
+        ]
+      }
+    },
+    "30": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            11.0,
+            11.079999999999998,
+            10.0
+          ],
+          "to": [
+            21.0,
+            12.079999999999998,
+            12.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                6.125,
+                5.625,
+                6.75,
+                5.6875
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                15.0,
+                5.625,
+                15.125,
+                5.6875
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                6.8125,
+                5.625,
+                7.4375,
+                5.6875
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                15.1875,
+                5.625,
+                15.3125,
+                5.6875
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                11.0625,
+                5.375,
+                11.6875,
+                5.5
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                11.75,
+                5.375,
+                12.375,
+                5.5
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          3.0,
+          1.0
+        ]
+      }
+    },
+    "31": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            11.0,
+            6.200000000000003,
+            7.960000000000001
+          ],
+          "to": [
+            21.0,
+            10.280000000000001,
+            10.96
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                5.1875,
+                4.6875,
+                5.8125,
+                4.9425
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                8.4375,
+                4.6875,
+                8.625,
+                4.9425
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                5.875,
+                4.6875,
+                6.5,
+                4.9425
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                8.6875,
+                4.6875,
+                8.875,
+                4.9425
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                2.8125,
+                5.375,
+                3.4375,
+                5.5625
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                3.5,
+                5.375,
+                4.125,
+                5.5625
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          3.0,
+          1.0
+        ]
+      }
+    },
+    "32": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            11.0,
+            2.0,
+            11.0
+          ],
+          "to": [
+            21.0,
+            12.0,
+            11.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                13.25,
+                0.0625,
+                13.875,
+                0.6875
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                13.9375,
+                0.0625,
+                14.5625,
+                0.6875
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          3.0,
+          1.0
+        ]
+      }
+    },
+    "33": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            2.5,
+            11.159999999999997,
+            7.5
+          ],
+          "to": [
+            12.5,
+            12.159999999999997,
+            9.5
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                7.5,
+                5.625,
+                8.125,
+                5.6875
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                15.375,
+                5.625,
+                15.5,
+                5.6875
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                8.1875,
+                5.625,
+                8.8125,
+                5.6875
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                15.5625,
+                5.625,
+                15.6875,
+                5.6875
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                12.4375,
+                5.375,
+                13.0625,
+                5.5
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                13.125,
+                5.375,
+                13.75,
+                5.5
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              7.5,
+              11.159999999999997,
+              8.5
+            ],
+            "axis": "y",
+            "angle": -45,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          3.0,
+          1.0
+        ]
+      }
+    },
+    "34": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            3.69,
+            6.240000000000002,
+            5.809999999999999
+          ],
+          "to": [
+            13.69,
+            10.399999999999999,
+            8.809999999999999
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                1.4375,
+                4.6875,
+                2.0625,
+                4.9475
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                3.3125,
+                4.6875,
+                3.5,
+                4.9475
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                2.125,
+                4.6875,
+                2.75,
+                4.9475
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                3.5625,
+                4.6875,
+                3.75,
+                4.9475
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                4.1875,
+                5.375,
+                4.8125,
+                5.5625
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                4.875,
+                5.375,
+                5.5,
+                5.5625
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              8.69,
+              6.240000000000002,
+              7.309999999999999
+            ],
+            "axis": "y",
+            "angle": -45,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          3.0,
+          1.0
+        ]
+      }
+    },
+    "35": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            2.5,
+            2.0,
+            8.5
+          ],
+          "to": [
+            12.5,
+            12.0,
+            8.5
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                14.625,
+                0.0625,
+                15.25,
+                0.6875
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                15.3125,
+                0.0625,
+                15.9375,
+                0.6875
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              7.5,
+              12,
+              8.5
+            ],
+            "axis": "y",
+            "angle": -45,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          3.0,
+          1.0
+        ]
+      }
+    },
+    "36": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            4.0,
+            11.0,
+            11.0
+          ],
+          "to": [
+            6.0,
+            12.0,
+            21.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                15.75,
+                5.625,
+                15.875,
+                5.6875
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                8.875,
+                5.625,
+                9.5,
+                5.6875
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                0.0625,
+                5.8125,
+                0.1875,
+                5.875
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                9.5625,
+                5.625,
+                10.1875,
+                5.6875
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                4.1875,
+                3.5,
+                4.3125,
+                4.125
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                4.375,
+                3.5,
+                4.5,
+                4.125
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          3.0,
+          0.0
+        ]
+      }
+    },
+    "37": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            5.04,
+            6.280000000000001,
+            11.0
+          ],
+          "to": [
+            8.04,
+            10.280000000000001,
+            21.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                12.0,
+                5.0625,
+                12.1875,
+                5.3125
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                12.1875,
+                4.6875,
+                12.8125,
+                4.9375
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                12.25,
+                5.0625,
+                12.4375,
+                5.3125
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                12.875,
+                4.6875,
+                13.5,
+                4.9375
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                3.3125,
+                3.5,
+                3.5,
+                4.125
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                3.5625,
+                3.5,
+                3.75,
+                4.125
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          3.0,
+          0.0
+        ]
+      }
+    },
+    "38": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            5.0,
+            2.0,
+            11.0
+          ],
+          "to": [
+            5.0,
+            12.0,
+            21.0
+          ],
+          "faces": {
+            "east": {
+              "uv": [
+                0.0625,
+                3.5,
+                0.6875,
+                4.125
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                0.75,
+                3.5,
+                1.375,
+                4.125
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          3.0,
+          0.0
+        ]
+      }
+    },
+    "39": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            2.5,
+            11.079999999999998,
+            6.5
+          ],
+          "to": [
+            12.5,
+            12.079999999999998,
+            8.5
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                10.25,
+                5.625,
+                10.875,
+                5.6875
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                0.25,
+                5.8125,
+                0.375,
+                5.875
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                10.9375,
+                5.625,
+                11.5625,
+                5.6875
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                0.4375,
+                5.8125,
+                0.5625,
+                5.875
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                13.8125,
+                5.375,
+                14.4375,
+                5.5
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                14.5,
+                5.375,
+                15.125,
+                5.5
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              7.5,
+              11.079999999999998,
+              7.5
+            ],
+            "axis": "y",
+            "angle": 45,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          3.0,
+          0.0
+        ]
+      }
+    },
+    "40": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            3.69,
+            6.32,
+            7.19
+          ],
+          "to": [
+            13.69,
+            10.399999999999999,
+            10.19
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                6.5625,
+                4.6875,
+                7.1875,
+                4.9425
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                8.9375,
+                4.6875,
+                9.125,
+                4.9425
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                7.25,
+                4.6875,
+                7.875,
+                4.9425
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                9.1875,
+                4.6875,
+                9.375,
+                4.9425
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                5.5625,
+                5.375,
+                6.1875,
+                5.5625
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                6.25,
+                5.375,
+                6.875,
+                5.5625
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              8.69,
+              6.32,
+              8.69
+            ],
+            "axis": "y",
+            "angle": 45,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          3.0,
+          0.0
+        ]
+      }
+    },
+    "41": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            2.5,
+            2.0,
+            7.5
+          ],
+          "to": [
+            12.5,
+            12.0,
+            7.5
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                1.4375,
+                3.5,
+                2.0625,
+                4.125
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                2.125,
+                3.5,
+                2.75,
+                4.125
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              7.5,
+              12,
+              7.5
+            ],
+            "axis": "y",
+            "angle": 45,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          3.0,
+          0.0
+        ]
+      }
+    },
+    "42": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            10.0,
+            12.219999999999999,
+            0.0
+          ],
+          "to": [
+            14.0,
+            12.219999999999999,
+            6.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                7.125,
+                4.1875,
+                7.375,
+                4.5625
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                7.4375,
+                4.1875,
+                7.6875,
+                4.5625
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              12,
+              12.219999999999999,
+              3
+            ],
+            "axis": "y",
+            "angle": -22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          3.0,
+          0.0
+        ]
+      }
+    },
+    "43": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            2.0,
+            12.219999999999999,
+            0.0
+          ],
+          "to": [
+            6.0,
+            12.219999999999999,
+            6.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                7.75,
+                4.1875,
+                8.0,
+                4.5625
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                8.0625,
+                4.1875,
+                8.3125,
+                4.5625
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          3.0,
+          0.0
+        ]
+      }
+    },
+    "44": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            9.0,
+            12.219999999999999,
+            10.0
+          ],
+          "to": [
+            13.0,
+            12.219999999999999,
+            16.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                8.375,
+                4.1875,
+                8.625,
+                4.5625
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                8.6875,
+                4.1875,
+                8.9375,
+                4.5625
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          3.0,
+          1.0
+        ]
+      }
+    },
+    "45": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            4.0,
+            12.219999999999999,
+            9.0
+          ],
+          "to": [
+            8.0,
+            12.219999999999999,
+            15.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                9.0,
+                4.1875,
+                9.25,
+                4.5625
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                9.3125,
+                4.1875,
+                9.5625,
+                4.5625
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              6,
+              12.219999999999999,
+              12
+            ],
+            "axis": "y",
+            "angle": 22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          3.0,
+          1.0
+        ]
+      }
+    },
+    "46": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            3.5,
+            12.219999999999999,
+            13.0
+          ],
+          "to": [
+            7.5,
+            12.219999999999999,
+            19.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                9.625,
+                4.1875,
+                9.875,
+                4.5625
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                9.9375,
+                4.1875,
+                10.1875,
+                4.5625
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          3.0,
+          0.0
+        ]
+      }
+    },
+    "47": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            8.5,
+            12.219999999999999,
+            15.0
+          ],
+          "to": [
+            12.5,
+            12.219999999999999,
+            21.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                10.25,
+                4.1875,
+                10.5,
+                4.5625
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                10.5625,
+                4.1875,
+                10.8125,
+                4.5625
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          3.0,
+          0.0
+        ]
+      }
+    },
+    "48": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            3.0,
+            7.0,
+            0.0
+          ],
+          "to": [
+            7.0,
+            14.0,
+            6.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                15.0625,
+                3.5,
+                15.3125,
+                3.9375
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                12.4375,
+                3.5,
+                12.8125,
+                3.9375
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                15.375,
+                3.5,
+                15.625,
+                3.9375
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                12.875,
+                3.5,
+                13.25,
+                3.9375
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                10.875,
+                4.1875,
+                11.125,
+                4.5625
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          3.0,
+          1.0
+        ]
+      }
+    },
+    "49": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            2.0,
+            8.0,
+            1.0
+          ],
+          "to": [
+            3.0,
+            13.0,
+            5.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                14.3125,
+                4.1875,
+                14.375,
+                4.5
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                14.4375,
+                4.1875,
+                14.5,
+                4.5
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                11.8125,
+                4.1875,
+                12.0625,
+                4.5
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                13.25,
+                5.0625,
+                13.3125,
+                5.3125
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                13.375,
+                5.0625,
+                13.4375,
+                5.3125
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          3.0,
+          1.0
+        ]
+      }
+    },
+    "50": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            7.0,
+            8.0,
+            1.0
+          ],
+          "to": [
+            8.0,
+            13.0,
+            5.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                14.5625,
+                4.1875,
+                14.625,
+                4.5
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                12.125,
+                4.1875,
+                12.375,
+                4.5
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                14.6875,
+                4.1875,
+                14.75,
+                4.5
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                13.5,
+                5.0625,
+                13.5625,
+                5.3125
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                13.625,
+                5.0625,
+                13.6875,
+                5.3125
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          3.0,
+          1.0
+        ]
+      }
+    },
+    "51": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            4.0,
+            14.0,
+            1.0
+          ],
+          "to": [
+            6.0,
+            15.0,
+            5.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                0.625,
+                5.8125,
+                0.75,
+                5.875
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                11.625,
+                5.625,
+                11.875,
+                5.6875
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                0.8125,
+                5.8125,
+                0.9375,
+                5.875
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                11.9375,
+                5.625,
+                12.1875,
+                5.6875
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                12.5,
+                5.0625,
+                12.625,
+                5.3125
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          3.0,
+          1.0
+        ]
+      }
+    },
+    "52": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            9.0,
+            7.0,
+            0.0
+          ],
+          "to": [
+            13.0,
+            14.0,
+            6.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                15.6875,
+                3.5,
+                15.9375,
+                3.9375
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                13.3125,
+                3.5,
+                13.6875,
+                3.9375
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                0.0625,
+                4.1875,
+                0.3125,
+                4.625
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                13.75,
+                3.5,
+                14.125,
+                3.9375
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                11.1875,
+                4.1875,
+                11.4375,
+                4.5625
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              11,
+              7,
+              3
+            ],
+            "axis": "z",
+            "angle": -22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          3.0,
+          1.0
+        ]
+      }
+    },
+    "53": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            8.0,
+            8.0,
+            1.0
+          ],
+          "to": [
+            9.0,
+            13.0,
+            5.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                14.8125,
+                4.1875,
+                14.875,
+                4.5
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                12.4375,
+                4.1875,
+                12.6875,
+                4.5
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                14.9375,
+                4.1875,
+                15.0,
+                4.5
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                12.75,
+                4.1875,
+                13.0,
+                4.5
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                13.75,
+                5.0625,
+                13.8125,
+                5.3125
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                13.875,
+                5.0625,
+                13.9375,
+                5.3125
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              11,
+              7,
+              3
+            ],
+            "axis": "z",
+            "angle": -22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          3.0,
+          1.0
+        ]
+      }
+    },
+    "54": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            13.0,
+            8.0,
+            1.0
+          ],
+          "to": [
+            14.0,
+            13.0,
+            5.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                15.0625,
+                4.1875,
+                15.125,
+                4.5
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                13.0625,
+                4.1875,
+                13.3125,
+                4.5
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                15.1875,
+                4.1875,
+                15.25,
+                4.5
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                13.375,
+                4.1875,
+                13.625,
+                4.5
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                14.0,
+                5.0625,
+                14.0625,
+                5.3125
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                14.125,
+                5.0625,
+                14.1875,
+                5.3125
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              11,
+              7,
+              3
+            ],
+            "axis": "z",
+            "angle": -22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          3.0,
+          1.0
+        ]
+      }
+    },
+    "55": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            10.0,
+            14.0,
+            1.0
+          ],
+          "to": [
+            12.0,
+            15.0,
+            5.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                1.0,
+                5.8125,
+                1.125,
+                5.875
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                12.25,
+                5.625,
+                12.5,
+                5.6875
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                1.1875,
+                5.8125,
+                1.3125,
+                5.875
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                12.5625,
+                5.625,
+                12.8125,
+                5.6875
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                12.6875,
+                5.0625,
+                12.8125,
+                5.3125
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                12.875,
+                5.0625,
+                13.0,
+                5.3125
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              11,
+              7,
+              3
+            ],
+            "axis": "z",
+            "angle": -22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          3.0,
+          1.0
+        ]
+      }
+    },
+    "56": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            14.0,
+            6.0,
+            7.0
+          ],
+          "to": [
+            18.0,
+            13.0,
+            13.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                0.375,
+                4.1875,
+                0.625,
+                4.625
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                14.1875,
+                3.5,
+                14.5625,
+                3.9375
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                0.6875,
+                4.1875,
+                0.9375,
+                4.625
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                14.625,
+                3.5,
+                15.0,
+                3.9375
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                11.5,
+                4.1875,
+                11.75,
+                4.5625
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          3.0,
+          0.0
+        ]
+      }
+    },
+    "57": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            13.0,
+            7.0,
+            8.0
+          ],
+          "to": [
+            14.0,
+            12.0,
+            12.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                15.3125,
+                4.1875,
+                15.375,
+                4.5
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                15.4375,
+                4.1875,
+                15.5,
+                4.5
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                13.6875,
+                4.1875,
+                13.9375,
+                4.5
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                14.25,
+                5.0625,
+                14.3125,
+                5.3125
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          3.0,
+          0.0
+        ]
+      }
+    },
+    "58": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            2.0,
+            7.0,
+            8.0
+          ],
+          "to": [
+            3.0,
+            12.0,
+            12.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                15.5625,
+                4.1875,
+                15.625,
+                4.5
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                14.0,
+                4.1875,
+                14.25,
+                4.5
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                15.6875,
+                4.1875,
+                15.75,
+                4.5
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                14.375,
+                5.0625,
+                14.4375,
+                5.3125
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          3.0,
+          0.0
+        ]
+      }
+    },
+    "59": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            15.0,
+            13.0,
+            8.0
+          ],
+          "to": [
+            17.0,
+            14.0,
+            12.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                1.375,
+                5.8125,
+                1.5,
+                5.875
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                12.875,
+                5.625,
+                13.125,
+                5.6875
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                1.5625,
+                5.8125,
+                1.6875,
+                5.875
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                13.1875,
+                5.625,
+                13.4375,
+                5.6875
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                13.0625,
+                5.0625,
+                13.1875,
+                5.3125
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          3.0,
+          0.0
+        ]
+      }
+    },
+    "60": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            6.0,
+            11.0,
+            7.5
+          ],
+          "to": [
+            10.0,
+            15.0,
+            11.5
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                13.5625,
+                4.6875,
+                13.8125,
+                4.9375
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                13.875,
+                4.6875,
+                14.125,
+                4.9375
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                14.1875,
+                4.6875,
+                14.4375,
+                4.9375
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                14.5,
+                4.6875,
+                14.75,
+                4.9375
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                14.8125,
+                4.6875,
+                15.0625,
+                4.9375
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                15.125,
+                4.6875,
+                15.375,
+                4.9375
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          2.0,
+          0.0
+        ]
+      }
+    },
+    "61": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            7.0,
+            10.0,
+            8.5
+          ],
+          "to": [
+            9.0,
+            11.0,
+            10.5
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                1.75,
+                5.8125,
+                1.875,
+                5.875
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                1.9375,
+                5.8125,
+                2.0625,
+                5.875
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                2.125,
+                5.8125,
+                2.25,
+                5.875
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                2.3125,
+                5.8125,
+                2.4375,
+                5.875
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                15.1875,
+                5.375,
+                15.3125,
+                5.5
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          2.0,
+          0.0
+        ]
+      }
+    },
+    "62": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            4.0,
+            0.0,
+            5.0
+          ],
+          "to": [
+            12.0,
+            0.0,
+            13.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                4.5625,
+                3.5,
+                5.0625,
+                4.0
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                5.125,
+                3.5,
+                5.625,
+                4.0
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              8,
+              0,
+              9
+            ],
+            "axis": "x",
+            "angle": -22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          3.0,
+          0.0
+        ]
+      }
+    },
+    "63": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            5.0,
+            0.29999999999999716,
+            6.0
+          ],
+          "to": [
+            11.0,
+            0.29999999999999716,
+            12.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                1.0,
+                4.1875,
+                1.375,
+                4.5625
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                1.4375,
+                4.1875,
+                1.8125,
+                4.5625
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              8,
+              0.29999999999999716,
+              9
+            ],
+            "axis": "z",
+            "angle": -22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          3.0,
+          0.0
+        ]
+      }
+    },
+    "64": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            6.0,
+            11.0,
+            7.5
+          ],
+          "to": [
+            10.0,
+            15.0,
+            11.5
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                15.4375,
+                4.6875,
+                15.6875,
+                4.9375
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                0.0625,
+                5.0625,
+                0.3125,
+                5.3125
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                0.375,
+                5.0625,
+                0.625,
+                5.3125
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                0.6875,
+                5.0625,
+                0.9375,
+                5.3125
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                1.0,
+                5.0625,
+                1.25,
+                5.3125
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                1.3125,
+                5.0625,
+                1.5625,
+                5.3125
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          2.0,
+          0.0
+        ]
+      }
+    },
+    "65": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            7.0,
+            10.0,
+            8.5
+          ],
+          "to": [
+            9.0,
+            11.0,
+            10.5
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                2.5,
+                5.8125,
+                2.625,
+                5.875
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                2.6875,
+                5.8125,
+                2.8125,
+                5.875
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                2.875,
+                5.8125,
+                3.0,
+                5.875
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                3.0625,
+                5.8125,
+                3.1875,
+                5.875
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                15.375,
+                5.375,
+                15.5,
+                5.5
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          2.0,
+          0.0
+        ]
+      }
+    },
+    "66": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            4.0,
+            0.0,
+            5.0
+          ],
+          "to": [
+            12.0,
+            0.0,
+            13.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                5.6875,
+                3.5,
+                6.1875,
+                4.0
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                6.25,
+                3.5,
+                6.75,
+                4.0
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              8,
+              0,
+              9
+            ],
+            "axis": "x",
+            "angle": -22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          3.0,
+          0.0
+        ]
+      }
+    },
+    "67": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            5.0,
+            0.29999999999999716,
+            6.0
+          ],
+          "to": [
+            11.0,
+            0.29999999999999716,
+            12.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                1.875,
+                4.1875,
+                2.25,
+                4.5625
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                2.3125,
+                4.1875,
+                2.6875,
+                4.5625
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              8,
+              0.29999999999999716,
+              9
+            ],
+            "axis": "z",
+            "angle": 22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          3.0,
+          0.0
+        ]
+      }
+    },
+    "68": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            14.0,
+            8.0,
+            3.5
+          ],
+          "to": [
+            18.0,
+            12.0,
+            7.5
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                1.625,
+                5.0625,
+                1.875,
+                5.3125
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                1.9375,
+                5.0625,
+                2.1875,
+                5.3125
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                2.25,
+                5.0625,
+                2.5,
+                5.3125
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                2.5625,
+                5.0625,
+                2.8125,
+                5.3125
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                2.875,
+                5.0625,
+                3.125,
+                5.3125
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                3.1875,
+                5.0625,
+                3.4375,
+                5.3125
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          2.0,
+          0.0
+        ]
+      }
+    },
+    "69": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            15.0,
+            7.0,
+            4.5
+          ],
+          "to": [
+            17.0,
+            8.0,
+            6.5
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                3.25,
+                5.8125,
+                3.375,
+                5.875
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                3.4375,
+                5.8125,
+                3.5625,
+                5.875
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                3.625,
+                5.8125,
+                3.75,
+                5.875
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                3.8125,
+                5.8125,
+                3.9375,
+                5.875
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                15.5625,
+                5.375,
+                15.6875,
+                5.5
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          2.0,
+          0.0
+        ]
+      }
+    },
+    "70": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            12.0,
+            13.0,
+            1.0
+          ],
+          "to": [
+            20.0,
+            13.0,
+            9.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                6.8125,
+                3.5,
+                7.3125,
+                4.0
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                7.375,
+                3.5,
+                7.875,
+                4.0
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              16,
+              13,
+              5
+            ],
+            "axis": "x",
+            "angle": -22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          2.0,
+          0.0
+        ]
+      }
+    },
+    "71": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            13.0,
+            13.299999999999997,
+            2.0
+          ],
+          "to": [
+            19.0,
+            13.299999999999997,
+            8.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                2.75,
+                4.1875,
+                3.125,
+                4.5625
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                3.1875,
+                4.1875,
+                3.5625,
+                4.5625
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              16,
+              13.299999999999997,
+              5
+            ],
+            "axis": "z",
+            "angle": -22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          2.0,
+          0.0
+        ]
+      }
+    },
+    "72": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            8.0,
+            1.0,
+            5.5
+          ],
+          "to": [
+            12.0,
+            5.0,
+            9.5
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                3.5,
+                5.0625,
+                3.75,
+                5.3125
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                3.8125,
+                5.0625,
+                4.0625,
+                5.3125
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                4.125,
+                5.0625,
+                4.375,
+                5.3125
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                4.4375,
+                5.0625,
+                4.6875,
+                5.3125
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                4.75,
+                5.0625,
+                5.0,
+                5.3125
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                5.0625,
+                5.0625,
+                5.3125,
+                5.3125
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          2.0,
+          0.0
+        ]
+      }
+    },
+    "73": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            9.0,
+            0.0,
+            6.5
+          ],
+          "to": [
+            11.0,
+            1.0,
+            8.5
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                4.0,
+                5.8125,
+                4.125,
+                5.875
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                4.1875,
+                5.8125,
+                4.3125,
+                5.875
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                4.375,
+                5.8125,
+                4.5,
+                5.875
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                4.5625,
+                5.8125,
+                4.6875,
+                5.875
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                15.75,
+                5.375,
+                15.875,
+                5.5
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          2.0,
+          0.0
+        ]
+      }
+    },
+    "74": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            6.0,
+            6.0,
+            3.0
+          ],
+          "to": [
+            14.0,
+            6.0,
+            11.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                7.9375,
+                3.5,
+                8.4375,
+                4.0
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                8.5,
+                3.5,
+                9.0,
+                4.0
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              10,
+              6,
+              7
+            ],
+            "axis": "x",
+            "angle": -22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          2.0,
+          0.0
+        ]
+      }
+    },
+    "75": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            7.0,
+            6.299999999999997,
+            4.0
+          ],
+          "to": [
+            13.0,
+            6.299999999999997,
+            10.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                3.625,
+                4.1875,
+                4.0,
+                4.5625
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                4.0625,
+                4.1875,
+                4.4375,
+                4.5625
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              10,
+              6.299999999999997,
+              7
+            ],
+            "axis": "z",
+            "angle": 22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          2.0,
+          0.0
+        ]
+      }
+    },
+    "76": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            5.0,
+            1.0,
+            6.5
+          ],
+          "to": [
+            9.0,
+            5.0,
+            10.5
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                5.375,
+                5.0625,
+                5.625,
+                5.3125
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                5.6875,
+                5.0625,
+                5.9375,
+                5.3125
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                6.0,
+                5.0625,
+                6.25,
+                5.3125
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                6.3125,
+                5.0625,
+                6.5625,
+                5.3125
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                6.625,
+                5.0625,
+                6.875,
+                5.3125
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                6.9375,
+                5.0625,
+                7.1875,
+                5.3125
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          2.0,
+          0.0
+        ]
+      }
+    },
+    "77": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            6.0,
+            0.0,
+            7.5
+          ],
+          "to": [
+            8.0,
+            1.0,
+            9.5
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                4.75,
+                5.8125,
+                4.875,
+                5.875
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                4.9375,
+                5.8125,
+                5.0625,
+                5.875
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                5.125,
+                5.8125,
+                5.25,
+                5.875
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                5.3125,
+                5.8125,
+                5.4375,
+                5.875
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                0.0625,
+                5.625,
+                0.1875,
+                5.75
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          2.0,
+          0.0
+        ]
+      }
+    },
+    "78": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            3.0,
+            6.0,
+            4.0
+          ],
+          "to": [
+            11.0,
+            6.0,
+            12.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                9.0625,
+                3.5,
+                9.5625,
+                4.0
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                9.625,
+                3.5,
+                10.125,
+                4.0
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              7,
+              6,
+              8
+            ],
+            "axis": "x",
+            "angle": -22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          2.0,
+          0.0
+        ]
+      }
+    },
+    "79": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            4.0,
+            6.299999999999997,
+            5.0
+          ],
+          "to": [
+            10.0,
+            6.299999999999997,
+            11.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                4.5,
+                4.1875,
+                4.875,
+                4.5625
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                4.9375,
+                4.1875,
+                5.3125,
+                4.5625
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              7,
+              6.299999999999997,
+              8
+            ],
+            "axis": "z",
+            "angle": -22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          2.0,
+          0.0
+        ]
+      }
+    },
+    "80": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            6.0,
+            8.0,
+            9.5
+          ],
+          "to": [
+            10.0,
+            12.0,
+            13.5
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                7.25,
+                5.0625,
+                7.5,
+                5.3125
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                7.5625,
+                5.0625,
+                7.8125,
+                5.3125
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                7.875,
+                5.0625,
+                8.125,
+                5.3125
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                8.1875,
+                5.0625,
+                8.4375,
+                5.3125
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                8.5,
+                5.0625,
+                8.75,
+                5.3125
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                8.8125,
+                5.0625,
+                9.0625,
+                5.3125
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          2.0,
+          1.0
+        ]
+      }
+    },
+    "81": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            7.0,
+            7.0,
+            10.5
+          ],
+          "to": [
+            9.0,
+            8.0,
+            12.5
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                5.5,
+                5.8125,
+                5.625,
+                5.875
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                5.6875,
+                5.8125,
+                5.8125,
+                5.875
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                5.875,
+                5.8125,
+                6.0,
+                5.875
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                6.0625,
+                5.8125,
+                6.1875,
+                5.875
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                0.25,
+                5.625,
+                0.375,
+                5.75
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          2.0,
+          1.0
+        ]
+      }
+    },
+    "82": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            4.0,
+            13.0,
+            7.0
+          ],
+          "to": [
+            12.0,
+            13.0,
+            15.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                10.1875,
+                3.5,
+                10.6875,
+                4.0
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                10.75,
+                3.5,
+                11.25,
+                4.0
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              8,
+              13,
+              11
+            ],
+            "axis": "x",
+            "angle": -22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          2.0,
+          1.0
+        ]
+      }
+    },
+    "83": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            5.0,
+            13.299999999999997,
+            8.0
+          ],
+          "to": [
+            11.0,
+            13.299999999999997,
+            14.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                5.375,
+                4.1875,
+                5.75,
+                4.5625
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                5.8125,
+                4.1875,
+                6.1875,
+                4.5625
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              8,
+              13.299999999999997,
+              11
+            ],
+            "axis": "z",
+            "angle": 22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          2.0,
+          1.0
+        ]
+      }
+    },
+    "84": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            6.0,
+            4.0,
+            9.5
+          ],
+          "to": [
+            10.0,
+            8.0,
+            13.5
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                9.125,
+                5.0625,
+                9.375,
+                5.3125
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                9.4375,
+                5.0625,
+                9.6875,
+                5.3125
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                9.75,
+                5.0625,
+                10.0,
+                5.3125
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                10.0625,
+                5.0625,
+                10.3125,
+                5.3125
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                10.375,
+                5.0625,
+                10.625,
+                5.3125
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                10.6875,
+                5.0625,
+                10.9375,
+                5.3125
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          2.0,
+          1.0
+        ]
+      }
+    },
+    "85": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            7.0,
+            3.0,
+            10.5
+          ],
+          "to": [
+            9.0,
+            4.0,
+            12.5
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                6.25,
+                5.8125,
+                6.375,
+                5.875
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                6.4375,
+                5.8125,
+                6.5625,
+                5.875
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                6.625,
+                5.8125,
+                6.75,
+                5.875
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                6.8125,
+                5.8125,
+                6.9375,
+                5.875
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                0.4375,
+                5.625,
+                0.5625,
+                5.75
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          2.0,
+          1.0
+        ]
+      }
+    },
+    "86": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            4.0,
+            9.0,
+            7.0
+          ],
+          "to": [
+            12.0,
+            9.0,
+            15.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                11.3125,
+                3.5,
+                11.8125,
+                4.0
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                11.875,
+                3.5,
+                12.375,
+                4.0
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              8,
+              9,
+              11
+            ],
+            "axis": "x",
+            "angle": -22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          2.0,
+          1.0
+        ]
+      }
+    },
+    "87": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/farm_return_obelisk_0",
+        "1": "stardewcraft:block/ginger_island/farm_return_obelisk_1",
+        "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            5.0,
+            9.299999999999997,
+            8.0
+          ],
+          "to": [
+            11.0,
+            9.299999999999997,
+            14.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                6.25,
+                4.1875,
+                6.625,
+                4.5625
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                6.6875,
+                4.1875,
+                7.0625,
+                4.5625
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              8,
+              9.299999999999997,
+              11
+            ],
+            "axis": "z",
+            "angle": -22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          2.0,
+          1.0
+        ]
+      }
+    }
+  },
+  "stardewcraft:collision": {
+    "mode": "custom",
+    "boxes": [
+      {
+        "from": [
+          3.2574,
+          32.0,
+          3.2574
+        ],
+        "to": [
+          28.7426,
+          63.0,
+          29.5
+        ]
+      }
+    ],
+    "policy": "aabb"
+  }
+}

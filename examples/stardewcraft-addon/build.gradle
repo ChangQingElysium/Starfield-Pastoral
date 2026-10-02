@@ -1,29 +1,47 @@
 plugins {
     id 'java-library'
-    id 'net.neoforged.moddev' version '2.0.137'
+    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
 }
 
 group = 'com.example.stardewaddon'
 version = '0.1.0'
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
-neoForge {
-    version = project.neo_version
+minecraft {
+    mappings channel: 'official', version: project.minecraft_version
 }
 
-def stardewCraftJars = fileTree('../../build/libs') {
-    include 'stardewcraft-*.jar'
+def coreProperties = new Properties()
+file('../../gradle.properties').withInputStream { coreProperties.load(it) }
+def coreArtifact = coreProperties.getProperty('mod_id')
+def coreVersion = coreProperties.getProperty('mod_version')
+def coreJar = file("../../build/libs/${coreArtifact}-${coreVersion}.jar")
+
+repositories {
+    flatDir { dir '../../build/libs' }
 }
 
 dependencies {
-    implementation stardewCraftJars
+    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+    // The complete jarJar artifact is reobfuscated; remap it before compiling the addon.
+    implementation fg.deobf("com.stardew.craft:${coreArtifact}:${coreVersion}")
 }
 
 tasks.named('compileJava').configure {
     doFirst {
-        if (stardewCraftJars.isEmpty()) {
-            throw new GradleException('Build StardewCraft first: ../../gradlew jar')
+        if (!coreJar.isFile()) {
+            throw new GradleException('Build StardewCraft first: ../../gradlew build')
+        }
+        new java.util.zip.ZipFile(coreJar).withCloseable { archive ->
+            if (archive.getEntry('META-INF/mods.toml') == null
+                    || archive.getEntry('META-INF/jarjar/metadata.json') == null) {
+                throw new GradleException('Use the complete Forge jarJar artifact, not a slim or NeoForge JAR.')
+            }
         }
     }
+}
+
+tasks.named('jar').configure {
+    finalizedBy 'reobfJar'
 }

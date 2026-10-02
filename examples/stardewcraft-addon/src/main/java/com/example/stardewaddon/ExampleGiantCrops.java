@@ -10,9 +10,9 @@ import java.util.ArrayList;
 final class ExampleGiantCrops {
     private ExampleGiantCrops() {}
     static void register() {
-        var id = ResourceLocation.parse("example_stardew_addon:giant_moonberry");
+        var id = new ResourceLocation("example_stardew_addon:giant_moonberry");
         StardewGiantCrops.register(new StardewGiantCrops.Definition(id,
-                ResourceLocation.parse("example_stardew_addon:moonberry"), 3, 3, 2, .01, true,
+                new ResourceLocation("example_stardew_addon:moonberry"), 3, 3, 2, .01, true,
                 (context, crops) -> {
                     // Resolve deferred blocks at runtime, never during mod construction.
                     if (!BuiltInRegistries.BLOCK.containsKey(id)) return java.util.List.of();

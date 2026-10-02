@@ -1,5 +1,6 @@
 package com.stardew.craft.client.weapon;
 
+import com.stardew.craft.port.PortCamera;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
@@ -107,7 +108,7 @@ public final class SingularityRuneEffectClient {
 
             poseStack.pushPose();
             poseStack.translate(x, y + 0.18, z);
-            poseStack.mulPose(Minecraft.getInstance().getEntityRenderDispatcher().cameraOrientation());
+            poseStack.mulPose(PortCamera.cameraOrientation(Minecraft.getInstance().getEntityRenderDispatcher()));
             poseStack.scale(rune.radius * 1.2f, rune.radius * 1.2f, rune.radius * 1.2f);
 
             PoseStack.Pose billboard = poseStack.last();

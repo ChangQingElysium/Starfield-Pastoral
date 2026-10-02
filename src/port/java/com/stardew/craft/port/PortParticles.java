@@ -48,12 +48,18 @@ public final class PortParticles {
     private static final class Client {
         private static void registerProviders(RegisterParticleProvidersEvent event) {
             event.registerSpriteSet(ENTITY_EFFECT.get(), sprites -> (option, level, x, y, z, dx, dy, dz) -> {
-                // 1.21 SpellParticle.MobEffectProvider: velocity passes through, colour comes from the option.
-                // 1.20.1 MobProvider colours from the velocity first; the option colour then replaces it. Alpha is
-                // always 1 for the float factories the mod uses (Particle#setAlpha is not accessible here).
+                // 1.21 SpellParticle.MobEffectProvider: new SpellParticle(...) with the velocity passed through, then
+                // setColor(option rgb) and setAlpha(option alpha). 1.20.1 MobProvider runs the same constructor and
+                // colours from the velocity first; the option colour then replaces it. The alpha is set afterwards
+                // like 1.21, which also overrides the constructor's 0 when the local player is scoping nearby
+                // (1.20.1 SpellParticle#tick lerps towards 1, the alpha of every float-RGB option the mod creates,
+                // where 1.21 lerps towards that same originalAlpha).
                 Particle particle = new SpellParticle.MobProvider(sprites)
                         .createParticle(ParticleTypes.ENTITY_EFFECT, level, x, y, z, dx, dy, dz);
-                if (particle != null) particle.setColor(option.getRed(), option.getGreen(), option.getBlue());
+                if (particle != null) {
+                    particle.setColor(option.getRed(), option.getGreen(), option.getBlue());
+                    ((com.stardew.craft.mixin.PortParticleAlphaInvoker) particle).stardewcraft$setAlpha(option.getAlpha());
+                }
                 return particle;
             });
         }

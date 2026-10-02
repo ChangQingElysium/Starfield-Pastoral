@@ -1,9 +1,5 @@
 {
   "values": [
-    "minecraft:bee",
-    "minecraft:endermite",
-    "minecraft:silverfish",
-    "minecraft:spider",
-    "minecraft:cave_spider"
+    "#minecraft:arthropod"
   ]
 }

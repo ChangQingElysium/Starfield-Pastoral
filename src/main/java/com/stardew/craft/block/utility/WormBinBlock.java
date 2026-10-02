@@ -112,7 +112,7 @@ public class WormBinBlock extends Block implements EntityBlock, PortBlockInterac
     @Nullable
     public BlockEntity newBlockEntity(@SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") BlockState state) {
         if (state.getValue(PART) == Part.EXTENSION) {
-            return null;
+            return com.stardew.craft.port.PortMachineExtensions.createExtension(pos, state);
         }
         return new WormBinBlockEntity(pos, state);
     }

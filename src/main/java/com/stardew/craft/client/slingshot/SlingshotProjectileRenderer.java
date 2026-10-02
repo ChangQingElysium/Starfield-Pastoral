@@ -1,5 +1,6 @@
 package com.stardew.craft.client.slingshot;
 
+import com.stardew.craft.port.PortCamera;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import com.stardew.craft.entity.projectile.SlingshotProjectile;
@@ -17,7 +18,7 @@ public final class SlingshotProjectileRenderer extends EntityRenderer<SlingshotP
     public SlingshotProjectileRenderer(EntityRendererProvider.Context context){super(context);items=context.getItemRenderer();}
     @Override public ResourceLocation getTextureLocation(SlingshotProjectile entity){return TextureAtlas.LOCATION_BLOCKS;}
     @Override public void render(SlingshotProjectile e,float yaw,float partial,PoseStack stack,MultiBufferSource buffers,int light){
-        stack.pushPose();stack.mulPose(entityRenderDispatcher.cameraOrientation());stack.mulPose(Axis.YP.rotationDegrees(180));
+        stack.pushPose();stack.mulPose(PortCamera.cameraOrientation(entityRenderDispatcher));stack.mulPose(Axis.YP.rotationDegrees(180));
         stack.mulPose(Axis.ZP.rotationDegrees((e.tickCount+partial)*e.spinDegreesPerTick()));
         String id=com.stardew.craft.item.weapon.SlingshotAmmo.sourceId(e.getItem());
         if(java.util.Set.of("388","390","378","380","384","382","386").contains(id)) {

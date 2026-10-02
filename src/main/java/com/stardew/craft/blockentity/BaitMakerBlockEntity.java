@@ -18,7 +18,6 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import javax.annotation.Nullable;
 
 public class BaitMakerBlockEntity extends TimedProductionBlockEntity {
-    private static final int EFFECTIVE_MINUTES_PER_DAY = 1260;
     private static final int MINUTES_UNTIL_READY = 10;
 
     private static final String TAG_INPUT = "input";

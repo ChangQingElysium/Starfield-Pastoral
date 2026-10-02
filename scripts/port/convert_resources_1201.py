@@ -10,9 +10,11 @@ handled separately by the NBT downgrade tool.
 - Recipes: item result objects use `item` instead of `id`; cooking/stonecutting
   results are plain strings (+ top-level `count` for stonecutting).
 - Loot tables: `match_tool` item predicates use 1.20.1 list/enchantment syntax.
+- Native StardewCraft models: NeoForge face metadata and supported built-in loaders -> Forge equivalents.
 """
 from __future__ import annotations
 
+import argparse
 import json
 import shutil
 import sys
@@ -20,6 +22,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 DATA = ROOT / "src/main/resources/data"
+MODELS = ROOT / "src/main/resources/assets/stardewcraft/models"
 
 DIR_RENAMES = {
     "recipe": "recipes",
@@ -64,6 +67,10 @@ def rename_dirs() -> None:
 
 # NeoForge 1.21.1 custom ingredient types and their Forge 1.20.1 equivalents (same JSON keys).
 INGREDIENT_TYPES = {"neoforge:difference": "forge:difference", "neoforge:intersection": "forge:intersection"}
+
+# NeoForge 21.1.217 / Forge 47.4.10 CompositeModel.Loader use the same children
+# BlockModels and item_render_order schema. Do not guess mappings for other loaders.
+MODEL_LOADERS = {"neoforge:composite": "forge:composite"}
 
 
 def convert_ingredient_types(o):
@@ -155,6 +162,65 @@ def rewrite_json(files, fn) -> int:
     return changed
 
 
+def convert_model_metadata(model: dict) -> dict:
+    """Convert supported loaders/native metadata without altering authored geometry.
+
+    ImportedModelGeometry explicitly reads neoforge_data itself; only Minecraft's
+    ordinary element/face deserializers need the Forge spelling. Ambiguous input
+    is rejected instead of silently discarding one of the two payloads.
+    """
+    loader = model.get("loader")
+    if isinstance(loader, str) and loader.startswith("neoforge:"):
+        if loader not in MODEL_LOADERS:
+            raise ValueError(f"unmapped NeoForge model loader {loader}")
+        model["loader"] = MODEL_LOADERS[loader]
+    if model.get("loader") == "forge:composite":
+        children = model.get("children")
+        if not isinstance(children, dict) or not children or not all(isinstance(child, dict) for child in children.values()):
+            raise ValueError("composite model requires nonempty children BlockModels")
+        order = model.get("item_render_order")
+        if order is not None and (not isinstance(order, list) or any(not isinstance(name, str) or name not in children for name in order)):
+            raise ValueError("composite item_render_order must name existing children")
+        for child in children.values():
+            convert_model_metadata(child)
+        return model
+    if "loader" in model:
+        return model
+
+    def walk(value):
+        if isinstance(value, dict):
+            if "neoforge_data" in value:
+                if "forge_data" in value:
+                    raise ValueError("model contains both neoforge_data and forge_data")
+                value["forge_data"] = value.pop("neoforge_data")
+            for child in value.values():
+                walk(child)
+        elif isinstance(value, list):
+            for child in value:
+                walk(child)
+
+    walk(model)
+    return model
+
+
+def convert_models() -> int:
+    changed = 0
+    for path in sorted(MODELS.rglob("*.json")):
+        text = path.read_text(encoding="utf-8-sig")
+        # Composite loaders need conversion even when they contain no face metadata.
+        if '"neoforge_data"' not in text and "neoforge:" not in text:
+            continue
+        original = json.loads(text)
+        try:
+            converted = convert_model_metadata(json.loads(text))
+        except ValueError as error:
+            raise SystemExit(f"{path.relative_to(ROOT)}: {error}") from error
+        if converted != original:
+            path.write_text(json.dumps(converted, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+            changed += 1
+    return changed
+
+
 def drop_unavailable_recipes() -> list[str]:
     """Recipes that need vanilla items added after 1.20.1 cannot load there; remove them (logged)."""
     import re as _re
@@ -173,12 +239,19 @@ def drop_unavailable_recipes() -> list[str]:
 
 
 def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--models-only", action="store_true", help="convert native model metadata and supported loaders only")
+    args = parser.parse_args()
+    if args.models_only:
+        print(f"native model metadata converted: {convert_models()}")
+        return 0
     rename_dirs()
     recipes = rewrite_json(sorted(DATA.glob("*/recipes/**/*.json")), convert_recipe)
     for line in drop_unavailable_recipes():
         print("dropped recipe (needs 1.21-only vanilla items):", line)
     loot = rewrite_json(sorted(DATA.glob("*/loot_tables/**/*.json")), walk_loot)
-    print(f"recipes converted: {recipes}, loot tables converted: {loot}")
+    models = convert_models()
+    print(f"recipes converted: {recipes}, loot tables converted: {loot}, native models converted: {models}")
     return 0
 
 

@@ -14,6 +14,7 @@ import com.stardew.craft.mixin.TownDoorGameRendererAccessor;
 import com.stardew.craft.mixin.TownDoorLevelRendererAccessor;
 import com.stardew.craft.mixin.TownDoorMinecraftAccessor;
 import com.stardew.craft.mixin.TownDoorSectionRenderDispatcherAccessor;
+import com.stardew.craft.mixin.StardewCraftMixinPlugin;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.Camera;
 import com.stardew.craft.port.net.minecraft.client.DeltaTracker;
@@ -511,6 +512,7 @@ final class TownDoorRenderer implements AutoCloseable {
         private Method emptyLists;
         private Field sectionManager;
         private Field renderLists;
+        private EmbeddiumRenderLists listSnapshots;
         private final Map<Integer, Object> portalLists = new HashMap<>();
 
         void clear() {
@@ -526,7 +528,7 @@ final class TownDoorRenderer implements AutoCloseable {
             if (!present) return Token.NONE;
             Object sodiumRenderer = getWorldRenderer.invoke(renderer);
             Object manager = sectionManager.get(sodiumRenderer);
-            Object outerLists = renderLists.get(manager);
+            Object outerLists = listSnapshots.copy(renderLists.get(manager));
             Object cachedLists = portalLists.computeIfAbsent(doorId, ignored -> {
                 try {
                     return emptyLists.invoke(null);
@@ -549,7 +551,7 @@ final class TownDoorRenderer implements AutoCloseable {
 
         void restore(Token token) throws Exception {
             if (token == Token.NONE) return;
-            portalLists.put(token.doorId, renderLists.get(token.manager));
+            portalLists.put(token.doorId, listSnapshots.copy(renderLists.get(token.manager)));
             renderLists.set(token.manager, token.outerLists);
             scheduleUpdate.invoke(token.renderer);
         }
@@ -560,7 +562,7 @@ final class TownDoorRenderer implements AutoCloseable {
             if (!present || cachedLists == null) return false;
             Object sodiumRenderer = getWorldRenderer.invoke(renderer);
             Object manager = sectionManager.get(sodiumRenderer);
-            Object mainLists = renderLists.get(manager);
+            Object mainLists = listSnapshots.copy(renderLists.get(manager));
             scheduleUpdate.invoke(sodiumRenderer);
             renderLists.set(manager, cachedLists);
             portalLists.put(doorId, mainLists);
@@ -571,12 +573,13 @@ final class TownDoorRenderer implements AutoCloseable {
         private void initialize(net.minecraft.client.renderer.LevelRenderer renderer) throws Exception {
             if (initialized) return;
             initialized = true;
+            if (!StardewCraftMixinPlugin.hasAuditedEmbeddium()) return;
             try {
                 ClassLoader loader = renderer.getClass().getClassLoader();
-                Class<?> extension = Class.forName("net.caffeinemc.mods.sodium.client.world.LevelRendererExtension", false, loader);
-                Class<?> sodiumRenderer = Class.forName("net.caffeinemc.mods.sodium.client.render.SodiumWorldRenderer", false, loader);
-                Class<?> manager = Class.forName("net.caffeinemc.mods.sodium.client.render.chunk.RenderSectionManager", false, loader);
-                Class<?> lists = Class.forName("net.caffeinemc.mods.sodium.client.render.chunk.lists.SortedRenderLists", false, loader);
+                Class<?> extension = Class.forName("me.jellysquid.mods.sodium.client.world.WorldRendererExtended", false, loader);
+                Class<?> sodiumRenderer = Class.forName("me.jellysquid.mods.sodium.client.render.SodiumWorldRenderer", false, loader);
+                Class<?> manager = Class.forName("me.jellysquid.mods.sodium.client.render.chunk.RenderSectionManager", false, loader);
+                Class<?> lists = Class.forName("me.jellysquid.mods.sodium.client.render.chunk.lists.SortedRenderLists", false, loader);
                 getWorldRenderer = extension.getMethod("sodium$getWorldRenderer");
                 scheduleUpdate = sodiumRenderer.getMethod("scheduleTerrainUpdate");
                 emptyLists = lists.getMethod("empty");
@@ -584,6 +587,7 @@ final class TownDoorRenderer implements AutoCloseable {
                 renderLists = manager.getDeclaredField("renderLists");
                 sectionManager.setAccessible(true);
                 renderLists.setAccessible(true);
+                listSnapshots = new EmbeddiumRenderLists(loader);
                 present = true;
             } catch (ClassNotFoundException ignored) {
                 present = false;
@@ -599,17 +603,35 @@ final class TownDoorRenderer implements AutoCloseable {
     private static final class IrisContext {
         private boolean initialized;
         private Field pipeline;
+        private Method getPipelineManager;
+        private Field managerPipeline;
 
-        Token swapOut(net.minecraft.client.renderer.LevelRenderer renderer) throws IllegalAccessException {
+        Token swapOut(net.minecraft.client.renderer.LevelRenderer renderer) throws ReflectiveOperationException {
             initialize(renderer);
             if (pipeline == null) return Token.NONE;
             Object old = pipeline.get(renderer);
+            Object manager = getPipelineManager == null ? null : getPipelineManager.invoke(null);
+            Object oldManagerPipeline = manager == null ? null : managerPipeline.get(manager);
+            Object vanilla = manager == null ? null : TownDoorIrisPipeline.vanilla();
+            // Oculus' terrain shader/framebuffer selection reads the manager, not LevelRenderer.
+            // Do not let the nested pass recursively re-enter the outer deferred pipeline.
+            if (manager != null && vanilla == null) throw new IllegalStateException("Oculus nested vanilla pipeline unavailable");
             pipeline.set(renderer, null);
-            return new Token(renderer, old);
+            try {
+                if (manager != null) managerPipeline.set(manager, vanilla);
+            } catch (IllegalAccessException error) {
+                pipeline.set(renderer, old);
+                throw error;
+            }
+            return new Token(renderer, old, manager, oldManagerPipeline);
         }
 
         void restore(Token token) throws IllegalAccessException {
-            if (token != Token.NONE) pipeline.set(token.renderer, token.pipeline);
+            if (token != Token.NONE) {
+                try {
+                    if (token.manager != null) managerPipeline.set(token.manager, token.managerPipeline);
+                } finally { pipeline.set(token.renderer, token.pipeline); }
+            }
         }
 
         private void initialize(net.minecraft.client.renderer.LevelRenderer renderer) {
@@ -618,13 +640,19 @@ final class TownDoorRenderer implements AutoCloseable {
             try {
                 pipeline = renderer.getClass().getDeclaredField("pipeline");
                 pipeline.setAccessible(true);
-            } catch (NoSuchFieldException ignored) {
+                if (StardewCraftMixinPlugin.hasAuditedOculus()) {
+                    ClassLoader loader = renderer.getClass().getClassLoader();
+                    getPipelineManager = Class.forName("net.irisshaders.iris.Iris", false, loader).getMethod("getPipelineManager");
+                    managerPipeline = Class.forName("net.irisshaders.iris.pipeline.PipelineManager", false, loader).getDeclaredField("pipeline");
+                    managerPipeline.setAccessible(true);
+                }
+            } catch (ReflectiveOperationException ignored) {
                 pipeline = null;
             }
         }
 
-        private record Token(Object renderer, Object pipeline) {
-            private static final Token NONE = new Token(null, null);
+        private record Token(Object renderer, Object pipeline, Object manager, Object managerPipeline) {
+            private static final Token NONE = new Token(null, null, null, null);
         }
     }
 

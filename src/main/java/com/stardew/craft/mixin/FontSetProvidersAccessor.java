@@ -12,4 +12,8 @@ public interface FontSetProvidersAccessor {
     // PORT(1.20.1): 1.20.5+ activeProviders (option-filtered) is 1.20.1 providers (no font options).
     @Accessor("providers")
     List<GlyphProvider> stardewcraft$getActiveProviders();
+
+    // PORT(1.20.1): 1.21 FontSet#name() (used by the 1.21.1 FontManager#getFontSetCached emulation).
+    @Accessor("name")
+    net.minecraft.resources.ResourceLocation stardewcraft$getName();
 }

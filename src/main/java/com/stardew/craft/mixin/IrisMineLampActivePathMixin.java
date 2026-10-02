@@ -11,7 +11,8 @@ public abstract class IrisMineLampActivePathMixin {
     private static void stardewcraft$prepare(java.nio.file.Path directory,String file,CallbackInfoReturnable<String> cir) {
         ComplementaryLampBridge.beginPack(directory,file);
     }
-    @Inject(method="lambda$new$8",at=@At("RETURN"),require=0)
+    // PORT(1.20.1): Oculus 1.8.0's active preprocessed source is lambda$new$9, not $8.
+    @Inject(method="lambda$new$9",at=@At("RETURN"),require=1)
     private static void stardewcraft$activePath(List<?> transforms,@Coerce Object processor,Iterable<?> environment,
             @Coerce Object path,CallbackInfoReturnable<String> cir) {
         ComplementaryLampBridge.observeCompiledSource(path,cir.getReturnValue());

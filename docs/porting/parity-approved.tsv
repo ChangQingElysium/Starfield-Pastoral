@@ -15,17 +15,8 @@ recipe	minecraft:flow_armor_trim_smithing_template	version-fact: 1.21 item
 recipe	minecraft:copper_door	version-fact: 1.20.3 item
 recipe	minecraft:copper_trapdoor	version-fact: 1.20.3 item
 recipe	minecraft:crafter	version-fact: 1.20.3 item
-registry	forge:fluid_type	version-fact: loader registry (NeoForge: neoforge:fluid_type)
-dynamic_registry	forge:fluid_type	version-fact: loader registry (NeoForge: neoforge:fluid_type)
-registry	neoforge:fluid_type	version-fact: loader registry (Forge: forge:fluid_type)
-dynamic_registry	neoforge:fluid_type	version-fact: loader registry (Forge: forge:fluid_type)
-registry	neoforge:attachment_types	port-mechanism: the attachment type registry lives inside the port layer (PortAttachments), same ids
-dynamic_registry	neoforge:attachment_types	port-mechanism: as above
-registry	minecraft:enchantment	port-mechanism: 1.21 data-driven enchantments are code-registered under the same ids (PortEnchantments)
-registry	minecraft:attribute	port-mechanism: 1.21-only step_height/scale emulated as stardewcraft:generic.* attributes (see bulk-port-gaps.md)
-dynamic_registry	minecraft:attribute	port-mechanism: as above
-registry	minecraft:particle_type	port-mechanism: stardewcraft:port_entity_effect carries the 1.21 entity_effect colour
-dynamic_registry	minecraft:particle_type	port-mechanism: as above
+# Registry ids are compared strictly. compare_parity normalises only exact port-only ids and
+# verified registry-view/key aliases; a whole registry must never be approved here.
 gametest	anviluses1211rulesforstardewitems	port-mechanism: port-only verification test
 gametest	enchantcommanduses1211rulesforstardewitems	port-mechanism: port-only verification test
 gametest	enchantingtablecandidatesmatch1211	port-mechanism: port-only verification test

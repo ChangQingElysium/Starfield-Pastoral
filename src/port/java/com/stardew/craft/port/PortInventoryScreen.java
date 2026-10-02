@@ -53,7 +53,8 @@ public final class PortInventoryScreen {
         entity.setXRot(-angleYComponent * 20.0F);
         entity.yHeadRot = entity.getYRot();
         entity.yHeadRotO = entity.getYRot();
-        // 1.21 getScale() is age scale x SCALE attribute; 1.20.1 has no SCALE attribute and getScale() is the age scale.
+        // 1.21 getScale() is the SCALE attribute only (age scale is separate); PortLivingEntityScaleMixin gives
+        // StardewCraft entities that value, other entities return 1.20.1's (age scale, 1 for players).
         float entityScale = entity.getScale();
         Vector3f translate = new Vector3f(0.0F, entity.getBbHeight() / 2.0F + yOffset * entityScale, 0.0F);
         float renderScale = (float) scale / entityScale;

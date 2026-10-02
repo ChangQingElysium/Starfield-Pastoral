@@ -18,7 +18,7 @@ import net.minecraftforge.items.IItemHandler;
 import javax.annotation.Nullable;
 
 public class SolarPanelBlockEntity extends BlockEntity implements UtilityAutomationAccess, FairyDustAcceleratable, AdvanceableUtility {
-    private static final int EFFECTIVE_MINUTES_PER_DAY = 1260;
+    private static final int EFFECTIVE_MINUTES_PER_DAY = TimedProductionBlockEntity.EFFECTIVE_MINUTES_PER_DAY;
 
     private static final String TAG_PRODUCT = "product";
     private static final String TAG_REMAINING = "remainingAbsMinutes";
@@ -304,6 +304,7 @@ public class SolarPanelBlockEntity extends BlockEntity implements UtilityAutomat
         tag.putBoolean(TAG_PAUSED, paused);
         tag.putBoolean("minuteMode", minuteMode);
         tag.putLong("lastAbsMinute", lastAbsMinute);
+        tag.putInt(TimedProductionBlockEntity.TAG_MACHINE_CLOCK, EFFECTIVE_MINUTES_PER_DAY);
     }
 
     @SuppressWarnings("null")
@@ -325,5 +326,13 @@ public class SolarPanelBlockEntity extends BlockEntity implements UtilityAutomat
         paused = tag.getBoolean(TAG_PAUSED);
         minuteMode = tag.getBoolean("minuteMode");
         lastAbsMinute = tag.contains("lastAbsMinute") ? tag.getLong("lastAbsMinute") : -1;
+        if (!tag.contains(TimedProductionBlockEntity.TAG_MACHINE_CLOCK)) {
+            // Pre-F-1 charge was counted on the 1260-minute day; keep the same share of days left.
+            if (remainingAbsMinutes > 0) {
+                remainingAbsMinutes = com.stardew.craft.port.PortJava.ceilDiv(remainingAbsMinutes * EFFECTIVE_MINUTES_PER_DAY,
+                        (long) TimedProductionBlockEntity.LEGACY_MINUTES_PER_DAY);
+            }
+            lastAbsMinute = TimedProductionBlockEntity.migrateLegacyAbsMinute(lastAbsMinute);
+        }
     }
 }

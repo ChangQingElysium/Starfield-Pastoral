@@ -151,7 +151,7 @@ public class KegBlockEntity extends TimedProductionBlockEntity {
 		}
 		QualityHelper.setQuality(output, QualityHelper.NORMAL);
 		var plan = prepareProduction(
-				stack, output, recipe.minutes(),
+				stack, output, recipeMinutes(recipe),
 				player, false);
 		if (plan.isEmpty()) {
 			return InsertResult.fail();
@@ -206,7 +206,7 @@ public class KegBlockEntity extends TimedProductionBlockEntity {
 			FlavoredArtisanOutputResolver.apply(recipe.preserveType(), stack, output);
 		}
 		QualityHelper.setQuality(output, QualityHelper.NORMAL);
-		int minutes = recipe.minutes();
+		int minutes = recipeMinutes(recipe);
 		var plan = prepareProduction(
 				stack, output, minutes,
 				null, true);

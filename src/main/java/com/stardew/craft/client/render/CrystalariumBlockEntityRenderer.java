@@ -1,5 +1,6 @@
 package com.stardew.craft.client.render;
 
+import com.stardew.craft.port.PortCamera;
 import net.minecraft.util.RandomSource;
 
 import net.minecraft.client.resources.model.BakedModel;
@@ -75,7 +76,7 @@ public class CrystalariumBlockEntityRenderer implements net.minecraft.client.ren
 
         poseStack.pushPose();
         poseStack.translate(0.5f, bubbleY, 0.5f);
-        poseStack.mulPose(Minecraft.getInstance().getEntityRenderDispatcher().cameraOrientation());
+        poseStack.mulPose(PortCamera.cameraOrientation(Minecraft.getInstance().getEntityRenderDispatcher()));
 
         float w = 20 * PX;
         float h = 24 * PX;

@@ -144,7 +144,7 @@ public class TapperBlockEntity extends TimedProductionBlockEntity {
 
 		this.treeId = supportDef.id();
 		product = cycle.createOutput(level.random);
-		readyAtAbsMinute = cycle.deadline(getCurrentAbsMinute(), "tapper");
+		readyAtAbsMinute = deadline(cycle);
 		ready = false;
 		setChanged();
 		syncToClient();
@@ -182,12 +182,27 @@ public class TapperBlockEntity extends TimedProductionBlockEntity {
 		}
 		treeId = expectedTree.typeId().toString();
 		product = configured != null ? configured.createOutput(level.random) : cycle.output();
-		readyAtAbsMinute = configured != null ? configured.deadline(getCurrentAbsMinute(), "tapper") :
+		readyAtAbsMinute = configured != null ? deadline(configured) :
 				getCurrentAbsMinute() + MachineProductionData.minutes("tapper", Math.toIntExact(
-                        (getCurrentDayIndex() - 1 + cycle.daysUntilReady()) * EFFECTIVE_MINUTES_PER_DAY - getCurrentAbsMinute()));
+                        (getCurrentDayIndex() - 1 + adjustedDays(cycle.daysUntilReady())) * EFFECTIVE_MINUTES_PER_DAY - getCurrentAbsMinute()));
 		ready = false;
 		setChanged();
 		syncToClient();
+	}
+
+	private int adjustedDays(int days) {
+		int multiplier = getBlockState().getBlock() instanceof TapperBlock block ? block.productionMultiplier() : 1;
+		return Math.max(1, Math.floorDiv(days, multiplier));
+	}
+
+	private long deadline(MachineProductionData.Cycle cycle) {
+		int multiplier = getBlockState().getBlock() instanceof TapperBlock block ? block.productionMultiplier() : 1;
+		if (multiplier == 1) return cycle.deadline(getCurrentAbsMinute(), "tapper");
+		// Tree.TryGetTapperOutput rounds the day count before CalculateMinutesUntilMorning.
+		int duration = cycle.mornings() ? adjustedDays(cycle.duration())
+				: Math.max(1, (int) Math.ceil((double) cycle.duration() / multiplier));
+		return new MachineProductionData.Cycle(cycle.output(), cycle.minCount(), cycle.maxCount(), duration, cycle.mornings())
+				.deadline(getCurrentAbsMinute(), "tapper");
 	}
 
 	public ItemStack harvestOne() {

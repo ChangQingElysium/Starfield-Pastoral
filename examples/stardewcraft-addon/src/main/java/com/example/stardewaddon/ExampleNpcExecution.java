@@ -8,7 +8,7 @@ import java.util.Optional;
 public final class ExampleNpcExecution {
     private ExampleNpcExecution() {}
     public static void register() {
-        StardewNpcExecution.registerCondition(ResourceLocation.parse("example_stardew_addon:archivist_hours"),100,
+        StardewNpcExecution.registerCondition(new ResourceLocation("example_stardew_addon:archivist_hours"),100,
                 context -> context.expression().equals("example_stardew_addon:daylight")
                         ? Optional.of(context.level().isDay()) : Optional.empty());
     }

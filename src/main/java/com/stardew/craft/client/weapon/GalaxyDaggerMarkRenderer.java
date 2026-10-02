@@ -1,5 +1,6 @@
 package com.stardew.craft.client.weapon;
 
+import com.stardew.craft.port.PortCamera;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.stardew.craft.Config;
 import net.minecraft.client.Minecraft;
@@ -36,7 +37,7 @@ public final class GalaxyDaggerMarkRenderer {
             float size = 0.25f * (1 + 0.055f * (float) Math.sin((tick + partial) * 0.55));
             int alpha = (int) (230 * Math.min(1, GalaxyDaggerMarkClientState.getRemainingRatio(id, tick) / 0.2f));
             stack.pushPose(); stack.translate(point.x, point.y, point.z);
-            stack.mulPose(event.getCamera().rotation());
+            stack.mulPose(PortCamera.rotation(event.getCamera()));
             Matrix4f pose = stack.last().pose();
             WeaponEffectShapes.mark(out, pose, WeaponEffectShapes.Mark.STAR, size, 182, 166, 255, alpha);
             stack.popPose();

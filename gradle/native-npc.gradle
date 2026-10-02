@@ -29,8 +29,39 @@ tasks.named('processResources') {
     }
 }
 
+// Keep the maintained checks intact; bridge only Java 21 library calls for the Forge JVM.
+def nativeJava17ChecksDirectory = layout.buildDirectory.dir('generated/sources/portNativeChecks')
+def nativeJava17CheckSources = [
+        'NativeHairChecks.java': 'tools/art/NativeHairChecks.java',
+        'NativeGusSupportChecks.java': 'tools/art/NativeGusSupportChecks.java',
+        'NativeEvelynActivityChecks.java': 'tools/art/NativeEvelynActivityChecks.java',
+        'NativeActorAnimationChecks.java': 'tools/art/NativeActorAnimationChecks.java']
+def nativeJava17Replacements = [
+        'part.getValue().getFirst()': 'com.stardew.craft.port.PortJava.getFirst(part.getValue())',
+        'qs.getFirst()': 'com.stardew.craft.port.PortJava.getFirst(qs)',
+        'Math.clamp(': 'com.stardew.craft.port.PortJava.clamp(']
+def preparePortNativeCheckSources = tasks.register('preparePortNativeCheckSources') {
+    inputs.files(nativeJava17CheckSources.values())
+    inputs.property('sourceReplacements', nativeJava17Replacements)
+    outputs.files(nativeJava17CheckSources.collect { filename, sourcePath ->
+        nativeJava17ChecksDirectory.map { directory -> directory.file(filename) }
+    })
+    doLast {
+        def destination = nativeJava17ChecksDirectory.get().asFile
+        destination.mkdirs()
+        nativeJava17CheckSources.each { filename, sourcePath ->
+            def content = file(sourcePath).getText('UTF-8')
+            nativeJava17Replacements.each { original, replacement -> content = content.replace(original, replacement) }
+            if (content =~ /\.get(?:First|Last)\(\)|Math\.clamp\(/) {
+                throw new GradleException("Unadapted Java 21 call in ${sourcePath}; review the Forge test-source bridge.")
+            }
+            new File(destination, filename).setText(content, 'UTF-8')
+        }
+    }
+}
 def compileNativeNpcChecks = tasks.register('compileNativeNpcChecks', JavaCompile) {
-    source = files('tools/art/SamScheduleChecks.java', 'src/main/java/com/stardew/craft/npc/runtime/SamSchedulePolicy.java', 'src/main/java/com/stardew/craft/client/npcnative/NativeSamSchedulePose.java', 'tools/art/NativeConstructionChecks.java', 'tools/art/NativeGeorgeChecks.java', 'tools/art/NativeNpcChecks.java', 'tools/art/NativeCharacterChecks.java', 'tools/art/NativeClothChecks.java', 'tools/art/NativeHairChecks.java',
+    dependsOn tasks.named('classes'), preparePortNativeCheckSources
+    source = files('tools/art/SamScheduleChecks.java', 'src/main/java/com/stardew/craft/npc/runtime/SamSchedulePolicy.java', 'src/main/java/com/stardew/craft/client/npcnative/NativeSamSchedulePose.java', 'tools/art/NativeConstructionChecks.java', 'tools/art/NativeGeorgeChecks.java', 'tools/art/NativeNpcChecks.java', 'tools/art/NativeCharacterChecks.java', 'tools/art/NativeClothChecks.java', nativeJava17ChecksDirectory.map { it.file('NativeHairChecks.java') },
             'tools/art/NpcMovementCapabilityChecks.java',
             'src/main/java/com/stardew/craft/npc/animation/SamActivity.java',
             'src/main/java/com/stardew/craft/npc/data/NpcAnimationInspector.java',
@@ -50,22 +81,22 @@ def compileNativeNpcChecks = tasks.register('compileNativeNpcChecks', JavaCompil
             'src/main/java/com/stardew/craft/npc/attention/NpcStareTracker.java')
     source 'tools/art/NativeJointSkinChecks.java'
     source 'tools/art/NativeGusActivityChecks.java'
-    source 'tools/art/NativeGusSupportChecks.java', 'src/main/java/com/stardew/craft/client/npcnative/NativeActivityStandingPose.java'
-    source 'tools/art/NativeEvelynActivityChecks.java'
-    source 'tools/art/NativeActorAnimationChecks.java', 'src/main/java/com/stardew/craft/client/npcnative/NativeActorAnimation.java'
+    source nativeJava17ChecksDirectory.map { it.file('NativeGusSupportChecks.java') }, 'src/main/java/com/stardew/craft/client/npcnative/NativeActivityStandingPose.java'
+    source nativeJava17ChecksDirectory.map { it.file('NativeEvelynActivityChecks.java') }
+    source nativeJava17ChecksDirectory.map { it.file('NativeActorAnimationChecks.java') }, 'src/main/java/com/stardew/craft/client/npcnative/NativeActorAnimation.java'
     source 'tools/art/NativeNpcTextureChecks.java'
     source 'tools/art/NpcModelOwnershipChecks.java', 'src/main/java/com/stardew/craft/npc/data/NpcModelOwnership.java'
-    classpath = sourceSets.main.compileClasspath
+    classpath = sourceSets.main.output + sourceSets.main.compileClasspath
     destinationDirectory = layout.buildDirectory.dir('classes/nativeNpcChecks')
-    javaCompiler = javaToolchains.compilerFor { languageVersion = JavaLanguageVersion.of(21) }
+    javaCompiler = javaToolchains.compilerFor { languageVersion = JavaLanguageVersion.of(17) }
 }
 def checkNativeNpcJointSkin = tasks.register('checkNativeNpcJointSkin', JavaExec) {
     group = 'verification'
     description = 'Checks continuous NPC joint surfaces with the production pose evaluator.'
     dependsOn compileNativeNpcChecks, compileNativeNpcModels
-    classpath = files(compileNativeNpcChecks) + configurations.runtimeClasspath
+    classpath = files(compileNativeNpcChecks) + sourceSets.main.output + configurations.runtimeClasspath
     mainClass = 'NativeJointSkinChecks'
-    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(17) }
     args layout.buildDirectory.dir('generated/resources/nativeNpc/assets/stardewcraft/npc_native').get().asFile.absolutePath,
             layout.buildDirectory.dir('reports/native-npc-joints').get().asFile.absolutePath
     if (providers.gradleProperty('nativeNpcPreview').getOrElse('false').toBoolean()) args '--preview'
@@ -74,9 +105,9 @@ def checkNativeNpcTextures = tasks.register('checkNativeNpcTextures', JavaExec) 
     group = 'verification'
     description = 'Decodes all processed native NPC textures with the Minecraft image decoder.'
     dependsOn compileNativeNpcChecks, tasks.named('processResources')
-    classpath = files(compileNativeNpcChecks) + configurations.runtimeClasspath
+    classpath = files(compileNativeNpcChecks) + sourceSets.main.output + configurations.runtimeClasspath
     mainClass = 'NativeNpcTextureChecks'
-    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(17) }
     args layout.buildDirectory.dir('resources/main').get().asFile.absolutePath
 }
 tasks.named('check') { dependsOn checkNativeNpcTextures }
@@ -85,9 +116,9 @@ def checkNativeActorAnimation = tasks.register('checkNativeActorAnimation', Java
     group = 'verification'
     description = 'Checks cutscene NPC animation aliases and timing on current native models.'
     dependsOn compileNativeNpcChecks, tasks.named('processResources')
-    classpath = files(compileNativeNpcChecks) + configurations.runtimeClasspath
+    classpath = files(compileNativeNpcChecks) + sourceSets.main.output + configurations.runtimeClasspath
     mainClass = 'NativeActorAnimationChecks'
-    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(17) }
     args layout.buildDirectory.dir('generated/resources/nativeNpc/assets/stardewcraft/npc_native').get().asFile.absolutePath,
             layout.buildDirectory.dir('resources/main/data/stardewcraft/cutscene_events').get().asFile.absolutePath,
             layout.buildDirectory.dir('resources/main/assets/stardewcraft/animations/entity/npc').get().asFile.absolutePath
@@ -97,9 +128,9 @@ def checkNpcModelOwnership = tasks.register('checkNpcModelOwnership', JavaExec) 
     group = 'verification'
     description = 'Rejects legacy assets and fallback for every shipped native NPC replacement.'
     dependsOn compileNativeNpcChecks, tasks.named('processResources')
-    classpath = files(compileNativeNpcChecks, sourceSets.main.output.resourcesDir) + configurations.runtimeClasspath
+    classpath = files(compileNativeNpcChecks) + sourceSets.main.output + configurations.runtimeClasspath
     mainClass = 'NpcModelOwnershipChecks'
-    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(17) }
     args file('src/main/resources').absolutePath, processedNpcResources
 }
 tasks.named('check') { dependsOn checkNpcModelOwnership }
@@ -107,9 +138,9 @@ def checkNativeNpcAnimation = tasks.register('checkNativeNpcAnimation', JavaExec
     group = 'verification'
     description = 'Checks the native NPC player without starting Minecraft.'
     dependsOn compileNativeNpcChecks, compileNativeNpcModels
-    classpath = files(compileNativeNpcChecks) + configurations.runtimeClasspath
+    classpath = files(compileNativeNpcChecks) + sourceSets.main.output + configurations.runtimeClasspath
     mainClass = 'NativeNpcChecks'
-    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(17) }
     args layout.buildDirectory.file('generated/resources/nativeNpc/assets/stardewcraft/npc_native/sam.json').get().asFile.absolutePath
     if (providers.gradleProperty('nativeNpcPreview').getOrElse('false').toBoolean()) {
         args layout.buildDirectory.file('reports/native-npc/preview-poses.json').get().asFile.absolutePath
@@ -125,9 +156,9 @@ def checkNpcMovementCapabilities = tasks.register('checkNpcMovementCapabilities'
     group = 'verification'
     description = 'Checks shipped NPC pathing capabilities and native/legacy walk detection without Minecraft.'
     dependsOn compileNativeNpcChecks, tasks.named('processResources')
-    classpath = files(compileNativeNpcChecks, sourceSets.main.output.resourcesDir) + configurations.runtimeClasspath
+    classpath = files(compileNativeNpcChecks) + sourceSets.main.output + configurations.runtimeClasspath
     mainClass = 'NpcMovementCapabilityChecks'
-    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(17) }
 }
 tasks.named('check').configure { dependsOn checkNpcMovementCapabilities }
 
@@ -135,9 +166,9 @@ def checkNativeCharacterAnimation = tasks.register('checkNativeCharacterAnimatio
     group = 'verification'
     description = 'Checks migrated character contact geometry and daily motion.'
     dependsOn compileNativeNpcChecks, compileNativeNpcModels
-    classpath = files(compileNativeNpcChecks) + configurations.runtimeClasspath
+    classpath = files(compileNativeNpcChecks) + sourceSets.main.output + configurations.runtimeClasspath
     mainClass = 'NativeCharacterChecks'
-    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(17) }
     args layout.buildDirectory.file('generated/resources/nativeNpc/assets/stardewcraft/npc_native/sebastian.json').get().asFile.absolutePath
     if (providers.gradleProperty('nativeNpcPreview').getOrElse('false').toBoolean()) {
         args layout.buildDirectory.file('reports/native-npc/sebastian-poses.json').get().asFile.absolutePath
@@ -149,9 +180,9 @@ def checkAbigailAnimation = tasks.register('checkAbigailAnimation', JavaExec) {
     group = 'verification'
     description = 'Checks migrated character contact geometry and daily motion.'
     dependsOn compileNativeNpcChecks, compileNativeNpcModels
-    classpath = files(compileNativeNpcChecks) + configurations.runtimeClasspath
+    classpath = files(compileNativeNpcChecks) + sourceSets.main.output + configurations.runtimeClasspath
     mainClass = 'NativeCharacterChecks'
-    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(17) }
     args layout.buildDirectory.file('generated/resources/nativeNpc/assets/stardewcraft/npc_native/abigail.json').get().asFile.absolutePath
     if (providers.gradleProperty('nativeNpcPreview').getOrElse('false').toBoolean()) {
         args layout.buildDirectory.file('reports/native-npc/abigail-poses.json').get().asFile.absolutePath
@@ -163,9 +194,9 @@ def checkRobinAnimation = tasks.register('checkRobinAnimation', JavaExec) {
     group = 'verification'
     description = 'Checks migrated character contact geometry and daily motion.'
     dependsOn compileNativeNpcChecks, compileNativeNpcModels
-    classpath = files(compileNativeNpcChecks) + configurations.runtimeClasspath
+    classpath = files(compileNativeNpcChecks) + sourceSets.main.output + configurations.runtimeClasspath
     mainClass = 'NativeCharacterChecks'
-    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(17) }
     args layout.buildDirectory.file('generated/resources/nativeNpc/assets/stardewcraft/npc_native/robin.json').get().asFile.absolutePath
     if (providers.gradleProperty('nativeNpcPreview').getOrElse('false').toBoolean()) {
         args layout.buildDirectory.file('reports/native-npc/robin-poses.json').get().asFile.absolutePath
@@ -178,9 +209,9 @@ tasks.named('check').configure { dependsOn checkRobinAnimation }
         group = 'verification'
         description = 'Checks ' + id + ' contact, character motion and interaction transitions.'
         dependsOn compileNativeNpcChecks, compileNativeNpcModels
-        classpath = files(compileNativeNpcChecks) + configurations.runtimeClasspath
+        classpath = files(compileNativeNpcChecks) + sourceSets.main.output + configurations.runtimeClasspath
         mainClass = 'NativeCharacterChecks'
-        javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
+        javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(17) }
         args layout.buildDirectory.file('generated/resources/nativeNpc/assets/stardewcraft/npc_native/' + id + '.json').get().asFile.absolutePath
         if (providers.gradleProperty('nativeNpcPreview').getOrElse('false').toBoolean()) {
             args layout.buildDirectory.file('reports/native-npc/' + id + '-poses.json').get().asFile.absolutePath
@@ -193,9 +224,9 @@ def checkGeorgeAnimation = tasks.register('checkGeorgeAnimation', JavaExec) {
     group = 'verification'
     description = 'Checks George seated supports, whole-arm clearance and wheelchair odometry.'
     dependsOn compileNativeNpcChecks, compileNativeNpcModels
-    classpath = files(compileNativeNpcChecks) + configurations.runtimeClasspath
+    classpath = files(compileNativeNpcChecks) + sourceSets.main.output + configurations.runtimeClasspath
     mainClass = 'NativeGeorgeChecks'
-    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(17) }
     args layout.buildDirectory.file('generated/resources/nativeNpc/assets/stardewcraft/npc_native/george.json').get().asFile.absolutePath
     if (providers.gradleProperty('nativeNpcPreview').getOrElse('false').toBoolean()) {
         args layout.buildDirectory.file('reports/native-npc/george-poses.json').get().asFile.absolutePath
@@ -208,9 +239,9 @@ def checkConstructionAnimation = tasks.register('checkConstructionAnimation', Ja
     group = 'verification'
     description = 'Checks the native construction clips, normals and hammer contacts without Minecraft.'
     dependsOn compileNativeNpcChecks, compileNativeNpcModels
-    classpath = files(compileNativeNpcChecks) + configurations.runtimeClasspath
+    classpath = files(compileNativeNpcChecks) + sourceSets.main.output + configurations.runtimeClasspath
     mainClass = 'NativeConstructionChecks'
-    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(17) }
     args layout.buildDirectory.file('generated/resources/nativeNpc/assets/stardewcraft/npc_native/robin_construction.json').get().asFile.absolutePath,
             layout.buildDirectory.file('reports/native-npc/construction-poses.json').get().asFile.absolutePath
 }
@@ -220,9 +251,9 @@ tasks.named('check').configure { dependsOn checkConstructionAnimation }
 def checkSamSchedule = tasks.register('checkSamSchedule', JavaExec) {
     group = 'verification'
     dependsOn compileNativeNpcChecks, compileNativeNpcModels
-    classpath = files(compileNativeNpcChecks) + configurations.runtimeClasspath
+    classpath = files(compileNativeNpcChecks) + sourceSets.main.output + configurations.runtimeClasspath
     mainClass = 'com.stardew.craft.client.npcnative.SamScheduleChecks'
-    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(17) }
     args layout.buildDirectory.dir('generated/resources/nativeNpc/assets/stardewcraft/npc_native').get().asFile.absolutePath
 }
 tasks.named('check').configure { dependsOn checkSamSchedule }
@@ -231,9 +262,9 @@ tasks.named('check').configure { dependsOn checkSamSchedule }
 def checkGusActivity = tasks.register('checkGusActivity', JavaExec) {
     group = 'verification'
     dependsOn compileNativeNpcChecks, compileNativeNpcModels
-    classpath = files(compileNativeNpcChecks) + configurations.runtimeClasspath
+    classpath = files(compileNativeNpcChecks) + sourceSets.main.output + configurations.runtimeClasspath
     mainClass = 'NativeGusActivityChecks'
-    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(17) }
     args layout.buildDirectory.file('generated/resources/nativeNpc/assets/stardewcraft/npc_native/gus_clean.json').get().asFile.absolutePath
     if (providers.gradleProperty('nativeNpcPreview').getOrElse('false').toBoolean()) {
         args layout.buildDirectory.file('reports/gus-clean/poses.json').get().asFile.absolutePath
@@ -244,9 +275,9 @@ tasks.named('check') { dependsOn checkGusActivity }
 def checkGusSupport = tasks.register('checkGusSupport', JavaExec) {
     group = 'verification'
     dependsOn compileNativeNpcChecks, compileNativeNpcModels
-    classpath = files(compileNativeNpcChecks) + configurations.runtimeClasspath
+    classpath = files(compileNativeNpcChecks) + sourceSets.main.output + configurations.runtimeClasspath
     mainClass = 'NativeGusSupportChecks'
-    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(17) }
     args layout.buildDirectory.dir('generated/resources/nativeNpc/assets/stardewcraft/npc_native').get().asFile.absolutePath
     if (providers.gradleProperty('nativeNpcPreview').getOrElse('false').toBoolean()) {
         args layout.buildDirectory.dir('reports').get().asFile.absolutePath
@@ -257,9 +288,9 @@ tasks.named('check') { dependsOn checkGusSupport }
 def checkEvelynActivity = tasks.register('checkEvelynActivity', JavaExec) {
     group = 'verification'
     dependsOn compileNativeNpcChecks, compileNativeNpcModels
-    classpath = files(compileNativeNpcChecks) + configurations.runtimeClasspath
+    classpath = files(compileNativeNpcChecks) + sourceSets.main.output + configurations.runtimeClasspath
     mainClass = 'NativeEvelynActivityChecks'
-    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(17) }
     args layout.buildDirectory.dir('generated/resources/nativeNpc/assets/stardewcraft/npc_native').get().asFile.absolutePath
     if (providers.gradleProperty('nativeNpcPreview').getOrElse('false').toBoolean()) args layout.buildDirectory.dir('reports').get().asFile.absolutePath
 }

@@ -9,7 +9,7 @@
   },
   "preconditions": [
     { "type": "not_saw_event", "id": "special_orders_board_unlock" },
-    { "type": "player_farm_age_days", "min": 87 },
+    { "type": "player_farm_age_days", "min": 57 },
     { "type": "not_flag", "id": "specialOrdersBoardUnlocked" }
   ],
   "commands": [

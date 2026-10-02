@@ -1,0 +1,60 @@
+{
+  "variants": {
+    "facing=north,part=main,night=false": {
+      "model": "stardewcraft:block/ginger_island/basic_window",
+      "y": 0
+    },
+    "facing=north,part=extension,night=false": {
+      "model": "stardewcraft:block/ginger_island/basic_window_extension"
+    },
+    "facing=north,part=main,night=true": {
+      "model": "stardewcraft:block/ginger_island/basic_window_night",
+      "y": 0
+    },
+    "facing=north,part=extension,night=true": {
+      "model": "stardewcraft:block/ginger_island/basic_window_extension"
+    },
+    "facing=east,part=main,night=false": {
+      "model": "stardewcraft:block/ginger_island/basic_window",
+      "y": 90
+    },
+    "facing=east,part=extension,night=false": {
+      "model": "stardewcraft:block/ginger_island/basic_window_extension"
+    },
+    "facing=east,part=main,night=true": {
+      "model": "stardewcraft:block/ginger_island/basic_window_night",
+      "y": 90
+    },
+    "facing=east,part=extension,night=true": {
+      "model": "stardewcraft:block/ginger_island/basic_window_extension"
+    },
+    "facing=south,part=main,night=false": {
+      "model": "stardewcraft:block/ginger_island/basic_window",
+      "y": 180
+    },
+    "facing=south,part=extension,night=false": {
+      "model": "stardewcraft:block/ginger_island/basic_window_extension"
+    },
+    "facing=south,part=main,night=true": {
+      "model": "stardewcraft:block/ginger_island/basic_window_night",
+      "y": 180
+    },
+    "facing=south,part=extension,night=true": {
+      "model": "stardewcraft:block/ginger_island/basic_window_extension"
+    },
+    "facing=west,part=main,night=false": {
+      "model": "stardewcraft:block/ginger_island/basic_window",
+      "y": 270
+    },
+    "facing=west,part=extension,night=false": {
+      "model": "stardewcraft:block/ginger_island/basic_window_extension"
+    },
+    "facing=west,part=main,night=true": {
+      "model": "stardewcraft:block/ginger_island/basic_window_night",
+      "y": 270
+    },
+    "facing=west,part=extension,night=true": {
+      "model": "stardewcraft:block/ginger_island/basic_window_extension"
+    }
+  }
+}

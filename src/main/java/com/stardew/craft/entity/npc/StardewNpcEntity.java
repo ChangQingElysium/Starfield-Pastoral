@@ -625,13 +625,13 @@ public class StardewNpcEntity extends PathfinderMob implements AnimatedModel {
     public boolean usesNativeAttention() { return entityData.get(DATA_MOTION_PROFILE).getBoolean("attention"); }
 
     // PORT(1.20.1): 1.21 LivingEntity#getDimensions is sleeping ? SLEEPING_DIMENSIONS : getDefaultDimensions(pose)
-    // (times the 1.20.5+ scale attribute, always 1 here); 1.20.1 only has getDimensions.
+    // .scale(getScale()); 1.20.1 only has getDimensions.
     @Override public net.minecraft.world.entity.EntityDimensions getDimensions(net.minecraft.world.entity.Pose pose) {
-        return pose == net.minecraft.world.entity.Pose.SLEEPING ? SLEEPING_DIMENSIONS : getDefaultDimensions(pose);
+        return pose == net.minecraft.world.entity.Pose.SLEEPING ? SLEEPING_DIMENSIONS : getDefaultDimensions(pose).scale(getScale());
     }
     public net.minecraft.world.entity.EntityDimensions getDefaultDimensions(net.minecraft.world.entity.Pose pose) {
         var profile=entityData.get(DATA_MOTION_PROFILE);
-        return profile.isEmpty() ? super.getDimensions(pose)
+        return profile.isEmpty() ? com.stardew.craft.port.PortInheritance.defaultDimensions(this)
                 : net.minecraft.world.entity.EntityDimensions.scalable(profile.getFloat("width"),profile.getFloat("height"));
     }
 

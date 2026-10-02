@@ -456,8 +456,10 @@ public final class NpcScheduleRuntimeService {
         // 1) <season>_<day>
         candidates.add(season + "_" + day);
 
-        // 2) <day>_<hearts>
-        candidates.add(day + "_" + hearts);
+        // 2) <day>_<hearts>: vanilla tries every heart level from current down to 1.
+        for (int tryHearts = hearts; tryHearts > 0; tryHearts--) {
+            candidates.add(day + "_" + tryHearts);
+        }
 
         // 3) <day>
         candidates.add(String.valueOf(day));
@@ -467,26 +469,32 @@ public final class NpcScheduleRuntimeService {
             candidates.add("bus");
         }
 
-        // 5/6/7) Weather overrides: rain2 > rain > snow
+        // 5/6/7) Weather overrides: vanilla tries rain2 only on a 50% roll, then rain; snow is project-only.
         if (weather.contains("rain") || weather.contains("storm")) {
-            candidates.add("rain2");
+            if (rollsRain2(level, npcId, timeManager)) {
+                candidates.add("rain2");
+            }
             candidates.add("rain");
         }
         if (weather.contains("snow")) {
             candidates.add("snow");
         }
 
-        // 7) <season>_<dayOfWeek>_<hearts>
-        candidates.add(season + "_" + weekday + "_" + hearts);
-        candidates.add(season + "_" + weekdayShort + "_" + hearts);
+        // 7) <season>_<dayOfWeek>_<hearts>: vanilla steps down by two hearts per attempt.
+        for (int tryHearts = hearts; tryHearts > 0; tryHearts -= 2) {
+            candidates.add(season + "_" + weekday + "_" + tryHearts);
+            candidates.add(season + "_" + weekdayShort + "_" + tryHearts);
+        }
 
         // 8) <season>_<dayOfWeek>
         candidates.add(season + "_" + weekday);
         candidates.add(season + "_" + weekdayShort);
 
-        // 9) <dayOfWeek>_<hearts>
-        candidates.add(weekday + "_" + hearts);
-        candidates.add(weekdayShort + "_" + hearts);
+        // 9) <dayOfWeek>_<hearts>: same two-heart step as above.
+        for (int tryHearts = hearts; tryHearts > 0; tryHearts -= 2) {
+            candidates.add(weekday + "_" + tryHearts);
+            candidates.add(weekdayShort + "_" + tryHearts);
+        }
 
         // 10) <dayOfWeek>
         candidates.add(weekday);
@@ -554,6 +562,13 @@ public final class NpcScheduleRuntimeService {
             )
         );
         return null;
+    }
+
+    /** Vanilla rolls Game1.random.NextBool() once per schedule load; keep it stable for the whole day. */
+    private static boolean rollsRain2(ServerLevel level, String npcId, StardewTimeManager timeManager) {
+        long salt = canonicalNpcId(npcId).hashCode() * 0x632BE59BD9B4E019L;
+        long dayMix = timeManager.getAbsoluteDay() * 0x9E3779B97F4A7C15L;
+        return new java.util.Random(level.getSeed() ^ dayMix ^ salt ^ 0x5241494E32L).nextBoolean();
     }
 
     private static boolean shouldUsePamBusSchedule(String npcId) {

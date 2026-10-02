@@ -1,0 +1,155 @@
+{
+  "parent": "minecraft:block/block",
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "0": "stardewcraft:block/ginger_island/island_bright_longleaf_left_0",
+    "1": "stardewcraft:block/ginger_island/island_bright_longleaf_left_1",
+    "particle": "stardewcraft:block/ginger_island/island_bright_longleaf_left_particle"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        2,
+        8
+      ],
+      "to": [
+        32,
+        30,
+        8
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            10.125,
+            0.125,
+            8.125,
+            3.625
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            10.25,
+            0.125,
+            12.25,
+            3.625
+          ],
+          "texture": "#0"
+        }
+      },
+      "rotation": {
+        "origin": [
+          32,
+          2,
+          8
+        ],
+        "axis": "x",
+        "angle": 22.5,
+        "rescale": false
+      }
+    },
+    {
+      "from": [
+        14,
+        2,
+        8.125
+      ],
+      "to": [
+        32,
+        32,
+        8.125
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            7.0625,
+            0.125,
+            5.9375,
+            3.875
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            0.0625,
+            4.0,
+            1.1875,
+            7.75
+          ],
+          "texture": "#0"
+        }
+      },
+      "rotation": {
+        "origin": [
+          32,
+          2,
+          8.125
+        ],
+        "axis": "y",
+        "angle": -22.5,
+        "rescale": false
+      }
+    },
+    {
+      "from": [
+        14,
+        2,
+        10
+      ],
+      "to": [
+        32,
+        21,
+        10
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            3.25,
+            7.875,
+            2.125,
+            10.25
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            3.3125,
+            7.875,
+            4.4375,
+            10.25
+          ],
+          "texture": "#0"
+        }
+      },
+      "rotation": {
+        "origin": [
+          32,
+          2,
+          10
+        ],
+        "axis": "x",
+        "angle": 45,
+        "rescale": false
+      }
+    }
+  ],
+  "stardewcraft:collision": {
+    "mode": "custom",
+    "boxes": [
+      {
+        "from": [
+          0.0,
+          1.9929,
+          1.2367
+        ],
+        "to": [
+          32.0,
+          32.0,
+          23.4421
+        ]
+      }
+    ],
+    "policy": "aabb"
+  }
+}

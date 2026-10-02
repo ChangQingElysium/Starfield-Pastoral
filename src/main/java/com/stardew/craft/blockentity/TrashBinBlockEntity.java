@@ -100,6 +100,14 @@ public class TrashBinBlockEntity extends net.minecraft.world.level.block.entity.
                 level.playSound(null, worldPosition, ModSounds.CRIT.get(), SoundSource.BLOCKS, 0.5f, 1.0f);
             }
 
+            // SDV AddToInventoryDirectly (Garbage Hat): straight into the inventory when it fits.
+            if (result.addToInventoryDirectly()) {
+                ItemStack direct = result.item().copy();
+                if (player.getInventory().add(direct) && direct.isEmpty()) {
+                    return;
+                }
+            }
+
             // 在垃圾桶上方生成物品实体
             double x = worldPosition.getX() + 0.5;
             double y = worldPosition.getY() + 1.2;

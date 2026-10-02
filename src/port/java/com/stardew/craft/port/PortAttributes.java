@@ -12,9 +12,11 @@ import net.minecraftforge.registries.RegistryObject;
 
 /**
  * Entity attributes that 1.20.5+ vanilla has and 1.20.1 lacks, with the 1.21.1 ranges/defaults/sync flags.
- * Registered as {@code stardewcraft:generic.step_height} / {@code stardewcraft:generic.scale} (1.21 ids are in the
- * {@code minecraft} namespace). Unlike 1.21 they are not on every living entity: only on the mod entities whose
- * attribute builders add them (vanilla mobs keep their 1.20.1 {@code setMaxUpStep} values).
+ * Registered under the 1.21.1 ids {@code minecraft:generic.step_height} / {@code minecraft:generic.scale} (so
+ * {@code /attribute}, entity NBT and attribute tooltips use the same ids as 1.21.1; the 1.21.1 vanilla names of
+ * {@code attribute.name.generic.*} ship in {@code src/port/resources/assets/minecraft/lang}, 1.20.1 vanilla lacks
+ * them). Unlike 1.21 they are not on every living entity: only on the mod entities whose attribute builders add them
+ * (vanilla mobs keep their 1.20.1 {@code setMaxUpStep} values).
  * <ul>
  * <li>{@link #STEP_HEIGHT}: 1.21 {@code LivingEntity#maxUpStep()} returns the attribute value (at least 1 with a
  * player controlling passenger); {@code PortLivingEntityStepHeightMixin} does the same for entities that carry it.
@@ -25,7 +27,7 @@ import net.minecraftforge.registries.RegistryObject;
  */
 public final class PortAttributes {
     private static final DeferredRegister<Attribute> ATTRIBUTES =
-            DeferredRegister.create(Registries.ATTRIBUTE, PortBootstrap.NAMESPACE);
+            DeferredRegister.create(Registries.ATTRIBUTE, "minecraft"); // PORT(1.20.1): 1.21.1 vanilla ids
 
     /** 1.21 {@code Attributes.STEP_HEIGHT}. */
     public static final RegistryObject<Attribute> STEP_HEIGHT = ATTRIBUTES.register("generic.step_height",

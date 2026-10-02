@@ -107,8 +107,9 @@ public final class PortVanillaEnchantmentRules {
     }
 
     /**
-     * 1.21 {@code Enchantment.areCompatible(a, b)} when the target is a StardewCraft item and both enchantments are
-     * ported vanilla ones; otherwise the 1.20.1 {@code a.isCompatibleWith(b)}.
+     * 1.21 {@code Enchantment.areCompatible(a, b)} when the target is a StardewCraft item. A vanilla exclusive
+     * tag also rejects a mod enchantment added by a datapack; pairs without two vanilla rules otherwise keep
+     * {@code a.isCompatibleWith(b)}, including the mod enchantment's live exclusive set.
      */
     public static boolean areCompatible(ItemStack target, Enchantment a, Enchantment b) {
         if (isModItem(target)) {
@@ -116,6 +117,9 @@ public final class PortVanillaEnchantmentRules {
             Rule ruleB = rule(b);
             if (ruleA != null && ruleB != null) {
                 return a != b && !inSet(ruleA, b) && !inSet(ruleB, a);
+            }
+            if ((ruleA != null && inSet(ruleA, b)) || (ruleB != null && inSet(ruleB, a))) {
+                return false;
             }
         }
         return a.isCompatibleWith(b);

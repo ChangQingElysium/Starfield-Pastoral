@@ -34,8 +34,11 @@ public final class StardewEnchantments {
     public static final ResourceKey<Enchantment> PRESERVING = key("preserving");
     public static final ResourceKey<Enchantment> FISHER = key("fisher");
 
-    // PORT(1.20.1): 1.20.5 entity type tags; shipped in src/port/resources with the 1.21.1 vanilla contents
-    // (nested #arthropod / #undead flattened; 1.21-only minecraft:bogged omitted, it does not exist in 1.20.1).
+    // PORT(1.20.1): 1.20.5 entity type tags; shipped in src/port/resources with the 1.21.1 vanilla structure
+    // (#arthropod, #undead = #skeletons + skeleton_horse + #zombies + wither + phantom; 1.21-only minecraft:bogged
+    // omitted), so data packs editing the nested tags propagate as on 1.21.1. 1.21.1 other mods tag their mobs into
+    // #arthropod/#undead for vanilla Bane of Arthropods/Smite; on 1.20.1 vanilla uses MobType for that, so non-vanilla
+    // entity types also count by MobType (see portMobType).
     private static final TagKey<EntityType<?>> SENSITIVE_TO_BANE_OF_ARTHROPODS =
             TagKey.create(Registries.ENTITY_TYPE, new ResourceLocation("minecraft", "sensitive_to_bane_of_arthropods"));
     private static final TagKey<EntityType<?>> SENSITIVE_TO_SMITE =
@@ -76,12 +79,20 @@ public final class StardewEnchantments {
 
     public static boolean isBugKillerTarget(LivingEntity target) {
         return target != null && (target.getType().is(SENSITIVE_TO_BANE_OF_ARTHROPODS)
+                || portMobType(target, net.minecraft.world.entity.MobType.ARTHROPOD)
                 || hasAnyTag(target, BUG_MONSTER_TAGS));
     }
 
     public static boolean isCrusaderTarget(LivingEntity target) {
         return target != null && (target.getType().is(SENSITIVE_TO_SMITE)
+                || portMobType(target, net.minecraft.world.entity.MobType.UNDEAD)
                 || hasAnyTag(target, UNDEAD_MONSTER_TAGS));
+    }
+
+    /** PORT(1.20.1): a non-vanilla mob that 1.20.1 vanilla Smite/Bane of Arthropods treats as undead/arthropod. */
+    private static boolean portMobType(LivingEntity target, net.minecraft.world.entity.MobType mobType) {
+        return target.getMobType() == mobType && !"minecraft".equals(
+                net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(target.getType()).getNamespace());
     }
 
     public static int effectiveFishingLevel(net.minecraft.server.level.ServerPlayer player, ItemStack rod) {

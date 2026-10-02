@@ -43,11 +43,6 @@
       "item": "stardewcraft:scythe",
       "price": 100,
       "stock": 1
-    },
-    {
-      "item": "stardewcraft:copper_pan",
-      "price": 2500,
-      "mail_flag": "ccFishTank"
     }
   ],
   "accepted_sell_types": [

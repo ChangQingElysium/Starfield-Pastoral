@@ -23,6 +23,7 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.items.wrapper.InvWrapper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -34,8 +35,9 @@ import org.jetbrains.annotations.Nullable;
  * <li>Every block entity whose type or block has a registration gets a Forge capability provider attached, so
  * hoppers, pipes and other mods see the same handlers through {@code BlockEntity#getCapability}.</li>
  * </ul>
- * Blocks without a block entity cannot carry Forge capabilities; their registrations are only visible through
- * {@link #getCapability}.
+ * Blocks without a block entity cannot carry Forge capabilities. Registered utility-machine extensions therefore
+ * use {@link PortMachineExtensions.ExtensionBlockEntity}, which forwards to the sole production entity without
+ * adding an inventory or ticker; other block-only registrations remain visible only through {@link #getCapability}.
  */
 public final class PortCapabilities {
     private static final ResourceLocation PROVIDER_ID = new ResourceLocation(PortBootstrap.NAMESPACE, "block_capabilities");
@@ -117,6 +119,8 @@ public final class PortCapabilities {
     @SubscribeEvent
     public static void attachBlockEntity(AttachCapabilitiesEvent<BlockEntity> event) {
         BlockEntity blockEntity = event.getObject();
+        // The extension delegates directly to its owner, including the owner's Forge optional lifecycle.
+        if (blockEntity instanceof PortMachineExtensions.ExtensionBlockEntity) return;
         Block block = blockEntity.getBlockState().getBlock();
         List<BlockCapability<?, ?>> capabilities = new ArrayList<>();
         for (Registration registration : REGISTRATIONS) {
@@ -138,6 +142,10 @@ public final class PortCapabilities {
      */
     public static void invalidateCapabilities(Level level, BlockPos pos) {
         BlockEntity blockEntity = level.getBlockEntity(pos);
+        if (blockEntity instanceof PortMachineExtensions.ExtensionBlockEntity extension) {
+            extension.invalidateHandlers();
+            return;
+        }
         Provider provider = blockEntity == null ? null : PROVIDERS.get(blockEntity);
         if (provider != null) provider.invalidate();
     }
@@ -173,7 +181,7 @@ public final class PortCapabilities {
             Cached[] slots = cache.computeIfAbsent(cap, ignored -> new Cached[7]);
             int index = side == null ? 6 : side.ordinal();
             Cached current = slots[index];
-            if (current != null && current.value == value) return current.optional;
+            if (current != null && sameCapabilityValue(current.value, value)) return current.optional;
             if (current != null) current.optional.invalidate();
             if (value == null) {
                 slots[index] = null;
@@ -182,6 +190,14 @@ public final class PortCapabilities {
             LazyOptional<?> optional = LazyOptional.of(() -> value);
             slots[index] = new Cached(value, optional);
             return optional;
+        }
+
+        private static boolean sameCapabilityValue(Object previous, @Nullable Object value) {
+            if (previous == value) return true;
+            // The official wrapper has only its final Container reference. Do not merge subclasses,
+            // distinct containers, or a provider that now returns null (e.g. an unbound Junimo chest).
+            return value != null && previous.getClass() == InvWrapper.class && value.getClass() == InvWrapper.class
+                    && ((InvWrapper) previous).getInv() == ((InvWrapper) value).getInv();
         }
 
         synchronized void invalidate() {

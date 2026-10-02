@@ -1,5 +1,6 @@
 package com.stardew.craft.client.render;
 
+import com.stardew.craft.port.PortCamera;
 import com.stardew.craft.client.font.StardewFonts;
 
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -58,7 +59,7 @@ public final class SpecialOrderBoardIndicatorRenderer {
 
         ps.pushPose();
         ps.translate(pos.getX() + 0.5D - cam.x, pos.getY() + 2.25D + yOffset - cam.y, pos.getZ() + 0.5D - cam.z);
-        ps.mulPose(event.getCamera().rotation());
+        ps.mulPose(PortCamera.rotation(event.getCamera()));
         float baseScale = 0.025F * scalePulse;
         ps.scale(baseScale, -baseScale, baseScale);
         drawGlyph(StardewFonts.spriteTextColored(), ps, buf, "!", EXCLAM_R, EXCLAM_G, EXCLAM_B);
@@ -79,7 +80,7 @@ public final class SpecialOrderBoardIndicatorRenderer {
         double bob = Math.sin((level.getGameTime() + event.getPartialTick()) / 5.0) * 0.08;
         pose.pushPose();
         pose.translate(pos.getX() + .5 - camera.x, pos.getY() + 1.85 + bob - camera.y, pos.getZ() + .5 - camera.z);
-        pose.mulPose(event.getCamera().rotation());
+        pose.mulPose(PortCamera.rotation(event.getCamera()));
         pose.scale(.45F, .45F, .45F);
         mc.getItemRenderer().renderStatic(new net.minecraft.world.item.ItemStack(com.stardew.craft.item.ModItems.PRIZE_TICKET.get()),
                 net.minecraft.world.item.ItemDisplayContext.FIXED, 0xF000F0,

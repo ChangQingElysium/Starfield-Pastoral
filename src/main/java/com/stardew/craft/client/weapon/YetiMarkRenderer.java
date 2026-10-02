@@ -1,5 +1,6 @@
 package com.stardew.craft.client.weapon;
 
+import com.stardew.craft.port.PortCamera;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.stardew.craft.Config;
 import net.minecraft.client.Minecraft;
@@ -35,7 +36,7 @@ public final class YetiMarkRenderer {
                     .add(camera.subtract(center).normalize().scale(0.04)).subtract(camera);
             float size = 0.25f * (1 + 0.055f * (float) Math.sin((tick + partial) * 0.55));
             stack.pushPose(); stack.translate(point.x, point.y, point.z);
-            stack.mulPose(event.getCamera().rotation());
+            stack.mulPose(PortCamera.rotation(event.getCamera()));
             Matrix4f pose = stack.last().pose();
             WeaponEffectShapes.mark(out, pose, WeaponEffectShapes.Mark.FROST, size, 151, 228, 255, 230);
             stack.popPose();

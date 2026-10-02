@@ -1,5 +1,6 @@
 package com.stardew.craft.client.emote;
 
+import com.stardew.craft.port.PortCamera;
 import org.joml.Matrix4f;
 
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -56,7 +57,7 @@ public final class EmoteBubbleWorldRenderer {
 			double y = Mth.lerp(partial, entity.yOld, entity.getY()) + entity.getBbHeight() + 0.72D;
 			double z = Mth.lerp(partial, entity.zOld, entity.getZ());
 			poseStack.translate(x - cameraPos.x, y - cameraPos.y, z - cameraPos.z);
-			poseStack.mulPose(event.getCamera().rotation());
+			poseStack.mulPose(PortCamera.rotation(event.getCamera()));
 			poseStack.scale(0.85F, 0.85F, 0.85F);
 			renderFrame(poseStack, buffer, frameIndex);
 			poseStack.popPose();

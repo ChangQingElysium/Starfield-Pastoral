@@ -1,0 +1,180 @@
+{
+  "parent": "minecraft:block/block",
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "0": "stardewcraft:block/ginger_island/palm_wall_ornament_left",
+    "particle": "stardewcraft:block/ginger_island/palm_wall_ornament_left_particle"
+  },
+  "elements": [
+    {
+      "from": [
+        10.5,
+        1,
+        14
+      ],
+      "to": [
+        13.5,
+        10,
+        16
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0.0,
+            0.0,
+            0.75,
+            2.25
+          ],
+          "texture": "#0"
+        },
+        "east": {
+          "uv": [
+            2.0,
+            0.0,
+            2.5,
+            2.25
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            1.0,
+            0.0,
+            1.75,
+            2.25
+          ],
+          "texture": "#0"
+        },
+        "west": {
+          "uv": [
+            2.75,
+            0.0,
+            3.25,
+            2.25
+          ],
+          "texture": "#0"
+        },
+        "up": {
+          "uv": [
+            3.5,
+            0.0,
+            4.25,
+            0.5
+          ],
+          "texture": "#0"
+        },
+        "down": {
+          "uv": [
+            4.5,
+            0.0,
+            5.25,
+            0.5
+          ],
+          "texture": "#0"
+        }
+      },
+      "rotation": {
+        "origin": [
+          11,
+          1,
+          15
+        ],
+        "axis": "z",
+        "angle": 22.5,
+        "rescale": false
+      }
+    },
+    {
+      "from": [
+        1,
+        9,
+        13.75
+      ],
+      "to": [
+        13,
+        16,
+        13.75
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            5.5,
+            0.0,
+            8.5,
+            1.75
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            8.75,
+            0.0,
+            11.75,
+            1.75
+          ],
+          "texture": "#0"
+        }
+      }
+    },
+    {
+      "from": [
+        1,
+        5,
+        13.75
+      ],
+      "to": [
+        4,
+        9,
+        13.75
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            12.0,
+            0.0,
+            12.75,
+            1.0
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            13.0,
+            0.0,
+            13.75,
+            1.0
+          ],
+          "texture": "#0"
+        }
+      },
+      "rotation": {
+        "origin": [
+          2.5,
+          9,
+          13.75
+        ],
+        "axis": "x",
+        "angle": -22.5,
+        "rescale": false
+      }
+    }
+  ],
+  "stardewcraft:collision": {
+    "mode": "custom",
+    "boxes": [
+      {
+        "from": [
+          1,
+          0.8087,
+          13.75
+        ],
+        "to": [
+          13.3097,
+          16,
+          16.0
+        ]
+      }
+    ],
+    "policy": "aabb"
+  }
+}

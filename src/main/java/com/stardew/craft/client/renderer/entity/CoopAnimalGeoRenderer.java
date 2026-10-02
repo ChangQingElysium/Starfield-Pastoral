@@ -1,5 +1,6 @@
 package com.stardew.craft.client.renderer.entity;
 
+import com.stardew.craft.port.PortCamera;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.stardew.craft.StardewCraft;
@@ -45,7 +46,7 @@ public class CoopAnimalGeoRenderer<T extends BaseCoopAnimalEntity> extends Block
 
 		poseStack.pushPose();
 		poseStack.translate(0.0D, entity.getBbHeight() + 0.22D, 0.0D);
-		poseStack.mulPose(Minecraft.getInstance().getEntityRenderDispatcher().cameraOrientation());
+		poseStack.mulPose(PortCamera.cameraOrientation(Minecraft.getInstance().getEntityRenderDispatcher()));
 
 		float half = EMOTE_SIZE * 0.5F;
 		VertexConsumer vc = bufferSource.getBuffer(RenderType.entityTranslucent(EMOTES_TEX));

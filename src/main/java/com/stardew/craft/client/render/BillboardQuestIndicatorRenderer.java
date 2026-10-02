@@ -1,5 +1,6 @@
 package com.stardew.craft.client.render;
 
+import com.stardew.craft.port.PortCamera;
 import com.stardew.craft.client.font.StardewFonts;
 
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -90,7 +91,7 @@ public final class BillboardQuestIndicatorRenderer {
             ps.pushPose();
             ps.translate(bx - cam.x, by - cam.y, bz - cam.z);
             // Billboard：始终朝摄像机
-            ps.mulPose(event.getCamera().rotation());
+            ps.mulPose(PortCamera.rotation(event.getCamera()));
             // 缩放到世界大小（和 DamageNumberClient 同手法：scale 负 Y 翻转字形）
             float baseScale = 0.025F * scalePulse;
             ps.scale(baseScale, -baseScale, baseScale);

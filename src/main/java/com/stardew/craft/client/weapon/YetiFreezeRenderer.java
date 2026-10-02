@@ -1,5 +1,6 @@
 package com.stardew.craft.client.weapon;
 
+import com.stardew.craft.port.PortCamera;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -95,7 +96,7 @@ public final class YetiFreezeRenderer {
 
             poseStack.pushPose();
             poseStack.translate(x, y, z);
-            poseStack.mulPose(dispatcher.cameraOrientation());
+            poseStack.mulPose(PortCamera.cameraOrientation(dispatcher));
             poseStack.mulPose(Axis.YP.rotationDegrees(180.0F));
 
             PoseStack.Pose last = poseStack.last();

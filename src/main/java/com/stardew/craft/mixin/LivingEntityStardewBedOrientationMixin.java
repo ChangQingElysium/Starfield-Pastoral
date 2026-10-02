@@ -1,6 +1,5 @@
 package com.stardew.craft.mixin;
 
-import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.block.decor.BedDecorBlock;
 import com.stardew.craft.block.decor.MapDecorStaticBlock;
 import net.minecraft.core.BlockPos;
@@ -30,7 +29,7 @@ public abstract class LivingEntityStardewBedOrientationMixin {
 
         LivingEntity self = (LivingEntity) (Object) this;
         BlockState state = self.level().getBlockState(sleepingPos.get());
-        if ((state.is(ModBlocks.BED_1.get()) || state.is(ModBlocks.BED_2.get()))
+        if ((state.getBlock() instanceof com.stardew.craft.block.decor.BedDecorBlock)
                 && state.hasProperty(MapDecorStaticBlock.FACING)) {
             cir.setReturnValue(state.getValue(MapDecorStaticBlock.FACING).getOpposite());
         }
@@ -40,10 +39,10 @@ public abstract class LivingEntityStardewBedOrientationMixin {
     private void stardew$alignSleeperWithDecorBed(BlockPos pos, CallbackInfo ci) {
         LivingEntity self = (LivingEntity) (Object) this;
         BlockState state = self.level().getBlockState(pos);
-        if (state.is(ModBlocks.BED_1.get()) || state.is(ModBlocks.BED_2.get())) {
+        if (state.getBlock() instanceof com.stardew.craft.block.decor.BedDecorBlock) {
             self.setPos(
                 pos.getX() + 0.5D,
-                pos.getY() + BedDecorBlock.SLEEP_Y_OFFSET,
+                pos.getY() + ((BedDecorBlock) state.getBlock()).sleepYOffset(),
                 pos.getZ() + 0.5D
             );
         }

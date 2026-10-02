@@ -53,7 +53,11 @@ public class MixedSeedsItem extends Item implements IStardewItem {
 
 		if (!level.isClientSide) {
 			int season = StardewTimeManager.get().getCurrentSeason();
-			BlockState cropState = pickCropStateForSeason(season, level.getRandom());
+			// 冬季随机取春夏秋作物，只有无视季节的地点（温室等）才种得成
+			BlockState cropState = (season == 3
+					&& !com.stardew.craft.farming.SeasonLocationRules.seedsIgnoreSeasonsHere(level, abovePos))
+					? null
+					: pickCropStateForSeason(season, level.getRandom());
 			if (cropState == null) {
 				if (context.getPlayer() != null) {
 					context.getPlayer().displayClientMessage(
@@ -72,17 +76,20 @@ public class MixedSeedsItem extends Item implements IStardewItem {
 	}
 
 	public static BlockState pickCropStateForSeason(int season, net.minecraft.util.RandomSource random) {
-		// 参考 Stardew: Crop.getRandomLowGradeCropForThisSeason
-		// Spring: Parsnip / Cauliflower / Potato
-		// Summer: Corn / Hot Pepper / Radish / Wheat
-		// Fall: Artichoke / Corn / Eggplant / Pumpkin / Yam
-		// Winter: (vanilla Stardew 无法在户外种，除非温室/室内) —— 这里先拒绝。
+		// Crop.getRandomLowGradeCropForThisSeason + ResolveSeedId:
+		// Spring: Next(472,476) 且 473→472 => 防风草 1/2、花椰菜 1/4、土豆 1/4
+		// Summer: 玉米/小麦/辣椒/萝卜 各 1/4
+		// Fall: Next(487,491) => 玉米/茄子/洋蓟/南瓜 各 1/4（无山药）
+		// Winter: 随机取春/夏/秋之一（仅在无视季节的温室/花盆里能种成）
+		if (season == 3) {
+			season = random.nextInt(3);
+		}
 		return switch (season) {
 			case 0 -> {
-				int r = random.nextInt(3);
+				int r = random.nextInt(4);
 				yield switch (r) {
-					case 0 -> ModBlocks.PARSNIP_CROP.get().defaultBlockState();
-					case 1 -> ModBlocks.CAULIFLOWER_CROP.get().defaultBlockState();
+					case 0, 1 -> ModBlocks.PARSNIP_CROP.get().defaultBlockState();
+					case 2 -> ModBlocks.CAULIFLOWER_CROP.get().defaultBlockState();
 					default -> ModBlocks.POTATO_CROP.get().defaultBlockState();
 				};
 			}
@@ -96,13 +103,12 @@ public class MixedSeedsItem extends Item implements IStardewItem {
 				};
 			}
 			case 2 -> {
-				int r = random.nextInt(5);
+				int r = random.nextInt(4);
 				yield switch (r) {
-					case 0 -> ModBlocks.ARTICHOKE_CROP.get().defaultBlockState();
-					case 1 -> ModBlocks.CORN_CROP.get().defaultBlockState();
-					case 2 -> ModBlocks.EGGPLANT_CROP.get().defaultBlockState();
-					case 3 -> ModBlocks.PUMPKIN_CROP.get().defaultBlockState();
-					default -> ModBlocks.YAM_CROP.get().defaultBlockState();
+					case 0 -> ModBlocks.CORN_CROP.get().defaultBlockState();
+					case 1 -> ModBlocks.EGGPLANT_CROP.get().defaultBlockState();
+					case 2 -> ModBlocks.ARTICHOKE_CROP.get().defaultBlockState();
+					default -> ModBlocks.PUMPKIN_CROP.get().defaultBlockState();
 				};
 			}
 			default -> null;

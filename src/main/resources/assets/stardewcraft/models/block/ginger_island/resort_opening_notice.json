@@ -1,0 +1,96 @@
+{
+  "parent": "minecraft:block/block",
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "0": "stardewcraft:block/ginger_island/resort_opening_notice",
+    "particle": "stardewcraft:block/ginger_island/resort_opening_notice_particle"
+  },
+  "elements": [
+    {
+      "from": [
+        4,
+        8,
+        15
+      ],
+      "to": [
+        12,
+        16,
+        16
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0.0,
+            0.0,
+            4.0,
+            4.0
+          ],
+          "texture": "#0"
+        },
+        "east": {
+          "uv": [
+            10.0,
+            0.0,
+            10.5,
+            4.0
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            5.0,
+            0.0,
+            9.0,
+            4.0
+          ],
+          "texture": "#0"
+        },
+        "west": {
+          "uv": [
+            11.0,
+            0.0,
+            11.5,
+            4.0
+          ],
+          "texture": "#0"
+        },
+        "up": {
+          "uv": [
+            0.0,
+            5.0,
+            4.0,
+            5.5
+          ],
+          "texture": "#0"
+        },
+        "down": {
+          "uv": [
+            5.0,
+            5.0,
+            9.0,
+            5.5
+          ],
+          "texture": "#0"
+        }
+      }
+    }
+  ],
+  "stardewcraft:collision": {
+    "mode": "custom",
+    "boxes": [
+      {
+        "from": [
+          4,
+          8,
+          15
+        ],
+        "to": [
+          12,
+          16,
+          16
+        ]
+      }
+    ],
+    "policy": "aabb"
+  }
+}

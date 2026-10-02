@@ -65,9 +65,9 @@ public final class MineRockGolemEntity extends StardewMonsterEntity {
     }
     @Override protected void defineSynchedData(){super.defineSynchedData();this.entityData.define(MOVING,false);this.entityData.define(RISE,0F);this.entityData.define(HIT,-100L);}
     // PORT(1.20.1): 1.21 LivingEntity#getDimensions is sleeping ? SLEEPING_DIMENSIONS : getDefaultDimensions(pose)
-    // (times the 1.20.5+ scale attribute, always 1 here); 1.20.1 only has getDimensions.
+    // .scale(getScale()); 1.20.1 only has getDimensions.
     @Override public net.minecraft.world.entity.EntityDimensions getDimensions(net.minecraft.world.entity.Pose pose) {
-        return pose == net.minecraft.world.entity.Pose.SLEEPING ? SLEEPING_DIMENSIONS : getDefaultDimensions(pose);
+        return pose == net.minecraft.world.entity.Pose.SLEEPING ? SLEEPING_DIMENSIONS : getDefaultDimensions(pose).scale(getScale());
     }
     public EntityDimensions getDefaultDimensions(Pose pose){return EntityDimensions.scalable(WIDTH,isFarmGolem()?FARM_HEIGHT:1.15F+(HEIGHT-1.15F)*entityData.get(RISE));}
     @Override public void onSyncedDataUpdated(EntityDataAccessor<?> key){super.onSyncedDataUpdated(key);if(RISE.equals(key))refreshDimensions();}

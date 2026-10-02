@@ -637,7 +637,7 @@ public abstract class StardewCropBlock extends Block implements PortBlockInterac
             if (mature && canGrabHarvest && !player.isCreative() && player instanceof ServerPlayer serverPlayer) {
                 int farmingLevel = getFarmingLevel(player);
                 int fertilizerLevel = getFertilizerLevel(serverLevel, interactionPos);
-                spawnHarvestDrops(serverLevel, interactionPos, interactionState, level.getRandom(), fertilizerLevel, farmingLevel);
+                spawnHarvestDrops(serverLevel, interactionPos, interactionState, level.getRandom(), fertilizerLevel, farmingLevel, player);
                 if (!decorativePlacedFlower) {
                     spawnHarvestSideProducts(serverLevel, interactionPos, interactionState, level.getRandom(), player, fertilizerLevel, farmingLevel);
                 }
@@ -683,7 +683,7 @@ public abstract class StardewCropBlock extends Block implements PortBlockInterac
         int fertilizerLevel = getFertilizerLevel(level, harvestPos);
         
         // 生成并掉落物品
-        spawnHarvestDrops(level, harvestPos, currentState, level.getRandom(), fertilizerLevel, farmingLevel);
+        spawnHarvestDrops(level, harvestPos, currentState, level.getRandom(), fertilizerLevel, farmingLevel, player);
 
         // 副产物（如小麦掉落干草）
         boolean decorativePlacedFlower = isPlayerPlacedDecorative(level, harvestPos, currentState);
@@ -803,10 +803,21 @@ public abstract class StardewCropBlock extends Block implements PortBlockInterac
         RandomSource random = level.getRandom();
         int fertilizerLevel = getFertilizerLevel(level, harvestPos);
         int quality = getHarvestQuality(random, fertilizerLevel, farmingLevel);
+        int numToHarvest = getHarvestCount(random, farmingLevel);
+        // Crop.harvest：祝尼魔同样走幸运翻倍（无玩家队伍数据时仅剩 0.0001 基础概率）
+        if (getHarvestMethod() != HarvestMethod.SCYTHE && random.nextDouble() < 0.0001D) {
+            numToHarvest *= 2;
+        }
         ItemStack harvested = getHarvestItem(quality);
-        harvested.setCount(getHarvestCount(random, farmingLevel));
+        harvested.setCount(1);
         harvested = applyHarvestItemCustomization(harvested, harvestState);
         output.accept(harvested.copy());
+        // 品质只给第一个，其余 numToHarvest-1 为普通品质
+        if (numToHarvest > 1) {
+            ItemStack extra = getHarvestItem(QualityHelper.NORMAL);
+            extra.setCount(numToHarvest - 1);
+            output.accept(applyHarvestItemCustomization(extra, harvestState));
+        }
         collectJunimoHarvestSideProducts(level, harvestPos, harvestState, random,
                 fertilizerLevel, farmingLevel, output);
 
@@ -858,20 +869,35 @@ public abstract class StardewCropBlock extends Block implements PortBlockInterac
      * 生成并掉落收获物品（供右键收割和左键破坏共用）
      */
     @SuppressWarnings("null")
-    protected void spawnHarvestDrops(ServerLevel level, BlockPos pos, BlockState state, RandomSource random, int fertilizerLevel, int farmingLevel) {
+    protected void spawnHarvestDrops(ServerLevel level, BlockPos pos, BlockState state, RandomSource random, int fertilizerLevel, int farmingLevel, @javax.annotation.Nullable Player player) {
         boolean decorativePlacedFlower = isPlayerPlacedDecorative(level, pos, state);
         int quality = decorativePlacedFlower ? QualityHelper.NORMAL : getHarvestQuality(random, fertilizerLevel, farmingLevel);
 
         // 获取收获数量（玩家放置的花只掉 1 个普通品质，且不受农业等级影响，方便与正常收割的普通品质堆叠）
         int numToHarvest = decorativePlacedFlower ? 1 : getHarvestCount(random, farmingLevel);
 
-        // 创建作物物品
-        ItemStack harvestItem = getHarvestItem(quality);
-        harvestItem.setCount(numToHarvest);
-        harvestItem = applyHarvestItemCustomization(harvestItem, state);
+        // Crop.harvest：非镰刀收获有 LuckLevel/1500 + DailyLuck/1200 + 0.0001 概率数量翻倍
+        if (!decorativePlacedFlower && getHarvestMethod() != HarvestMethod.SCYTHE) {
+            double luckChance = 0.0001D;
+            if (player instanceof ServerPlayer sp) {
+                luckChance += PlayerStardewDataAPI.getLuckLevel(sp) / 1500.0D
+                        + PlayerStardewDataAPI.getDailyLuck(sp) / 1200.0D;
+            }
+            if (random.nextDouble() < luckChance) {
+                numToHarvest *= 2;
+            }
+        }
 
-        // 掉落物品
+        // 只有第一个产物带品质，其余 numToHarvest-1 为普通品质
+        ItemStack harvestItem = getHarvestItem(quality);
+        harvestItem.setCount(1);
+        harvestItem = applyHarvestItemCustomization(harvestItem, state);
         popResource(level, pos, harvestItem);
+        if (numToHarvest > 1) {
+            ItemStack extra = getHarvestItem(QualityHelper.NORMAL);
+            extra.setCount(numToHarvest - 1);
+            popResource(level, pos, applyHarvestItemCustomization(extra, state));
+        }
     }
 
     /**

@@ -153,8 +153,10 @@ public final class StardewReadingZoom {
         var bar = barAt(zoom, mouseX(), mouseY());
         if (bar == null && !Screen.hasAltDown() && !Screen.hasShiftDown()) return;
         boolean horizontal = bar != null ? bar.horizontal() : Screen.hasShiftDown();
-        // PORT(1.20.1): 1.20.1 has no horizontal scroll; getScrollDelta() is the vertical delta.
-        double delta = event.getScrollDelta();
+        // PORT(1.20.1): for StardewCraft screens getScrollDelta() is exactly 1.21's scrollY (PortMouseHandlerScreenInputMixin
+        // turns off 1.20.1's macOS horizontal-for-vertical substitution); 1.21's scrollX comes from PortMouse.
+        double scrollY = event.getScrollDelta();
+        double delta = scrollY != 0 ? scrollY : com.stardew.craft.port.PortMouse.scrollDeltaX();
         if (pan(event.getScreen(), horizontal ? -delta * 64 : 0, horizontal ? 0 : -delta * 64)) event.setCanceled(true);
     }
 

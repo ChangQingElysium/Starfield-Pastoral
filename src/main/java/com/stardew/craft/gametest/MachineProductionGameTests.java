@@ -163,7 +163,7 @@ public final class MachineProductionGameTests {
         try {
             MachineProductionData.reload(Map.of());
             var oak = MachineProductionData.cycle("tapper", "oak");
-            helper.assertTrue(oak.deadline(600, "tapper") == 7 * 1260, "Seven nights must finish at the seventh morning, not the eighth");
+            helper.assertTrue(oak.deadline(600, "tapper") == 7 * 1600, "Seven nights must finish at the seventh morning, not the eighth");
             helper.assertTrue(!MachineProductionData.reload(Map.of(id("tapper"), json("""
                 {"cycles":{"oak":{"duration":{"minutes":30,"mornings":1}}}}
                 """))), "Mixed clock units must be rejected");
@@ -184,5 +184,55 @@ public final class MachineProductionGameTests {
             MachineProductionData.applyFromJson(previous);
         }
         helper.succeed();
+    }
+    @GameTest(batch = "production_data", templateNamespace = "minecraft", template = "bastion/mobs/empty")
+    public static void machineClockFollowsVanillaAndMigratesLegacyDeadlinesOnce(GameTestHelper helper) {
+        // Utility.CalculateMinutesUntilMorning: every machine day totals 1600 minutes whatever the bedtime.
+        helper.assertTrue(TimedProductionBlockEntity.minutesUntilMorning(0, 1) == 1600
+                && TimedProductionBlockEntity.minutesUntilMorning(960, 1) == 640
+                && TimedProductionBlockEntity.minutesUntilMorning(1200, 3) == 3600,
+                "Overnight top-up must follow CalculateMinutesUntilMorning");
+        helper.assertTrue(recipeMinutes("keg", new ItemStack(ModItems.WHEAT.get())) == 1750
+                && recipeMinutes("keg", new ItemStack(ModItems.HOPS.get())) == 2250
+                && recipeMinutes("cheese_press", new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM
+                        .get(new ResourceLocation(StardewCraft.MODID, "milk")))) == 200,
+                "Recipe durations must match Data/Machines.json");
+        var raisins = ArtisanRecipeDataManager.getRecipe("dehydrator", new ItemStack(ModItems.GRAPE.get(), 5)).orElseThrow();
+        helper.assertTrue(raisins.days() == 1, "Dehydrator must use DaysUntilReady 1");
+        helper.assertTrue(MachineProductionData.cycle("bee_house", "default").mornings()
+                && MachineProductionData.cycle("bee_house", "default").duration() == 4
+                && MachineProductionData.cycle("worm_bin", "default").mornings(),
+                "Morning-based machines must not use fixed minutes");
+
+        // Pre-F-1 day 3 at 10:00 (offset 240) and day 3 overnight (offset 1230) keep their moment.
+        long legacyDay = 2L * TimedProductionBlockEntity.LEGACY_MINUTES_PER_DAY;
+        helper.assertTrue(TimedProductionBlockEntity.migrateLegacyAbsMinute(legacyDay + 240) == 2L * 1600 + 240
+                && TimedProductionBlockEntity.migrateLegacyAbsMinute(legacyDay + 1230) == 2L * 1600 + 1400
+                && TimedProductionBlockEntity.migrateLegacyAbsMinute(legacyDay + 1260) == 3L * 1600
+                && TimedProductionBlockEntity.migrateLegacyAbsMinute(-1) == -1,
+                "Legacy deadline must keep its day and clock time");
+        var level = helper.getLevel();
+        BlockPos pos = helper.absolutePos(new BlockPos(1, 2, 1));
+        var state = ModBlocks.KEG.get().defaultBlockState();
+        var legacy = new net.minecraft.nbt.CompoundTag();
+        legacy.put("input", com.stardew.craft.port.PortItemStacks.save(new ItemStack(ModItems.WHEAT.get()), level.registryAccess()));
+        legacy.put("product", com.stardew.craft.port.PortItemStacks.save(new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.get(new ResourceLocation(StardewCraft.MODID, "beer"))), level.registryAccess()));
+        legacy.putLong("readyAtAbsMinute", legacyDay + 240);
+        var keg = new KegBlockEntity(pos, state);
+        keg.setLevel(level);
+        keg.load(legacy);
+        helper.assertTrue(keg.stardewReadyAtAbsoluteMinute() == 2L * 1600 + 240, "Legacy keg deadline was not migrated");
+        var saved = keg.saveWithoutMetadata();
+        helper.assertTrue(saved.getInt(TimedProductionBlockEntity.TAG_MACHINE_CLOCK) == 1600
+                && saved.getLong("readyAtAbsMinute") == 2L * 1600 + 240, "Migrated keg must be saved with the clock marker");
+        var restored = new KegBlockEntity(pos, state);
+        restored.setLevel(level);
+        restored.load(saved);
+        helper.assertTrue(restored.stardewReadyAtAbsoluteMinute() == 2L * 1600 + 240, "Marked keg deadline was migrated twice");
+        helper.succeed();
+    }
+
+    private static int recipeMinutes(String machine, ItemStack input) {
+        return ArtisanRecipeDataManager.getRecipe(machine, input).orElseThrow().minutes();
     }
 }

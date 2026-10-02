@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /** Sodium clipping-uniform hook adapted from Immersive Portals (Apache-2.0). */
 @Pseudo
-@Mixin(targets = "net.caffeinemc.mods.sodium.client.render.chunk.shader.DefaultShaderInterface", remap = false)
+@Mixin(targets = "me.jellysquid.mods.sodium.client.render.chunk.shader.ChunkShaderInterface", remap = false)
 public abstract class TownDoorSodiumShaderMixin {
     @Unique private int stardewcraft$clipProgram = Integer.MIN_VALUE;
     @Unique private int stardewcraft$clipLocation = Integer.MIN_VALUE;

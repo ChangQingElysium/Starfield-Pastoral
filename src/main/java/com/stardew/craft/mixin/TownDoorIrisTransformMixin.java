@@ -14,7 +14,7 @@ import java.util.Map;
 @Pseudo
 @Mixin(targets = "net.irisshaders.iris.pipeline.transform.TransformPatcher", remap = false)
 public abstract class TownDoorIrisTransformMixin {
-    @Inject(method = "transformInternal", at = @At("RETURN"), cancellable = true, require = 0)
+    @Inject(method = "transformInternal", at = @At("RETURN"), cancellable = true, require = 1)
     private static void stardewcraft$patch(String name, Map<?, String> inputs, @Coerce Object parameters,
                                            CallbackInfoReturnable<Map<?, String>> cir) {
         Map<?, String> output = cir.getReturnValue();

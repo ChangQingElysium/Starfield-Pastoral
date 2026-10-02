@@ -66,7 +66,7 @@ public class PreservesJarBlock extends MapUtilityStaticBlock implements EntityBl
 	@Override
 	@Nullable
 	public BlockEntity newBlockEntity(@SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") BlockState state) {
-		if (state.getValue(PART) == Part.EXTENSION) return null;
+		if (state.getValue(PART) == Part.EXTENSION) return com.stardew.craft.port.PortMachineExtensions.createExtension(pos, state);
         return new PreservesJarBlockEntity(pos, state);
 	}
 

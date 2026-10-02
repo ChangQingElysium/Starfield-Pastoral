@@ -1,5 +1,6 @@
 package com.stardew.craft.client.book;
 
+import com.stardew.craft.port.PortCamera;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
@@ -218,7 +219,7 @@ public final class ReadingBookClientEffect {
 
         poseStack.pushPose();
         poseStack.translate(pos.x, pos.y, pos.z);
-        poseStack.mulPose(minecraft.getEntityRenderDispatcher().cameraOrientation());
+        poseStack.mulPose(PortCamera.cameraOrientation(minecraft.getEntityRenderDispatcher()));
         PoseStack.Pose pose = poseStack.last();
         Matrix4f matrix = pose.pose();
         vertex(consumer, matrix, -half, -half, 0.0F, 1.0F, a);

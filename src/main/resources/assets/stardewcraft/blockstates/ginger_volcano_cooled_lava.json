@@ -1,0 +1,52 @@
+{
+  "variants": {
+    "neighbors=0": {
+      "model": "stardewcraft:block/ginger_island/cooled_lava/0"
+    },
+    "neighbors=1": {
+      "model": "stardewcraft:block/ginger_island/cooled_lava/1"
+    },
+    "neighbors=2": {
+      "model": "stardewcraft:block/ginger_island/cooled_lava/2"
+    },
+    "neighbors=3": {
+      "model": "stardewcraft:block/ginger_island/cooled_lava/3"
+    },
+    "neighbors=4": {
+      "model": "stardewcraft:block/ginger_island/cooled_lava/4"
+    },
+    "neighbors=5": {
+      "model": "stardewcraft:block/ginger_island/cooled_lava/5"
+    },
+    "neighbors=6": {
+      "model": "stardewcraft:block/ginger_island/cooled_lava/6"
+    },
+    "neighbors=7": {
+      "model": "stardewcraft:block/ginger_island/cooled_lava/7"
+    },
+    "neighbors=8": {
+      "model": "stardewcraft:block/ginger_island/cooled_lava/8"
+    },
+    "neighbors=9": {
+      "model": "stardewcraft:block/ginger_island/cooled_lava/9"
+    },
+    "neighbors=10": {
+      "model": "stardewcraft:block/ginger_island/cooled_lava/10"
+    },
+    "neighbors=11": {
+      "model": "stardewcraft:block/ginger_island/cooled_lava/11"
+    },
+    "neighbors=12": {
+      "model": "stardewcraft:block/ginger_island/cooled_lava/12"
+    },
+    "neighbors=13": {
+      "model": "stardewcraft:block/ginger_island/cooled_lava/13"
+    },
+    "neighbors=14": {
+      "model": "stardewcraft:block/ginger_island/cooled_lava/14"
+    },
+    "neighbors=15": {
+      "model": "stardewcraft:block/ginger_island/cooled_lava/15"
+    }
+  }
+}

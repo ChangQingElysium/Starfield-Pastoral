@@ -31,16 +31,19 @@ public final class PortPayloadContext implements IPayloadContext {
     private final Consumer<CustomPacketPayload> replySink;
     @Nullable
     private final Set<String> finishedTasks;
+    @Nullable
+    private final String expectedTaskId;
     private volatile boolean disconnected;
 
     private PortPayloadContext(Connection connection, LogicalSide side, boolean login, @Nullable ServerPlayer serverPlayer,
-            Consumer<CustomPacketPayload> replySink, @Nullable Set<String> finishedTasks) {
+            Consumer<CustomPacketPayload> replySink, @Nullable Set<String> finishedTasks, @Nullable String expectedTaskId) {
         this.connection = connection;
         this.side = side;
         this.login = login;
         this.serverPlayer = serverPlayer;
         this.replySink = replySink;
         this.finishedTasks = finishedTasks;
+        this.expectedTaskId = expectedTaskId;
     }
 
     /** Play-phase payload received by the server from {@code sender}. */
@@ -50,18 +53,18 @@ public final class PortPayloadContext implements IPayloadContext {
                 throw new IllegalStateException("Cannot reply: no player bound to this connection");
             }
             PortNetwork.sendToPlayer(sender, payload);
-        }, null);
+        }, null, null);
     }
 
     /** Play-phase payload received by the client. */
     static PortPayloadContext clientPlay(Connection connection) {
-        return new PortPayloadContext(connection, LogicalSide.CLIENT, false, null, PortNetwork::sendToServer, null);
+        return new PortPayloadContext(connection, LogicalSide.CLIENT, false, null, PortNetwork::sendToServer, null, null);
     }
 
     /** Payload exchanged during the Forge login handshake (NeoForge configuration phase). */
     static PortPayloadContext login(Connection connection, LogicalSide side, Consumer<CustomPacketPayload> replySink,
-            @Nullable Set<String> finishedTasks) {
-        return new PortPayloadContext(connection, side, true, null, replySink, finishedTasks);
+            @Nullable Set<String> finishedTasks, String expectedTaskId) {
+        return new PortPayloadContext(connection, side, true, null, replySink, finishedTasks, expectedTaskId);
     }
 
     boolean isDisconnected() {
@@ -125,6 +128,9 @@ public final class PortPayloadContext implements IPayloadContext {
     public void finishCurrentTask(ConfigurationTask.Type type) {
         if (!this.login || this.side.isClient() || this.finishedTasks == null) {
             throw new UnsupportedOperationException("Configuration tasks can only be finished by the server during login");
+        }
+        if (!type.id().equals(this.expectedTaskId)) {
+            throw new IllegalStateException("Cannot finish configuration task " + type.id() + "; current task is " + this.expectedTaskId);
         }
         this.finishedTasks.add(type.id());
     }

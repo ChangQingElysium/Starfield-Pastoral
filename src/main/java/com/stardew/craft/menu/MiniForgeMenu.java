@@ -50,6 +50,15 @@ public class MiniForgeMenu extends AbstractContainerMenu {
     private int craftState = ForgeRuleService.CraftState.MISSING_INGREDIENTS.id();
     private int forgeCost;
     private int cinderShardCount;
+    private net.minecraft.world.inventory.ContainerLevelAccess workstation = net.minecraft.world.inventory.ContainerLevelAccess.NULL;
+    private net.minecraft.world.level.block.Block workstationBlock;
+
+    public MiniForgeMenu atWorkstation(net.minecraft.world.inventory.ContainerLevelAccess access,
+                                      net.minecraft.world.level.block.Block block) {
+        workstation = access;
+        workstationBlock = block;
+        return this;
+    }
 
     public MiniForgeMenu(int containerId, Inventory playerInventory) {
         this(containerId, playerInventory, new SimpleContainer(FORGE_SLOTS), new SimpleContainer(1));
@@ -224,7 +233,7 @@ public class MiniForgeMenu extends AbstractContainerMenu {
 
     @Override
     public boolean stillValid(Player player) {
-        return true;
+        return workstationBlock == null || stillValid(workstation, player, workstationBlock);
     }
 
     @Override

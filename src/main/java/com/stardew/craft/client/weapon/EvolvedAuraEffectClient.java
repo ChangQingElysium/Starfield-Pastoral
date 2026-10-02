@@ -1,5 +1,6 @@
 package com.stardew.craft.client.weapon;
 
+import com.stardew.craft.port.PortCamera;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
@@ -75,7 +76,7 @@ public final class EvolvedAuraEffectClient {
         VertexConsumer coreConsumer = buffer.getBuffer(coreType);
         poseStack.pushPose();
         poseStack.translate(x, y + 0.8, z);
-        poseStack.mulPose(Minecraft.getInstance().getEntityRenderDispatcher().cameraOrientation());
+        poseStack.mulPose(PortCamera.cameraOrientation(Minecraft.getInstance().getEntityRenderDispatcher()));
         poseStack.scale(0.9f, 1.6f, 0.9f);
 
         PoseStack.Pose column = poseStack.last();

@@ -1,5 +1,6 @@
 package com.stardew.craft.client.combat;
 
+import com.stardew.craft.port.PortCamera;
 import com.stardew.craft.client.font.StardewFonts;
 
 import com.stardew.craft.combat.DimensionDamageMapper;
@@ -125,7 +126,7 @@ public final class DamageNumberClient {
 
             event.getPoseStack().pushPose();
             event.getPoseStack().translate(x, y, z);
-            event.getPoseStack().mulPose(event.getCamera().rotation());
+            event.getPoseStack().mulPose(PortCamera.rotation(event.getCamera()));
             event.getPoseStack().scale(scale, -scale, scale);
 
                 String text = dn.getText();

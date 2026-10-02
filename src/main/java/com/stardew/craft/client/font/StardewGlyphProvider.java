@@ -115,9 +115,10 @@ final class StardewGlyphProvider implements GlyphProvider {
 
                 @Override
                 public float getBearingY() {
-                    // PORT(1.20.1): 1.21 getBearingTop() = 7 - visualTop and getTop() = 7 - getBearingTop();
-                    // 1.20.1 getUp() = getBearingY(), so the glyph top stays at visualTop.
-                    return data.visualTop(glyph);
+                    // PORT(1.20.1): 1.21 getBearingTop() = 7 - visualTop, getTop() = 7 - getBearingTop() = visualTop and
+                    // BakedGlyph draws the top at y + up. 1.20.1 getUp() = getBearingY() and BakedGlyph draws it at
+                    // y + (up - 3) (italic shear uses up - 3 too), so bearingY = visualTop + 3 keeps the 1.21 position.
+                    return data.visualTop(glyph) + 3.0F;
                 }
             });
         }

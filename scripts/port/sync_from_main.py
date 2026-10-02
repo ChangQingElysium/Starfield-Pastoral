@@ -1,31 +1,37 @@
 #!/usr/bin/env python3
-"""Bring the 1.20.1 port up to date with the 1.21.1 main workspace (including uncommitted work).
+"""Three-way synchronize the Forge port from a stable main-workspace snapshot.
 
     python3 scripts/port/sync_from_main.py [--main ../StardewCraft] [--dry-run]
+    python3 scripts/port/sync_from_main.py --snapshot <commit>
+    python3 scripts/port/sync_from_main.py --complete-snapshot <commit>
 
-1. Snapshot the whole main workspace (tracked + untracked, honouring .gitignore) into a commit
-   stored at refs/port/main-snapshots/<n>, using a private index so main's index, HEAD and
-   files are never touched.
-2. Java (src/main/java): for every file that changed between the previous snapshot and the new
-   one, 3-way merge   base = port-scripts(previous) | ours = port tree | theirs = port-scripts(new)
-   so hand adaptations in the port survive. Conflicts are left with markers and listed.
-3. Resources (src/main/resources): mirrored from main, then the deterministic conversions
-   (convert_resources_1201.py, nbt_downgrade_1201.py) are re-run. Port-owned resource files are
-   kept; stardewcraft.mixins.json is 3-way merged.
-4. The new snapshot is recorded in scripts/port/main-sync-state.txt.
+Resources and build inputs come from Git blobs, never from live main files after
+the snapshot. Both resource snapshots are converted in staging before any port
+files change. The converted previous snapshot is the merge base, so manual Forge
+adaptations and genuinely port-only files survive. Only the three platform files
+below are wholly port-owned; mixins and other text resources use three-way merges.
+
+A dry run uses a private index/tree without creating a commit or ref, changing the
+port files, or advancing STATE. Conflicts leave STATE at its previous snapshot;
+after resolving text markers and reviewing binary/delete/add collisions, explicitly
+complete that exact snapshot. Completion runs lint but is not a build/release gate.
 """
 from __future__ import annotations
 
 import argparse
+import importlib.util
+import json
 import os
 import shutil
 import subprocess
 import sys
+import tarfile
 import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 STATE = ROOT / "scripts/port/main-sync-state.txt"
+PENDING = ROOT / "build/port-sync-pending.json"
 # Order matters: every later script expects the output of the earlier ones.
 SCRIPTS = [ROOT / "scripts/port/rewrite_1201.py", ROOT / "scripts/port/adapt_nbt_provider.py",
            ROOT / "scripts/port/adapt_block_use.py", ROOT / "scripts/port/adapt_overrides_1201.py",
@@ -35,28 +41,39 @@ PORT_OWNED_RESOURCES = {
     "META-INF/accesstransformer.cfg",
     "pack.mcmeta",
 }
-MERGED_RESOURCES = {"stardewcraft.mixins.json"}
-# Version-independent build inputs mirrored verbatim (compiled into resources by build.gradle).
+# Version-independent build inputs compiled into resources by build.gradle.
 MIRRORED_PATHS = ["assets-src/npc", "assets-src/furniture/sebastian_computer", "tools/art", "tools/npc"]
+RESOURCE_PREFIX = "src/main/resources"
+CONFLICT_MARKERS = (b"<<<<<<< ", b"=======", b">>>>>>> ")
 
 
-def git(*args, env=None, cwd=ROOT, check=True, binary=False) -> str | bytes:
-    res = subprocess.run(["git", *args], cwd=cwd, env=env, capture_output=True, check=False)
+def git(*args, env=None, cwd=None, check=True, binary=False) -> str | bytes:
+    res = subprocess.run(["git", *args], cwd=ROOT if cwd is None else cwd,
+                         env=env, capture_output=True, check=False)
     if check and res.returncode != 0:
         raise SystemExit(f"git {' '.join(args)} failed:\n{res.stderr.decode()}")
     return res.stdout if binary else res.stdout.decode().strip()
 
 
-def snapshot(main: Path, parent: str) -> str:
+def snapshot(main: Path, parent: str, dry: bool = False) -> str:
     with tempfile.TemporaryDirectory() as tmp:
         env = dict(os.environ, GIT_INDEX_FILE=str(Path(tmp) / "index"))
         git("--work-tree", str(main), "read-tree", parent, env=env)
         git("--work-tree", str(main), "add", "-A", env=env)
         tree = git("write-tree", env=env)
+    if dry:
+        return tree
     commit = git("commit-tree", tree, "-p", parent, "-m", f"port: snapshot of {main} workspace")
-    n = len(git("for-each-ref", "refs/port/main-snapshots/").splitlines())
-    git("update-ref", f"refs/port/main-snapshots/{n:04d}", commit)
+    refs = git("for-each-ref", "--format=%(refname)", "refs/port/main-snapshots/").splitlines()
+    numbers = [int(ref.rsplit("/", 1)[1]) for ref in refs if ref.rsplit("/", 1)[1].isdigit()]
+    n = max(numbers, default=-1) + 1
+    # The expected zero ref prevents concurrent snapshots from overwriting one another.
+    git("update-ref", f"refs/port/main-snapshots/{n:04d}", commit, "0" * 40)
     return commit
+
+
+def tree_paths(rev: str, prefix: str) -> set[str]:
+    return set(git("ls-tree", "-r", "--name-only", rev, "--", prefix).splitlines())
 
 
 def changed_paths(old: str, new: str, prefix: str) -> list[tuple[str, str]]:
@@ -64,11 +81,76 @@ def changed_paths(old: str, new: str, prefix: str) -> list[tuple[str, str]]:
     return [tuple(line.split("\t", 1)) for line in out.splitlines() if line]
 
 
-def scripted(commit: str, path: str, workdir: Path) -> bytes | None:
-    if subprocess.run(["git", "cat-file", "-e", f"{commit}:{path}"], cwd=ROOT,
+def blob(rev: str, path: str) -> bytes | None:
+    if subprocess.run(["git", "cat-file", "-e", f"{rev}:{path}"], cwd=ROOT,
                       capture_output=True).returncode != 0:
         return None
-    data = git("show", f"{commit}:{path}", binary=True)
+    return git("show", f"{rev}:{path}", binary=True)
+
+
+def local_path(rel: str) -> Path:
+    path = Path(rel)
+    if path.is_absolute() or ".." in path.parts:
+        raise SystemExit(f"unsafe sync path: {rel}")
+    target = ROOT / path
+    for part in [target, *target.parents]:
+        if part == ROOT:
+            break
+        if part.is_symlink():
+            raise SystemExit(f"refusing to synchronize through symlink: {part}")
+    return target
+
+
+def read_local(rel: str) -> bytes | None:
+    target = local_path(rel)
+    if target.exists() and not target.is_file():
+        raise SystemExit(f"sync file collides with a directory: {rel}")
+    return target.read_bytes() if target.exists() else None
+
+
+def set_file(path: Path, data: bytes | None) -> None:
+    if data is None:
+        if path.exists():
+            path.unlink()
+    else:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(data)
+
+
+def merge_bytes(base: bytes | None, ours: bytes | None,
+                theirs: bytes | None) -> tuple[bytes | None, bool]:
+    if ours == theirs or theirs == base:
+        return ours, False
+    if ours == base:
+        return theirs, False
+    # Add/add and modify/delete must not overwrite an existing port adaptation.
+    if base is None or ours is None or theirs is None:
+        return ours, True
+    try:
+        for data in (base, ours, theirs):
+            data.decode("utf-8")
+            if b"\0" in data:
+                return ours, True
+    except UnicodeDecodeError:
+        return ours, True
+    with tempfile.TemporaryDirectory() as tmp:
+        previous, current, incoming = (Path(tmp) / name for name in ("base", "ours", "theirs"))
+        previous.write_bytes(base)
+        current.write_bytes(ours)
+        incoming.write_bytes(theirs)
+        res = subprocess.run(["git", "merge-file", "-L", "port", "-L", "main-previous",
+                              "-L", "main-latest", str(current), str(previous), str(incoming)],
+                             capture_output=True)
+        # merge-file returns the number of conflicts (up to 127), not just 1.
+        if res.returncode < 0 or res.returncode > 127:
+            raise SystemExit(f"git merge-file failed:\n{res.stderr.decode()}")
+        return current.read_bytes(), res.returncode != 0
+
+
+def scripted(rev: str, path: str, workdir: Path) -> bytes | None:
+    data = blob(rev, path)
+    if data is None:
+        return None
     target = workdir / Path(path).name
     target.write_bytes(data)
     for script in SCRIPTS:
@@ -76,122 +158,270 @@ def scripted(commit: str, path: str, workdir: Path) -> bytes | None:
     return target.read_bytes()
 
 
-def merge_java(old: str, new: str, dry: bool) -> tuple[list[str], list[str]]:
-    conflicts, touched = [], []
-    with tempfile.TemporaryDirectory() as tmp:
-        tmpd = Path(tmp)
-        for status, path in changed_paths(old, new, "src/main/java"):
-            ours_path = ROOT / path
-            (tmpd / "b").mkdir(exist_ok=True); (tmpd / "t").mkdir(exist_ok=True)
-            base = scripted(old, path, tmpd / "b")
-            theirs = scripted(new, path, tmpd / "t")
-            ours = ours_path.read_bytes() if ours_path.exists() else None
-            touched.append(f"{status} {path}")
-            if dry:
-                continue
-            if theirs is None:  # deleted in main
-                if ours is not None and (base is None or ours == base):
-                    ours_path.unlink()
-                elif ours is not None:
-                    conflicts.append(f"deleted in main but adapted in port: {path}")
-                continue
-            if ours is None or base is None or ours == base:
-                ours_path.parent.mkdir(parents=True, exist_ok=True)
-                ours_path.write_bytes(theirs)
-                continue
-            fb, ft = tmpd / "base.java", tmpd / "theirs.java"
-            fb.write_bytes(base); ft.write_bytes(theirs)
-            rc = subprocess.run(["git", "merge-file", "-L", "port", "-L", "main-previous", "-L", "main-latest",
-                                 str(ours_path), str(fb), str(ft)]).returncode
-            if rc != 0:
-                conflicts.append(path)
-    return touched, conflicts
+def plan_java(old: str, new: str, workdir: Path) -> tuple[dict, list[str], list[str]]:
+    changes, touched, conflicts = {}, [], []
+    previous, incoming = workdir / "java-base", workdir / "java-incoming"
+    previous.mkdir()
+    incoming.mkdir()
+    for status, path in changed_paths(old, new, "src/main/java"):
+        base = scripted(old, path, previous)
+        theirs = scripted(new, path, incoming)
+        ours = read_local(path)
+        merged, conflict = merge_bytes(base, ours, theirs)
+        touched.append(f"{status} {path}")
+        if merged != ours:
+            changes[path] = merged
+        if conflict:
+            conflicts.append(path)
+    return changes, touched, conflicts
 
 
-def sync_resources(main: Path, old: str, new: str, dry: bool) -> list[str]:
-    src, dst = main / "src/main/resources", ROOT / "src/main/resources"
-    if dry:
-        return []
-    keep = {p: (dst / p).read_bytes() for p in PORT_OWNED_RESOURCES if (dst / p).exists()}
+def export_tree(rev: str, prefixes: list[str], project: Path) -> None:
+    """Export all requested blobs in one Git process, rejecting links/path escapes."""
+    existing = [prefix for prefix in prefixes if tree_paths(rev, prefix)]
+    if not existing:
+        return
+    process = subprocess.Popen(["git", "archive", "--format=tar", rev, "--", *existing],
+                               cwd=ROOT, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    try:
+        with tarfile.open(fileobj=process.stdout, mode="r|") as archive:
+            for member in archive:
+                rel = Path(member.name)
+                if rel.is_absolute() or ".." in rel.parts:
+                    raise SystemExit(f"unsafe snapshot archive path: {member.name}")
+                target = project / rel
+                if member.isdir():
+                    target.mkdir(parents=True, exist_ok=True)
+                elif member.isfile():
+                    if not any(member.name.startswith(prefix + "/") for prefix in existing):
+                        raise SystemExit(f"unexpected snapshot archive file: {member.name}")
+                    target.parent.mkdir(parents=True, exist_ok=True)
+                    with archive.extractfile(member) as source, target.open("wb") as output:
+                        shutil.copyfileobj(source, output)
+                    target.chmod(member.mode & 0o777)
+                else:
+                    raise SystemExit(f"unsupported snapshot archive entry: {member.name}")
+        _, stderr = process.communicate()
+        if process.returncode != 0:
+            raise SystemExit(f"git archive {rev} failed:\n{stderr.decode()}")
+    except BaseException:
+        if process.poll() is None:
+            process.terminate()
+            process.communicate()
+        else:
+            process.stdout.close()
+            process.stderr.close()
+        raise
+
+
+def load_conversion(name: str):
+    path = ROOT / f"scripts/port/{name}.py"
+    spec = importlib.util.spec_from_file_location(f"port_sync_{name}", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def check_conversion_inputs() -> None:
+    """The existing converters require prepared 1.20.1 facts, not a Gradle run here."""
+    mc = ROOT / "build/port-mc-src/net/minecraft"
+    needed = [ROOT / "build/port-classpath.txt", *[mc / path for path in (
+        "world/item/Items.java", "world/level/block/Blocks.java", "world/level/biome/Biomes.java",
+        "world/item/enchantment/Enchantments.java", "world/entity/EntityType.java",
+        "world/level/material/Fluids.java")]]
+    missing = [str(path.relative_to(ROOT)) for path in needed if not path.is_file()]
+    if missing:
+        raise SystemExit("resource conversion inputs missing; prepare the 1.20.1 port tooling first:\n  "
+                         + "\n  ".join(missing))
+    jars = [Path(p) for p in needed[0].read_text().strip().split(":") if p.endswith("client-extra.jar")]
+    if not jars or not all(path.is_file() for path in jars):
+        raise SystemExit("resource conversion requires an existing client-extra.jar in build/port-classpath.txt")
+
+
+def convert_resources(resources: Path) -> None:
+    # The converters have no resource-root CLI. Redirect only their resource globals;
+    # ROOT must stay real for vanilla source/classpath inputs and diagnostic paths.
+    conversion = load_conversion("convert_resources_1201")
+    conversion.DATA = resources / "data"
+    conversion.MODELS = resources / "assets/stardewcraft/models"
+    conversion.DATA.mkdir(parents=True, exist_ok=True)
+    argv = sys.argv
+    try:
+        sys.argv = [str(ROOT / "scripts/port/convert_resources_1201.py")]
+        if conversion.main() != 0:
+            raise SystemExit("resource conversion failed")
+    finally:
+        sys.argv = argv
+    nbt = load_conversion("nbt_downgrade_1201")
+    nbt.RES = resources
+    if nbt.main(["convert"]) != 0:
+        raise SystemExit("NBT resource conversion failed")
+
+
+def files_under(root: Path) -> dict[str, Path]:
+    files = {}
+    for path in root.rglob("*"):
+        if path.is_symlink():
+            raise SystemExit(f"refusing symlink in resource/build-input tree: {path}")
+        if path.is_file():
+            files[path.relative_to(root).as_posix()] = path
+    return files
+
+
+def prepare_resources(previous: Path, incoming: Path) -> list[str]:
+    dst = local_path(RESOURCE_PREFIX)
+    if dst.exists() and not dst.is_dir():
+        raise SystemExit("src/main/resources is not a directory")
+    base_files, new_files = files_under(previous), files_under(incoming)
+    ours_files = files_under(dst)
     conflicts = []
-    merged = {}
-    with tempfile.TemporaryDirectory() as tmp:
-        for p in MERGED_RESOURCES:
-            rel = f"src/main/resources/{p}"
-            ours = dst / p
-            base = git("show", f"{old}:{rel}", binary=True, check=False)
-            theirs = git("show", f"{new}:{rel}", binary=True, check=False)
-            fb, ft, fo = Path(tmp) / "b", Path(tmp) / "t", Path(tmp) / "o"
-            fb.write_bytes(base); ft.write_bytes(theirs); fo.write_bytes(ours.read_bytes())
-            if subprocess.run(["git", "merge-file", str(fo), str(fb), str(ft)]).returncode != 0:
-                conflicts.append(rel)
-            merged[p] = fo.read_bytes()
-    # Mirror tracked + untracked (non-ignored) resource files of the snapshot.
-    shutil.rmtree(dst)
-    files = git("ls-tree", "-r", "--name-only", new, "--", "src/main/resources").splitlines()
-    for rel in files:
-        target = ROOT / rel
-        target.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(main / rel, target)
-    for p, data in {**keep, **merged}.items():
-        (dst / p).parent.mkdir(parents=True, exist_ok=True)
-        (dst / p).write_bytes(data)
-    subprocess.run([sys.executable, str(ROOT / "scripts/port/convert_resources_1201.py")], check=True)
-    subprocess.run([sys.executable, str(ROOT / "scripts/port/nbt_downgrade_1201.py"), "convert"], check=True)
+    for rel in sorted(base_files.keys() | new_files.keys() | ours_files.keys()):
+        base = base_files[rel].read_bytes() if rel in base_files else None
+        theirs = new_files[rel].read_bytes() if rel in new_files else None
+        ours = ours_files[rel].read_bytes() if rel in ours_files else None
+        if rel in PORT_OWNED_RESOURCES:
+            merged, conflict = ours, False
+        else:
+            merged, conflict = merge_bytes(base, ours, theirs)
+        if conflict:
+            conflicts.append(f"{RESOURCE_PREFIX}/{rel}")
+        set_file(incoming / rel, merged)
     return conflicts
 
 
-def mirror_paths(main: Path, new: str, dry: bool) -> int:
-    count = 0
+def plan_mirrors(previous: Path, incoming: Path) -> tuple[dict, list[str]]:
+    changes, conflicts = {}, []
     for prefix in MIRRORED_PATHS:
-        wanted = set(git("ls-tree", "-r", "--name-only", new, "--", prefix).splitlines())
-        here = ROOT / prefix
-        existing = {str(p.relative_to(ROOT)) for p in here.rglob("*") if p.is_file()} if here.exists() else set()
-        if dry:
-            count += len(wanted ^ existing)
-            continue
-        for rel in existing - wanted:
-            (ROOT / rel).unlink()
-            count += 1
-        for rel in wanted:
-            data = git("show", f"{new}:{rel}", binary=True)
-            target = ROOT / rel
-            if not target.exists() or target.read_bytes() != data:
-                target.parent.mkdir(parents=True, exist_ok=True)
-                target.write_bytes(data)
-                count += 1
-    return count
+        base_files = files_under(previous / prefix)
+        new_files = files_under(incoming / prefix)
+        # Do not enumerate/delete unrelated local or ignored authoring files.
+        for path in sorted(base_files.keys() | new_files.keys()):
+            rel = f"{prefix}/{path}"
+            base = base_files[path].read_bytes() if path in base_files else None
+            theirs = new_files[path].read_bytes() if path in new_files else None
+            ours = read_local(rel)
+            merged, conflict = merge_bytes(base, ours, theirs)
+            if merged != ours:
+                changes[rel] = merged
+            if conflict:
+                conflicts.append(rel)
+    return changes, conflicts
 
 
-def main() -> int:
-    ap = argparse.ArgumentParser()
+def replace_resources(incoming: Path, backup: Path) -> None:
+    dst = local_path(RESOURCE_PREFIX)
+    existed = dst.exists()
+    if existed:
+        dst.rename(backup)
+    try:
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        incoming.rename(dst)
+    except BaseException:
+        if existed:
+            backup.rename(dst)
+        raise
+
+
+def run_lint() -> int:
+    return subprocess.run([sys.executable, str(ROOT / "scripts/port/lint_port.py")]).returncode
+
+
+def save_pending(old: str, new: str, conflicts: list[str], applied: bool) -> None:
+    PENDING.parent.mkdir(parents=True, exist_ok=True)
+    PENDING.write_text(json.dumps({"old": old, "new": new, "conflicts": conflicts,
+                                   "applied": applied}, indent=2) + "\n")
+
+
+def complete_snapshot(rev: str) -> int:
+    if not PENDING.is_file():
+        raise SystemExit("no pending snapshot to complete")
+    pending = json.loads(PENDING.read_text())
+    new = git("rev-parse", f"{rev}^{{commit}}")
+    old = STATE.read_text().split()[0]
+    if new != pending["new"] or old != pending["old"]:
+        raise SystemExit("snapshot/state does not match the pending synchronization")
+    if not pending.get("applied"):
+        raise SystemExit("synchronization was interrupted; retry the exact snapshot with --retry-incomplete")
+    unresolved = []
+    for rel in pending["conflicts"]:
+        data = read_local(rel)
+        if data is not None and any(line.startswith(CONFLICT_MARKERS) for line in data.splitlines()):
+            unresolved.append(rel)
+    if unresolved:
+        raise SystemExit("unresolved conflict markers:\n  " + "\n  ".join(unresolved))
+    if run_lint() != 0:
+        return 1
+    STATE.write_text(new + "\n")
+    PENDING.unlink()
+    print(f"completed snapshot {new}; binary/delete/add collisions explicitly accepted")
+    print("next: compile and run the required release checks; completion is not release validation")
+    return 0
+
+
+def main(argv=None) -> int:
+    ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--main", default=str(ROOT.parent / "StardewCraft"))
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--snapshot", help="use an existing snapshot commit instead of taking a new one")
-    args = ap.parse_args()
-    main_dir = Path(args.main).resolve()
+    ap.add_argument("--complete-snapshot", help="acknowledge resolved conflicts and advance STATE")
+    ap.add_argument("--retry-incomplete", action="store_true",
+                    help="retry --snapshot after an interrupted application, not unresolved conflicts")
+    args = ap.parse_args(argv)
+    if args.complete_snapshot:
+        if args.dry_run or args.snapshot or args.retry_incomplete:
+            ap.error("--complete-snapshot cannot be combined with sync options")
+        return complete_snapshot(args.complete_snapshot)
     old = STATE.read_text().split()[0]
-    new = git("rev-parse", args.snapshot) if args.snapshot else snapshot(main_dir, old)
+    if PENDING.exists() and not args.dry_run:
+        pending = json.loads(PENDING.read_text())
+        retry = args.retry_incomplete and args.snapshot and not pending.get("applied")
+        if not retry or old != pending["old"] or git("rev-parse", f"{args.snapshot}^{{commit}}") != pending["new"]:
+            raise SystemExit("resolve the pending snapshot, then use --complete-snapshot with its exact SHA")
+    elif args.retry_incomplete:
+        ap.error("--retry-incomplete requires a pending interrupted synchronization")
+    main_dir = Path(args.main).resolve()
+    new = git("rev-parse", f"{args.snapshot}^{{commit}}") if args.snapshot else snapshot(main_dir, old, args.dry_run)
     if git("rev-parse", f"{old}^{{tree}}") == git("rev-parse", f"{new}^{{tree}}"):
         print("main unchanged since last sync")
         return 0
-    touched, conflicts = merge_java(old, new, args.dry_run)
-    conflicts += sync_resources(main_dir, old, new, args.dry_run)
-    print(f"mirrored build-input files changed: {mirror_paths(main_dir, new, args.dry_run)}")
-    print(f"snapshot {new}: {len(touched)} java paths changed")
-    for line in touched:
-        print("  ", line)
+    check_conversion_inputs()
+    (ROOT / "build").mkdir(exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix="port-sync-", dir=ROOT / "build") as tmp:
+        workdir = Path(tmp)
+        previous, incoming = workdir / "previous", workdir / "incoming"
+        prefixes = [RESOURCE_PREFIX, *MIRRORED_PATHS]
+        export_tree(old, prefixes, previous)
+        export_tree(new, prefixes, incoming)
+        previous_resources, incoming_resources = previous / RESOURCE_PREFIX, incoming / RESOURCE_PREFIX
+        convert_resources(previous_resources)
+        convert_resources(incoming_resources)
+        conflicts = prepare_resources(previous_resources, incoming_resources)
+        java_changes, touched, java_conflicts = plan_java(old, new, workdir)
+        mirror_changes, mirror_conflicts = plan_mirrors(previous, incoming)
+        conflicts += java_conflicts + mirror_conflicts
+        print(f"snapshot {new}: {len(touched)} java paths changed")
+        print(f"mirrored build-input files changed: {len(mirror_changes)}")
+        for line in touched:
+            print("  ", line)
+        if not args.dry_run:
+            # Mark incomplete before mutation so an IO failure/crash cannot advance STATE.
+            save_pending(old, new, conflicts, applied=False)
+            replace_resources(incoming_resources, workdir / "original-resources")
+            for rel, data in {**java_changes, **mirror_changes}.items():
+                set_file(local_path(rel), data)
+            save_pending(old, new, conflicts, applied=True)
     if conflicts:
-        print("CONFLICTS (resolve, then rerun the javac loop):")
-        for c in conflicts:
-            print("  ", c)
+        print("CONFLICTS (STATE was not advanced; resolve/review, then --complete-snapshot):")
+        for path in conflicts:
+            print("  ", path)
+    lint_status = 0 if args.dry_run else run_lint()
+    if conflicts or lint_status:
+        return 1
     if not args.dry_run:
         STATE.write_text(new + "\n")
-        # Silent-behaviour idioms that compile on 1.20.1 (sprite UVs, NBT block pos, DFU optionals...).
-        print("lint:")
-        subprocess.run([sys.executable, str(ROOT / "scripts/port/lint_port.py")])
-        print("next: scripts/port/javac_all.sh, then fix_java21_errors.py / fix_errors_1201.py on its log")
-    return 1 if conflicts else 0
+        PENDING.unlink()
+        print("next: compile and run the required release checks")
+    return 0
 
 
 if __name__ == "__main__":

@@ -7,12 +7,12 @@ import com.stardew.craft.cutscene.runtime.EventPlayer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 
-@EventBusSubscriber(modid = ExampleStardewAddon.MOD_ID, value = Dist.CLIENT)
+@Mod.EventBusSubscriber(modid = ExampleStardewAddon.MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
 public final class ExampleClientCommands {
     private ExampleClientCommands() {
     }
@@ -20,7 +20,7 @@ public final class ExampleClientCommands {
     @SubscribeEvent
     public static void onClientSetup(FMLClientSetupEvent event) {
         event.enqueueWork(() -> StardewCutsceneCommands.register(
-                ResourceLocation.fromNamespaceAndPath(ExampleStardewAddon.MOD_ID, "toast"),
+                new ResourceLocation(ExampleStardewAddon.MOD_ID, "toast"),
                 data -> new ToastCommand(data.get("text").getAsString())));
     }
 

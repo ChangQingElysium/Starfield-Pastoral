@@ -56,7 +56,12 @@ public final class PortFaceBakery {
             Direction facing, ModelState transform, @Nullable BlockElementRotation rotation, boolean shade) {
         BlockFaceUV uv = face.uv;
         if (transform.isUvLocked()) {
-            uv = FaceBakery.recomputeUVs(face.uv, facing, transform.getRotation(), UV_LOCK_CONTEXT);
+            Transformation uvRotation = transform.getRotation();
+            // PORT(1.20.1): 1.21 BlockMath falls back to identity, not a zero-scale UV transform.
+            if (uvRotation.inverse() == null) {
+                uvRotation = Transformation.identity();
+            }
+            uv = FaceBakery.recomputeUVs(face.uv, facing, uvRotation, UV_LOCK_CONTEXT);
         }
         float[] saved = new float[uv.uvs.length];
         System.arraycopy(uv.uvs, 0, saved, 0, saved.length);

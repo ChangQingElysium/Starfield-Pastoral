@@ -1,5 +1,6 @@
 package com.stardew.craft.client.weapon;
 
+import com.stardew.craft.port.PortCamera;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
@@ -66,7 +67,7 @@ public final class OssifiedMarkRenderer {
 
             poseStack.pushPose();
             poseStack.translate(x, y, z);
-            poseStack.mulPose(dispatcher.cameraOrientation());
+            poseStack.mulPose(PortCamera.cameraOrientation(dispatcher));
             poseStack.mulPose(Axis.YP.rotationDegrees(180.0F));
             float scale = com.stardew.craft.port.PortJava.clamp(entity.getBbHeight()*0.65f, 0.55f, 1.4f);
             poseStack.scale(scale, scale, scale);

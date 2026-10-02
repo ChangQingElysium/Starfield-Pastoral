@@ -1,0 +1,96 @@
+{
+  "parent": "minecraft:block/block",
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "0": "stardewcraft:block/ginger_island/field_office_canvas_floor",
+    "particle": "stardewcraft:block/ginger_island/field_office_canvas_floor_particle"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0.25,
+            4.5,
+            4.25,
+            8.5
+          ],
+          "texture": "#0"
+        },
+        "east": {
+          "uv": [
+            0.25,
+            4.5,
+            4.25,
+            8.5
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            0.25,
+            4.5,
+            4.25,
+            8.5
+          ],
+          "texture": "#0"
+        },
+        "west": {
+          "uv": [
+            0.25,
+            4.5,
+            4.25,
+            8.5
+          ],
+          "texture": "#0"
+        },
+        "up": {
+          "uv": [
+            0.25,
+            0.25,
+            4.25,
+            4.25
+          ],
+          "texture": "#0"
+        },
+        "down": {
+          "uv": [
+            4.5,
+            4.5,
+            8.5,
+            8.5
+          ],
+          "texture": "#0"
+        }
+      }
+    }
+  ],
+  "stardewcraft:collision": {
+    "mode": "custom",
+    "boxes": [
+      {
+        "from": [
+          0,
+          0,
+          0
+        ],
+        "to": [
+          16,
+          16,
+          16
+        ]
+      }
+    ],
+    "policy": "aabb"
+  }
+}

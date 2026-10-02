@@ -474,8 +474,7 @@ public final class PassOutService {
             }
             var state = player.level().getBlockState(pos);
             if (state.getBlock() instanceof BedBlock
-                    || state.is(ModBlocks.BED_1.get())
-                    || state.is(ModBlocks.BED_2.get())) {
+                    || state.getBlock() instanceof com.stardew.craft.block.decor.BedDecorBlock) {
                 return true;
             }
         }
@@ -922,8 +921,7 @@ public final class PassOutService {
 
     private static boolean isSleepBlock(net.minecraft.world.level.block.state.BlockState state) {
         return state.getBlock() instanceof BedBlock
-                || state.is(ModBlocks.BED_1.get())
-                || state.is(ModBlocks.BED_2.get());
+                || state.getBlock() instanceof com.stardew.craft.block.decor.BedDecorBlock;
     }
 
     // ──────────────────────────────────────

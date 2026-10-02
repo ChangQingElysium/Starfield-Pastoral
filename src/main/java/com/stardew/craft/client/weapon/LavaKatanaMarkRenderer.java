@@ -1,5 +1,6 @@
 package com.stardew.craft.client.weapon;
 
+import com.stardew.craft.port.PortCamera;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
@@ -37,7 +38,7 @@ public final class LavaKatanaMarkRenderer {
             size *= 1 + 0.08f * (float) Math.sin(now * 0.65);
             stack.pushPose();
             stack.translate(position.x, position.y, position.z);
-            stack.mulPose(event.getCamera().rotation());
+            stack.mulPose(PortCamera.rotation(event.getCamera()));
             Matrix4f pose = stack.last().pose();
             quad(out, pose, size * 1.3f, 48);
             quad(out, pose, size, 195 + Math.min(45, heat * 4));

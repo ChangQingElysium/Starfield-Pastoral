@@ -1,5 +1,6 @@
 package com.stardew.craft.client.render;
 
+import com.stardew.craft.port.PortCamera;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
@@ -82,7 +83,7 @@ public class LoomBlockEntityRenderer implements BlockEntityRenderer<LoomBlockEnt
 
         poseStack.pushPose();
         poseStack.translate(0.5f, bubbleY, 0.5f);
-        poseStack.mulPose(Minecraft.getInstance().getEntityRenderDispatcher().cameraOrientation());
+        poseStack.mulPose(PortCamera.cameraOrientation(Minecraft.getInstance().getEntityRenderDispatcher()));
 
         float w = 20 * PX;
         float h = 24 * PX;

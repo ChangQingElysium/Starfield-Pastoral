@@ -3,8 +3,10 @@ package com.stardew.craft.port;
 import com.stardew.craft.port.net.neoforged.neoforge.common.util.TriState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FarmBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.IPlantable;
@@ -21,6 +23,11 @@ import net.minecraftforge.common.IPlantable;
  * rules on top of {@code mayPlaceOn}, only a few plants ask it, and vanilla rules/isFertile only accept
  * {@code Blocks.FARMLAND}. The {@code Port*PlantSupportMixin}s restore the 1.21.1 rules; mod soils that override the
  * 1.21.1 TriState method implement {@link Soil} with the unchanged 1.21.1 body.
+ *
+ * <p>Scope ({@link #portRules}): the 1.21.1 rules apply wherever StardewCraft is involved (a StardewCraft soil or plant)
+ * and to vanilla plants on vanilla soils (1.21.1 vanilla, which the mod's worlds and farms observe). A third-party plant
+ * on a non-StardewCraft soil, or a vanilla plant on a third-party soil, keeps the unchanged Forge 1.20.1 code (Forge
+ * plant-type rules, {@code Blocks.FARMLAND}-only checks), so other mods' plants and soils behave as on Forge 1.20.1.
  *
  * <p>Compatibility: a third-party 1.20.1 soil that overrides Forge's boolean method ({@link #legacyForgeSoil}) keeps the
  * Forge answer at the call sites where 1.20.1 asked it; no StardewCraft or vanilla block is such a soil.
@@ -47,6 +54,57 @@ public final class PortPlantSupport {
     public static boolean fertile(BlockState state) {
         return state.getBlock() instanceof FarmBlock && state.getValue(FarmBlock.MOISTURE) > 0;
     }
+
+    /**
+     * {@code FarmBlock#isFertile} as added by {@code PortFarmBlockPlantSupportMixin}: the 1.21.1 default for vanilla and
+     * StardewCraft farmland, Forge 1.20.1's default ({@code Blocks.FARMLAND} only) for a third-party FarmBlock.
+     */
+    public static boolean farmBlockFertile(BlockState state) {
+        return (state.is(Blocks.FARMLAND) || isStardew(state.getBlock())) && fertile(state);
+    }
+
+    /**
+     * 1.21.1 {@code soil.isFertile(level, pos)} on the 1.21.1 path ({@link #portRules}): a soil that overrides the hook
+     * answers itself; otherwise the 1.21.1 default (any moist FarmBlock, e.g. a third-party farmland under a
+     * StardewCraft crop).
+     */
+    public static boolean fertile121(BlockState soil, BlockGetter level, BlockPos pos) {
+        return OWN_IS_FERTILE.get(soil.getBlock().getClass()) ? soil.isFertile(level, pos) : fertile(soil);
+    }
+
+    /**
+     * Whether a plant on this soil follows the 1.21.1 rules: a StardewCraft soil ({@link Soil} or the mod namespace) or
+     * plant, or a vanilla plant on a vanilla soil. Everything else runs the original Forge 1.20.1 code.
+     */
+    public static boolean portRules(BlockState soil, Block plant) {
+        Block soilBlock = soil.getBlock();
+        if (soilBlock instanceof Soil || isStardew(soilBlock) || isStardew(plant)) return true;
+        return VANILLA.equals(namespace(soilBlock)) && VANILLA.equals(namespace(plant));
+    }
+
+    private static final String VANILLA = "minecraft";
+
+    private static boolean isStardew(Block block) {
+        return "stardewcraft".equals(namespace(block));
+    }
+
+    private static String namespace(Block block) {
+        return BuiltInRegistries.BLOCK.getKey(block).getNamespace();
+    }
+
+    /** A soil class with its own {@code isFertile} (not the FarmBlock port default or Forge's interface default). */
+    private static final ClassValue<Boolean> OWN_IS_FERTILE = new ClassValue<>() {
+        @Override
+        protected Boolean computeValue(Class<?> type) {
+            try {
+                Class<?> owner = type.getMethod("isFertile", BlockState.class, BlockGetter.class, BlockPos.class)
+                        .getDeclaringClass();
+                return owner != FarmBlock.class && !owner.isInterface();
+            } catch (NoSuchMethodException e) {
+                return false;
+            }
+        }
+    };
 
     /** 1.21.1 {@code CropBlock#hasSufficientLight} (1.20.1 additionally accepted {@code canSeeSky}). */
     public static boolean sufficientCropLight(net.minecraft.world.level.LevelReader level, BlockPos pos) {

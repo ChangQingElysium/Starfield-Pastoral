@@ -23,7 +23,6 @@ import javax.annotation.Nullable;
 
 @SuppressWarnings("all")
 public class CrystalariumBlockEntity extends TimedProductionBlockEntity implements AnimatedModel {
-    private static final int EFFECTIVE_MINUTES_PER_DAY = 1260;
     private static final int TIME_DEFAULT = 5000;
 
     private static final String TAG_INPUT = "input";
@@ -140,7 +139,7 @@ public class CrystalariumBlockEntity extends TimedProductionBlockEntity implemen
 
         var plan = prepareMachineCycle(
                 StardewMachineCycleKind.REPEATING,
-                stack, output, recipe.minutes(),
+                stack, output, recipeMinutes(recipe),
                 player, false);
         if (plan.isEmpty()) {
             return InsertResult.fail();
@@ -200,7 +199,7 @@ public class CrystalariumBlockEntity extends TimedProductionBlockEntity implemen
             nextOutput = input.copy();
             nextOutput.setCount(1);
         }
-        int minutes = recipe != null ? recipe.minutes() : TIME_DEFAULT;
+        int minutes = recipe != null ? recipeMinutes(recipe) : TIME_DEFAULT;
         var nextPlan = prepareMachineCycle(
                 StardewMachineCycleKind.REPEATING,
                 input, nextOutput, minutes,
@@ -250,7 +249,7 @@ public class CrystalariumBlockEntity extends TimedProductionBlockEntity implemen
         }
         var plan = prepareMachineCycle(
                 StardewMachineCycleKind.REPEATING,
-                stack, output, recipe.minutes(),
+                stack, output, recipeMinutes(recipe),
                 null, true);
         if (plan.isEmpty()) {
             return stack;

@@ -1,0 +1,32 @@
+{
+  "variants": {
+    "facing=north,part=main": {
+      "model": "stardewcraft:block/ginger_island/island_curled_fern",
+      "y": 0
+    },
+    "facing=north,part=extension": {
+      "model": "stardewcraft:block/ginger_island/island_curled_fern_extension"
+    },
+    "facing=east,part=main": {
+      "model": "stardewcraft:block/ginger_island/island_curled_fern",
+      "y": 90
+    },
+    "facing=east,part=extension": {
+      "model": "stardewcraft:block/ginger_island/island_curled_fern_extension"
+    },
+    "facing=south,part=main": {
+      "model": "stardewcraft:block/ginger_island/island_curled_fern",
+      "y": 180
+    },
+    "facing=south,part=extension": {
+      "model": "stardewcraft:block/ginger_island/island_curled_fern_extension"
+    },
+    "facing=west,part=main": {
+      "model": "stardewcraft:block/ginger_island/island_curled_fern",
+      "y": 270
+    },
+    "facing=west,part=extension": {
+      "model": "stardewcraft:block/ginger_island/island_curled_fern_extension"
+    }
+  }
+}

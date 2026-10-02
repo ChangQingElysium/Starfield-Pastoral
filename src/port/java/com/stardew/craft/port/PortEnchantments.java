@@ -7,32 +7,54 @@ import com.google.gson.JsonParser;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentUtils;
+import net.minecraft.network.chat.Style;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.packs.resources.PreparableReloadListener;
+import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.tags.TagKey;
+import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentCategory;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.AddReloadListenerEvent;
+import net.minecraftforge.event.OnDatapackSyncEvent;
+import net.minecraftforge.network.PacketDistributor;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.registries.DeferredRegister;
 
 /**
  * PORT(1.20.1): 1.21.1 enchantments are data-driven ({@code data/stardewcraft/enchantment/*.json}); 1.20.1 only has
  * the built-in, code-registered enchantment registry. Each mod enchantment is registered here under the same id
- * ({@code stardewcraft:<name>}) and built from the very same JSON file shipped in the mod jar, so the
+ * ({@code stardewcraft:<name>}) and built from the same JSON definitions, including data-pack overrides, so the
  * {@code ResourceKey<Enchantment>} constants in {@code StardewEnchantments} resolve through
  * {@code registryAccess().registryOrThrow/lookupOrThrow(Registries.ENCHANTMENT)} exactly as in 1.21.1.
  * <p>
@@ -42,7 +64,8 @@ import net.minecraftforge.registries.DeferredRegister;
  *   (absent = supported items) → {@link Enchantment#canApplyAtEnchantingTable}.</li>
  *   <li>{@code exclusive_set} → {@code checkCompatibility}; 1.20.1 {@code isCompatibleWith} checks both directions
  *   like 1.21 {@code Enchantment.areCompatible}.</li>
- *   <li>{@code weight} → {@link Enchantment.Rarity} by weight (10/5/2/1; any other weight is rejected).</li>
+ *   <li>{@code weight} → the exact 1..1024 weighted-selection value via {@code PortEnchantmentWeightMixin}.
+ *   Standard weights retain their corresponding 1.20 rarity for Forge callers.</li>
  *   <li>{@code min_cost}/{@code max_cost} → {@code base + per_level_above_first * (level - 1)}.</li>
  *   <li>{@code anvil_cost} → anvil per-level cost via {@code PortAnvilEnchantmentCostMixin} (1.20.1 derives it from
  *   rarity; 1.21 uses {@code anvil_cost}, halved with a minimum of 1 for books in both versions).</li>
@@ -52,7 +75,8 @@ import net.minecraftforge.registries.DeferredRegister;
  *   <li>1.21 creative tabs list a book for every registered enchantment, so the creative-tab category filter is
  *   bypassed.</li>
  * </ul>
- * The JSONs carry no effect components; any {@code effects} entry is rejected at registration.
+ * The source mod's JSONs carry no effect components; non-empty {@code effects} are explicitly rejected.
+ * Reloads retain all 17 registered identities and publish one validated snapshot, then sync remote clients.
  */
 public final class PortEnchantments {
     /** Registration order = 1.21 data-driven registry order (resource locations sorted). */
@@ -66,10 +90,14 @@ public final class PortEnchantments {
     public static final TagKey<Enchantment> TRADEABLE = vanillaTag("tradeable");
     public static final TagKey<Enchantment> IN_ENCHANTING_TABLE = vanillaTag("in_enchanting_table");
     public static final TagKey<Enchantment> ON_RANDOM_LOOT = vanillaTag("on_random_loot");
+    public static final TagKey<Enchantment> DOUBLE_TRADE_PRICE = vanillaTag("double_trade_price");
+    private static final ThreadLocal<TagKey<Enchantment>> SELECTION_POOL = new ThreadLocal<>();
 
     private static final DeferredRegister<Enchantment> ENCHANTMENTS =
             DeferredRegister.create(Registries.ENCHANTMENT, PortBootstrap.NAMESPACE);
     private static final Map<String, EnchantmentCategory> CATEGORIES = new LinkedHashMap<>();
+    // Publish a complete reload at once. Registered enchantment identities never change.
+    private static volatile Map<String, DataEnchantment> definitions = Map.of();
     private static boolean registered;
 
     static {
@@ -84,6 +112,8 @@ public final class PortEnchantments {
         if (registered) return;
         registered = true;
         ENCHANTMENTS.register(modBus);
+        MinecraftForge.EVENT_BUS.register(PortEnchantments.class);
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> PortClientHandlers::register);
     }
 
     private static TagKey<Enchantment> vanillaTag(String path) {
@@ -98,6 +128,92 @@ public final class PortEnchantments {
             return new DataEnchantment(name, json);
         } catch (IOException e) {
             throw new IllegalStateException("Cannot read enchantment definition " + path, e);
+        }
+    }
+
+    @SubscribeEvent
+    public static void addReloadListener(AddReloadListenerEvent event) {
+        event.addListener(new PreparableReloadListener() {
+            @Override
+            public CompletableFuture<Void> reload(PreparationBarrier barrier, ResourceManager manager,
+                    ProfilerFiller preparationProfiler, ProfilerFiller reloadProfiler,
+                    Executor backgroundExecutor, Executor gameExecutor) {
+                return CompletableFuture.supplyAsync(() -> readDefinitions(manager), backgroundExecutor)
+                        .thenCompose(barrier::wait)
+                        .thenAcceptAsync(PortEnchantments::applyDefinitions, gameExecutor);
+            }
+
+            @Override
+            public String getName() { return "PortEnchantments"; }
+        });
+    }
+
+    static Map<String, JsonObject> readDefinitions(ResourceManager manager) {
+        Map<String, JsonObject> result = new LinkedHashMap<>();
+        for (String name : NAMES) {
+            ResourceLocation file = new ResourceLocation(PortBootstrap.NAMESPACE, "enchantment/" + name + ".json");
+            try (Reader reader = manager.getResourceOrThrow(file).openAsReader()) {
+                result.put(name, JsonParser.parseReader(reader).getAsJsonObject());
+            } catch (IOException exception) {
+                throw new IllegalStateException("Cannot reload enchantment " + file, exception);
+            }
+        }
+        return result;
+    }
+
+    /** Shared by the resource reload and network decoder; reject invalid/incomplete snapshots atomically. */
+    public static void applyDefinitions(Map<String, JsonObject> json) {
+        if (!json.keySet().equals(Set.copyOf(NAMES))) {
+            throw new IllegalArgumentException("Enchantment snapshot must contain exactly the registered mod ids");
+        }
+        Map<String, DataEnchantment> next = new LinkedHashMap<>();
+        for (String name : NAMES) next.put(name, new DataEnchantment(name, json.get(name).deepCopy()));
+        definitions = Map.copyOf(next);
+    }
+
+    public static Map<String, JsonObject> snapshot() {
+        Map<String, DataEnchantment> current = definitions;
+        Map<String, JsonObject> result = new LinkedHashMap<>();
+        for (String name : NAMES) {
+            DataEnchantment definition = current.get(name);
+            if (definition == null) definition = load(name);
+            result.put(name, definition.json.deepCopy());
+        }
+        return result;
+    }
+
+    static void resetClientDefinitions() { definitions = Map.of(); }
+
+    public record SyncMessage(Map<String, JsonObject> definitions) {
+        void encode(FriendlyByteBuf buf) {
+            buf.writeVarInt(NAMES.size());
+            for (String name : NAMES) {
+                buf.writeUtf(name);
+                buf.writeUtf(definitions.get(name).toString(), 32767);
+            }
+        }
+
+        static SyncMessage decode(FriendlyByteBuf buf) {
+            int count = buf.readVarInt();
+            if (count != NAMES.size()) throw new IllegalArgumentException("Invalid enchantment snapshot size " + count);
+            Map<String, JsonObject> json = new LinkedHashMap<>();
+            for (int i = 0; i < count; i++) {
+                String name = buf.readUtf(64);
+                if (!NAMES.contains(name) || json.containsKey(name)) throw new IllegalArgumentException("Invalid enchantment id " + name);
+                json.put(name, JsonParser.parseString(buf.readUtf(32767)).getAsJsonObject());
+            }
+            return new SyncMessage(Map.copyOf(json));
+        }
+    }
+
+    @SubscribeEvent
+    public static void datapackSync(OnDatapackSyncEvent event) {
+        List<ServerPlayer> players = event.getPlayer() == null ? event.getPlayerList().getPlayers() : List.of(event.getPlayer());
+        if (players.isEmpty()) return;
+        SyncMessage message = new SyncMessage(snapshot());
+        for (ServerPlayer player : players) {
+            if (player.connection.connection.isMemoryConnection()) continue;
+            PortNetwork.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), message);
         }
     }
 
@@ -144,20 +260,8 @@ public final class PortEnchantments {
         for (Enchantment.Rarity rarity : Enchantment.Rarity.values()) {
             if (rarity.getWeight() == weight) return rarity;
         }
-        throw new UnsupportedOperationException("PORT(1.20.1): enchantment weight " + weight
-                + " has no 1.20.1 Rarity (10/5/2/1); enchanting-table weighting would need a dedicated override");
-    }
-
-    /** Anvil per-level cost as the 1.20.1 rarity switch in {@code AnvilMenu#createResult} computes it. */
-    static Enchantment.Rarity rarityForAnvilCost(int anvilCost) {
-        return switch (anvilCost) {
-            case 1 -> Enchantment.Rarity.COMMON;
-            case 2 -> Enchantment.Rarity.UNCOMMON;
-            case 4 -> Enchantment.Rarity.RARE;
-            case 8 -> Enchantment.Rarity.VERY_RARE;
-            default -> throw new UnsupportedOperationException("PORT(1.20.1): anvil_cost " + anvilCost
-                    + " is not expressible through the 1.20.1 anvil rarity switch (1/2/4/8)");
-        };
+        // EnchantmentInstance's constructor uses the exact JSON weight through a dedicated hook.
+        return Enchantment.Rarity.COMMON;
     }
 
     private static EquipmentSlot[] slots(JsonArray groups) {
@@ -181,20 +285,53 @@ public final class PortEnchantments {
         return slots.toArray(EquipmentSlot[]::new);
     }
 
-    private static synchronized EnchantmentCategory category(ItemSet supported) {
+    private static synchronized EnchantmentCategory category(String name, ItemSet supported) {
         // 1.20.1 requires a category; it only feeds Forge's default enchanting-table/creative-tab checks, both of
         // which DataEnchantment overrides. Give it the supported-items predicate so other mods reading it agree.
-        return CATEGORIES.computeIfAbsent(supported.key(), key -> EnchantmentCategory.create(
+        return CATEGORIES.computeIfAbsent(name, key -> EnchantmentCategory.create(
                 "STARDEWCRAFT_" + key.replaceAll("[^A-Za-z0-9]", "_").toUpperCase(Locale.ROOT),
-                item -> supported.test().test(item.builtInRegistryHolder())));
+                item -> {
+                    DataEnchantment current = definitions.get(name);
+                    return (current == null ? supported : current.supportedItems).test().test(item.builtInRegistryHolder());
+                }));
     }
 
-    /** Rarity whose 1.20.1 anvil cost equals the 1.21 {@code anvil_cost}; {@code null} for non-mod enchantments. */
-    public static Enchantment.Rarity anvilRarity(Enchantment enchantment) {
-        return enchantment instanceof DataEnchantment data ? rarityForAnvilCost(data.anvilCost) : null;
+    public static int anvilCost(Enchantment enchantment, int vanilla) {
+        return enchantment instanceof DataEnchantment data ? data.current().anvilCost : vanilla;
+    }
+
+    public static int weight(Enchantment enchantment, int vanilla) {
+        return enchantment instanceof DataEnchantment data ? data.current().weight : vanilla;
+    }
+
+    public static <T> T fromRandomLoot(Supplier<T> action) {
+        TagKey<Enchantment> previous = SELECTION_POOL.get();
+        SELECTION_POOL.set(ON_RANDOM_LOOT);
+        try { return action.get(); }
+        finally {
+            if (previous == null) SELECTION_POOL.remove(); else SELECTION_POOL.set(previous);
+        }
+    }
+
+    public static boolean inSelectionPool(Enchantment enchantment, boolean vanilla) {
+        TagKey<Enchantment> pool = SELECTION_POOL.get();
+        return enchantment instanceof DataEnchantment data ? data.inTag(pool == null ? IN_ENCHANTING_TABLE : pool) : vanilla;
+    }
+
+    public static boolean inRandomLoot(Enchantment enchantment, boolean vanilla) {
+        return enchantment instanceof DataEnchantment data ? data.inTag(ON_RANDOM_LOOT) : vanilla;
+    }
+
+    public static boolean doubleTradePrice(Enchantment enchantment, boolean vanilla) {
+        return enchantment instanceof DataEnchantment data ? data.inTag(DOUBLE_TRADE_PRICE) : vanilla;
     }
 
     public static final class DataEnchantment extends Enchantment {
+        private final String name;
+        private final JsonObject json;
+        private final int weight;
+        private final EquipmentSlot[] activeSlots;
+        private final Component description;
         private final int maxLevel;
         private final int minCostBase;
         private final int minCostPerLevel;
@@ -210,7 +347,12 @@ public final class PortEnchantments {
         }
 
         private DataEnchantment(String name, JsonObject json, ItemSet supported) {
-            super(rarityForWeight(json.get("weight").getAsInt()), category(supported), slots(json.getAsJsonArray("slots")));
+            super(rarityForWeight(json.get("weight").getAsInt()), category(name, supported), slots(json.getAsJsonArray("slots")));
+            this.name = name;
+            this.json = json;
+            this.weight = json.get("weight").getAsInt();
+            if (weight < 1 || weight > 1024) throw new IllegalArgumentException("Enchantment weight must be in 1..1024");
+            this.activeSlots = slots(json.getAsJsonArray("slots"));
             if (json.has("effects") && !json.getAsJsonObject("effects").entrySet().isEmpty()) {
                 throw new UnsupportedOperationException("PORT(1.20.1): enchantment effect components are not ported ("
                         + PortBootstrap.NAMESPACE + ":" + name + ")");
@@ -225,13 +367,36 @@ public final class PortEnchantments {
             this.maxCostBase = maxCost.get("base").getAsInt();
             this.maxCostPerLevel = maxCost.get("per_level_above_first").getAsInt();
             this.anvilCost = json.get("anvil_cost").getAsInt();
-            rarityForAnvilCost(this.anvilCost); // validate now, not on first anvil use
+            if (maxLevel < 1 || maxLevel > 255 || anvilCost < 0) throw new IllegalArgumentException("Invalid enchantment level/anvil cost");
             this.exclusiveSet = parseEnchantmentSet(json.get("exclusive_set"));
-            JsonObject description = json.getAsJsonObject("description");
-            if (description == null || !description.has("translate") || description.size() != 1) {
-                throw new UnsupportedOperationException("PORT(1.20.1): only plain translatable enchantment descriptions are ported");
+            this.description = Component.Serializer.fromJson(json.get("description"));
+            if (this.description == null) throw new IllegalArgumentException("Missing enchantment description");
+            JsonElement descriptionJson = json.get("description");
+            this.descriptionId = descriptionJson.isJsonObject() && descriptionJson.getAsJsonObject().has("translate")
+                    ? descriptionJson.getAsJsonObject().get("translate").getAsString() : "enchantment." + PortBootstrap.NAMESPACE + "." + name;
+        }
+
+        private DataEnchantment current() { return definitions.getOrDefault(name, this); }
+
+        @Override
+        public Rarity getRarity() { return rarityForWeight(current().weight); }
+
+        @Override
+        public Map<EquipmentSlot, ItemStack> getSlotItems(LivingEntity entity) {
+            Map<EquipmentSlot, ItemStack> items = new EnumMap<>(EquipmentSlot.class);
+            for (EquipmentSlot slot : current().activeSlots) {
+                ItemStack stack = entity.getItemBySlot(slot);
+                if (!stack.isEmpty()) items.put(slot, stack);
             }
-            this.descriptionId = description.get("translate").getAsString();
+            return items;
+        }
+
+        @Override
+        public Component getFullname(int level) {
+            var text = ComponentUtils.mergeStyles(current().description.copy(),
+                    Style.EMPTY.withColor(isCurse() ? ChatFormatting.RED : ChatFormatting.GRAY));
+            if (level != 1 || getMaxLevel() != 1) text.append(" ").append(Component.translatable("enchantment.level." + level));
+            return text;
         }
 
         private Holder<Enchantment> holder() {
@@ -249,41 +414,44 @@ public final class PortEnchantments {
 
         @Override
         public int getMaxLevel() {
-            return maxLevel;
+            return current().maxLevel;
         }
 
         @Override
         public int getMinCost(int level) {
-            return minCostBase + minCostPerLevel * (level - 1);
+            DataEnchantment data = current();
+            return data.minCostBase + data.minCostPerLevel * (level - 1);
         }
 
         @Override
         public int getMaxCost(int level) {
-            return maxCostBase + maxCostPerLevel * (level - 1);
+            DataEnchantment data = current();
+            return data.maxCostBase + data.maxCostPerLevel * (level - 1);
         }
 
         @Override
         protected String getOrCreateDescriptionId() {
-            return descriptionId;
+            return current().descriptionId;
         }
 
         @Override
         protected boolean checkCompatibility(Enchantment other) {
             // 1.21 Enchantment.areCompatible: !a.equals(b) && !a.exclusiveSet.contains(b) && !b.exclusiveSet.contains(a);
             // 1.20.1 isCompatibleWith runs this from both sides.
-            return this != other && !exclusiveSet.test(BuiltInRegistries.ENCHANTMENT.wrapAsHolder(other));
+            return this != other && !current().exclusiveSet.test(BuiltInRegistries.ENCHANTMENT.wrapAsHolder(other));
         }
 
         /** 1.21 {@code isSupportedItem} / {@code canEnchant}. */
         @Override
         public boolean canEnchant(ItemStack stack) {
-            return supportedItems.contains(stack);
+            return current().supportedItems.contains(stack);
         }
 
         /** 1.21 {@code isPrimaryItem}. */
         @Override
         public boolean canApplyAtEnchantingTable(ItemStack stack) {
-            return supportedItems.contains(stack) && (primaryItems == null || primaryItems.contains(stack));
+            DataEnchantment data = current();
+            return data.supportedItems.contains(stack) && (data.primaryItems == null || data.primaryItems.contains(stack));
         }
 
         @Override

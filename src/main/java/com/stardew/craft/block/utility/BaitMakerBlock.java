@@ -123,7 +123,7 @@ public class BaitMakerBlock extends Block implements EntityBlock, PortBlockInter
     @Nullable
     public BlockEntity newBlockEntity(@SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") BlockState state) {
         if (state.getValue(PART) == Part.EXTENSION) {
-            return null;
+            return com.stardew.craft.port.PortMachineExtensions.createExtension(pos, state);
         }
         return new BaitMakerBlockEntity(pos, state);
     }

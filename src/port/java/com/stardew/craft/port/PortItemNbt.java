@@ -6,6 +6,7 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
@@ -23,6 +24,10 @@ import net.minecraftforge.server.ServerLifecycleHooks;
 public final class PortItemNbt {
     public static final String DISPLAY = "display";
     public static final String HIDE_FLAGS = "HideFlags";
+    /** Explicit 1.21 base name, separate from native display.Name (the player's custom name). */
+    public static final String ITEM_NAME = "stardewcraft:ItemName";
+    /** Only an explicit set(custom_data, EMPTY) writes this; ordinary untagged stacks remain unchanged. */
+    public static final String EMPTY_CUSTOM_DATA = "stardewcraft:EmptyCustomData";
 
     /**
      * Root keys owned by vanilla 1.20.1 item data. They are not part of {@code minecraft:custom_data};
@@ -33,7 +38,7 @@ public final class PortItemNbt {
             "Damage", "RepairCost", "Unbreakable", "Enchantments", "StoredEnchantments", ItemStack.TAG_DISPLAY,
             HIDE_FLAGS, "CanDestroy", "CanPlaceOn", "AttributeModifiers", "CustomModelData", "BlockStateTag",
             "BlockEntityTag", "EntityTag", "Trim", "Potion", "CustomPotionColor", "CustomPotionEffects",
-            "Fireworks");
+            "Fireworks", ITEM_NAME, EMPTY_CUSTOM_DATA);
 
     private PortItemNbt() {
     }
@@ -47,6 +52,18 @@ public final class PortItemNbt {
     public static Tag root(ItemStack stack, String key) {
         CompoundTag tag = stack.getTag();
         return tag == null ? null : tag.get(key);
+    }
+
+    @Nullable
+    public static Component itemName(ItemStack stack) {
+        if (stack.isEmpty()) return null;
+        Tag value = root(stack, ITEM_NAME);
+        if (value == null || value.getId() != Tag.TAG_STRING) return null;
+        try {
+            return Component.Serializer.fromJson(value.getAsString());
+        } catch (RuntimeException ignored) {
+            return null;
+        }
     }
 
     public static void putRoot(ItemStack stack, String key, Tag value) {

@@ -1,0 +1,13 @@
+{
+  "intervalMin": 5,
+  "intervalMax": 8,
+  "durationMin": 0.1,
+  "durationMax": 0.2,
+  "doubleChance": 0,
+  "groundOffset": 0,
+  "walkStride": 1,
+  "blinkMode": "closed",
+  "requiredClips": [
+    "animation.gil.idle"
+  ]
+}

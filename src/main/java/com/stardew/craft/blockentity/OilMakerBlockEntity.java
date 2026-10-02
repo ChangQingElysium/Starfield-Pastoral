@@ -25,7 +25,6 @@ import java.util.Optional;
  * Oil Maker block entity.
  */
 public class OilMakerBlockEntity extends TimedProductionBlockEntity {
-    private static final int EFFECTIVE_MINUTES_PER_DAY = 1260;
     private long lastEffectMinuteBucket = Long.MIN_VALUE;
 
     private static final String TAG_INPUT = "input";
@@ -148,7 +147,7 @@ public class OilMakerBlockEntity extends TimedProductionBlockEntity {
         Item outputItem = BuiltInRegistries.ITEM.get(recipe.outputId());
         ItemStack output = new ItemStack(outputItem, recipe.rollOutputCount(level.random));
         var plan = prepareProduction(
-                stack, output, recipe.minutes(),
+                stack, output, recipeMinutes(recipe),
                 player, false);
         if (plan.isEmpty()) {
             return InsertResult.fail();
@@ -200,7 +199,7 @@ public class OilMakerBlockEntity extends TimedProductionBlockEntity {
         Item outputItem = BuiltInRegistries.ITEM.get(recipe.outputId());
         ItemStack output = new ItemStack(outputItem, recipe.rollOutputCount(level.random));
         var plan = prepareProduction(
-                stack, output, recipe.minutes(),
+                stack, output, recipeMinutes(recipe),
                 null, true);
         if (plan.isEmpty()) {
             return stack;

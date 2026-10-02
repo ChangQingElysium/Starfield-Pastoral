@@ -1,5 +1,6 @@
 package com.stardew.craft.client.renderer.entity;
 
+import com.stardew.craft.port.PortCamera;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.stardew.craft.StardewCraft;
@@ -47,7 +48,7 @@ public class FairyCompanionRenderer extends EntityRenderer<FairyCompanionEntity>
         float v1 = 16.0f / TEXTURE_HEIGHT;
 
         poseStack.pushPose();
-        poseStack.mulPose(minecraft.getEntityRenderDispatcher().cameraOrientation());
+        poseStack.mulPose(PortCamera.cameraOrientation(minecraft.getEntityRenderDispatcher()));
         poseStack.scale(0.52f, 0.52f, 0.52f);
 
         VertexConsumer consumer = buffer.getBuffer(RenderType.entityTranslucent(TEXTURE));

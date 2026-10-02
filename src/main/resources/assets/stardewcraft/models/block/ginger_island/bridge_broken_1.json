@@ -1,0 +1,283 @@
+{
+  "parent": "minecraft:block/block",
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "0": "stardewcraft:block/ginger_island/bridge_broken_1_0",
+    "1": "stardewcraft:block/ginger_island/bridge_broken_1_1",
+    "particle": "stardewcraft:block/ginger_island/bridge_broken_1_particle"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        5,
+        1
+      ],
+      "to": [
+        3,
+        8,
+        4
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            0.0,
+            0.0,
+            1.5,
+            1.5
+          ],
+          "texture": "#0"
+        },
+        "down": {
+          "uv": [
+            0.0,
+            11.0,
+            1.5,
+            12.5
+          ],
+          "texture": "#0"
+        },
+        "north": {
+          "uv": [
+            0.0,
+            4.0,
+            1.5,
+            5.5
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            0.0,
+            4.0,
+            1.5,
+            5.5
+          ],
+          "texture": "#0"
+        },
+        "east": {
+          "uv": [
+            0.0,
+            6.0,
+            1.5,
+            7.5
+          ],
+          "texture": "#0"
+        },
+        "west": {
+          "uv": [
+            0.0,
+            6.0,
+            1.5,
+            7.5
+          ],
+          "texture": "#0"
+        }
+      }
+    },
+    {
+      "from": [
+        0,
+        5,
+        4
+      ],
+      "to": [
+        1,
+        8,
+        7
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            0.0,
+            1.5,
+            0.5,
+            3.0
+          ],
+          "texture": "#0"
+        },
+        "down": {
+          "uv": [
+            0.0,
+            12.5,
+            0.5,
+            14.0
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            0.0,
+            4.0,
+            0.5,
+            5.5
+          ],
+          "texture": "#0"
+        },
+        "east": {
+          "uv": [
+            1.5,
+            6.0,
+            3.0,
+            7.5
+          ],
+          "texture": "#0"
+        },
+        "west": {
+          "uv": [
+            1.5,
+            6.0,
+            3.0,
+            7.5
+          ],
+          "texture": "#0"
+        }
+      }
+    },
+    {
+      "from": [
+        0,
+        5,
+        9
+      ],
+      "to": [
+        5,
+        8,
+        12
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            8.0,
+            0.0,
+            10.5,
+            1.5
+          ],
+          "texture": "#0"
+        },
+        "down": {
+          "uv": [
+            0.0,
+            11.0,
+            2.5,
+            12.5
+          ],
+          "texture": "#0"
+        },
+        "north": {
+          "uv": [
+            8.0,
+            4.0,
+            10.5,
+            5.5
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            8.0,
+            4.0,
+            10.5,
+            5.5
+          ],
+          "texture": "#0"
+        },
+        "east": {
+          "uv": [
+            0.0,
+            6.0,
+            1.5,
+            7.5
+          ],
+          "texture": "#0"
+        },
+        "west": {
+          "uv": [
+            0.0,
+            6.0,
+            1.5,
+            7.5
+          ],
+          "texture": "#0"
+        }
+      }
+    },
+    {
+      "from": [
+        0,
+        5,
+        12
+      ],
+      "to": [
+        3,
+        8,
+        15
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            8.0,
+            1.5,
+            9.5,
+            3.0
+          ],
+          "texture": "#0"
+        },
+        "down": {
+          "uv": [
+            0.0,
+            12.5,
+            1.5,
+            14.0
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            8.0,
+            4.0,
+            9.5,
+            5.5
+          ],
+          "texture": "#0"
+        },
+        "east": {
+          "uv": [
+            1.5,
+            6.0,
+            3.0,
+            7.5
+          ],
+          "texture": "#0"
+        },
+        "west": {
+          "uv": [
+            1.5,
+            6.0,
+            3.0,
+            7.5
+          ],
+          "texture": "#0"
+        }
+      }
+    }
+  ],
+  "stardewcraft:collision": {
+    "mode": "custom",
+    "boxes": [
+      {
+        "from": [
+          0,
+          5,
+          1
+        ],
+        "to": [
+          5,
+          8,
+          15
+        ]
+      }
+    ],
+    "policy": "aabb"
+  }
+}

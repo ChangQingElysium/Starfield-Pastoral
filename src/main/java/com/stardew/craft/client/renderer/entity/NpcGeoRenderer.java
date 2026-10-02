@@ -1,5 +1,6 @@
 package com.stardew.craft.client.renderer.entity;
 
+import com.stardew.craft.port.PortCamera;
 import com.stardew.craft.client.model.entity.NpcGeoModel;
 import com.stardew.craft.client.ClientPlayerDataCache;
 import com.stardew.craft.client.renderer.entity.indicator.NpcOverheadIndicator;
@@ -76,7 +77,7 @@ public class NpcGeoRenderer extends BlockbenchEntityRenderer<StardewNpcEntity> {
 
         poseStack.pushPose();
         poseStack.translate(0.0D, entity.getBbHeight() + indicator.yOffset(), 0.0D);
-        poseStack.mulPose(this.entityRenderDispatcher.cameraOrientation());
+        poseStack.mulPose(PortCamera.cameraOrientation(this.entityRenderDispatcher));
         poseStack.scale(-indicator.scale(), indicator.scale(), indicator.scale());
 
         float u0 = indicator.u() / (float) indicator.textureWidth();
