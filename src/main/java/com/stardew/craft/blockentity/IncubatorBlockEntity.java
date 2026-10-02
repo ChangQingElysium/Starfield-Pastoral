@@ -68,7 +68,7 @@ public class IncubatorBlockEntity extends TimedProductionBlockEntity {
     private BuildingRecord home(ServerLevel level, ItemStack egg) {
         var home = FarmFeed.home(level, worldPosition); var id = resolveAnimalTypeId(egg);
         if (getBlockState().getBlock() instanceof OstrichIncubatorBlock
-                && (home == null || !home.family().equals(PrefabDefinitions.BARN))) return null;
+                && (home == null || !home.family().equals(LivestockSpecies.OSTRICH.family()))) return null;
         if (id == null || !LivestockProjection.supported(level,LivestockSpecies.parse(id)) || !LivestockHomes.accepts(level,home, LivestockSpecies.parse(id)) || !LivestockHomes.bounds(home).contains(worldPosition)) return null;
         // The approved incubator model serves both houses; coop incubators start at tier two.
         return home.family().equals(PrefabDefinitions.COOP) && home.tier() < 2 ? null : home;

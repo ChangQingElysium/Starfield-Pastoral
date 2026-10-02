@@ -1,9 +1,9 @@
 package com.stardew.craft.gingerisland;
 
 import com.stardew.craft.animal.runtime.FarmFeed;
+import com.stardew.craft.animal.runtime.LivestockSpecies;
 import com.stardew.craft.block.utility.IncubatorBlock;
 import com.stardew.craft.building.runtime.BuildingService;
-import com.stardew.craft.building.runtime.PrefabDefinitions;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -52,7 +52,7 @@ public final class OstrichIncubatorBlock extends IncubatorBlock {
                 || !context.getLevel().getFluidState(pos.above()).isEmpty()) return null;
         if (context.getPlayer() instanceof ServerPlayer player) {
             var home = FarmFeed.home(player.serverLevel(), pos);
-            if (home == null || !home.family().equals(PrefabDefinitions.BARN)
+            if (home == null || !home.family().equals(LivestockSpecies.OSTRICH.family())
                     || !BuildingService.canManage(player, home)
                     || !IslandContext.canModifyAt(player, pos)
                     || !IslandContext.canModifyAt(player, pos.above())) return null;

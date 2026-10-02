@@ -32,16 +32,20 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.OptionalInt;
 import java.util.Set;
 import java.util.UUID;
@@ -51,7 +55,8 @@ import java.util.UUID;
 public final class GingerIslandAssetGameTests {
     private static final String NS = "stardewcraft_ginger_assets";
 
-    @GameTest(templateNamespace = NS, template = "empty")
+    // World-writing cases need the full rotated footprints isolated in a 32x12x32 air volume.
+    @GameTest(templateNamespace = NS, template = "asset_test")
     public static void objectStatesShareOneRegistrationAndPreservePicking(GameTestHelper h) {
         var level = h.getLevel();
         var pos = h.absolutePos(new BlockPos(5, 3, 5));
@@ -82,7 +87,7 @@ public final class GingerIslandAssetGameTests {
         h.succeed();
     }
 
-    @GameTest(templateNamespace = NS, template = "empty")
+    @GameTest(templateNamespace = NS, template = "asset_test")
     public static void volcanoSwitchLatchesOnlyForGroundedPlayers(GameTestHelper h) {
         var level = h.getLevel();
         var button = (VolcanoFloorSwitchBlock) GingerIslandBlocks.get("ginger_volcano_floor_switch");
@@ -134,7 +139,7 @@ public final class GingerIslandAssetGameTests {
         h.succeed();
     }
 
-    @GameTest(templateNamespace = NS, template = "empty")
+    @GameTest(templateNamespace = NS, template = "asset_test")
     public static void cabinPassageAllFacingsAndNoReservedInterior(GameTestHelper h) {
         var level = h.getLevel();
         var cabin = (MapDecorStaticBlock) GingerIslandBlocks.get("ginger_captain_cabin_shell");
@@ -160,7 +165,7 @@ public final class GingerIslandAssetGameTests {
         h.succeed();
     }
 
-    @GameTest(templateNamespace = NS, template = "empty")
+    @GameTest(templateNamespace = NS, template = "asset_test")
     public static void ostrichIncubatorOneReceiptReadyAppearanceAndUpperAccess(GameTestHelper h) {
         var level = h.getLevel();
         var block = (OstrichIncubatorBlock) GingerIslandBlocks.get("ginger_ostrich_incubator_empty");
@@ -192,14 +197,16 @@ public final class GingerIslandAssetGameTests {
         });
     }
 
-    @GameTest(templateNamespace = NS, template = "empty")
+    @GameTest(templateNamespace = NS, template = "asset_test")
     public static void fireplaceStateLightingAndExtensionInteraction(GameTestHelper h) {
         var level = h.getLevel();
         var fireplace = (IslandFlameBlock) GingerIslandBlocks.get("ginger_stove_fireplace");
         var pos = h.absolutePos(new BlockPos(6, 3, 6));
         var state = fireplace.defaultBlockState();
         level.setBlock(pos, state, 2 | 16);
-        h.assertTrue(fireplace.placeExtensions(level, pos, state), "Fireplace placement failed");
+        boolean placed = fireplace.placeExtensions(level, pos, state);
+        h.assertTrue(placed, "Fireplace placement failed"
+                + (placed ? "" : "; " + extensionPlacementFailure(level, fireplace, pos, state)));
         var player = new FakePlayer(level, new GameProfile(UUID.randomUUID(), "Fireplace test"));
         var extension = pos.above();
         h.assertTrue(level.getBlockState(extension).is(fireplace), "Missing interactive chimney cell");
@@ -224,7 +231,40 @@ public final class GingerIslandAssetGameTests {
         };
     }
 
-    @GameTest(templateNamespace = NS, template = "empty")
+    private static String extensionPlacementFailure(ServerLevel level, MapDecorStaticBlock block,
+                                                    BlockPos main, BlockState state) {
+        var shape = state.getShape(level, main);
+        var cells = new LinkedHashSet<BlockPos>();
+        shape.forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) -> {
+            for (int x = (int) Math.floor(minX + 1.0E-7); x < Math.ceil(maxX - 1.0E-7); x++)
+                for (int y = (int) Math.floor(minY + 1.0E-7); y < Math.ceil(maxY - 1.0E-7); y++)
+                    for (int z = (int) Math.floor(minZ + 1.0E-7); z < Math.ceil(maxZ - 1.0E-7); z++)
+                        cells.add(main.offset(x, y, z));
+        });
+        var rejected = new ArrayList<String>();
+        for (var cell : cells) {
+            if (cell.equals(main)) continue;
+            var current = level.getBlockState(cell);
+            boolean replaceable = current.canBeReplaced();
+            boolean ownedExtension = current.is(block) && current.getValue(MapDecorStaticBlock.PART)
+                    == MapDecorStaticBlock.Part.EXTENSION && main.equals(block.findMainPos(level, cell, current));
+            boolean inHeight = !level.isOutsideBuildHeight(cell);
+            boolean inBorder = level.getWorldBorder().isWithinBounds(cell);
+            boolean loaded = level.hasChunkAt(cell);
+            boolean protectedWrite = com.stardew.craft.building.runtime.BuildingProtection.deniesReplacement(
+                    level, cell, state.setValue(MapDecorStaticBlock.PART, MapDecorStaticBlock.Part.EXTENSION));
+            if ((!replaceable && !ownedExtension) || !inHeight || !inBorder || !loaded || protectedWrite) {
+                rejected.add(cell.subtract(main) + "=" + current + "/replace=" + replaceable
+                        + "/owned=" + ownedExtension + "/height=" + inHeight + "/border=" + inBorder
+                        + "/loaded=" + loaded + "/protected=" + protectedWrite);
+            }
+        }
+        return "main=" + main + ", state=" + level.getBlockState(main) + ", wanted=" + state
+                + ", bounds=" + (shape.isEmpty() ? "empty" : shape.bounds())
+                + ", occupiedCells=" + cells.size() + ", rejectedCells=" + rejected;
+    }
+
+    @GameTest(templateNamespace = NS, template = "asset_test")
     public static void tropicalBedTwoLanesAllFacingsAndCleanup(GameTestHelper h) {
         var level = h.getLevel();
         var bed = (TropicalBedBlock) GingerIslandBlocks.get("ginger_tropical_bed");
@@ -232,7 +272,9 @@ public final class GingerIslandAssetGameTests {
         for (Direction facing : Direction.Plane.HORIZONTAL) {
             var state = bed.defaultBlockState().setValue(MapDecorStaticBlock.FACING, facing);
             level.setBlock(main, state, 2 | 16);
-            h.assertTrue(bed.placeExtensions(level, main, state), "Bed footprint failed: " + facing);
+            boolean placed = bed.placeExtensions(level, main, state);
+            h.assertTrue(placed, "Bed footprint failed: " + facing
+                    + (placed ? "" : "; " + extensionPlacementFailure(level, bed, main, state)));
             for (int lane = 0; lane < 2; lane++) {
                 BlockPos foot = main.offset(rotate(new BlockPos(lane, 0, 0), facing));
                 BlockPos head = main.offset(rotate(new BlockPos(lane, 0, 2), facing));
@@ -249,7 +291,7 @@ public final class GingerIslandAssetGameTests {
         h.succeed();
     }
 
-    @GameTest(templateNamespace = NS, template = "empty")
+    @GameTest(templateNamespace = NS, template = "asset_test")
     public static void heavyTapperOneJobRoundedDaysAndUpperAutomation(GameTestHelper h) {
         var level = h.getLevel();
         var registry = PrefabTreeRegistry.get(level);
@@ -289,7 +331,7 @@ public final class GingerIslandAssetGameTests {
         h.succeed();
     }
 
-    @GameTest(templateNamespace = NS, template = "empty")
+    @GameTest(templateNamespace = NS, template = "asset_test")
     public static void forgeExtensionOpensSameMenuAndTracksWorkstation(GameTestHelper h) {
         var level = h.getLevel();
         var forge = (MapDecorStaticBlock) GingerIslandBlocks.get("ginger_caldera_forge");
@@ -362,7 +404,7 @@ public final class GingerIslandAssetGameTests {
         return root.toString();
     }
 
-    @GameTest(templateNamespace = NS, template = "empty")
+    @GameTest(templateNamespace = NS, template = "asset_test")
     public static void coolingConnectionsAndProtectedLocations(GameTestHelper h) {
         var level = h.getLevel();
         var pos = h.absolutePos(new BlockPos(6, 3, 6));

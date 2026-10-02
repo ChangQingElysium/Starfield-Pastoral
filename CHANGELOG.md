@@ -1,5 +1,51 @@
 # Changelog
 
+## 0.6.3 - 2026-10-02
+
+### 更新日志（中文）
+
+**0.6.3 · Forge 1.20.1 适配与系统完善**
+
+**升级前请备份完整存档。** 本次更新包含公共城镇预生成地图更新，可能覆盖玩家在公共区域摆放的家具、地板及其他改造；不能只备份农场。两个安装包分别用于 Minecraft 1.20.1 / Forge 与 Minecraft 1.21.1 / NeoForge，不能混装；不支持将 1.21.1 世界直接降级到 1.20.1。
+
+#### 两个版本的共同内容
+
+- 修正机器的白天、夜间与跨日生产计时，按天配方在对应早晨完成，并迁移旧机器的保存进度；完善孵化、树液采集、出货限制、自动化及多格设施的状态同步。
+- 对齐作物额外产量与品质、混合种子季节池、乌鸦与稻草人、工具蓄力和消耗、淘盘奖励及钓鱼条件；补齐畜牧命名检查、住所条件与每日心情显示，修复新鸵鸟孵化器与既有鸡舍住所规则的冲突。
+- 完善冒险家公会的讨伐公告板、吉尔奖励领取及马龙物品找回；扩展晶球、钓鱼宝箱、骷髅洞穴奖励和工具升级的数据定义及相关界面。
+- 动画模型改用本模组的原生加载与播放，不再内嵌 GeckoLib；完善 NPC 动作、日程、寻路和交互，以及箱子、机器与家具的动画表现。
+- 加入季节快捷栏、普通生存背包界面及 Jade 提示框主题，重制生命与体力 HUD，并更新相关图标、装饰材料和模型。
+- 修复建筑放置预览、障碍反馈、室内空间与温室相关问题，更新公共城镇地图和公会设施；温室模板及旧存档土壤升级为模组泥土／耕地，保留已有作物、装修和耕地含水量。
+- 接入 147 项姜岛方块资源及对应物品，包含家具、场景装饰、重型树液采集器、鸵鸟孵化器、火山地面开关与浇水冷却熔岩等交互；金色核桃记录可绑定所属农场。**这不代表姜岛整岛建造或全部原版玩法已经完成。**
+
+#### Forge 1.20.1 适配
+
+- 提供独立 Forge 安装包，适配物品数据、网络同步、事件、界面、渲染及可选模组集成，保持上述共同内容的逻辑一致。
+- 修复迁移中的重复物品描述、产物气泡图标和伤害数字缺失、多格设施与屋檐异常阴影，以及相关输入、光照和方块状态兼容问题。
+- 明确保留两项版本差异：Forge 包不包含 FLOW / BOLT 两套纹饰及模板；鱼塘水经滴水石灌注炼药锅的功能不移植。
+
+### Update Log (English)
+
+**0.6.3 · Forge 1.20.1 Support and System Refinements**
+
+**Back up the entire save before updating.** The bundled public-town map update may overwrite furniture, flooring and other player changes in public areas; a farm-only backup is insufficient. Use the matching Minecraft 1.20.1 / Forge or Minecraft 1.21.1 / NeoForge package, not both. Directly downgrading a 1.21.1 world to 1.20.1 is not supported.
+
+#### Shared Content
+
+- Corrects daytime, overnight and multi-day machine timing. Day-based recipes finish on the appropriate morning, with migration of saved machine progress, and improves incubation, tapping, shipping restrictions, automation and multi-block state synchronization.
+- Aligns crop extra yields and quality, seasonal Mixed Seeds pools, crows and scarecrows, tool charging and costs, panning rewards and fishing conditions. Adds livestock name validation, home checks and daily mood display, and fixes the new Ostrich Incubator's conflict with the existing coop home rule.
+- Completes the Adventurer's Guild monster board, Gil's reward collection and Marlon's item recovery, and expands data definitions and interfaces for geodes, fishing treasure, Skull Cavern rewards and tool upgrades.
+- Moves animated models to the mod's native loading and playback, without bundling GeckoLib, and improves NPC animation, schedules, navigation and interaction alongside chest, machine and furniture animations.
+- Adds seasonal hotbar, normal Survival inventory and Jade tooltip themes, refreshes the health and energy HUD, and updates related icons, decorative materials and models.
+- Fixes building previews, obstruction feedback, interior-space and greenhouse issues, and updates the public-town map and Guild facilities. Greenhouse templates and existing interiors use the mod's dirt/farmland, preserving crops, player furnishings and farmland moisture.
+- Registers 147 Ginger Island block assets and their items, including furniture, scenery, the Heavy Tapper, Ostrich Incubator, volcano floor switches and watering-can lava cooling. Golden Walnut records can be bound to their owning farm. **This does not mean that the complete island build or all original island gameplay is finished.**
+
+#### Forge 1.20.1 Support
+
+- Ships a separate Forge package with adaptations for item data, networking, events, GUI, rendering and optional integrations, retaining the shared gameplay logic above.
+- Fixes port-specific duplicate item descriptions, missing product-bubble icons and damage numbers, abnormal shadows on multi-block facilities and awnings, and related input, lighting and block-state compatibility issues.
+- Retains two explicit version differences: the Forge package omits the FLOW / BOLT armor trims and templates, and does not port dripstone filling a cauldron with Fish Pond Water.
+
 ## 0.6.2 - 2026-09-19
 
 ### 更新日志（中文）

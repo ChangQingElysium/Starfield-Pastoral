@@ -118,7 +118,7 @@ public final class MineContainerGameTests {
     }
     }
 
-    @GameTest(templateNamespace="stardewcraft_mine_assets",template="ring_utilities")
+    @GameTest(templateNamespace="stardewcraft_buildings",template="construction_site")
     public static void mainExtensionAndBombUseActualBreakerInsteadOfNearbyPlayer(GameTestHelper h) throws Exception {
         try (var ignored=miningDataLevel(h)) {
         var level=h.getLevel();var a=player(h,"cache veteran");var b=player(h,"cache novice");
@@ -233,8 +233,17 @@ public final class MineContainerGameTests {
         h.getLevel().setBlock(pos,state,3);h.assertTrue(block.placeExtensions(h.getLevel(),pos,state),"Test cache did not place");
     }
     private static BlockPos findGemSlot(GameTestHelper h,ServerPlayer p) {
-        for(int x=0;x<80;x++)for(int z=0;z<80;z++) {
-            var pos=h.absolutePos(new BlockPos(4+x,3,4+z));var r=MineContainerRewards.random(h.getLevel(),pos,1);
+        // getBounds is world-space; keep both cache parts and the loot query inside the fixture.
+        var bounds=h.getBounds();
+        int minX=(int)Math.floor(bounds.minX)+4,maxX=(int)Math.ceil(bounds.maxX)-5;
+        int minZ=(int)Math.floor(bounds.minZ)+4,maxZ=(int)Math.ceil(bounds.maxZ)-5;
+        int y=h.absolutePos(new BlockPos(0,3,0)).getY();
+        for(int x=minX;x<=maxX;x++)for(int z=minZ;z<=maxZ;z++) {
+            var pos=new BlockPos(x,y,z);
+            if(!bounds.contains(x+.5,y+.5,z+.5)||!bounds.contains(x+.5,y+1.5,z+.5)
+                    ||!h.getLevel().getBlockState(pos).canBeReplaced()
+                    ||!h.getLevel().getBlockState(pos.above()).canBeReplaced())continue;
+            var r=MineContainerRewards.random(h.getLevel(),pos,1);
             if(MineContainerRewards.roll(p,r).continueToContents()&&r.nextDouble()<.65&&r.nextDouble()<.8&&r.nextInt(9)==5)return pos;
         }
         throw new AssertionError("Could not find original gem branch");

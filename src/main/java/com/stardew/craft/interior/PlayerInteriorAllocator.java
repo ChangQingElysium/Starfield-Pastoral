@@ -134,6 +134,9 @@ public class PlayerInteriorAllocator extends SavedData {
                 StardewCraft.LOGGER.error("[INTERIOR-ALLOC] Failed to load greenhouse for player {} at {}", playerUUID, origin);
             }
         }
+        if (ghPlaced.contains(playerUUID)) {
+            com.stardew.craft.greenhouse.GreenhouseBuildings.migrateInteriorSoil(level, origin);
+        }
         return origin;
     }
 
@@ -377,9 +380,9 @@ public class PlayerInteriorAllocator extends SavedData {
     // CC schem 尺寸 23x8x69 → 需要 min(0,0)~max(22,68) 的 chunk 范围
     private static final int CC_SCHEM_X = 23;
     private static final int CC_SCHEM_Z = 69;
-    // GH 内部 schem 尺寸约 7x5x12
-    private static final int GH_SCHEM_X = 7;
-    private static final int GH_SCHEM_Z = 12;
+    // Shipped GH schematic is 19x11x20; keep its complete planting area loaded.
+    private static final int GH_SCHEM_X = 19;
+    private static final int GH_SCHEM_Z = 20;
 
     private void forceChunksForCC(ServerLevel level, BlockPos origin, boolean force) {
         forceChunksForRegion(level, origin, CC_SCHEM_X, CC_SCHEM_Z, force);

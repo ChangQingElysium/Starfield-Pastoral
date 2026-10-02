@@ -261,6 +261,8 @@ tools/npc/*
 !tools/art/package_refined_gaits.py
 
 !tools/npc/NpcRuntimeRegression.java
+!tools/gametest/
+!tools/gametest/generate_ginger_asset_fixture.py
 
 !docs/npc-runtime-architecture.md
 

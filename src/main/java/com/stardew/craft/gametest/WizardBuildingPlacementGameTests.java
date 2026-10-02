@@ -96,7 +96,8 @@ public final class WizardBuildingPlacementGameTests {
         var player = FakePlayerFactory.get(level, new GameProfile(UUID.randomUUID(), "WizardPlacement"));
         var farms = FarmInstanceRegistry.get(level.getServer());
         var farm = farms.createFarm(player.getUUID(), "WizardPlacement", "WizardPlacement", FarmType.STANDARD);
-        var pos = farm.getFarmBoundsMin().offset(12, 2, 12);
+        // Reused farm slots can retain legacy livestock around the (12, 2, 12) fixture.
+        var pos = farm.getFarmBoundsMin().offset(24, 2, 24);
         Map<BlockPos, BlockState> previous = new LinkedHashMap<>();
         try {
             dimension.set(level, ModDimensions.STARDEW_VALLEY);
@@ -148,7 +149,8 @@ public final class WizardBuildingPlacementGameTests {
         var player = FakePlayerFactory.get(level, new GameProfile(UUID.randomUUID(), "HutPlacementGates"));
         var farms = FarmInstanceRegistry.get(level.getServer());
         var farm = farms.createFarm(player.getUUID(), "HutPlacementGates", "HutPlacementGates", FarmType.STANDARD);
-        var pos = farm.getFarmBoundsMin().offset(12, 2, 12);
+        // Keep rejection causes isolated from the same legacy livestock fixture.
+        var pos = farm.getFarmBoundsMin().offset(24, 2, 24);
         var edge = new BlockPos(farm.getFarmBoundsMin().getX(), pos.getY(), pos.getZ());
         var block = (WizardBuildingBlock) ModBlocks.JUNIMO_HUT.get();
         Map<BlockPos, BlockState> previous = new LinkedHashMap<>();

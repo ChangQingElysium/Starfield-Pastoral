@@ -1140,6 +1140,7 @@ public final class InteriorSubspaceManager {
             restoreMuseumExhibitStands(level);
 
             InteriorSubspaceSavedData data = InteriorSubspaceSavedData.get(level);
+            migrateGreenhouseSoil(level, data);
             data.layoutVersion = LAYOUT_VERSION;
             data.portalTriggerVersion = PORTAL_TRIGGER_VERSION;
             data.initialized = true;
@@ -1240,6 +1241,20 @@ public final class InteriorSubspaceManager {
         chunkWaitTicks = 0;
     }
 
+    /** A separate soil upgrade must never trigger a layout/schematic replay in an old save. */
+    private static void migrateGreenhouseSoil(ServerLevel level, InteriorSubspaceSavedData data) {
+        if (data.greenhouseSoilVersion >= 1) return;
+        com.stardew.craft.greenhouse.GreenhouseBuildings.migrateInteriorSoil(
+                level, GREENHOUSE_INTERIOR_ORIGIN);
+        PlayerInteriorAllocator allocator = PlayerInteriorAllocator.get(level);
+        for (var owner : allocator.getPlayersWithGreenhouse()) {
+            com.stardew.craft.greenhouse.GreenhouseBuildings.migrateInteriorSoil(
+                    level, allocator.getGreenhouseOrigin(owner));
+        }
+        data.greenhouseSoilVersion = 1;
+        data.setDirty();
+    }
+
     /** 分批放置（包括逐步释放 chunk）是否正在进行中 */
     public static boolean isBatchPlacementInProgress() {
         return batchPlacementInProgress || gradualReleaseInProgress;
@@ -1252,6 +1267,7 @@ public final class InteriorSubspaceManager {
 
         InteriorSubspaceSavedData data = InteriorSubspaceSavedData.get(level);
         if (data.layoutVersion == LAYOUT_VERSION && data.initialized) {
+            migrateGreenhouseSoil(level, data);
             if (data.portalTriggerVersion < PORTAL_TRIGGER_VERSION) {
                 ensurePortalInteractions(level);
                 data.portalTriggerVersion = PORTAL_TRIGGER_VERSION;
@@ -1266,6 +1282,7 @@ public final class InteriorSubspaceManager {
             ensurePortalInteractions(level);
             migrateFarmAndGreenhousePortals(level);
             restoreMuseumExhibitStands(level);
+            migrateGreenhouseSoil(level, data);
             data.layoutVersion = LAYOUT_VERSION;
             data.portalTriggerVersion = PORTAL_TRIGGER_VERSION;
             data.initialized = true;
@@ -1868,6 +1885,7 @@ public final class InteriorSubspaceManager {
     private static final class InteriorSubspaceSavedData extends SavedData {
         private int layoutVersion = 0;
         private int portalTriggerVersion = 0;
+        private int greenhouseSoilVersion = 0;
         private boolean initialized = false;
 
         static InteriorSubspaceSavedData get(ServerLevel level) {
@@ -1884,6 +1902,7 @@ public final class InteriorSubspaceManager {
             InteriorSubspaceSavedData data = new InteriorSubspaceSavedData();
             data.layoutVersion = tag.getInt("layoutVersion");
             data.portalTriggerVersion = tag.getInt("portalTriggerVersion");
+            data.greenhouseSoilVersion = tag.getInt("greenhouseSoilVersion");
             data.initialized = tag.getBoolean("initialized");
             return data;
         }
@@ -1893,6 +1912,7 @@ public final class InteriorSubspaceManager {
                                                            @Nonnull HolderLookup.Provider provider) {
             tag.putInt("layoutVersion", layoutVersion);
             tag.putInt("portalTriggerVersion", portalTriggerVersion);
+            tag.putInt("greenhouseSoilVersion", greenhouseSoilVersion);
             tag.putBoolean("initialized", initialized);
             return tag;
         }

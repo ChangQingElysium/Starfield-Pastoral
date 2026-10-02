@@ -26,6 +26,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.sounds.SoundSource;
+import net.neoforged.neoforge.items.IItemHandler;
 
 import javax.annotation.Nullable;
 import java.util.UUID;
@@ -37,6 +38,7 @@ public class AutoGrabberBlockEntity extends BlockEntity implements UtilityAutoma
     public static final int SLOT_COUNT = STORAGE_ROWS * 9;
 
     private final NonNullList<ItemStack> items = NonNullList.withSize(SLOT_COUNT, ItemStack.EMPTY);
+    private final UtilityItemHandler automationItemHandler = new UtilityItemHandler(this);
     private int openCount = 0;
 
     public AutoGrabberBlockEntity(BlockPos pos, BlockState state) {
@@ -151,6 +153,11 @@ public class AutoGrabberBlockEntity extends BlockEntity implements UtilityAutoma
             }
         }
         return false;
+    }
+
+    @Override
+    public IItemHandler getAutomationItemHandler() {
+        return automationItemHandler;
     }
 
     @Override
