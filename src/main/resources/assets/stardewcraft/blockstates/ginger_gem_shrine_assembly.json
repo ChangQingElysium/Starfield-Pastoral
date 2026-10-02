@@ -1,0 +1,60 @@
+{
+  "variants": {
+    "facing=north,part=main,solved=false": {
+      "model": "stardewcraft:block/ginger_island/gem_shrine_assembly",
+      "y": 0
+    },
+    "facing=north,part=extension,solved=false": {
+      "model": "stardewcraft:block/ginger_island/gem_shrine_assembly_extension"
+    },
+    "facing=north,part=main,solved=true": {
+      "model": "stardewcraft:block/ginger_island/gem_shrine_solved",
+      "y": 0
+    },
+    "facing=north,part=extension,solved=true": {
+      "model": "stardewcraft:block/ginger_island/gem_shrine_assembly_extension"
+    },
+    "facing=east,part=main,solved=false": {
+      "model": "stardewcraft:block/ginger_island/gem_shrine_assembly",
+      "y": 90
+    },
+    "facing=east,part=extension,solved=false": {
+      "model": "stardewcraft:block/ginger_island/gem_shrine_assembly_extension"
+    },
+    "facing=east,part=main,solved=true": {
+      "model": "stardewcraft:block/ginger_island/gem_shrine_solved",
+      "y": 90
+    },
+    "facing=east,part=extension,solved=true": {
+      "model": "stardewcraft:block/ginger_island/gem_shrine_assembly_extension"
+    },
+    "facing=south,part=main,solved=false": {
+      "model": "stardewcraft:block/ginger_island/gem_shrine_assembly",
+      "y": 180
+    },
+    "facing=south,part=extension,solved=false": {
+      "model": "stardewcraft:block/ginger_island/gem_shrine_assembly_extension"
+    },
+    "facing=south,part=main,solved=true": {
+      "model": "stardewcraft:block/ginger_island/gem_shrine_solved",
+      "y": 180
+    },
+    "facing=south,part=extension,solved=true": {
+      "model": "stardewcraft:block/ginger_island/gem_shrine_assembly_extension"
+    },
+    "facing=west,part=main,solved=false": {
+      "model": "stardewcraft:block/ginger_island/gem_shrine_assembly",
+      "y": 270
+    },
+    "facing=west,part=extension,solved=false": {
+      "model": "stardewcraft:block/ginger_island/gem_shrine_assembly_extension"
+    },
+    "facing=west,part=main,solved=true": {
+      "model": "stardewcraft:block/ginger_island/gem_shrine_solved",
+      "y": 270
+    },
+    "facing=west,part=extension,solved=true": {
+      "model": "stardewcraft:block/ginger_island/gem_shrine_assembly_extension"
+    }
+  }
+}

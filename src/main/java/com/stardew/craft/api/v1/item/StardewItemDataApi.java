@@ -88,7 +88,8 @@ public final class StardewItemDataApi {
             if (basePrice < 0) {
                 return -1;
             }
-            return Math.round(basePrice * QualityHelper.getPriceMultiplier(QualityHelper.getQuality(stack)));
+            // SDV Object.sellToStorePrice: (int)(price * (1 + quality * 0.25)) truncates.
+            return (int) ((float) basePrice * QualityHelper.getPriceMultiplier(QualityHelper.getQuality(stack)));
         }
         if (stack.getItem() instanceof IStardewItem legacy) {
             return legacy.getSellPrice(stack);

@@ -74,6 +74,7 @@ public final class LivestockManagement {
             case "rename" -> {
                 String name = request.name().strip();
                 if (name.isEmpty() || name.length() > 32 || name.codePoints().anyMatch(c -> Character.isISOControl(c) || c == 0xA7)) return "name_required";
+                if (data.nameTaken(animal.farm(), name, animal.id())) return "name_taken";
                 data.put(animal.rename(name)); data.newborn(animal.id(), false);
             }
             case "sell" -> {

@@ -55,8 +55,8 @@ public final class IslandStoneRewards {
         // VolcanoDungeon.breakStone runs before the common node reward, and requires a credited player.
         if (hasPlayer && StardewLocations.hierarchy(level.dimension().location(), pos).stream().anyMatch(IslandStoneRewards::isVolcano)) {
             if (rollVolcanoBat(source, level.getRandom())) Block.popResource(level, pos, new ItemStack(ModItems.MUMMIFIED_BAT.get()));
-            if (random.nextDouble() < 0.03 && GoldenWalnutData.get(level.getServer()).reserveVolcanoDrop()) {
-                Block.popResource(level, pos, new ItemStack(ModItems.GOLDEN_WALNUT.get()));
+            if (random.nextDouble() < 0.03 && GoldenWalnutData.at(level, pos).reserveVolcanoDrop()) {
+                com.stardew.craft.gingerisland.WalnutDebris.drop(level, pos, 1);
             }
         }
     }
@@ -64,8 +64,8 @@ public final class IslandStoneRewards {
     public static void afterNodeDrop(ServerLevel level, BlockPos pos, String source, RandomSource random) {
         if (source.equals("25")
                 && StardewLocations.hierarchy(level.dimension().location(), pos).stream().anyMatch(IslandStoneRewards::isIsland)
-                && random.nextDouble() < 0.1 && GoldenWalnutData.get(level.getServer()).reserveMusselDrop()) {
-            Block.popResource(level, pos, new ItemStack(ModItems.GOLDEN_WALNUT.get()));
+                && random.nextDouble() < 0.1 && GoldenWalnutData.at(level, pos).reserveMusselDrop()) {
+            com.stardew.craft.gingerisland.WalnutDebris.drop(level, pos, 1);
         }
     }
 }

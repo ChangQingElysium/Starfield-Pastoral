@@ -24,10 +24,12 @@ public final class LivestockDayState {
     public LivestockDayState(ServerLevel level, LivestockRecord record, List<LivestockWorldData.Product> products) {
         this.level=level;this.record=record;this.products=products;
         var c=record.care();
-        state=new AnimalDayReducer.State(c.age(),c.ownedDays(),c.friendship(),c.happiness(),c.fullness(),c.daysSinceLay(),c.petted(),c.autoPetted(),false,0,record.produce(),c.quality());
+        state=new AnimalDayReducer.State(c.age(),c.ownedDays(),c.friendship(),c.happiness(),c.fullness(),c.daysSinceLay(),c.petted(),c.autoPetted(),false,record.extra().getInt("MoodMessage"),record.produce(),c.quality());
     }
     public LivestockRecord finish(int day) {
-        return record.withCare(day,new LivestockCare(state.ageDays(),state.daysOwned(),state.friendship(),state.happiness(),state.fullness(),state.daysSinceLastProduce(),state.produceQuality(),state.wasPetToday(),state.wasAutoPetToday())).produce(state.currentProduceId());
+        var settled=record.withCare(day,new LivestockCare(state.ageDays(),state.daysOwned(),state.friendship(),state.happiness(),state.fullness(),state.daysSinceLastProduce(),state.produceQuality(),state.wasPetToday(),state.wasAutoPetToday())).produce(state.currentProduceId());
+        var extra=settled.extra();extra.putInt("MoodMessage",state.moodMessage());
+        return settled.extra(extra);
     }
     public boolean product(ItemStack stack,boolean cracker) {
         if(stack==null||stack.isEmpty())return false;

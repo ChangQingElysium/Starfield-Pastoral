@@ -131,7 +131,8 @@ public final class ArtisanRecipeDataManager {
                     machineId.getNamespace(), "network/" + machineId.getPath() + "/" + index);
             return new Recipe(id, machineId, inputId, inputTag, inputMode, outputId, outputCount, minutes,
                     consumeCount, keepInputQuality, outputQuality, preserveType, seedMakerRule, outputMode,
-                    obj.has("maxOutputCount") ? obj.get("maxOutputCount").getAsInt() : outputCount);
+                    obj.has("maxOutputCount") ? obj.get("maxOutputCount").getAsInt() : outputCount,
+                    obj.has("days") ? obj.get("days").getAsInt() : 0);
         } catch (Exception e) {
             return null;
         }
@@ -175,17 +176,28 @@ public final class ArtisanRecipeDataManager {
                          @Nullable PreserveType preserveType,
                          @Nullable SeedMakerRule seedMakerRule,
                          OutputMode outputMode,
-                         int maxOutputCount) {
+                         int maxOutputCount,
+                         int days) {
         public Recipe {
             if (outputCount < 1 || maxOutputCount < outputCount || maxOutputCount > 999)
                 throw new IllegalArgumentException("Invalid artisan output count range");
+            if (days < 0)
+                throw new IllegalArgumentException("Invalid artisan recipe days");
+        }
+        public Recipe(ResourceLocation id, ResourceLocation machine, ResourceLocation inputId,
+                      TagKey<Item> inputTag, InputMode inputMode, ResourceLocation outputId, int outputCount,
+                      int minutes, int consumeCount, boolean keepInputQuality, int outputQuality,
+                      PreserveType preserveType, SeedMakerRule seedMakerRule, OutputMode outputMode,
+                      int maxOutputCount) {
+            this(id, machine, inputId, inputTag, inputMode, outputId, outputCount, minutes, consumeCount,
+                keepInputQuality, outputQuality, preserveType, seedMakerRule, outputMode, maxOutputCount, 0);
         }
         public Recipe(ResourceLocation id, ResourceLocation machine, ResourceLocation inputId,
                       TagKey<Item> inputTag, InputMode inputMode, ResourceLocation outputId, int outputCount,
                       int minutes, int consumeCount, boolean keepInputQuality, int outputQuality,
                       PreserveType preserveType, SeedMakerRule seedMakerRule, OutputMode outputMode) {
             this(id, machine, inputId, inputTag, inputMode, outputId, outputCount, minutes, consumeCount,
-                keepInputQuality, outputQuality, preserveType, seedMakerRule, outputMode, outputCount);
+                keepInputQuality, outputQuality, preserveType, seedMakerRule, outputMode, outputCount, 0);
         }
         public int rollOutputCount(net.minecraft.util.RandomSource random) {
             return outputCount == maxOutputCount ? outputCount : outputCount + random.nextInt(maxOutputCount - outputCount + 1);
@@ -356,6 +368,16 @@ public final class ArtisanRecipeDataManager {
                         continue;
                     }
                     int minutes = readInt(recipeObj, "minutes", 0);
+                    // Machines.json DaysUntilReady: finish on the Nth morning instead of after fixed minutes.
+                    int days = readInt(recipeObj, "days", 0);
+                    if (days > 0 && recipeObj.has("minutes")) {
+                        diagnostics.add(DefinitionDiagnostic.error(
+                                resourceId, definitionId, "Recipe needs exactly one of minutes or days"));
+                        continue;
+                    }
+                    if (days > 0) {
+                        minutes = days * com.stardew.craft.blockentity.TimedProductionBlockEntity.EFFECTIVE_MINUTES_PER_DAY;
+                    }
                     int consumeCount = readInt(recipeObj, "consume", 1);
                     QualityRule qualityRule = readQualityRule(recipeObj);
                     PreserveType preserveType = readPreserveType(recipeObj, "preserveType");
@@ -371,7 +393,8 @@ public final class ArtisanRecipeDataManager {
                     consumeCount = Math.max(1, consumeCount);
                     Recipe recipe = new Recipe(definitionId, machineId, inputId, inputTag, inputMode,
                             outputId, outputCount, minutes, consumeCount, qualityRule.keepInputQuality(),
-                            qualityRule.outputQuality(), preserveType, seedMakerRule, outputMode, maxOutputCount);
+                            qualityRule.outputQuality(), preserveType, seedMakerRule, outputMode, maxOutputCount,
+                            Math.max(0, days));
                     if (definitions.putIfAbsent(definitionId, recipe) != null) {
                         diagnostics.add(DefinitionDiagnostic.error(
                                 resourceId, definitionId, "Duplicate machine recipe definition ID"));
@@ -420,6 +443,7 @@ public final class ArtisanRecipeDataManager {
             ro.addProperty("outputCount", r.outputCount());
             ro.addProperty("maxOutputCount", r.maxOutputCount());
             ro.addProperty("minutes", r.minutes());
+            ro.addProperty("days", r.days());
             ro.addProperty("consumeCount", r.consumeCount());
             ro.addProperty("keepInputQuality", r.keepInputQuality());
             ro.addProperty("outputQuality", r.outputQuality());

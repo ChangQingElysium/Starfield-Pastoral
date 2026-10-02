@@ -114,6 +114,7 @@ public final class LivestockUiData {
         row.putInt("Age", animal.care().age());
         row.putInt("Friendship", animal.care().friendship());
         row.putInt("Mood", animal.care().happiness());
+        row.putInt("MoodMessage", animal.extra().getInt("MoodMessage"));
         row.putInt("Fullness", animal.care().fullness());
         row.putBoolean("Petted", animal.care().petted() || animal.care().autoPetted());
         row.putBoolean("Baby", animal.baby());

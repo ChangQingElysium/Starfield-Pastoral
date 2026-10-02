@@ -57,7 +57,8 @@ def block_display():
     return 'minecraft:block/block'
 
 
-def import_bbmodel(project, identifier, emissive_elements=()):
+def import_bbmodel(project, identifier, emissive_elements=(), *, texture_metadata=None,
+                   allow_inverted_hulls=False):
     fmt = project.get('meta', {}).get('model_format')
     if fmt not in ('java_block', 'free', 'bedrock', 'geckolib', 'geckolib_model'):
         raise ValueError(f'Unsupported bbmodel format: {fmt}')
@@ -82,8 +83,12 @@ def import_bbmodel(project, identifier, emissive_elements=()):
         if not png.startswith(b'\x89PNG\r\n\x1a\n'):
             raise ValueError('Invalid embedded PNG')
         files[output_path(name, 'textures', '.png')] = png
-        if texture.get('height', 0) > texture.get('uv_height', texture.get('height', 0)):
-            raise ValueError('Animated texture needs explicit frame metadata; import a static texture or author its .mcmeta')
+        # Integer-upscaled item art is one image, not a vertical animation strip.
+        if texture.get('height', 0) > texture.get('width', 0) and texture.get('height', 0) * texture.get('uv_width', resolution['width']) > texture.get('width', 0) * texture.get('uv_height', resolution['height']):
+            metadata = (texture_metadata or {}).get(index)
+            if metadata is None or 'animation' not in metadata:
+                raise ValueError('Animated texture needs explicit frame metadata; import a static texture or author its .mcmeta')
+            files[output_path(name, 'textures', '.png.mcmeta')] = (json.dumps(metadata) + '\n').encode()
     if not textures:
         raise ValueError('Model has no textures')
     particle = next((str(i) for i, t in enumerate(project['textures']) if t.get('particle')), '0')
@@ -112,7 +117,8 @@ def import_bbmodel(project, identifier, emissive_elements=()):
             inflate = e.get('inflate', 0)
             part = {'from': [x - inflate for x in e['from']], 'to': [x + inflate for x in e['to']], 'faces': {}}
             # Java accepts reversed endpoints for authored inward-facing outline shells.
-            if not native and any(part['to'][i] < part['from'][i] for i in range(3)):
+            if not native and any(part['to'][i] < part['from'][i] for i in range(3)) and not (
+                    allow_inverted_hulls and all(part['to'][i] < part['from'][i] for i in range(3))):
                 raise ValueError('Inverted cuboid bounds')
             angles = e.get('rotation', [0, 0, 0])
             if native:

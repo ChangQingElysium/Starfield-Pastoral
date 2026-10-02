@@ -1,0 +1,3977 @@
+{
+  "parent": "minecraft:block/block",
+  "loader": "neoforge:composite",
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "0": "stardewcraft:block/ginger_island/professor_field_tent_assembly",
+    "particle": "stardewcraft:block/ginger_island/professor_field_tent_assembly_particle"
+  },
+  "children": {
+    "0": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/professor_field_tent_assembly",
+        "particle": "stardewcraft:block/ginger_island/professor_field_tent_assembly_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            0.0,
+            6.3029399999999995,
+            0.0
+          ],
+          "to": [
+            24.0,
+            7.3029399999999995,
+            20.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                6.875,
+                2.75,
+                8.375,
+                2.8125
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                8.4375,
+                2.75,
+                9.6875,
+                2.8125
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                0.0625,
+                0.0625,
+                1.5625,
+                1.3125
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                2.625,
+                2.75,
+                4.125,
+                4.0
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          2.0,
+          0.0
+        ]
+      }
+    },
+    "1": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/professor_field_tent_assembly",
+        "particle": "stardewcraft:block/ginger_island/professor_field_tent_assembly_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            0.0,
+            6.3029399999999995,
+            4.0
+          ],
+          "to": [
+            24.0,
+            7.3029399999999995,
+            24.0
+          ],
+          "faces": {
+            "south": {
+              "uv": [
+                9.75,
+                2.75,
+                11.25,
+                2.8125
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                11.3125,
+                2.75,
+                12.5625,
+                2.8125
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                0.0625,
+                1.3125,
+                1.5625,
+                2.5625
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                2.625,
+                4.0,
+                4.125,
+                5.25
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          2.0,
+          1.0
+        ]
+      }
+    },
+    "2": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/professor_field_tent_assembly",
+        "particle": "stardewcraft:block/ginger_island/professor_field_tent_assembly_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            8.0,
+            6.3029399999999995,
+            0.0
+          ],
+          "to": [
+            32.0,
+            7.3029399999999995,
+            20.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                12.625,
+                2.75,
+                14.125,
+                2.8125
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                14.1875,
+                2.75,
+                15.4375,
+                2.8125
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                1.5625,
+                0.0625,
+                3.0625,
+                1.3125
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                4.125,
+                2.75,
+                5.625,
+                4.0
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          2.0,
+          2.0,
+          0.0
+        ]
+      }
+    },
+    "3": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/professor_field_tent_assembly",
+        "particle": "stardewcraft:block/ginger_island/professor_field_tent_assembly_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            8.0,
+            6.3029399999999995,
+            4.0
+          ],
+          "to": [
+            32.0,
+            7.3029399999999995,
+            24.0
+          ],
+          "faces": {
+            "east": {
+              "uv": [
+                1.625,
+                5.4375,
+                2.875,
+                5.5
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                0.0625,
+                5.4375,
+                1.5625,
+                5.5
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                1.5625,
+                1.3125,
+                3.0625,
+                2.5625
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                4.125,
+                4.0,
+                5.625,
+                5.25
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          2.0,
+          2.0,
+          1.0
+        ]
+      }
+    },
+    "4": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/professor_field_tent_assembly",
+        "particle": "stardewcraft:block/ginger_island/professor_field_tent_assembly_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            0.0,
+            -3.19706,
+            0.0
+          ],
+          "to": [
+            0.0,
+            17.80294,
+            20.0
+          ],
+          "faces": {
+            "east": {
+              "uv": [
+                14.5,
+                1.375,
+                15.75,
+                2.6875
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                15.75,
+                1.375,
+                14.5,
+                2.6875
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              0,
+              38.80294,
+              0
+            ],
+            "axis": "z",
+            "angle": 22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          4.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "5": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/professor_field_tent_assembly",
+        "particle": "stardewcraft:block/ginger_island/professor_field_tent_assembly_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            0.0,
+            -3.19706,
+            4.0
+          ],
+          "to": [
+            0.0,
+            17.80294,
+            24.0
+          ],
+          "faces": {
+            "east": {
+              "uv": [
+                13.25,
+                1.375,
+                14.5,
+                2.6875
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                14.5,
+                1.375,
+                13.25,
+                2.6875
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              0,
+              38.80294,
+              -16
+            ],
+            "axis": "z",
+            "angle": 22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          4.0,
+          0.0,
+          1.0
+        ]
+      }
+    },
+    "6": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/professor_field_tent_assembly",
+        "particle": "stardewcraft:block/ginger_island/professor_field_tent_assembly_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            0.0,
+            1.8029399999999995,
+            0.0
+          ],
+          "to": [
+            0.0,
+            22.80294,
+            20.0
+          ],
+          "faces": {
+            "east": {
+              "uv": [
+                14.5,
+                0.0625,
+                15.75,
+                1.375
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                15.75,
+                0.0625,
+                14.5,
+                1.375
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              0,
+              22.80294,
+              0
+            ],
+            "axis": "z",
+            "angle": 22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          4.0,
+          1.0,
+          0.0
+        ]
+      }
+    },
+    "7": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/professor_field_tent_assembly",
+        "particle": "stardewcraft:block/ginger_island/professor_field_tent_assembly_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            0.0,
+            1.8029399999999995,
+            4.0
+          ],
+          "to": [
+            0.0,
+            22.80294,
+            24.0
+          ],
+          "faces": {
+            "east": {
+              "uv": [
+                13.25,
+                0.0625,
+                14.5,
+                1.375
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                14.5,
+                0.0625,
+                13.25,
+                1.375
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              0,
+              22.80294,
+              -16
+            ],
+            "axis": "z",
+            "angle": 22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          4.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    "8": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/professor_field_tent_assembly",
+        "particle": "stardewcraft:block/ginger_island/professor_field_tent_assembly_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            0.0,
+            -3.19706,
+            0.0
+          ],
+          "to": [
+            0.0,
+            17.80294,
+            20.0
+          ],
+          "faces": {
+            "east": {
+              "uv": [
+                1.3125,
+                4.0625,
+                2.5625,
+                5.375
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                2.5625,
+                4.0625,
+                1.3125,
+                5.375
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              0,
+              38.80294,
+              0
+            ],
+            "axis": "z",
+            "angle": -22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "9": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/professor_field_tent_assembly",
+        "particle": "stardewcraft:block/ginger_island/professor_field_tent_assembly_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            0.0,
+            -3.19706,
+            4.0
+          ],
+          "to": [
+            0.0,
+            17.80294,
+            24.0
+          ],
+          "faces": {
+            "east": {
+              "uv": [
+                0.0625,
+                4.0625,
+                1.3125,
+                5.375
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                1.3125,
+                4.0625,
+                0.0625,
+                5.375
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              0,
+              38.80294,
+              -16
+            ],
+            "axis": "z",
+            "angle": -22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          0.0,
+          1.0
+        ]
+      }
+    },
+    "10": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/professor_field_tent_assembly",
+        "particle": "stardewcraft:block/ginger_island/professor_field_tent_assembly_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            0.0,
+            1.8029399999999995,
+            0.0
+          ],
+          "to": [
+            0.0,
+            22.80294,
+            20.0
+          ],
+          "faces": {
+            "east": {
+              "uv": [
+                1.3125,
+                2.75,
+                2.5625,
+                4.0625
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                2.5625,
+                2.75,
+                1.3125,
+                4.0625
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              0,
+              22.80294,
+              0
+            ],
+            "axis": "z",
+            "angle": -22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          1.0,
+          0.0
+        ]
+      }
+    },
+    "11": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/professor_field_tent_assembly",
+        "particle": "stardewcraft:block/ginger_island/professor_field_tent_assembly_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            0.0,
+            1.8029399999999995,
+            4.0
+          ],
+          "to": [
+            0.0,
+            22.80294,
+            24.0
+          ],
+          "faces": {
+            "east": {
+              "uv": [
+                0.0625,
+                2.75,
+                1.3125,
+                4.0625
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                1.3125,
+                2.75,
+                0.0625,
+                4.0625
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              0,
+              22.80294,
+              -16
+            ],
+            "axis": "z",
+            "angle": -22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    "12": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/professor_field_tent_assembly",
+        "particle": "stardewcraft:block/ginger_island/professor_field_tent_assembly_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            1.0,
+            0.0,
+            0.125
+          ],
+          "to": [
+            32.0,
+            19.5,
+            0.125
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                3.125,
+                1.28125,
+                5.0625,
+                2.5
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                5.0625,
+                1.28125,
+                3.125,
+                2.5
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          3.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "13": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/professor_field_tent_assembly",
+        "particle": "stardewcraft:block/ginger_island/professor_field_tent_assembly_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            1.0,
+            3.5,
+            0.125
+          ],
+          "to": [
+            32.0,
+            23.0,
+            0.125
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                3.125,
+                0.0625,
+                5.0625,
+                1.28125
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                5.0625,
+                0.0625,
+                3.125,
+                1.28125
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          3.0,
+          1.0,
+          0.0
+        ]
+      }
+    },
+    "14": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/professor_field_tent_assembly",
+        "particle": "stardewcraft:block/ginger_island/professor_field_tent_assembly_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            0.0,
+            0.0,
+            0.125
+          ],
+          "to": [
+            31.0,
+            19.5,
+            0.125
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                6.1875,
+                1.28125,
+                8.125,
+                2.5
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                8.125,
+                1.28125,
+                6.1875,
+                2.5
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "15": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/professor_field_tent_assembly",
+        "particle": "stardewcraft:block/ginger_island/professor_field_tent_assembly_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            0.0,
+            3.5,
+            0.125
+          ],
+          "to": [
+            31.0,
+            23.0,
+            0.125
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                6.1875,
+                0.0625,
+                8.125,
+                1.28125
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                8.125,
+                0.0625,
+                6.1875,
+                1.28125
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          1.0,
+          0.0
+        ]
+      }
+    },
+    "16": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/professor_field_tent_assembly",
+        "particle": "stardewcraft:block/ginger_island/professor_field_tent_assembly_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            -1.0,
+            12.0,
+            0.125
+          ],
+          "to": [
+            17.0,
+            23.0,
+            0.125
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                5.0625,
+                0.0625,
+                6.1875,
+                0.75
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                6.1875,
+                0.0625,
+                5.0625,
+                0.75
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          2.0,
+          1.0,
+          0.0
+        ]
+      }
+    },
+    "17": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/professor_field_tent_assembly",
+        "particle": "stardewcraft:block/ginger_island/professor_field_tent_assembly_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            0.0,
+            0.0,
+            7.875
+          ],
+          "to": [
+            20.0,
+            19.5,
+            7.875
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                9.4375,
+                1.28125,
+                8.1875,
+                2.5
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                8.1875,
+                1.28125,
+                9.4375,
+                2.5
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          0.0,
+          2.0
+        ]
+      }
+    },
+    "18": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/professor_field_tent_assembly",
+        "particle": "stardewcraft:block/ginger_island/professor_field_tent_assembly_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            0.0,
+            3.5,
+            7.875
+          ],
+          "to": [
+            20.0,
+            23.0,
+            7.875
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                9.4375,
+                0.0625,
+                8.1875,
+                1.28125
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                8.1875,
+                0.0625,
+                9.4375,
+                1.28125
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          1.0,
+          2.0
+        ]
+      }
+    },
+    "19": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/professor_field_tent_assembly",
+        "particle": "stardewcraft:block/ginger_island/professor_field_tent_assembly_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            4.0,
+            0.0,
+            7.875
+          ],
+          "to": [
+            24.0,
+            19.5,
+            7.875
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                10.6875,
+                1.28125,
+                9.4375,
+                2.5
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                9.4375,
+                1.28125,
+                10.6875,
+                2.5
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          0.0,
+          2.0
+        ]
+      }
+    },
+    "20": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/professor_field_tent_assembly",
+        "particle": "stardewcraft:block/ginger_island/professor_field_tent_assembly_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            4.0,
+            3.5,
+            7.875
+          ],
+          "to": [
+            24.0,
+            23.0,
+            7.875
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                10.6875,
+                0.0625,
+                9.4375,
+                1.28125
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                9.4375,
+                0.0625,
+                10.6875,
+                1.28125
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          1.0,
+          2.0
+        ]
+      }
+    },
+    "21": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/professor_field_tent_assembly",
+        "particle": "stardewcraft:block/ginger_island/professor_field_tent_assembly_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            8.0,
+            0.0,
+            7.875
+          ],
+          "to": [
+            28.0,
+            19.5,
+            7.875
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                11.9375,
+                1.28125,
+                10.6875,
+                2.5
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                10.6875,
+                1.28125,
+                11.9375,
+                2.5
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          2.0,
+          0.0,
+          2.0
+        ]
+      }
+    },
+    "22": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/professor_field_tent_assembly",
+        "particle": "stardewcraft:block/ginger_island/professor_field_tent_assembly_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            8.0,
+            3.5,
+            7.875
+          ],
+          "to": [
+            28.0,
+            23.0,
+            7.875
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                11.9375,
+                0.0625,
+                10.6875,
+                1.28125
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                10.6875,
+                0.0625,
+                11.9375,
+                1.28125
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          2.0,
+          1.0,
+          2.0
+        ]
+      }
+    },
+    "23": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/professor_field_tent_assembly",
+        "particle": "stardewcraft:block/ginger_island/professor_field_tent_assembly_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            12.0,
+            0.0,
+            7.875
+          ],
+          "to": [
+            32.0,
+            19.5,
+            7.875
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                13.1875,
+                1.28125,
+                11.9375,
+                2.5
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                11.9375,
+                1.28125,
+                13.1875,
+                2.5
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          3.0,
+          0.0,
+          2.0
+        ]
+      }
+    },
+    "24": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/professor_field_tent_assembly",
+        "particle": "stardewcraft:block/ginger_island/professor_field_tent_assembly_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            12.0,
+            3.5,
+            7.875
+          ],
+          "to": [
+            32.0,
+            23.0,
+            7.875
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                13.1875,
+                0.0625,
+                11.9375,
+                1.28125
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                11.9375,
+                0.0625,
+                13.1875,
+                1.28125
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          3.0,
+          1.0,
+          2.0
+        ]
+      }
+    },
+    "25": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/professor_field_tent_assembly",
+        "particle": "stardewcraft:block/ginger_island/professor_field_tent_assembly_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            -1.0,
+            0.0,
+            12.0
+          ],
+          "to": [
+            17.0,
+            28.0,
+            12.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                5.6875,
+                2.75,
+                6.8125,
+                4.5
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          2.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "26": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/professor_field_tent_assembly",
+        "particle": "stardewcraft:block/ginger_island/professor_field_tent_assembly_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "to": [
+            1.0,
+            28.0,
+            12.0
+          ],
+          "faces": {
+            "west": {
+              "uv": [
+                2.625,
+                2.75,
+                3.375,
+                4.5
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          3.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "27": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/professor_field_tent_assembly",
+        "particle": "stardewcraft:block/ginger_island/professor_field_tent_assembly_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            15.0,
+            0.0,
+            0.0
+          ],
+          "to": [
+            15.0,
+            28.0,
+            12.0
+          ],
+          "faces": {
+            "east": {
+              "uv": [
+                2.625,
+                2.75,
+                3.375,
+                4.5
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "28": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/professor_field_tent_assembly",
+        "particle": "stardewcraft:block/ginger_island/professor_field_tent_assembly_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            -1.0,
+            12.0,
+            0.0
+          ],
+          "to": [
+            17.0,
+            12.0,
+            12.0
+          ],
+          "faces": {
+            "down": {
+              "uv": [
+                2.625,
+                2.75,
+                3.75,
+                3.5
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          2.0,
+          1.0,
+          0.0
+        ]
+      }
+    },
+    "29": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/professor_field_tent_assembly",
+        "particle": "stardewcraft:block/ginger_island/professor_field_tent_assembly_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            -1.0,
+            0.125,
+            0.0
+          ],
+          "to": [
+            17.0,
+            0.125,
+            12.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                2.625,
+                2.75,
+                3.75,
+                3.5
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          2.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "30": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/professor_field_tent_assembly",
+        "particle": "stardewcraft:block/ginger_island/professor_field_tent_assembly_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            -3.0,
+            11.0,
+            13.0
+          ],
+          "to": [
+            19.0,
+            16.0,
+            18.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                2.9375,
+                5.4375,
+                4.3125,
+                5.75
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                5.8125,
+                5.4375,
+                6.125,
+                5.75
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                4.375,
+                5.4375,
+                5.75,
+                5.75
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                6.1875,
+                5.4375,
+                6.5,
+                5.75
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                6.5625,
+                5.4375,
+                7.9375,
+                5.75
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                8.0,
+                5.4375,
+                9.375,
+                5.75
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              8,
+              13.5,
+              15.5
+            ],
+            "axis": "x",
+            "angle": 22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          2.0,
+          1.0,
+          -1.0
+        ]
+      }
+    },
+    "31": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/professor_field_tent_assembly",
+        "particle": "stardewcraft:block/ginger_island/professor_field_tent_assembly_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            15.0,
+            0.0,
+            1.0
+          ],
+          "to": [
+            17.0,
+            19.5,
+            3.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                9.4375,
+                6.65625,
+                9.5625,
+                7.875
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                9.8125,
+                6.65625,
+                9.9375,
+                7.875
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                9.625,
+                6.65625,
+                9.75,
+                7.875
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                10.0,
+                6.65625,
+                10.125,
+                7.875
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                10.375,
+                5.4375,
+                10.5,
+                5.5625
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "32": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/professor_field_tent_assembly",
+        "particle": "stardewcraft:block/ginger_island/professor_field_tent_assembly_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            15.0,
+            3.5,
+            1.0
+          ],
+          "to": [
+            17.0,
+            23.0,
+            3.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                9.4375,
+                5.4375,
+                9.5625,
+                6.65625
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                9.8125,
+                5.4375,
+                9.9375,
+                6.65625
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                9.625,
+                5.4375,
+                9.75,
+                6.65625
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                10.0,
+                5.4375,
+                10.125,
+                6.65625
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                10.1875,
+                5.4375,
+                10.3125,
+                5.5625
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          1.0,
+          0.0
+        ]
+      }
+    },
+    "33": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/professor_field_tent_assembly",
+        "particle": "stardewcraft:block/ginger_island/professor_field_tent_assembly_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            15.0,
+            0.0,
+            1.0
+          ],
+          "to": [
+            17.0,
+            19.5,
+            3.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                10.5625,
+                6.65625,
+                10.6875,
+                7.875
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                10.9375,
+                6.65625,
+                11.0625,
+                7.875
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                10.75,
+                6.65625,
+                10.875,
+                7.875
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                11.125,
+                6.65625,
+                11.25,
+                7.875
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                11.5,
+                5.4375,
+                11.625,
+                5.5625
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          3.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "34": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/professor_field_tent_assembly",
+        "particle": "stardewcraft:block/ginger_island/professor_field_tent_assembly_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            15.0,
+            3.5,
+            1.0
+          ],
+          "to": [
+            17.0,
+            23.0,
+            3.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                10.5625,
+                5.4375,
+                10.6875,
+                6.65625
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                10.9375,
+                5.4375,
+                11.0625,
+                6.65625
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                10.75,
+                5.4375,
+                10.875,
+                6.65625
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                11.125,
+                5.4375,
+                11.25,
+                6.65625
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                11.3125,
+                5.4375,
+                11.4375,
+                5.5625
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          3.0,
+          1.0,
+          0.0
+        ]
+      }
+    },
+    "35": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/professor_field_tent_assembly",
+        "particle": "stardewcraft:block/ginger_island/professor_field_tent_assembly_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            15.0,
+            0.0,
+            5.0
+          ],
+          "to": [
+            17.0,
+            19.5,
+            7.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                11.6875,
+                6.65625,
+                11.8125,
+                7.875
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                12.0625,
+                6.65625,
+                12.1875,
+                7.875
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                11.875,
+                6.65625,
+                12.0,
+                7.875
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                12.25,
+                6.65625,
+                12.375,
+                7.875
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                12.625,
+                5.4375,
+                12.75,
+                5.5625
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          0.0,
+          2.0
+        ]
+      }
+    },
+    "36": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/professor_field_tent_assembly",
+        "particle": "stardewcraft:block/ginger_island/professor_field_tent_assembly_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            15.0,
+            3.5,
+            5.0
+          ],
+          "to": [
+            17.0,
+            23.0,
+            7.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                11.6875,
+                5.4375,
+                11.8125,
+                6.65625
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                12.0625,
+                5.4375,
+                12.1875,
+                6.65625
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                11.875,
+                5.4375,
+                12.0,
+                6.65625
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                12.25,
+                5.4375,
+                12.375,
+                6.65625
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                12.4375,
+                5.4375,
+                12.5625,
+                5.5625
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          1.0,
+          2.0
+        ]
+      }
+    },
+    "37": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/professor_field_tent_assembly",
+        "particle": "stardewcraft:block/ginger_island/professor_field_tent_assembly_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            15.0,
+            0.0,
+            5.0
+          ],
+          "to": [
+            17.0,
+            19.5,
+            7.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                12.8125,
+                6.65625,
+                12.9375,
+                7.875
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                13.1875,
+                6.65625,
+                13.3125,
+                7.875
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                13.0,
+                6.65625,
+                13.125,
+                7.875
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                13.375,
+                6.65625,
+                13.5,
+                7.875
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                13.75,
+                5.4375,
+                13.875,
+                5.5625
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          3.0,
+          0.0,
+          2.0
+        ]
+      }
+    },
+    "38": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/professor_field_tent_assembly",
+        "particle": "stardewcraft:block/ginger_island/professor_field_tent_assembly_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            15.0,
+            3.5,
+            5.0
+          ],
+          "to": [
+            17.0,
+            23.0,
+            7.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                12.8125,
+                5.4375,
+                12.9375,
+                6.65625
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                13.1875,
+                5.4375,
+                13.3125,
+                6.65625
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                13.0,
+                5.4375,
+                13.125,
+                6.65625
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                13.375,
+                5.4375,
+                13.5,
+                6.65625
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                13.5625,
+                5.4375,
+                13.6875,
+                5.5625
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          3.0,
+          1.0,
+          2.0
+        ]
+      }
+    },
+    "39": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/professor_field_tent_assembly",
+        "particle": "stardewcraft:block/ginger_island/professor_field_tent_assembly_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            0.0,
+            4.3029399999999995,
+            1.125
+          ],
+          "to": [
+            24.0,
+            6.3029399999999995,
+            3.125
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                1.5625,
+                7.9375,
+                3.0625,
+                8.0625
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                3.125,
+                7.9375,
+                4.625,
+                8.0625
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                6.375,
+                7.9375,
+                6.5,
+                8.0625
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                9.625,
+                7.9375,
+                11.125,
+                8.0625
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          2.0,
+          0.0
+        ]
+      }
+    },
+    "40": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/professor_field_tent_assembly",
+        "particle": "stardewcraft:block/ginger_island/professor_field_tent_assembly_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            8.0,
+            4.3029399999999995,
+            1.125
+          ],
+          "to": [
+            32.0,
+            6.3029399999999995,
+            3.125
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                0.0625,
+                7.9375,
+                1.5625,
+                8.0625
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                6.1875,
+                7.9375,
+                6.3125,
+                8.0625
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                4.625,
+                7.9375,
+                6.125,
+                8.0625
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                11.125,
+                7.9375,
+                12.625,
+                8.0625
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          2.0,
+          2.0,
+          0.0
+        ]
+      }
+    },
+    "41": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/professor_field_tent_assembly",
+        "particle": "stardewcraft:block/ginger_island/professor_field_tent_assembly_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            15.0,
+            11.0,
+            14.25
+          ],
+          "to": [
+            29.0,
+            24.0,
+            16.25
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                12.6875,
+                7.9375,
+                13.5625,
+                8.75
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                14.5625,
+                7.9375,
+                14.6875,
+                8.75
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                14.75,
+                7.9375,
+                14.875,
+                8.75
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                14.9375,
+                7.9375,
+                15.8125,
+                8.0625
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                0.0625,
+                8.8125,
+                0.9375,
+                8.9375
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          0.0,
+          -1.0
+        ]
+      }
+    },
+    "42": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/professor_field_tent_assembly",
+        "particle": "stardewcraft:block/ginger_island/professor_field_tent_assembly_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            9.0,
+            9.125,
+            11.25
+          ],
+          "to": [
+            11.0,
+            11.125,
+            16.25
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                1.0,
+                8.8125,
+                1.125,
+                8.9375
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                1.375,
+                8.8125,
+                1.6875,
+                8.9375
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                1.75,
+                8.8125,
+                2.0625,
+                8.9375
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                2.125,
+                8.8125,
+                2.25,
+                9.125
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                2.3125,
+                8.8125,
+                2.4375,
+                9.125
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          3.0,
+          1.0,
+          -1.0
+        ]
+      }
+    },
+    "43": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/professor_field_tent_assembly",
+        "particle": "stardewcraft:block/ginger_island/professor_field_tent_assembly_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            9.5,
+            7.0,
+            11.75
+          ],
+          "to": [
+            10.5,
+            10.0,
+            12.75
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                2.5,
+                8.8125,
+                2.5625,
+                9.0
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                2.75,
+                8.8125,
+                2.8125,
+                9.0
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                2.625,
+                8.8125,
+                2.6875,
+                9.0
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                2.875,
+                8.8125,
+                2.9375,
+                9.0
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                3.0,
+                8.8125,
+                3.0625,
+                8.875
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                3.125,
+                8.8125,
+                3.1875,
+                8.875
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          3.0,
+          1.0,
+          -1.0
+        ]
+      }
+    },
+    "44": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/professor_field_tent_assembly",
+        "particle": "stardewcraft:block/ginger_island/professor_field_tent_assembly_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            7.0,
+            6.0,
+            9.25
+          ],
+          "to": [
+            13.0,
+            8.0,
+            15.25
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                3.25,
+                8.8125,
+                3.625,
+                8.9375
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                4.125,
+                8.8125,
+                4.5,
+                8.9375
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                3.6875,
+                8.8125,
+                4.0625,
+                8.9375
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                4.5625,
+                8.8125,
+                4.9375,
+                8.9375
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                5.0,
+                8.8125,
+                5.375,
+                9.1875
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                5.4375,
+                8.8125,
+                5.8125,
+                9.1875
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          3.0,
+          1.0,
+          -1.0
+        ]
+      }
+    },
+    "45": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/professor_field_tent_assembly",
+        "particle": "stardewcraft:block/ginger_island/professor_field_tent_assembly_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            8.0,
+            8.0,
+            10.25
+          ],
+          "to": [
+            12.0,
+            9.0,
+            14.25
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                5.875,
+                8.8125,
+                6.125,
+                8.875
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                6.5,
+                8.8125,
+                6.75,
+                8.875
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                6.1875,
+                8.8125,
+                6.4375,
+                8.875
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                6.8125,
+                8.8125,
+                7.0625,
+                8.875
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                7.125,
+                8.8125,
+                7.375,
+                9.0625
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          3.0,
+          1.0,
+          -1.0
+        ]
+      }
+    },
+    "46": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/professor_field_tent_assembly",
+        "particle": "stardewcraft:block/ginger_island/professor_field_tent_assembly_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            8.0,
+            0.0,
+            10.25
+          ],
+          "to": [
+            12.0,
+            6.0,
+            14.25
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                7.75,
+                8.8125,
+                8.0,
+                9.1875
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                8.375,
+                8.8125,
+                8.625,
+                9.1875
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                8.0625,
+                8.8125,
+                8.3125,
+                9.1875
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                8.6875,
+                8.8125,
+                8.9375,
+                9.1875
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          3.0,
+          1.0,
+          -1.0
+        ]
+      }
+    },
+    "47": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/professor_field_tent_assembly",
+        "particle": "stardewcraft:block/ginger_island/professor_field_tent_assembly_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            7.0,
+            14.0,
+            9.25
+          ],
+          "to": [
+            13.0,
+            16.0,
+            15.25
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                9.625,
+                8.8125,
+                10.0,
+                8.9375
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                10.5,
+                8.8125,
+                10.875,
+                8.9375
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                10.0625,
+                8.8125,
+                10.4375,
+                8.9375
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                10.9375,
+                8.8125,
+                11.3125,
+                8.9375
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                11.375,
+                8.8125,
+                11.75,
+                9.1875
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                11.8125,
+                8.8125,
+                12.1875,
+                9.1875
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          3.0,
+          0.0,
+          -1.0
+        ]
+      }
+    },
+    "48": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/professor_field_tent_assembly",
+        "particle": "stardewcraft:block/ginger_island/professor_field_tent_assembly_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            7.5,
+            0.0,
+            9.75
+          ],
+          "to": [
+            8.5,
+            6.0,
+            10.75
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                12.25,
+                8.8125,
+                12.3125,
+                9.1875
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                12.5,
+                8.8125,
+                12.5625,
+                9.1875
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                12.375,
+                8.8125,
+                12.4375,
+                9.1875
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                12.625,
+                8.8125,
+                12.6875,
+                9.1875
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          3.0,
+          1.0,
+          -1.0
+        ]
+      }
+    },
+    "49": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/professor_field_tent_assembly",
+        "particle": "stardewcraft:block/ginger_island/professor_field_tent_assembly_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            7.5,
+            0.0,
+            13.75
+          ],
+          "to": [
+            8.5,
+            6.0,
+            14.75
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                13.0,
+                8.8125,
+                13.0625,
+                9.1875
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                13.25,
+                8.8125,
+                13.3125,
+                9.1875
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                13.125,
+                8.8125,
+                13.1875,
+                9.1875
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                13.375,
+                8.8125,
+                13.4375,
+                9.1875
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          3.0,
+          1.0,
+          -1.0
+        ]
+      }
+    },
+    "50": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/professor_field_tent_assembly",
+        "particle": "stardewcraft:block/ginger_island/professor_field_tent_assembly_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            11.5,
+            0.0,
+            9.75
+          ],
+          "to": [
+            12.5,
+            6.0,
+            10.75
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                13.75,
+                8.8125,
+                13.8125,
+                9.1875
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                14.0,
+                8.8125,
+                14.0625,
+                9.1875
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                13.875,
+                8.8125,
+                13.9375,
+                9.1875
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                14.125,
+                8.8125,
+                14.1875,
+                9.1875
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          3.0,
+          1.0,
+          -1.0
+        ]
+      }
+    },
+    "51": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/professor_field_tent_assembly",
+        "particle": "stardewcraft:block/ginger_island/professor_field_tent_assembly_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            11.5,
+            0.0,
+            13.75
+          ],
+          "to": [
+            12.5,
+            6.0,
+            14.75
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                14.5,
+                8.8125,
+                14.5625,
+                9.1875
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                14.75,
+                8.8125,
+                14.8125,
+                9.1875
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                14.625,
+                8.8125,
+                14.6875,
+                9.1875
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                14.875,
+                8.8125,
+                14.9375,
+                9.1875
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          3.0,
+          1.0,
+          -1.0
+        ]
+      }
+    },
+    "52": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/professor_field_tent_assembly",
+        "particle": "stardewcraft:block/ginger_island/professor_field_tent_assembly_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            14.9273,
+            15.0,
+            15.0
+          ],
+          "to": [
+            16.9273,
+            19.0,
+            17.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                15.25,
+                8.8125,
+                15.375,
+                9.0625
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                15.625,
+                8.8125,
+                15.75,
+                9.0625
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                15.4375,
+                8.8125,
+                15.5625,
+                9.0625
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                15.8125,
+                8.8125,
+                15.9375,
+                9.0625
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                0.0625,
+                9.25,
+                0.1875,
+                9.375
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                0.25,
+                9.25,
+                0.375,
+                9.375
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          -1.0,
+          -1.0,
+          -1.0
+        ]
+      }
+    },
+    "53": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/professor_field_tent_assembly",
+        "particle": "stardewcraft:block/ginger_island/professor_field_tent_assembly_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            0.0523,
+            0.5,
+            14.5
+          ],
+          "to": [
+            1.0523,
+            1.5,
+            17.5
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                0.4375,
+                9.25,
+                0.5,
+                9.3125
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                0.6875,
+                9.25,
+                0.875,
+                9.3125
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                0.5625,
+                9.25,
+                0.625,
+                9.3125
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                0.9375,
+                9.25,
+                1.125,
+                9.3125
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                1.1875,
+                9.25,
+                1.25,
+                9.4375
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                1.3125,
+                9.25,
+                1.375,
+                9.4375
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          0.0,
+          -1.0
+        ]
+      }
+    },
+    "54": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/professor_field_tent_assembly",
+        "particle": "stardewcraft:block/ginger_island/professor_field_tent_assembly_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            14.9273,
+            15.0,
+            7.0
+          ],
+          "to": [
+            16.9273,
+            19.0,
+            9.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                1.4375,
+                9.25,
+                1.5625,
+                9.5
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                1.8125,
+                9.25,
+                1.9375,
+                9.5
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                1.625,
+                9.25,
+                1.75,
+                9.5
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                2.0,
+                9.25,
+                2.125,
+                9.5
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                2.1875,
+                9.25,
+                2.3125,
+                9.375
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                2.375,
+                9.25,
+                2.5,
+                9.375
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          -1.0,
+          -1.0,
+          2.0
+        ]
+      }
+    },
+    "55": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/professor_field_tent_assembly",
+        "particle": "stardewcraft:block/ginger_island/professor_field_tent_assembly_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            0.0523,
+            0.5,
+            6.5
+          ],
+          "to": [
+            1.0523,
+            1.5,
+            9.5
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                2.5625,
+                9.25,
+                2.625,
+                9.3125
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                2.8125,
+                9.25,
+                3.0,
+                9.3125
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                2.6875,
+                9.25,
+                2.75,
+                9.3125
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                3.0625,
+                9.25,
+                3.25,
+                9.3125
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                3.3125,
+                9.25,
+                3.375,
+                9.4375
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                3.4375,
+                9.25,
+                3.5,
+                9.4375
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          0.0,
+          2.0
+        ]
+      }
+    },
+    "56": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/professor_field_tent_assembly",
+        "particle": "stardewcraft:block/ginger_island/professor_field_tent_assembly_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            15.072699999999998,
+            15.0,
+            15.0
+          ],
+          "to": [
+            17.072699999999998,
+            19.0,
+            17.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                3.5625,
+                9.25,
+                3.6875,
+                9.5
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                3.9375,
+                9.25,
+                4.0625,
+                9.5
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                3.75,
+                9.25,
+                3.875,
+                9.5
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                4.125,
+                9.25,
+                4.25,
+                9.5
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                4.3125,
+                9.25,
+                4.4375,
+                9.375
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                4.5,
+                9.25,
+                4.625,
+                9.375
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          4.0,
+          -1.0,
+          -1.0
+        ]
+      }
+    },
+    "57": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/professor_field_tent_assembly",
+        "particle": "stardewcraft:block/ginger_island/professor_field_tent_assembly_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            14.947699999999998,
+            0.5,
+            14.5
+          ],
+          "to": [
+            15.947699999999998,
+            1.5,
+            17.5
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                4.6875,
+                9.25,
+                4.75,
+                9.3125
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                4.9375,
+                9.25,
+                5.125,
+                9.3125
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                4.8125,
+                9.25,
+                4.875,
+                9.3125
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                5.1875,
+                9.25,
+                5.375,
+                9.3125
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                5.4375,
+                9.25,
+                5.5,
+                9.4375
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                5.5625,
+                9.25,
+                5.625,
+                9.4375
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          4.0,
+          0.0,
+          -1.0
+        ]
+      }
+    },
+    "58": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/professor_field_tent_assembly",
+        "particle": "stardewcraft:block/ginger_island/professor_field_tent_assembly_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            15.072699999999998,
+            15.0,
+            7.0
+          ],
+          "to": [
+            17.072699999999998,
+            19.0,
+            9.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                5.6875,
+                9.25,
+                5.8125,
+                9.5
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                6.0625,
+                9.25,
+                6.1875,
+                9.5
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                5.875,
+                9.25,
+                6.0,
+                9.5
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                6.25,
+                9.25,
+                6.375,
+                9.5
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                6.4375,
+                9.25,
+                6.5625,
+                9.375
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                6.625,
+                9.25,
+                6.75,
+                9.375
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          4.0,
+          -1.0,
+          2.0
+        ]
+      }
+    },
+    "59": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/professor_field_tent_assembly",
+        "particle": "stardewcraft:block/ginger_island/professor_field_tent_assembly_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            14.947699999999998,
+            0.5,
+            6.5
+          ],
+          "to": [
+            15.947699999999998,
+            1.5,
+            9.5
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                6.8125,
+                9.25,
+                6.875,
+                9.3125
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                7.0625,
+                9.25,
+                7.25,
+                9.3125
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                6.9375,
+                9.25,
+                7.0,
+                9.3125
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                7.3125,
+                9.25,
+                7.5,
+                9.3125
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                7.5625,
+                9.25,
+                7.625,
+                9.4375
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                7.6875,
+                9.25,
+                7.75,
+                9.4375
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          4.0,
+          0.0,
+          2.0
+        ]
+      }
+    }
+  },
+  "stardewcraft:collision": {
+    "mode": "custom",
+    "boxes": [
+      {
+        "from": [
+          0,
+          0,
+          0
+        ],
+        "to": [
+          31,
+          40,
+          12
+        ]
+      },
+      {
+        "from": [
+          49,
+          0,
+          0
+        ],
+        "to": [
+          80,
+          40,
+          12
+        ]
+      },
+      {
+        "from": [
+          31,
+          32,
+          0
+        ],
+        "to": [
+          49,
+          41,
+          12
+        ]
+      },
+      {
+        "from": [
+          0,
+          0,
+          12
+        ],
+        "to": [
+          80,
+          41,
+          40
+        ]
+      }
+    ],
+    "policy": "compound_tent_entry"
+  }
+}

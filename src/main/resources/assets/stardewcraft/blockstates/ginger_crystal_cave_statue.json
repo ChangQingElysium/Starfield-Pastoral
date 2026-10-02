@@ -1,0 +1,60 @@
+{
+  "variants": {
+    "facing=north,part=main,active=false": {
+      "model": "stardewcraft:block/ginger_island/crystal_cave_statue",
+      "y": 0
+    },
+    "facing=north,part=extension,active=false": {
+      "model": "stardewcraft:block/ginger_island/crystal_cave_statue_extension"
+    },
+    "facing=north,part=main,active=true": {
+      "model": "stardewcraft:block/ginger_island/crystal_cave_statue_active",
+      "y": 0
+    },
+    "facing=north,part=extension,active=true": {
+      "model": "stardewcraft:block/ginger_island/crystal_cave_statue_extension"
+    },
+    "facing=east,part=main,active=false": {
+      "model": "stardewcraft:block/ginger_island/crystal_cave_statue",
+      "y": 90
+    },
+    "facing=east,part=extension,active=false": {
+      "model": "stardewcraft:block/ginger_island/crystal_cave_statue_extension"
+    },
+    "facing=east,part=main,active=true": {
+      "model": "stardewcraft:block/ginger_island/crystal_cave_statue_active",
+      "y": 90
+    },
+    "facing=east,part=extension,active=true": {
+      "model": "stardewcraft:block/ginger_island/crystal_cave_statue_extension"
+    },
+    "facing=south,part=main,active=false": {
+      "model": "stardewcraft:block/ginger_island/crystal_cave_statue",
+      "y": 180
+    },
+    "facing=south,part=extension,active=false": {
+      "model": "stardewcraft:block/ginger_island/crystal_cave_statue_extension"
+    },
+    "facing=south,part=main,active=true": {
+      "model": "stardewcraft:block/ginger_island/crystal_cave_statue_active",
+      "y": 180
+    },
+    "facing=south,part=extension,active=true": {
+      "model": "stardewcraft:block/ginger_island/crystal_cave_statue_extension"
+    },
+    "facing=west,part=main,active=false": {
+      "model": "stardewcraft:block/ginger_island/crystal_cave_statue",
+      "y": 270
+    },
+    "facing=west,part=extension,active=false": {
+      "model": "stardewcraft:block/ginger_island/crystal_cave_statue_extension"
+    },
+    "facing=west,part=main,active=true": {
+      "model": "stardewcraft:block/ginger_island/crystal_cave_statue_active",
+      "y": 270
+    },
+    "facing=west,part=extension,active=true": {
+      "model": "stardewcraft:block/ginger_island/crystal_cave_statue_extension"
+    }
+  }
+}

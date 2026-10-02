@@ -347,9 +347,16 @@ public final class BlacksmithService {
         if (data.getDaysLeftForToolUpgrade() > 0) return;
         if (data.isToolUpgradeNotified()) return;
 
-        // SDV: skip notification on festival days
-        // SDV: skip on Friday when CC completed and not raining (Clint goes to saloon)
-        // For now, just show the message
+        // SDV Farmer.showToolUpgradeAvailability: no message on festival days, nor on a Friday after the
+        // Community Center is complete when it is not raining (Clint is at the saloon). Retry next day.
+        if (com.stardew.craft.festival.FestivalService.isFestivalDay()) return;
+        com.stardew.craft.time.StardewTimeManager time = com.stardew.craft.time.StardewTimeManager.get();
+        boolean friday = Math.floorMod(time.getCurrentDay() - 1, 7) == 4;
+        String weather = com.stardew.craft.weather.WeatherManager.getCurrentWeather(player.serverLevel());
+        boolean raining = "Rain".equals(weather) || "Storm".equals(weather) || "GreenRain".equals(weather);
+        if (friday && !raining
+                && com.stardew.craft.communitycenter.state.CCStoryFlags.hasFlag(
+                        player, com.stardew.craft.communitycenter.state.CCStoryFlags.CC_IS_COMPLETE)) return;
         data.setToolUpgradeNotified(true);
         PlayerDataManager.get().setDirty();
 

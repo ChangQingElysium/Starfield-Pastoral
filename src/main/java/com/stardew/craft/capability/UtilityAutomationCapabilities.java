@@ -96,6 +96,8 @@ public final class UtilityAutomationCapabilities {
             (be, ctx) -> be.getAutomationItemHandler());
         event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.TAPPER.get(),
             (be, ctx) -> be.getAutomationItemHandler());
+        event.registerBlock(Capabilities.ItemHandler.BLOCK, UtilityAutomationCapabilities::getAutomationFromMultiblock,
+                com.stardew.craft.gingerisland.GingerIslandBlocks.get("ginger_heavy_tapper"));
         event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.MUSHROOM_BOX.get(),
             (be, ctx) -> be.getAutomationItemHandler());
         event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.FISH_POND_BUCKET.get(),
@@ -132,6 +134,7 @@ public final class UtilityAutomationCapabilities {
             ModBlocks.CHARCOAL_KILN.get(),
             ModBlocks.MAYONNAISE_MACHINE.get(),
             ModBlocks.INCUBATOR.get(),
+            com.stardew.craft.gingerisland.GingerIslandBlocks.get("ginger_ostrich_incubator_empty"),
             ModBlocks.CRYSTALARIUM.get(),
             ModBlocks.AUTO_GRABBER.get(),
             ModBlocks.LIGHTNING_ROD.get(),
@@ -153,6 +156,8 @@ public final class UtilityAutomationCapabilities {
     }
 
     public static BlockPos resolveMainPos(Level level, BlockPos pos, BlockState state) {
+        if (state.getBlock() instanceof com.stardew.craft.gingerisland.HeavyTapperBlock
+                && state.getValue(com.stardew.craft.gingerisland.HeavyTapperBlock.UPPER)) return pos.below();
         if (state.getBlock() instanceof com.stardew.craft.block.utility.MapUtilityStaticBlock block) {
             BlockPos main = block.findMainPos(level, pos, state);
             return main == null ? pos : main;

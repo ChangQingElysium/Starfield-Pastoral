@@ -1,0 +1,37 @@
+{
+  "parent": "minecraft:block/block",
+  "loader": "neoforge:composite",
+  "textures": {
+    "particle": "stardewcraft:block/ginger_island/field_office_fossil_backing_particle"
+  },
+  "children": {
+    "0": {
+      "parent": "stardewcraft:block/ginger_island/field_office_fossil_backing",
+      "transform": {
+        "translation": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    }
+  },
+  "stardewcraft:collision": {
+    "mode": "custom",
+    "boxes": [
+      {
+        "from": [
+          0,
+          0,
+          13.5
+        ],
+        "to": [
+          16,
+          16,
+          16
+        ]
+      }
+    ],
+    "policy": "compound_assembly"
+  }
+}

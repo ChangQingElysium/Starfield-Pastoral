@@ -7,6 +7,10 @@ import com.stardew.craft.economy.sell.ProfessionSellPriceService;
 import com.stardew.craft.economy.sell.SellQuote;
 import com.stardew.craft.economy.sell.SellSource;
 import com.stardew.craft.api.v1.item.StardewItemDataApi;
+import com.stardew.craft.inventory.InventoryTrashPolicy;
+import com.stardew.craft.item.tool.FishingRodItem;
+import com.stardew.craft.item.tool.PanItem;
+import com.stardew.craft.item.weapon.SlingshotItem;
 import com.stardew.craft.menu.ShippingBinMenu;
 import com.stardew.craft.network.overnight.OvernightSettlementTracker;
 import com.stardew.craft.player.PlayerDataManager;
@@ -168,9 +172,45 @@ public class ShippingBinBlockEntity extends net.minecraft.world.level.block.enti
         syncToClient();
     }
 
+    /**
+     * SDV {@code Item.canBeShipped} / {@code Object.canBeShipped}: only plain Objects ship.
+     * Weapons, tools, boots, rings, hats, clothing, trinkets, furniture, wallpaper/flooring and
+     * big craftables are not Objects (or are excluded by Object.canBeShipped), and quest or
+     * non-trashable items fail {@code canBeTrashed}.
+     */
     public static boolean canShip(ItemStack stack) {
-        return !stack.isEmpty() && StardewItemDataApi.getSellPrice(stack) > 0;
+        if (stack.isEmpty() || !InventoryTrashPolicy.canTrash(stack)) {
+            return false;
+        }
+        if (stack.getItem() instanceof FishingRodItem
+                || stack.getItem() instanceof PanItem
+                || stack.getItem() instanceof SlingshotItem) {
+            return false;
+        }
+        String typeKey = StardewItemDataApi.getTypeKey(stack);
+        if (typeKey == null || typeKey.startsWith("stardewcraft.type.weapon")
+                || NON_OBJECT_TYPE_KEYS.contains(typeKey)) {
+            return false;
+        }
+        return StardewItemDataApi.getSellPrice(stack) > 0;
     }
+
+    private static final java.util.Set<String> NON_OBJECT_TYPE_KEYS = java.util.Set.of(
+            "stardewcraft.type.tool",
+            "stardewcraft.type.boots",
+            "stardewcraft.type.ring",
+            "stardewcraft.type.hat",
+            "stardewcraft.type.shirt",
+            "stardewcraft.type.pants",
+            "stardewcraft.type.trinket",
+            "stardewcraft.type.furniture",
+            "stardewcraft.type.special_furniture",
+            "stardewcraft.type.furniture_painting",
+            "stardewcraft.type.carpet",
+            "stardewcraft.type.wallpaper",
+            "stardewcraft.type.utility",
+            "stardewcraft.type.scarecrow",
+            "stardewcraft.type.quest");
 
     /**
      * 夜间结算前将 buffer 中剩余的物品记录到出货追踪器。

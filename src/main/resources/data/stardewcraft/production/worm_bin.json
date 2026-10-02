@@ -3,7 +3,7 @@
   "cycles": {
     "default": {
       "duration": {
-        "minutes": 1260
+        "mornings": 1
       },
       "output": "stardewcraft:bait",
       "min_count": 4,

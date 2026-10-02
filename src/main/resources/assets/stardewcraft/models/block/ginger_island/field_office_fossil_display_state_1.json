@@ -1,0 +1,59 @@
+{
+  "parent": "minecraft:block/block",
+  "loader": "neoforge:composite",
+  "textures": {
+    "particle": "stardewcraft:block/ginger_island/field_office_fossil_display_particle"
+  },
+  "children": {
+    "0": {
+      "parent": "stardewcraft:block/ginger_island/field_office_fossil_display",
+      "transform": {
+        "translation": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "1": {
+      "parent": "stardewcraft:block/ginger_island/field_office_fossil_large",
+      "transform": {
+        "translation": [
+          0.0875,
+          1.625,
+          0.0
+        ]
+      }
+    }
+  },
+  "stardewcraft:collision": {
+    "mode": "custom",
+    "boxes": [
+      {
+        "from": [
+          -16,
+          0,
+          0
+        ],
+        "to": [
+          32,
+          16,
+          32
+        ]
+      },
+      {
+        "from": [
+          -14.6,
+          16,
+          3.8012
+        ],
+        "to": [
+          30.5411,
+          58.0778,
+          26.1988
+        ]
+      }
+    ],
+    "policy": "compound_assembly"
+  }
+}

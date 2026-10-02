@@ -364,8 +364,7 @@ public class DimensionEventHandler {
     private static boolean isSleepAnchor(ServerPlayer player, BlockPos bedPos) {
         var state = player.level().getBlockState(bedPos);
         return state.getBlock() instanceof BedBlock
-                || state.is(ModBlocks.BED_1.get())
-                || state.is(ModBlocks.BED_2.get());
+                || state.getBlock() instanceof com.stardew.craft.block.decor.BedDecorBlock;
     }
 
     private static void wakeSleepingStardewPlayers(net.minecraft.server.MinecraftServer server) {

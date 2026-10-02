@@ -91,7 +91,7 @@ final class NpcDialogueResolver {
             return Selection.NONE;
         }
         String preface = !noPreface && !"spring".equals(context.seasonLower())
-                ? context.seasonLower() + "_"
+                ? context.seasonLower()
                 : "";
         String location = context.locationName();
 

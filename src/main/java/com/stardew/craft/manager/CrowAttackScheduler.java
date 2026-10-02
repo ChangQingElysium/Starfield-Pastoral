@@ -66,8 +66,9 @@ public final class CrowAttackScheduler {
             BlockPos minB = farm.getFarmBoundsMin();
             BlockPos maxB = farm.getFarmBoundsMax();
 
-            // 收集该农场内"进入中期生长"的作物（phase ≥ 2，对齐 SDV Farm.addCrows）
-            List<BlockPos> ripeInFarm = new ArrayList<>();
+            // Farm.addCrows：potentialCrows 按农场内全部有作物的格数计，目标需 phase>1（currentPhase>1）
+            List<BlockPos> allInFarm = new ArrayList<>();
+            Set<BlockPos> midGrowth = new HashSet<>();
             for (GlobalPos gp : allCrops) {
                 if (gp.dimension() != stardewLevel.dimension()) continue;
                 BlockPos p = gp.pos();
@@ -80,33 +81,33 @@ public final class CrowAttackScheduler {
                 if (crop == null || !crop.root().equals(p)) {
                     continue;
                 }
+                allInFarm.add(p);
                 CropGrowthManager.CropGrowthState st = cropMgr.getState(stardewLevel, p);
                 boolean coreMidGrowth = st != null && st.phase > 1;
                 boolean addonMidGrowth =
                         !(stardewLevel.getBlockState(p).getBlock()
                                 instanceof StardewCropBlock)
                                 && crop.visualStage() > 1;
-                if (coreMidGrowth || addonMidGrowth) ripeInFarm.add(p);
+                if (coreMidGrowth || addonMidGrowth) midGrowth.add(p);
             }
-            if (ripeInFarm.isEmpty()) continue;
+            if (allInFarm.isEmpty()) continue;
 
-            int potentialCrows = Math.min(4, ripeInFarm.size() / 16);
+            int potentialCrows = Math.min(4, allInFarm.size() / 16);
             if (potentialCrows < 1) continue;
 
-            // 优先从"玩家视距内已加载区块"里挑目标——这样清晨起床能真看到乌鸦落下。
-            // 如果一格已加载作物都没有（远端孤岛田），退回全集合，作物照样被吃（SDV parity）。
-            List<BlockPos> loadedCandidates = new ArrayList<>();
-            for (BlockPos p : ripeInFarm) {
-                if (stardewLevel.isLoaded(p)) loadedCandidates.add(p);
-            }
-            List<BlockPos> targetPool = loadedCandidates.isEmpty() ? ripeInFarm : loadedCandidates;
-
-            Set<BlockPos> alreadyTargeted = new HashSet<>();
             for (int i = 0; i < potentialCrows; i++) {
                 if (rng.nextFloat() >= 0.30F) continue;
 
-                BlockPos target = targetPool.get(rng.nextInt(targetPool.size()));
-                if (!alreadyTargeted.add(target)) continue;
+                // 原版随机 10 次，取到 phase>1 的作物即停
+                BlockPos target = null;
+                for (int attempt = 0; attempt < 10; attempt++) {
+                    BlockPos cand = allInFarm.get(rng.nextInt(allInFarm.size()));
+                    if (midGrowth.contains(cand)) {
+                        target = cand;
+                        break;
+                    }
+                }
+                if (target == null) continue;
 
                 BlockPos covering = scareMgr.findScarecrowCovering(target);
                 if (covering != null) {

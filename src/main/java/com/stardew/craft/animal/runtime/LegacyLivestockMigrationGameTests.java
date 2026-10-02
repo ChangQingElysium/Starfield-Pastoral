@@ -5,6 +5,7 @@ import com.stardew.craft.animal.model.*;
 import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.blockentity.AnimalProduceSpotBlockEntity;
 import com.stardew.craft.blockentity.IncubatorBlockEntity;
+import com.stardew.craft.blockentity.TimedProductionBlockEntity;
 import com.stardew.craft.building.runtime.*;
 import com.stardew.craft.entity.ModEntities;
 import com.stardew.craft.farm.*;
@@ -210,13 +211,15 @@ public final class LegacyLivestockMigrationGameTests {
             fixture.level.setBlock(position, ModBlocks.INCUBATOR.get().defaultBlockState(), 3);
             var incubator = (IncubatorBlockEntity) fixture.level.getBlockEntity(position);
             var raw = new CompoundTag(); raw.put("input", new ItemStack(ModItems.OSTRICH_EGG.get()).save(fixture.level.registryAccess()));
-            long oldMinute = (fixture.day - 1L) * 1260 + Math.max(0, StardewTimeManager.get().getCurrentTime() - 360);
+            long oldMinute = (fixture.day - 1L) * TimedProductionBlockEntity.LEGACY_MINUTES_PER_DAY + Math.max(0, StardewTimeManager.get().getCurrentTime() - 360);
             raw.putLong("readyAtAbsMinute", oldMinute + 500); raw.putBoolean("ready", false);
             incubator.loadWithComponents(raw, fixture.level.registryAccess());
             var player = FakePlayerFactory.get(fixture.level, new GameProfile(fixture.owner, "LegacyKeeper")); player.moveTo(position.getCenter());
-            h.assertTrue(incubator.hasInput() && incubator.getRemainingAbsMinutes() == 500, "Legacy input cleared or old clock misread");
+            // The old completion moment (day + clock time) is kept on the 1600-minute machine clock.
+            long remaining = TimedProductionBlockEntity.migrateLegacyAbsMinute(oldMinute + 500) - TimedProductionBlockEntity.getCurrentAbsMinute();
+            h.assertTrue(remaining >= 500 && incubator.hasInput() && incubator.getRemainingAbsMinutes() == remaining, "Legacy input cleared or old clock misread");
             h.assertTrue(incubator.claimReadyAnimal(player, "Early") == IncubatorBlockEntity.ClaimResult.NOT_READY, "Unfinished egg hatched early");
-            h.assertTrue(incubator.getRemainingAbsMinutes() == 500, "Clock conversion restarted/shortened incubation");
+            h.assertTrue(incubator.getRemainingAbsMinutes() == remaining, "Clock conversion restarted/shortened incubation");
             raw.putBoolean("ready", true); incubator.loadWithComponents(raw, fixture.level.registryAccess());
             var result = incubator.claimReadyAnimal(player, "Legacy hatch");
             h.assertTrue(result == IncubatorBlockEntity.ClaimResult.SUCCESS, "Ready legacy egg not claimable: " + result);

@@ -1,0 +1,22 @@
+{
+  "variants": {
+    "variant=0": {
+      "model": "stardewcraft:block/ginger_island/caldera_floor_0"
+    },
+    "variant=1": {
+      "model": "stardewcraft:block/ginger_island/caldera_floor_1"
+    },
+    "variant=2": {
+      "model": "stardewcraft:block/ginger_island/caldera_floor_2"
+    },
+    "variant=3": {
+      "model": "stardewcraft:block/ginger_island/caldera_floor_3"
+    },
+    "variant=4": {
+      "model": "stardewcraft:block/ginger_island/caldera_floor_4"
+    },
+    "variant=5": {
+      "model": "stardewcraft:block/ginger_island/caldera_floor_5"
+    }
+  }
+}

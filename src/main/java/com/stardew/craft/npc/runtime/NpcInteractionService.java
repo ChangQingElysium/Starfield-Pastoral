@@ -1750,7 +1750,7 @@ public final class NpcInteractionService {
 
         if (birthday) {
             // Personality-branched birthday responses (vanilla NPC.cs parity)
-            boolean positive = (taste == GiftTaste.LOVED || taste == GiftTaste.LIKED || taste == GiftTaste.NEUTRAL);
+            boolean positive = (taste == GiftTaste.LOVED || taste == GiftTaste.LIKED);
             boolean negative = (taste == GiftTaste.DISLIKED || taste == GiftTaste.HATED);
 
             if (positive) {
@@ -1894,8 +1894,8 @@ public final class NpcInteractionService {
 
     /**
      * Broadcast an emote bubble above the NPC entity based on gift taste.
-     * Vanilla parity: loved → heart(20), liked → happy(32), hated → angry(12),
-     * disliked → sad(28), neutral → no emote.
+     * Vanilla parity: loved → heart(20), hated → angry(12);
+     * liked / disliked / neutral → no emote.
      */
     private static void broadcastGiftEmote(
             net.minecraft.world.entity.Entity npcEntity,
@@ -1903,10 +1903,8 @@ public final class NpcInteractionService {
     ) {
         EmoteType emote = switch (taste) {
             case LOVED -> EmoteCatalog.byId("heart");
-            case LIKED -> EmoteCatalog.byId("happy");
             case HATED -> EmoteCatalog.byId("angry");
-            case DISLIKED -> EmoteCatalog.byId("sad");
-            case NEUTRAL -> null;
+            case LIKED, DISLIKED, NEUTRAL -> null;
         };
         if (emote != null) {
             int baseIndex = EmoteCatalog.getBubbleBaseIndex(emote);

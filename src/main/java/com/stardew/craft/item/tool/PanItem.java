@@ -201,6 +201,7 @@ public class PanItem extends Item implements IStardewItem {
 
         int daysPlayed = totalDaysPlayed(level);
         List<ItemStack> loot = rollLoot(point, daysPlayed, player, timesPanned, upgradeLevel, pan);
+        int lastMiningXp = LAST_MINING_XP.get()[0];
 
         // ── 物品发放：生成物品实体从淘金点弹向玩家，拾取时触发 HUD ──
         for (ItemStack stack : loot) {
@@ -231,29 +232,10 @@ public class PanItem extends Item implements IStardewItem {
         // 3. 玩家位置：收获音效（紫水晶叮 + 经验球拾取音），确保玩家一定听得到
         level.playSound(null, player, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.6f, 1.2f);
         level.playSound(null, player, SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.PLAYERS, 0.3f, 1.0f);
-        // 4. 每个战利品生成短暂的物品实体从淘金点弹向玩家（视觉反馈）
-        for (ItemStack stack : loot) {
-            if (stack.isEmpty()) continue;
-            net.minecraft.world.entity.item.ItemEntity itemEntity = new net.minecraft.world.entity.item.ItemEntity(
-                level, point.getX() + 0.5, point.getY() + 1.2, point.getZ() + 0.5, stack.copy());
-            // 朝玩家方向抛出
-            double dx = player.getX() - (point.getX() + 0.5);
-            double dy = player.getEyeY() - (point.getY() + 1.2);
-            double dz = player.getZ() - (point.getZ() + 0.5);
-            double dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
-            if (dist > 0.1) {
-                double speed = 0.3;
-                itemEntity.setDeltaMovement(dx / dist * speed, dy / dist * speed + 0.2, dz / dist * speed);
-            }
-            itemEntity.setPickUpDelay(0); // 立即可拾取
-            itemEntity.setThrower(player);
-            level.addFreshEntity(itemEntity);
-        }
-
+        // SDV Pan.getPanItems: mining XP = orePieces + extraPieces, foraging XP = item count * 7.
         int totalItems = loot.size();
-        int totalOreAndExtra = 0;
-        for (ItemStack s : loot) totalOreAndExtra += s.getCount();
-        if (totalOreAndExtra > 0) PlayerStardewDataAPI.addExperience(player, SkillType.MINING, Math.min(totalOreAndExtra, 20));
+        int miningXp = lastMiningXp;
+        if (miningXp > 0) PlayerStardewDataAPI.addExperience(player, SkillType.MINING, miningXp);
         if (totalItems > 0) PlayerStardewDataAPI.addExperience(player, SkillType.FORAGING, totalItems * 7);
 
         mgr.clearPoint(player.getUUID(), level);
@@ -265,6 +247,9 @@ public class PanItem extends Item implements IStardewItem {
     public static List<ItemStack> rollLoot(BlockPos point, int daysPlayed, ServerPlayer who, int timesPanned, int upgradeLevel) {
         return rollLoot(point, daysPlayed, who, timesPanned, upgradeLevel, ItemStack.EMPTY);
     }
+
+    /** Mining XP (orePieces + extraPieces) of the most recent rollLoot call on this thread. */
+    private static final ThreadLocal<int[]> LAST_MINING_XP = ThreadLocal.withInitial(() -> new int[1]);
 
     public static List<ItemStack> rollLoot(BlockPos point, int daysPlayed, ServerPlayer who, int timesPanned, int upgradeLevel, ItemStack pan) {
         List<ItemStack> items = new ArrayList<>();
@@ -301,32 +286,31 @@ public class PanItem extends Item implements IStardewItem {
         while (r.nextDouble() - dailyLuck < 0.4 + luckLevel * 0.04 + extraChance && numRolls > 0) {
             double rollExtra = r.nextDouble() - dailyLuck - (L - 1) * 0.005;
             Item whichExtra = ModItems.COAL.get();
-            int extraCount = extraPieces;
 
             if (rollExtra < 0.02 + luckLevel * 0.002 && r.nextDouble() < 0.75) {
                 whichExtra = ModItems.DIAMOND.get();
-                extraCount = 1;
+                extraPieces = 1;
             } else if (rollExtra < 0.1 && r.nextDouble() < 0.75) {
                 Item[] gems = {
                     ModItems.EMERALD.get(), ModItems.AQUAMARINE.get(),
                     ModItems.RUBY.get(), ModItems.AMETHYST.get(), ModItems.TOPAZ.get()
                 };
                 whichExtra = gems[r.nextInt(gems.length)];
-                extraCount = 1;
+                extraPieces = 1;
             } else if (rollExtra < 0.36) {
                 whichExtra = ModItems.OMNI_GEODE.get();
-                extraCount = Math.max(1, extraPieces / 2);
+                extraPieces = Math.max(1, extraPieces / 2);
             } else if (rollExtra < 0.5) {
                 Item[] fmz = {
                     ModItems.FIRE_QUARTZ.get(), ModItems.FROZEN_TEAR.get(), ModItems.EARTH_CRYSTAL.get()
                 };
                 whichExtra = fmz[r.nextInt(fmz.length)];
-                extraCount = 1;
+                extraPieces = 1;
             }
 
             // SDV mystery box 5% — golden variant after Foraging Mastery.
             com.stardew.craft.player.PlayerStardewData data = PlayerDataManager.getPlayerData(who);
-            if (r.nextDouble() < BookPowerEffects.applyMysteryBoxChance(data, 0.05)) {
+            if (data.hasMailFlag("sawQiPlane") && r.nextDouble() < BookPowerEffects.applyMysteryBoxChance(data, 0.05)) {
                 Item box = data.hasMastery(SkillType.FORAGING)
                         ? ModItems.GOLDEN_MYSTERY_BOX.get()
                         : ModItems.MYSTERY_BOX.get();
@@ -334,7 +318,7 @@ public class PanItem extends Item implements IStardewItem {
             }
 
             if (whichExtra != null && whichExtra != Items.AIR) {
-                items.add(new ItemStack(whichExtra, extraCount));
+                items.add(new ItemStack(whichExtra, extraPieces));
             }
             if (StardewEnchantments.has(pan, StardewEnchantments.FISHER) && r.nextDouble() < 0.10) {
                 items.add(new ItemStack(ModItems.SUNFISH.get()));
@@ -342,15 +326,16 @@ public class PanItem extends Item implements IStardewItem {
             numRolls--;
         }
 
-        // Bonus coal — SDV: while (r.NextDouble() < 0.05) amount++;
-        int bonusCoal = 0;
-        double bonusCoalChance = StardewEnchantments.has(pan, StardewEnchantments.ARCHAEOLOGIST) ? 0.20 : 0.05;
-        while (r.nextDouble() < bonusCoalChance) bonusCoal++;
-        if (bonusCoal > 0) {
-            items.add(new ItemStack(ModItems.COAL.get(), bonusCoal));
+        // Artifact Trove (275) — SDV: while (r.NextDouble() < 0.05 [+0.15 Archaeologist]) amount++;
+        int bonusTrove = 0;
+        double bonusTroveChance = StardewEnchantments.has(pan, StardewEnchantments.ARCHAEOLOGIST) ? 0.20 : 0.05;
+        while (r.nextDouble() < bonusTroveChance) bonusTrove++;
+        if (bonusTrove > 0) {
+            items.add(new ItemStack(ModItems.ARTIFACT_TROVE.get(), bonusTrove));
         }
 
         items.add(new ItemStack(whichOre, orePieces));
+        LAST_MINING_XP.get()[0] = orePieces + extraPieces;
         return items;
     }
 

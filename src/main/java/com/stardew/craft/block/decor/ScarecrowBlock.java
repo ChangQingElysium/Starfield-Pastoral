@@ -40,7 +40,7 @@ public class ScarecrowBlock extends MapDecorStaticBlock implements EntityBlock {
     public static boolean protects(BlockPos scarecrowPos, BlockPos targetPos, int radius) {
         int dx = scarecrowPos.getX() - targetPos.getX();
         int dz = scarecrowPos.getZ() - targetPos.getZ();
-        return dx * dx + dz * dz <= radius * radius;
+        return dx * dx + dz * dz < radius * radius;
     }
 
     @Override

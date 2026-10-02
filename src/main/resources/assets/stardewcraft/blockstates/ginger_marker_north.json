@@ -1,0 +1,172 @@
+{
+  "variants": {
+    "facing=north,part=main,variant=0": {
+      "model": "stardewcraft:block/ginger_island/marker_north",
+      "y": 0
+    },
+    "facing=north,part=extension,variant=0": {
+      "model": "stardewcraft:block/ginger_island/marker_north_extension"
+    },
+    "facing=north,part=main,variant=1": {
+      "model": "stardewcraft:block/ginger_island/marker_east",
+      "y": 0
+    },
+    "facing=north,part=extension,variant=1": {
+      "model": "stardewcraft:block/ginger_island/marker_north_extension"
+    },
+    "facing=north,part=main,variant=2": {
+      "model": "stardewcraft:block/ginger_island/marker_south",
+      "y": 0
+    },
+    "facing=north,part=extension,variant=2": {
+      "model": "stardewcraft:block/ginger_island/marker_north_extension"
+    },
+    "facing=north,part=main,variant=3": {
+      "model": "stardewcraft:block/ginger_island/marker_west",
+      "y": 0
+    },
+    "facing=north,part=extension,variant=3": {
+      "model": "stardewcraft:block/ginger_island/marker_north_extension"
+    },
+    "facing=north,part=main,variant=4": {
+      "model": "stardewcraft:block/ginger_island/marker_north",
+      "y": 0
+    },
+    "facing=north,part=extension,variant=4": {
+      "model": "stardewcraft:block/ginger_island/marker_north_extension"
+    },
+    "facing=north,part=main,variant=5": {
+      "model": "stardewcraft:block/ginger_island/marker_north",
+      "y": 0
+    },
+    "facing=north,part=extension,variant=5": {
+      "model": "stardewcraft:block/ginger_island/marker_north_extension"
+    },
+    "facing=east,part=main,variant=0": {
+      "model": "stardewcraft:block/ginger_island/marker_north",
+      "y": 90
+    },
+    "facing=east,part=extension,variant=0": {
+      "model": "stardewcraft:block/ginger_island/marker_north_extension"
+    },
+    "facing=east,part=main,variant=1": {
+      "model": "stardewcraft:block/ginger_island/marker_east",
+      "y": 90
+    },
+    "facing=east,part=extension,variant=1": {
+      "model": "stardewcraft:block/ginger_island/marker_north_extension"
+    },
+    "facing=east,part=main,variant=2": {
+      "model": "stardewcraft:block/ginger_island/marker_south",
+      "y": 90
+    },
+    "facing=east,part=extension,variant=2": {
+      "model": "stardewcraft:block/ginger_island/marker_north_extension"
+    },
+    "facing=east,part=main,variant=3": {
+      "model": "stardewcraft:block/ginger_island/marker_west",
+      "y": 90
+    },
+    "facing=east,part=extension,variant=3": {
+      "model": "stardewcraft:block/ginger_island/marker_north_extension"
+    },
+    "facing=east,part=main,variant=4": {
+      "model": "stardewcraft:block/ginger_island/marker_north",
+      "y": 90
+    },
+    "facing=east,part=extension,variant=4": {
+      "model": "stardewcraft:block/ginger_island/marker_north_extension"
+    },
+    "facing=east,part=main,variant=5": {
+      "model": "stardewcraft:block/ginger_island/marker_north",
+      "y": 90
+    },
+    "facing=east,part=extension,variant=5": {
+      "model": "stardewcraft:block/ginger_island/marker_north_extension"
+    },
+    "facing=south,part=main,variant=0": {
+      "model": "stardewcraft:block/ginger_island/marker_north",
+      "y": 180
+    },
+    "facing=south,part=extension,variant=0": {
+      "model": "stardewcraft:block/ginger_island/marker_north_extension"
+    },
+    "facing=south,part=main,variant=1": {
+      "model": "stardewcraft:block/ginger_island/marker_east",
+      "y": 180
+    },
+    "facing=south,part=extension,variant=1": {
+      "model": "stardewcraft:block/ginger_island/marker_north_extension"
+    },
+    "facing=south,part=main,variant=2": {
+      "model": "stardewcraft:block/ginger_island/marker_south",
+      "y": 180
+    },
+    "facing=south,part=extension,variant=2": {
+      "model": "stardewcraft:block/ginger_island/marker_north_extension"
+    },
+    "facing=south,part=main,variant=3": {
+      "model": "stardewcraft:block/ginger_island/marker_west",
+      "y": 180
+    },
+    "facing=south,part=extension,variant=3": {
+      "model": "stardewcraft:block/ginger_island/marker_north_extension"
+    },
+    "facing=south,part=main,variant=4": {
+      "model": "stardewcraft:block/ginger_island/marker_north",
+      "y": 180
+    },
+    "facing=south,part=extension,variant=4": {
+      "model": "stardewcraft:block/ginger_island/marker_north_extension"
+    },
+    "facing=south,part=main,variant=5": {
+      "model": "stardewcraft:block/ginger_island/marker_north",
+      "y": 180
+    },
+    "facing=south,part=extension,variant=5": {
+      "model": "stardewcraft:block/ginger_island/marker_north_extension"
+    },
+    "facing=west,part=main,variant=0": {
+      "model": "stardewcraft:block/ginger_island/marker_north",
+      "y": 270
+    },
+    "facing=west,part=extension,variant=0": {
+      "model": "stardewcraft:block/ginger_island/marker_north_extension"
+    },
+    "facing=west,part=main,variant=1": {
+      "model": "stardewcraft:block/ginger_island/marker_east",
+      "y": 270
+    },
+    "facing=west,part=extension,variant=1": {
+      "model": "stardewcraft:block/ginger_island/marker_north_extension"
+    },
+    "facing=west,part=main,variant=2": {
+      "model": "stardewcraft:block/ginger_island/marker_south",
+      "y": 270
+    },
+    "facing=west,part=extension,variant=2": {
+      "model": "stardewcraft:block/ginger_island/marker_north_extension"
+    },
+    "facing=west,part=main,variant=3": {
+      "model": "stardewcraft:block/ginger_island/marker_west",
+      "y": 270
+    },
+    "facing=west,part=extension,variant=3": {
+      "model": "stardewcraft:block/ginger_island/marker_north_extension"
+    },
+    "facing=west,part=main,variant=4": {
+      "model": "stardewcraft:block/ginger_island/marker_north",
+      "y": 270
+    },
+    "facing=west,part=extension,variant=4": {
+      "model": "stardewcraft:block/ginger_island/marker_north_extension"
+    },
+    "facing=west,part=main,variant=5": {
+      "model": "stardewcraft:block/ginger_island/marker_north",
+      "y": 270
+    },
+    "facing=west,part=extension,variant=5": {
+      "model": "stardewcraft:block/ginger_island/marker_north_extension"
+    }
+  }
+}

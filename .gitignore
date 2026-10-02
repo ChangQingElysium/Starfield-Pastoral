@@ -119,6 +119,14 @@ replay_pid*.log
 
 scripts/*
 !scripts/import_block_model.py
+!scripts/register_ginger_island_assets.py
+!scripts/audit_ginger_island_bindings.py
+!scripts/check_ginger_island_assets.py
+!scripts/ginger_island_catalog.py
+!scripts/ginger_island_names.py
+!scripts/study_ginger_island_terrain_reference.py
+!scripts/render_ginger_island_reference_world.py
+!scripts/read_ginger_island_reference_world.py
 !scripts/import_farm_building_prefabs.py
 !scripts/import_greenhouse_prefabs.py
 !scripts/import_standard_farm.py

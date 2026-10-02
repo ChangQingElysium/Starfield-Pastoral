@@ -32,6 +32,8 @@ public final class ModClientModels {
         event.register(model);
 
         registerStandalone(event, "block/utility/incubator_egg");
+        registerStandalone(event, "block/ginger_island/ostrich_incubator_empty");
+        registerStandalone(event, "block/ginger_island/ostrich_incubator_loaded");
         registerStandalone(event, "block/utility/fridge_door");
         registerStandalone(event, "block/utility/incubator_straw_front");
         registerStandalone(event, "block/utility/incubator_straw_back");

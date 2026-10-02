@@ -27,7 +27,8 @@ public final class ModBlockEntities {
 
 	@SuppressWarnings("null")
 	public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<TapperBlockEntity>> TAPPER =
-			BLOCK_ENTITIES.register("tapper", () -> BlockEntityType.Builder.of(TapperBlockEntity::new, ModBlocks.TAPPER.get()).build(null));
+			BLOCK_ENTITIES.register("tapper", () -> BlockEntityType.Builder.of(TapperBlockEntity::new, ModBlocks.TAPPER.get(),
+                    com.stardew.craft.gingerisland.GingerIslandBlocks.get("ginger_heavy_tapper")).build(null));
 
 	@SuppressWarnings("null")
 	public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<WildWeedsBlockEntity>> WILD_WEEDS =
@@ -160,7 +161,8 @@ public final class ModBlockEntities {
 
 	@SuppressWarnings("null")
 	public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<IncubatorBlockEntity>> INCUBATOR =
-			BLOCK_ENTITIES.register("incubator", () -> BlockEntityType.Builder.of(IncubatorBlockEntity::new, ModBlocks.INCUBATOR.get()).build(null));
+			BLOCK_ENTITIES.register("incubator", () -> BlockEntityType.Builder.of(IncubatorBlockEntity::new, ModBlocks.INCUBATOR.get(),
+                    com.stardew.craft.gingerisland.GingerIslandBlocks.get("ginger_ostrich_incubator_empty")).build(null));
 
 	@SuppressWarnings("null")
 	public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<OilMakerBlockEntity>> OIL_MAKER =

@@ -6,6 +6,7 @@ import com.stardew.craft.item.ModItems;
 import com.stardew.craft.mining.MiningDataManager;
 import com.stardew.craft.mining.MiningPlayerData;
 import com.stardew.craft.player.PlayerDataManager;
+import com.stardew.craft.player.PlayerStardewDataAPI;
 import com.stardew.craft.player.PlayerStardewData;
 import com.stardew.craft.time.StardewTimeManager;
 import net.minecraft.core.BlockPos;
@@ -45,7 +46,12 @@ public final class GarbageCanLootTable {
     /**
      * 结果记录：包含物品和是否 Mega/DoubleMega 标识。
      */
-    public record Result(ItemStack item, boolean isMegaSuccess, boolean isDoubleMegaSuccess) {}
+    public record Result(ItemStack item, boolean isMegaSuccess, boolean isDoubleMegaSuccess,
+                         boolean addToInventoryDirectly) {
+        public Result(ItemStack item, boolean isMegaSuccess, boolean isDoubleMegaSuccess) {
+            this(item, isMegaSuccess, isDoubleMegaSuccess, false);
+        }
+    }
 
     /**
      * 尝试为给定 canId 计算今日掉落。
@@ -69,7 +75,7 @@ public final class GarbageCanLootTable {
         boolean baseChancePassed = rng.nextDouble() < baseChance;
 
         // ---- BeforeAll ----
-        Result beforeAll = evaluateBeforeAll(rng, baseChancePassed, trashCansChecked);
+        Result beforeAll = evaluateBeforeAll(rng, baseChancePassed, trashCansChecked, player);
         if (beforeAll != null) return beforeAll;
 
         // ---- Named can items (Data/GarbageCans.json) ----
@@ -92,10 +98,11 @@ public final class GarbageCanLootTable {
                     : null;
             case "Blacksmith" -> {
                 if (rng.nextDouble() >= specialChance) yield null;
+                // Base_Ore: RandomItemId (O)378 / (O)380 / (O)382, stack x1..4.
                 Item[] ores = {
                         ModItems.COPPER_ORE.get(),
                         ModItems.IRON_ORE.get(),
-                        ModItems.GOLD_ORE.get()
+                        ModItems.COAL.get()
                 };
                 yield result(ores[rng.nextInt(ores.length)], 1 + rng.nextInt(4));
             }
@@ -140,10 +147,20 @@ public final class GarbageCanLootTable {
     // ==================== BeforeAll ====================
 
     @Nullable
-    private static Result evaluateBeforeAll(Random rng, boolean baseChancePassed, int trashCansChecked) {
-        // Garbage Hat: 20+ 次, 0.2% 概率, DoubleMega — 我们没有此物品，跳过
-        // Trash Catalogue: 50+ 次, 0.2% 概率, DoubleMega — 我们没有此物品，跳过
-        // Qi Bean: 需要特殊订单规则 DROP_QI_BEANS, 25% 概率 — 我们没有此物品，跳过
+    private static Result evaluateBeforeAll(Random rng, boolean baseChancePassed, int trashCansChecked,
+                                            ServerPlayer player) {
+        // Base_GarbageHat: PLAYER_STAT trashCansChecked 20, RANDOM .002; IgnoreBaseChance,
+        // IsDoubleMegaSuccess, AddToInventoryDirectly.
+        if (trashCansChecked >= 20 && rng.nextDouble() < 0.002) {
+            return new Result(new ItemStack(ModItems.GARBAGE_HAT.get()), false, true, true);
+        }
+        // Base_TrashCatalogue ((F)TrashCatalogue, 50+ 次, 0.2%, DoubleMega)：项目没有垃圾目录家具，跳过
+        // Base_QiBean: PLAYER_SPECIAL_ORDER_RULE_ACTIVE Current DROP_QI_BEANS, RANDOM 0.25 (needs base chance)
+        if (baseChancePassed
+                && PlayerStardewDataAPI.isSpecialOrderRuleActive(player, "DROP_QI_BEANS")
+                && rng.nextDouble() < 0.25) {
+            return result(ModItems.VANILLA_CATEGORY_ITEMS.get("qi_bean").get(), 1);
+        }
         return null;
     }
 

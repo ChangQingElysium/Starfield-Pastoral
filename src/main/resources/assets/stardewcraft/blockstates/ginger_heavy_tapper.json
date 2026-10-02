@@ -1,0 +1,32 @@
+{
+  "variants": {
+    "facing=north,upper=false": {
+      "model": "stardewcraft:block/ginger_island/heavy_tapper",
+      "y": 180
+    },
+    "facing=north,upper=true": {
+      "model": "stardewcraft:block/ginger_island/heavy_tapper_extension"
+    },
+    "facing=east,upper=false": {
+      "model": "stardewcraft:block/ginger_island/heavy_tapper",
+      "y": 270
+    },
+    "facing=east,upper=true": {
+      "model": "stardewcraft:block/ginger_island/heavy_tapper_extension"
+    },
+    "facing=south,upper=false": {
+      "model": "stardewcraft:block/ginger_island/heavy_tapper",
+      "y": 0
+    },
+    "facing=south,upper=true": {
+      "model": "stardewcraft:block/ginger_island/heavy_tapper_extension"
+    },
+    "facing=west,upper=false": {
+      "model": "stardewcraft:block/ginger_island/heavy_tapper",
+      "y": 90
+    },
+    "facing=west,upper=true": {
+      "model": "stardewcraft:block/ginger_island/heavy_tapper_extension"
+    }
+  }
+}

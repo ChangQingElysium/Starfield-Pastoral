@@ -63,6 +63,11 @@
       "stock": 1
     },
     {
+      "item": "stardewcraft:copper_pan",
+      "price": 2500,
+      "mail_flag": "ccFishTank"
+    },
+    {
       "item": "recipe:stardewcraft:fish_smoker",
       "price": 10000,
       "stock": 1
