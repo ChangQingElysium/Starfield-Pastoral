@@ -1,5 +1,61 @@
 # Changelog
 
+## 0.6.3fix1 - 2026-10-05
+
+### 更新日志（中文）
+
+**0.6.3fix1 · 稳定性、种植与交互修复**
+
+两个安装包分别用于 Minecraft 1.20.1 / Forge 与 Minecraft 1.21.1 / NeoForge，不能混装。更新前请备份完整存档；不支持将 1.21.1 世界直接降级到 1.20.1。
+
+#### 两个版本的共同内容
+
+- 修复新世界生成停在 0%、后台地形任务跨线程交接调色板时卡住或报错的问题；修正模板屋顶在光照阶段触发邻近区块加载的问题。
+- 修复温室部分格子无法种植双层作物、上半截覆盖相邻作物或障碍物的问题；旧温室只迁移占据种植空间的历史光源，保留作物、土壤、容器和玩家改造。
+- 修复茶树种植日期与采收记录在保存重载后丢失，兼容旧坐标格式，并从现有生长阶段恢复遗漏的登记。
+- 修复手持物品时 Shift 右键无法取回摆放的料理、饮品和鱼的问题；取回保留原物品的品质与其他数据，背包已满时只掉落一份。
+- 修复自动收集器拆除后复活或重复掉落，以及建筑管理网络消息无法传递动物 UUID 的问题；迷你冰箱扩为原版的 36 格，保留旧库存的位置。
+- 修复飞蛇、蝙蝠和苍蝇受击后追踪加速立即抵消击退的问题，保留怪物各自的击退、免疫和地面行动规则。
+- 修正林冠下采集物刷新、未加载区域抵达后当日补刷及每日上限；采集物不再替换流体，补充森林春葱簇与海滩潮池刷新。
+- 加入可保存的旧版生命／体力条选项；修正 HUD 数字绘制、机器产物气泡多层图标的前后顺序，以及原生动画在渲染时间回退时短暂重启的问题。
+- 更新冈瑟的原生模型与待机、眨眼、行走和回望动作，修正短外套衣摆与髋部的连接；NPC 剧情动作缺少对应片段时保留同一角色的待机姿态并记录提示。
+- 修正钓鱼经验、宝箱出现资格、逃鱼时的渔具磨损和高效附魔体力消耗；修正晶球统计、料理书配方范围、任务完成对话／邮件，以及特别订单解锁与击杀计数规则。
+- 按原版修正战败物品丢失资格：普通武器、弹弓和靴子可丢失，农具、镰刀、戒指及原版明确保护的武器保留。
+- 补充模组沙质台阶和楼梯及其合并、转角、含水与掉落行为；农场铺设地板／道路提供对应的临时移速加成。
+- 完善姜岛道具的手持放置、支撑面、变体保留、碰撞和拆除；补充船只水面锚定与轻微摇晃、宝石台物品存取、巨龟场景角色及旧道具别名兼容。**姜岛整岛建造及全部原版玩法仍未完成。**
+
+#### Forge 1.20.1
+
+- 同步本次 1.21.1 的共同内容，保留 Forge 的 API、存档数据和资源格式适配；修复官方命名开发环境中的物品堆叠数量 Mixin 映射错误，补充开发／SRG 两种环境的实际验证，并改进服务器启动、保存与退出检查。
+- 继续保留两项已确认差异：不包含 FLOW / BOLT 两套纹饰及模板；不移植鱼塘水经滴水石灌注炼药锅的功能。
+
+### Update Log (English)
+
+**0.6.3fix1 · Stability, Planting and Interaction Fixes**
+
+Use the matching Minecraft 1.20.1 / Forge or Minecraft 1.21.1 / NeoForge package, not both. Back up the entire save before updating. Directly downgrading a 1.21.1 world to 1.20.1 is not supported.
+
+#### Shared Content
+
+- Fixes world creation stalling at 0% and palette handoff errors between terrain workers. Prevents template roofs from loading neighboring chunks during lighting.
+- Fixes tall-crop planting failures and upper crop blocks overwriting adjacent crops or obstructions. Existing greenhouses relocate only historical lights occupying planting space, preserving crops, soil, containers and player changes.
+- Fixes tea-bush planting dates and harvest records being lost after reload. Supports legacy coordinates and recovers missing registrations from saved growth stages.
+- Fixes Shift-right-click retrieval of placed dishes, drinks and fish while holding an item. Retrieved servings retain quality and other item data; a full inventory drops exactly one serving.
+- Fixes Auto-Grabbers reappearing or duplicating drops when dismantled, and animal UUIDs being rejected by building-management packets. Expands Mini-Fridges to the original 36 slots while preserving existing inventory positions.
+- Fixes Serpents, Bats and Flies immediately canceling accepted knockback with chase acceleration, while retaining each monster's movement and immunity rules.
+- Corrects forage spawning beneath forest canopies, current-day spawning when entering previously unloaded areas, and daily caps. Forage no longer replaces fluids; adds forest Spring Onion clusters and beach tide-pool spawning.
+- Adds a persistent option for the legacy health and energy bars. Corrects HUD digit rendering, layered product-bubble icons, and native animations briefly restarting after render-time corrections.
+- Updates Gunther's native model and idle, blink, walk and attention animations, with improved short-coat and hip connections. Missing NPC cutscene clips retain that character's idle pose and produce a diagnostic warning.
+- Corrects fishing experience, treasure eligibility, tackle wear after an escape, and Efficient-enchantment stamina costs. Also corrects geode statistics, cooking-book recipe scope, quest dialogue/mail updates, and Special Order unlock and kill-count rules.
+- Corrects defeat-related item-loss eligibility: ordinary weapons, slingshots and boots can be lost; farming tools, scythes, rings and explicitly protected weapons remain protected.
+- Adds the mod's sand slabs and stairs with merging, corners, waterlogging and appropriate drops. Farm flooring and paths provide their corresponding temporary movement-speed bonus.
+- Improves Ginger Island prop placement, support faces, variants, collision and removal. Adds surface-water boat anchoring and subtle motion, gem-pedestal item storage, the giant-turtle scene actor, and compatibility for historical prop aliases. **The complete island build and all original island gameplay remain unfinished.**
+
+#### Forge 1.20.1
+
+- Synchronizes the shared 1.21.1 changes while retaining Forge API, save-data and resource-format adaptations. Fixes stack-count Mixin mappings in official-name development environments, adds actual mapped/SRG verification, and improves server startup, save and shutdown checks.
+- Retains the two confirmed differences: no FLOW / BOLT armor trims or templates, and no dripstone filling a cauldron with Fish Pond Water.
+
 ## 0.6.3 - 2026-10-02
 
 ### 更新日志（中文）

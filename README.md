@@ -5,9 +5,9 @@
 <h1 align="center">Starfield Pastoral · 星野牧歌</h1>
 
 <p align="center">
-  <strong>Farm, fish, raise animals, meet the villagers, and explore the mines in Minecraft 1.21.1.</strong>
+  <strong>Farm, fish, raise animals, meet the villagers, and explore the mines in Minecraft 1.20.1 or 1.21.1.</strong>
   <br>
-  A non-commercial NeoForge fan project based on the farming, town life, and progression of Stardew Valley.
+  A non-commercial Forge / NeoForge fan project based on the farming, town life, and progression of Stardew Valley.
 </p>
 
 <p align="center">
@@ -35,7 +35,7 @@
 
 ## About
 
-Starfield Pastoral is a NeoForge mod for Minecraft 1.21.1. A new game begins in the Overworld. Find the Wizard's Tower, complete the Wizard's request, enter the Stardew Valley dimension, and take over your grandfather's farm.
+Starfield Pastoral supports Minecraft 1.20.1 / Forge and Minecraft 1.21.1 / NeoForge. A new game begins in the Overworld. Find the Wizard's Tower, complete the Wizard's request, enter the Stardew Valley dimension, and take over your grandfather's farm.
 
 Current builds include farming, animals, fishing, NPC schedules, dialogue, mail, shops, mines, time progression, and overnight settlement.
 
@@ -60,14 +60,17 @@ Current builds include farming, animals, fishing, NPC schedules, dialogue, mail,
 
 ## Download and requirements
 
-| Requirement | Version |
-| --- | --- |
-| Minecraft | 1.21.1 |
-| Mod loader | NeoForge 21.1.217 or a compatible newer build |
-| Java | 21 |
-| Environment | Client and server |
-| Source version | 0.5.5 |
-| Official downloads | [CurseForge](https://www.curseforge.com/minecraft/mc-mods/starfield-pastoral) · [Modrinth](https://modrinth.com/mod/starfield-pastoral) |
+| Requirement | Forge package | NeoForge package |
+| --- | --- | --- |
+| Minecraft | 1.20.1 | 1.21.1 |
+| Mod loader | Forge 47.4.10 | NeoForge 21.1.217 |
+| Java | 17 | 21 |
+| Environment | Client and server | Client and server |
+| Source version | 0.6.3fix1 | 0.6.3fix1 |
+
+Download the matching JAR from [GitHub Releases](https://github.com/ChangQingElysium/Starfield-Pastoral/releases), [CurseForge](https://www.curseforge.com/minecraft/mc-mods/starfield-pastoral), or [Modrinth](https://modrinth.com/mod/starfield-pastoral). Do not install both packages together or downgrade a 1.21.1 save to 1.20.1.
+
+Source is maintained on `main` for NeoForge 1.21.1 and `mc1.20.1-forge` for Forge 1.20.1. Release tags freeze the corresponding source commits; fixes share gameplay behavior while retaining platform-specific APIs and resource formats. The Forge package keeps two documented exceptions: no FLOW / BOLT armor trims/templates, and no dripstone cauldron filling with Fish Pond Water.
 
 JEI is optional and adds information for fishing and other content. Read the release notes before updating an existing world.
 

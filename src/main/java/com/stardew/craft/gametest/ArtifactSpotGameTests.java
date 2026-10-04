@@ -148,15 +148,20 @@ public final class ArtifactSpotGameTests {
         var player = FakePlayerFactory.get(level, new GameProfile(UUID.randomUUID(), "ChargedHoe"));
         var hoe = (HoeItem) ModItems.IRIDIUM_HOE.get();
         player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(hoe));
-        for (int x = 3; x <= 7; x++) for (int z = 3; z <= 7; z++) {
-            var p = helper.absolutePos(new BlockPos(x, 1, z));
+        var center = ground.relative(player.getDirection(), 2);
+        var expectedTargets = new java.util.HashSet<BlockPos>();
+        for (int x = -2; x <= 2; x++) for (int z = -2; z <= 2; z++) {
+            var p = center.offset(x, 0, z);
             level.setBlock(p, ModBlocks.DIRT.get().defaultBlockState(), 3);
             level.setBlock(p.above(), Blocks.AIR.defaultBlockState(), 3);
+            expectedTargets.add(p.equals(ground) ? p.above() : p);
         }
         level.setBlock(ground.above(), ModBlocks.ARTIFACT_SPOT.get().defaultBlockState(), 3);
         var targets = hoe.getAffectedBlocks(level, ground.above(), player, 5);
         helper.assertTrue(targets.size() == 25 && targets.contains(ground.above()) && !targets.contains(ground),
                 "Charged hoe must lift only occupied marker cells, leaving ordinary targets at ground height");
+        helper.assertTrue(new java.util.HashSet<>(targets).equals(expectedTargets),
+                "Charged hoe must preserve every ordinary ground target in its forward-facing 5x5 pattern");
         helper.succeed();
     }
     @GameTest(templateNamespace = StardewCraft.MODID, template = "ring_utilities")

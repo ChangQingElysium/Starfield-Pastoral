@@ -123,6 +123,8 @@ scripts/*
 !scripts/ginger_island_placement.py
 !scripts/audit_ginger_island_bindings.py
 !scripts/check_ginger_island_assets.py
+!scripts/ginger_island_item_icons.py
+!scripts/audit_ginger_island_item_bounds.py
 !scripts/ginger_island_catalog.py
 !scripts/ginger_island_names.py
 !scripts/study_ginger_island_terrain_reference.py

@@ -71,9 +71,14 @@ public final class FiberCropGameTests {
                 }
                 var mature = level.getBlockState(pos);
                 helper.assertTrue(!crop.tryHarvestByHand(level, pos, mature, null), "Scythe crop harvested by bare hand");
-                var fruit = crop.tryHarvestByJunimo(level, pos, mature, 10, stack -> {});
-                helper.assertTrue(fruit.is(ModItems.FIBER.get()) && fruit.getCount() >= 4
-                        && QualityHelper.getQuality(fruit) == QualityHelper.NORMAL, "Fiber item, minimum stack or normal quality changed");
+                var outputs = new java.util.ArrayList<ItemStack>();
+                var fruit = crop.tryHarvestByJunimo(level, pos, mature, 10, stack -> outputs.add(stack.copy()));
+                helper.assertTrue(fruit.is(ModItems.FIBER.get()) && fruit.getCount() == 1
+                        && QualityHelper.getQuality(fruit) == QualityHelper.NORMAL, "Fiber primary item or normal quality changed");
+                helper.assertTrue(outputs.stream().allMatch(stack -> stack.is(ModItems.FIBER.get())
+                                && QualityHelper.getQuality(stack) == QualityHelper.NORMAL)
+                        && outputs.stream().mapToInt(ItemStack::getCount).sum() >= 4,
+                        "Fiber item, minimum stack or normal quality changed");
                 helper.assertTrue(level.getBlockState(pos).isAir() && level.getBlockState(pos.above()).isAir(), "Fiber harvest left a regrowing carrier");
             }
 

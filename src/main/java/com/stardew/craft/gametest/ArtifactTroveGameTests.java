@@ -78,9 +78,11 @@ public final class ArtifactTroveGameTests {
 
     @GameTest(templateNamespace = "stardewcraft_artifact_trove", template = "empty", timeoutTicks = 100)
     public static void allTwentyEightVanillaResultsHaveOneEqualSlot(GameTestHelper h) throws Exception {
-        var roll = GeodeLootService.class.getDeclaredMethod("getTreasureFromGeode", String.class, ServerPlayer.class, Random.class);
+        var roll = GeodeLootService.class.getDeclaredMethod("getTreasureFromGeode", String.class, ServerPlayer.class,
+                Random.class, java.util.function.Consumer.class, java.util.Map.class);
         roll.setAccessible(true);
         var player = FakePlayerFactory.get(h.getLevel(), new GameProfile(UUID.randomUUID(), "TrovePool"));
+        java.util.function.Consumer<com.stardew.craft.api.v1.action.StardewAction> effects = action -> {};
         for (int index = 0; index < EXPECTED.size(); index++) {
             final int selected = index;
             var random = new Random(0) {
@@ -90,7 +92,7 @@ public final class ArtifactTroveGameTests {
                     return selected;
                 }
             };
-            var stack = (ItemStack) roll.invoke(null, "stardewcraft:artifact_trove", player, random);
+            var stack = (ItemStack) roll.invoke(null, "stardewcraft:artifact_trove", player, random, effects, java.util.Map.of());
             h.assertTrue(stack.getCount() == 1 && BuiltInRegistries.ITEM.getKey(stack.getItem()).toString()
                     .equals("stardewcraft:" + EXPECTED.get(index)), "Wrong vanilla result at slot " + index);
         }
