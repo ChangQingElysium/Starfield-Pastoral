@@ -1,0 +1,32 @@
+{
+  "variants": {
+    "facing=north,part=main": {
+      "model": "stardewcraft:block/ginger_island/field_office_canvas_floor",
+      "y": 0
+    },
+    "facing=north,part=extension": {
+      "model": "stardewcraft:block/ginger_island/field_office_canvas_floor_extension"
+    },
+    "facing=east,part=main": {
+      "model": "stardewcraft:block/ginger_island/field_office_canvas_floor",
+      "y": 90
+    },
+    "facing=east,part=extension": {
+      "model": "stardewcraft:block/ginger_island/field_office_canvas_floor_extension"
+    },
+    "facing=south,part=main": {
+      "model": "stardewcraft:block/ginger_island/field_office_canvas_floor",
+      "y": 180
+    },
+    "facing=south,part=extension": {
+      "model": "stardewcraft:block/ginger_island/field_office_canvas_floor_extension"
+    },
+    "facing=west,part=main": {
+      "model": "stardewcraft:block/ginger_island/field_office_canvas_floor",
+      "y": 270
+    },
+    "facing=west,part=extension": {
+      "model": "stardewcraft:block/ginger_island/field_office_canvas_floor_extension"
+    }
+  }
+}

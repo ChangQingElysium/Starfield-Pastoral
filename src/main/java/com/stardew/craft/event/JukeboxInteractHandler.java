@@ -34,6 +34,33 @@ public final class JukeboxInteractHandler {
         var state = player.level().getBlockState(event.getPos());
         if (!state.is(ModBlocks.JUKEBOX.get())) return;
 
+        // MiniJukebox.checkForAction: only on the farm / greenhouse / cellar / Ginger Island west,
+        // and never outdoors in the rain.
+        if (player.level() instanceof ServerLevel here) {
+            boolean farm = com.stardew.craft.farm.FarmInstanceAllocator.isInFarmInstanceRegion(event.getPos())
+                    && com.stardew.craft.core.FarmAreaResolver.isInAnyFarm(here, event.getPos());
+            boolean greenhouse = com.stardew.craft.greenhouse.GreenhouseManager.isInGreenhouseInterior(here, event.getPos());
+            var locations = com.stardew.craft.api.v1.world.StardewLocations.hierarchy(here.dimension().location(), event.getPos());
+            boolean islandWest = locations.stream().anyMatch(com.stardew.craft.mining.IslandStoneRewards::isWest);
+            if (!farm && !greenhouse && !islandWest) {
+                player.displayClientMessage(net.minecraft.network.chat.Component.translatable(
+                        "message.stardewcraft.jukebox.not_farm_play"), true);
+                event.setCanceled(true);
+                event.setCancellationResult(InteractionResult.SUCCESS);
+                return;
+            }
+            String weather = com.stardew.craft.weather.WeatherManager.getCurrentWeather(here);
+            boolean raining = "Rain".equals(weather) || "Storm".equals(weather) || "GreenRain".equals(weather);
+            boolean outdoors = !greenhouse && locations.stream().noneMatch(com.stardew.craft.api.v1.world.StardewLocation::indoor);
+            if (outdoors && raining) {
+                player.displayClientMessage(net.minecraft.network.chat.Component.translatable(
+                        "message.stardewcraft.jukebox.outdoor_rainy"), true);
+                event.setCanceled(true);
+                event.setCancellationResult(InteractionResult.SUCCESS);
+                return;
+            }
+        }
+
         // 获取当前曲目
         String currentTrack = "";
         if (player.level() instanceof ServerLevel serverLevel) {

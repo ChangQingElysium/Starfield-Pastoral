@@ -91,6 +91,11 @@ public final class SecretWoodsAccessManager {
         boolean inSecretWoods = CoalForestArea.containsColumn(player.blockPosition());
         if (isUnlocked(player) && inSecretWoods) {
             SecretWoodsSlimeSpawnService.ensureTodaySpawned(level);
+            if (player.tickCount % 20 == 0) {
+                ForageSpawnService.ensureZoneSpawned(level,
+                        net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("stardewcraft", "secret_woods"),
+                        com.stardew.craft.time.StardewTimeManager.get().getCurrentSeason());
+            }
         }
 
         PlayerAreaEvictionService.enforce(

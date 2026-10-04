@@ -27,6 +27,10 @@ public class MonsterFlightMotion {
     }
     public void steer(Vec3 offset, boolean chase, boolean turningAllowed) {
         velocity = velocity.scale(1 - 1.0 / slipperiness);
+        // Serpent/Fly/Bat animation acceleration is gated by the source hit recovery.
+        // Keep the accepted trajectory and its friction while that gate is closed;
+        // chasing/braking and the powered-flight speed cap must not erase the impact.
+        if (!turningAllowed && hitMilliseconds > 0) return;
         if (offset == null || offset.lengthSqr() < .01) {
             velocity = velocity.scale(.9);
             return;

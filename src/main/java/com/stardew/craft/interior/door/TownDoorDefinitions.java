@@ -7,7 +7,7 @@ import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
 
-/** Authored town doorway pairs read from pregen map version 17. */
+/** Authored town doorway pairs read from pregen map version 19. */
 public final class TownDoorDefinitions {
     private static final int ENTER_NORTH = -1;
     private static final int EXIT_SOUTH = 1;
@@ -51,7 +51,7 @@ public final class TownDoorDefinitions {
                     area(27, 65, -8, 2, 1, "pierre_house_enter"), area(20, 36, -11, 3, 3, "pierre_house_exit")),
             pair(2, "museum", row(124, 64, 41, 1), row(112, 38, 48, 1),
                     area(124, 64, 42, 2, 1, "museum_enter"), area(111, 38, 47, 3, 3, "museum_exit")),
-            pair(3, "blacksmith", row(108, 64, 28, 1), row(107, 46, 31, 1),
+            pair(3, "blacksmith", row(108, 64, 28, 1), row(107, 46, 32, 1),
                     area(108, 64, 29, 2, 1, "blacksmith_enter"), area(106, 46, 31, 3, 3, "blacksmith_exit")),
             pair(4, "saloon", row(29, 66, 13, 2), row(26, 36, 20, 2),
                     area(29, 66, 14, 2, 2, "saloon_enter"), area(25, 36, 19, 3, 3, "saloon_exit")),
@@ -62,8 +62,8 @@ public final class TownDoorDefinitions {
             pair(7, "1_river_road", row(48, 64, 0, 1), row(48, 22, 6, 1),
                     area(48, 64, 1, 2, 1, "1_river_road_enter"), area(47, 22, 5, 3, 3, "1_river_road_exit")),
             pair(8, "carpenter_shop", row(28, 81, -115, 2), row(29, 51, -115, 2),
-                    area(28, 85, -115, 2, 2, "carpenter_shop_enter"), area(29, 51, -116, 3, 3, "carpenter_shop_exit")),
-            pair(9, "1_willow_lane", row(-29, 65, 38, 2), row(-29, 38, 45, 2),
+                    area(28, 81, -114, 2, 2, "carpenter_shop_enter"), area(29, 51, -116, 3, 3, "carpenter_shop_exit")),
+            pair(9, "1_willow_lane", row(-29, 65, 39, 2), row(-29, 38, 45, 2),
                     area(-29, 65, 39, 2, 2, "1_willow_lane_enter"), area(-29, 38, 44, 3, 3, "1_willow_lane_exit")),
             pair(10, "2_willow_lane", row(-11, 64, 38, 2), row(-10, 24, 42, 2),
                     area(-11, 64, 39, 2, 2, "2_willow_lane_enter"), area(-11, 24, 41, 3, 3, "2_willow_lane_exit")),
@@ -83,7 +83,7 @@ public final class TownDoorDefinitions {
                     area(108, 65, -17, 2, 2, "joja_mart_enter"), area(108, 45, -17, 3, 2, "joja_mart_exit")),
             pair(18, "trailer", row(72, 65, 8, 2), row(71, 35, 6, 2),
                     area(72, 64, 9, 2, 2, "trailer_enter"), area(71, 35, 5, 3, 3, "trailer_exit")),
-            pair(19, "adventurer_guild", row(106, 81, -143, 1), row(106, 60, -142, 1),
+            pair(19, "adventurer_guild", row(106, 81, -143, 1), row(106, 60, -141, 1),
                     area(106, 81, -142, 2, 1, "adventurer_guild_enter"),
                     area(105, 60, -142, 3, 3, "adventurer_guild_exit"))
     );

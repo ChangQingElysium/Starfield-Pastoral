@@ -25,8 +25,16 @@ public class SlayMonsterQuest extends StardewQuest {
 
     @Override
     public void onMonsterSlain(ServerPlayer player, String monsterType) {
+        onMonsterSlain(player, List.of(monsterType));
+    }
+
+    /** SDV SlayMonsterQuest.OnMonsterSlain: monster.Name.Contains(monsterName), counted once per kill. */
+    @Override
+    public void onMonsterSlain(ServerPlayer player, java.util.Collection<String> monsterTags) {
         if (completed || !accepted) return;
-        if (monsterName.equals(monsterType) && numberKilled < numberToKill) {
+        String target = stripMobPrefix(monsterName);
+        boolean matches = !target.isEmpty() && monsterTags.stream().anyMatch(tag -> stripMobPrefix(tag).contains(target));
+        if (matches && numberKilled < numberToKill) {
             numberKilled = Math.min(numberToKill, numberKilled + 1);
             if (numberKilled >= numberToKill) {
                 // SDV: don't questComplete yet if there's a target NPC — enter report phase
@@ -37,6 +45,12 @@ public class SlayMonsterQuest extends StardewQuest {
                 // else: wait for onNpcSocialized (report phase)
             }
         }
+    }
+
+    private static String stripMobPrefix(String value) {
+        if (value == null) return "";
+        String lower = value.toLowerCase(java.util.Locale.ROOT);
+        return lower.startsWith("sd_mob_") ? lower.substring("sd_mob_".length()) : lower;
     }
 
     /**

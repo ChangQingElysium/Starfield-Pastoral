@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "stardewcraft:item/ginger_island/ginger_resort_umbrella_coral",
+    "particle": "stardewcraft:block/ginger_island/resort_umbrella_coral_particle"
+  }
+}

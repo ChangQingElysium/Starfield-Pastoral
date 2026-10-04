@@ -190,7 +190,7 @@ public class FiberCropBlock extends StardewCropBlock {
         if (level instanceof ServerLevel) {
             BlockPos above = pos.above();
             BlockState aboveState = level.getBlockState(above);
-            if (aboveState.isAir() || !(aboveState.getBlock() == this && aboveState.getValue(HALF) == DoubleBlockHalf.UPPER)) {
+            if (aboveState.isAir()) {
                 level.setBlock(above, state.setValue(HALF, DoubleBlockHalf.UPPER), 3);
             }
         }

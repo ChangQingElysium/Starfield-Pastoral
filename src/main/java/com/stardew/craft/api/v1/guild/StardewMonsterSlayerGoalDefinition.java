@@ -12,7 +12,8 @@ public record StardewMonsterSlayerGoalDefinition(
         String translationKey,
         int requiredKills,
         List<String> monsterTags,
-        List<StardewAction> rewards
+        List<StardewAction> rewards,
+        java.util.Optional<net.minecraft.resources.ResourceLocation> rewardPreview
 ) {
     public static final Codec<StardewMonsterSlayerGoalDefinition> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.STRING.fieldOf("translation_key").forGetter(StardewMonsterSlayerGoalDefinition::translationKey),
@@ -20,12 +21,18 @@ public record StardewMonsterSlayerGoalDefinition(
                     .forGetter(StardewMonsterSlayerGoalDefinition::requiredKills),
             Codec.STRING.listOf().fieldOf("monster_tags").forGetter(StardewMonsterSlayerGoalDefinition::monsterTags),
             StardewActions.CODEC.listOf().optionalFieldOf("rewards", List.of())
-                    .forGetter(StardewMonsterSlayerGoalDefinition::rewards)
+                    .forGetter(StardewMonsterSlayerGoalDefinition::rewards),
+            net.minecraft.resources.ResourceLocation.CODEC.optionalFieldOf("reward_preview")
+                    .forGetter(StardewMonsterSlayerGoalDefinition::rewardPreview)
     ).apply(instance, StardewMonsterSlayerGoalDefinition::new));
 
     public StardewMonsterSlayerGoalDefinition {
         monsterTags = List.copyOf(monsterTags == null ? List.of() : monsterTags);
         rewards = List.copyOf(rewards == null ? List.of() : rewards);
         if (monsterTags.isEmpty()) throw new IllegalArgumentException("monster slayer goal needs monster_tags");
+    }
+    public StardewMonsterSlayerGoalDefinition(String translationKey, int requiredKills,
+            List<String> monsterTags, List<StardewAction> rewards) {
+        this(translationKey, requiredKills, monsterTags, rewards, java.util.Optional.empty());
     }
 }

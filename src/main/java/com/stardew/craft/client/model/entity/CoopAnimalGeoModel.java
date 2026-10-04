@@ -4,9 +4,9 @@ import com.stardew.craft.StardewCraft;
 import com.stardew.craft.entity.animal.BaseCoopAnimalEntity;
 import net.minecraft.resources.ResourceLocation;
 import java.util.Objects;
-import software.bernie.geckolib.model.GeoModel;
+import com.stardew.craft.client.model.nativebb.BlockbenchModel;
 
-public class CoopAnimalGeoModel<T extends BaseCoopAnimalEntity> extends GeoModel<T> {
+public class CoopAnimalGeoModel<T extends BaseCoopAnimalEntity> extends BlockbenchModel<T> {
 	@Override
 	public ResourceLocation getModelResource(T animatable) {
 		String path = Objects.requireNonNull(animatable.getVariant().modelPath(animatable.isBaby()));

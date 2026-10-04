@@ -91,6 +91,7 @@ public final class ModClientSetup {
 	@SuppressWarnings("null")
 	@SubscribeEvent
 	public static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {
+        event.registerBlockEntityRenderer(ModBlockEntities.FRIDGE.get(), com.stardew.craft.client.render.FridgeBlockEntityRenderer::new);
 		event.registerBlockEntityRenderer(ModBlockEntities.JOJA_BILLBOARD.get(), com.stardew.craft.client.render.JojaBillboardBlockEntityRenderer::new);
 		event.registerBlockEntityRenderer(ModBlockEntities.ICE_CREAM_STAND.get(), com.stardew.craft.client.render.IceCreamStandBlockEntityRenderer::new);
 		event.registerBlockEntityRenderer(ModBlockEntities.BOOKSELLER_DECOR.get(), com.stardew.craft.client.render.BooksellerDecorBlockEntityRenderer::new);
@@ -98,6 +99,7 @@ public final class ModClientSetup {
 		event.registerBlockEntityRenderer(ModBlockEntities.BLACKSMITH_VENTILATOR.get(), com.stardew.craft.client.render.BlacksmithVentilatorBlockEntityRenderer::new);
 		event.registerBlockEntityRenderer(ModBlockEntities.PLAZA_DISPLAY.get(), com.stardew.craft.client.render.PlazaDisplayBlockEntityRenderer::new);
 		event.registerBlockEntityRenderer(ModBlockEntities.PARKED_VEHICLE.get(), com.stardew.craft.client.render.ParkedVehicleBlockEntityRenderer::new);
+        event.registerBlockEntityRenderer(ModBlockEntities.WILLY_BOAT.get(), com.stardew.craft.client.render.WillyBoatBlockEntityRenderer::new);
 		event.registerBlockEntityRenderer(ModBlockEntities.PLAYGROUND.get(), com.stardew.craft.client.render.PlaygroundBlockEntityRenderer::new);
 		event.registerBlockEntityRenderer(ModBlockEntities.DOUBLE_SWING.get(), com.stardew.craft.client.render.DoubleSwingBlockEntityRenderer::new);
 		event.registerBlockEntityRenderer(ModBlockEntities.PARK_FOUNTAIN.get(), com.stardew.craft.client.render.ParkFountainBlockEntityRenderer::new);
@@ -239,6 +241,7 @@ public final class ModClientSetup {
 		event.register(ModMenuTypes.FAIR_GRANGE_DISPLAY.get(), com.stardew.craft.client.gui.festival.FairGrangeDisplayScreen::new);
 		event.register(ModMenuTypes.BUNDLE.get(), com.stardew.craft.communitycenter.client.BundleScreen::new);
 		event.register(ModMenuTypes.BUNDLE_REWARD.get(), com.stardew.craft.communitycenter.client.BundleRewardScreen::new);
+        event.register(ModMenuTypes.GIL_REWARD.get(), com.stardew.craft.client.gui.GilRewardScreen::new);
 	}
 
 	@SuppressWarnings("null")

@@ -1,9 +1,9 @@
 {
   "machine": "cheese_press",
   "recipes": [
-    { "input": "stardewcraft:milk", "output": "stardewcraft:cheese", "minutes": 180 },
-    { "input": "stardewcraft:large_milk", "output": "stardewcraft:cheese", "minutes": 180, "quality": "gold" },
-    { "input": "stardewcraft:goat_milk", "output": "stardewcraft:goat_cheese", "minutes": 180 },
-    { "input": "stardewcraft:large_goat_milk", "output": "stardewcraft:goat_cheese", "minutes": 180, "quality": "gold" }
+    { "input": "stardewcraft:milk", "output": "stardewcraft:cheese", "minutes": 200 },
+    { "input": "stardewcraft:large_milk", "output": "stardewcraft:cheese", "minutes": 200, "quality": "gold" },
+    { "input": "stardewcraft:goat_milk", "output": "stardewcraft:goat_cheese", "minutes": 200 },
+    { "input": "stardewcraft:large_goat_milk", "output": "stardewcraft:goat_cheese", "minutes": 200, "quality": "gold" }
   ]
 }

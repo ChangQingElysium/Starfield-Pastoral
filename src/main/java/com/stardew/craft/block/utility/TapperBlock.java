@@ -50,14 +50,22 @@ public class TapperBlock extends Block implements EntityBlock {
 	 * Example: FACING=NORTH -> the supported log/trunk is at pos.north().
 	 */
 	public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
-	private static final VoxelShape[] SHAPES = ModelVoxelShapeCache.horizontalShapes("stardewcraft:block/utility/tapper", Direction.SOUTH);
+	private final VoxelShape[] shapes;
 	private static final int MAX_TAPPERS_PER_TREE = 1;
 
 	@SuppressWarnings("null")
 	public TapperBlock(Properties properties) {
+		this(properties, "stardewcraft:block/utility/tapper");
+	}
+
+	public TapperBlock(Properties properties, String modelId) {
 		super(properties);
+		shapes = ModelVoxelShapeCache.horizontalShapes(modelId, Direction.SOUTH);
 		registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH));
 	}
+
+	public int productionMultiplier() { return 1; }
+	public boolean isMainPart(BlockState state) { return true; }
 
 	@Override
 	protected void createBlockStateDefinition(@SuppressWarnings("null") StateDefinition.Builder<Block, BlockState> builder) {
@@ -137,7 +145,7 @@ public class TapperBlock extends Block implements EntityBlock {
 	@Override
 	protected List<ItemStack> getDrops(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") LootParams.Builder params) {
 		// Always drop itself (block item), regardless of loot-table/data-pack issues.
-		return List.of(new ItemStack(ModBlocks.TAPPER.get()));
+		return List.of(new ItemStack(this));
 	}
 
 	@SuppressWarnings("null")
@@ -175,7 +183,7 @@ public class TapperBlock extends Block implements EntityBlock {
 	@SuppressWarnings("null")
 	@Override
 	public VoxelShape getShape(@SuppressWarnings("null") BlockState state, @SuppressWarnings("null") BlockGetter level, @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") CollisionContext context) {
-		return SHAPES[ModelVoxelShapeCache.horizontalIndex(state.getValue(FACING))];
+		return shapes[ModelVoxelShapeCache.horizontalIndex(state.getValue(FACING))];
 	}
 
 	@SuppressWarnings("null")
@@ -253,7 +261,7 @@ public class TapperBlock extends Block implements EntityBlock {
 
 	@Nullable
 	public static WildTrees.Def findValidProductionDef(LevelReader level, BlockPos pos, BlockState state) {
-		if (!state.is(ModBlocks.TAPPER.get()) || !state.hasProperty(FACING)) {
+		if (!(state.getBlock() instanceof TapperBlock block) || !block.isMainPart(state) || !state.hasProperty(FACING)) {
 			return null;
 		}
 		@SuppressWarnings("null")
@@ -282,7 +290,7 @@ public class TapperBlock extends Block implements EntityBlock {
 			BlockPos pos,
 			BlockState state
 	) {
-		if (!state.is(ModBlocks.TAPPER.get()) || !state.hasProperty(FACING)) {
+		if (!(state.getBlock() instanceof TapperBlock block) || !block.isMainPart(state) || !state.hasProperty(FACING)) {
 			return null;
 		}
 		Direction supportDir = state.getValue(FACING);
@@ -342,7 +350,7 @@ public class TapperBlock extends Block implements EntityBlock {
 		for (Direction d : Direction.Plane.HORIZONTAL) {
 			BlockPos tapperPos = pos.relative(d);
 			BlockState state = level.getBlockState(tapperPos);
-			if (state.is(ModBlocks.TAPPER.get()) && state.getValue(FACING) == d.getOpposite()) {
+			if (state.getBlock() instanceof TapperBlock block && block.isMainPart(state) && state.getValue(FACING) == d.getOpposite()) {
 				tappers.add(tapperPos.immutable());
 			}
 		}

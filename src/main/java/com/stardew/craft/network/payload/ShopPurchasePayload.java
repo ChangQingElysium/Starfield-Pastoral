@@ -162,6 +162,17 @@ public record ShopPurchasePayload(
                 return;
             }
 
+            // SDV Object.actionWhenPurchased: a purchased Stardrop (434) is eaten immediately, never handed over.
+            boolean eatStardropNow = payload.shopId().equals("ShadowShop")
+                    && entry.itemId().equals("stardewcraft:stardrop");
+            if (eatStardropNow && !com.stardew.craft.item.misc.StardropItem.consumeImmediately(player)) {
+                payment.receipt().orElseThrow().refund();
+                sendResult(player, payload.shopId(), false,
+                    currentShopBalance(player, defaultCurrency),
+                    "", 0, payload.itemIndex());
+                return;
+            }
+
             int newMoney = currentShopBalance(player, defaultCurrency);
 
             // Record the purchase so remaining daily stock is tracked (SDV: SynchronizedShopStock parity)
@@ -171,13 +182,14 @@ public record ShopPurchasePayload(
                         entry.itemId(), qty);
             }
 
-            if (payload.shopId().equals("ShadowShop")
-                    && entry.itemId().equals("stardewcraft:stardrop")) {
+            if (eatStardropNow) {
                 com.stardew.craft.player.PlayerStardewData data =
                     com.stardew.craft.player.PlayerDataManager.getPlayerData(player);
                 data.addMailFlag(com.stardew.craft.sewer.SewerStoryFlags.SEWER_STARDROP_PURCHASED);
                 com.stardew.craft.player.PlayerDataManager.get().savePlayerData(player.getUUID(), data);
                 com.stardew.craft.player.PlayerDataEventHandler.syncPlayerData(player, data);
+                sendResult(player, payload.shopId(), true, newMoney, "", 0, payload.itemIndex());
+                return;
             }
             if (payload.shopId().equals("ShadowShop")
                     && entry.itemId().equals("stardewcraft:warp_wand")) {

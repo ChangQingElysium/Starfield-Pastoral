@@ -24,6 +24,11 @@
     "george": {
       "eye_height": 1.53125
     },
+    "gunther": {
+      "eye_height": 1.75,
+      "speed": 0.128,
+      "step_height": 1.0
+    },
     "marlon": {
       "eye_height": 1.75,
       "speed": 0.121739,
@@ -165,6 +170,11 @@
     "wizard": {
       "speed": 0.14069,
       "step_height": 1.0
+    },
+    "gil": {
+      "eye_height": 1.5,
+      "speed": 0.1,
+      "step_height": 1
     }
   }
 }

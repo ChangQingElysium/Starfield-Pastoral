@@ -180,6 +180,7 @@ public final class BuiltinApiTypes {
     }
 
     private static void registerItemQueries() {
+        com.stardew.craft.loot.ContextualLootQueries.register();
         com.stardew.craft.mining.SkullCavernTreasurePool.registerQuery();
         StardewItemQueries.register(id("item"), DirectItemQuery.CODEC, (context, data) -> {
             if (!BuiltInRegistries.ITEM.containsKey(data.item())) {
@@ -256,6 +257,26 @@ public final class BuiltinApiTypes {
                 .flatMap(entry -> StardewItemQueries.contentReferences(
                         owner, entry.query()).getOrThrow().stream())
                 .toList());
+        StardewItemQueries.<DirectItemQuery>registerPreview(id("item"), (ctx, d) ->
+                BuiltInRegistries.ITEM.containsKey(d.item()) ? List.of(new ItemStack(BuiltInRegistries.ITEM.get(d.item()), d.count())) : List.of());
+        StardewItemQueries.<OneOfItemQuery>registerPreview(id("one_of"), (ctx, d) -> d.items().stream()
+                .filter(BuiltInRegistries.ITEM::containsKey).map(key -> new ItemStack(BuiltInRegistries.ITEM.get(key), d.count())).toList());
+        StardewItemQueries.<RandomTagQuery>registerPreview(id("random_tag"), (ctx, d) -> {
+            var tag = BuiltInRegistries.ITEM.getTag(TagKey.create(Registries.ITEM, d.tag()));
+            return tag.isEmpty() ? List.of() : tag.get().stream().map(holder -> new ItemStack(holder.value(), d.count())).toList();
+        });
+        StardewItemQueries.<RandomCountItemQuery>registerPreview(id("random_count"), (ctx, d) -> {
+            var result = new ArrayList<ItemStack>();
+            for (var stack : StardewItemQueries.preview(d.query(), ctx).getOrThrow()) {
+                result.add(stack.copyWithCount(d.minCount()));
+                if (d.minCount() != d.maxCount()) result.add(stack.copyWithCount(d.maxCount()));
+            }
+            return result;
+        });
+        StardewItemQueries.<OneOfQueriesItemQuery>registerPreview(id("one_of_queries"), (ctx, d) -> d.queries().stream()
+                .flatMap(query -> StardewItemQueries.preview(query, ctx).getOrThrow().stream()).toList());
+        StardewItemQueries.<WeightedItemQuery>registerPreview(id("weighted"), (ctx, d) -> d.entries().stream()
+                .flatMap(entry -> StardewItemQueries.preview(entry.query(), ctx).getOrThrow().stream()).toList());
     }
 
     private static void registerActions() {

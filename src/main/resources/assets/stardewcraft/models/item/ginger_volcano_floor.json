@@ -1,0 +1,41 @@
+{
+  "parent": "stardewcraft:block/ginger_island/volcano_floor",
+  "overrides": [
+    {
+      "predicate": {
+        "stardewcraft:ginger_island_variant": 0.0
+      },
+      "model": "stardewcraft:block/ginger_island/volcano_floor_0"
+    },
+    {
+      "predicate": {
+        "stardewcraft:ginger_island_variant": 0.2
+      },
+      "model": "stardewcraft:block/ginger_island/volcano_floor_1"
+    },
+    {
+      "predicate": {
+        "stardewcraft:ginger_island_variant": 0.4
+      },
+      "model": "stardewcraft:block/ginger_island/volcano_floor_2"
+    },
+    {
+      "predicate": {
+        "stardewcraft:ginger_island_variant": 0.6
+      },
+      "model": "stardewcraft:block/ginger_island/volcano_floor_3"
+    },
+    {
+      "predicate": {
+        "stardewcraft:ginger_island_variant": 0.8
+      },
+      "model": "stardewcraft:block/ginger_island/volcano_floor_4"
+    },
+    {
+      "predicate": {
+        "stardewcraft:ginger_island_variant": 1.0
+      },
+      "model": "stardewcraft:block/ginger_island/volcano_floor_5"
+    }
+  ]
+}

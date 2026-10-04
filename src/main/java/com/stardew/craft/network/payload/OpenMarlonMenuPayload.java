@@ -59,8 +59,6 @@ public record OpenMarlonMenuPayload(boolean hasLostItems, boolean hasDesertFesti
         } else {
             options.add(Component.translatable("stardewcraft.npc.marlon.menu.shop"));
             choices.add(0);
-            options.add(Component.translatable("stardewcraft.npc.marlon.menu.gil"));
-            choices.add(1);
             if (payload.hasLostItems()) {
                 options.add(Component.translatable("stardewcraft.npc.marlon.menu.recovery"));
                 choices.add(2);

@@ -1,6 +1,5 @@
 package com.stardew.craft.block.utility;
 
-import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.block.shape.ModelVoxelShapeCache;
 import com.stardew.craft.blockentity.IncubatorBlockEntity;
 import com.stardew.craft.blockentity.ModBlockEntities;
@@ -94,7 +93,7 @@ public class IncubatorBlock extends Block implements EntityBlock {
         if (state.getValue(PART) == Part.EXTENSION) {
             return List.of();
         }
-        return List.of(new ItemStack(ModBlocks.INCUBATOR.get()));
+        return List.of(new ItemStack(this));
     }
 
     @SuppressWarnings("null")
@@ -260,7 +259,7 @@ public class IncubatorBlock extends Block implements EntityBlock {
     @Override
     public BlockState playerWillDestroy(@SuppressWarnings("null") Level level, @SuppressWarnings("null") BlockPos pos, @SuppressWarnings("null") BlockState state, @SuppressWarnings("null") Player player) {
         if (!level.isClientSide && state.getValue(PART) == Part.EXTENSION && !player.isCreative()) {
-            popResource(level, pos, new ItemStack(ModBlocks.INCUBATOR.get()));
+            popResource(level, pos, new ItemStack(this));
         }
         return super.playerWillDestroy(level, pos, state, player);
     }

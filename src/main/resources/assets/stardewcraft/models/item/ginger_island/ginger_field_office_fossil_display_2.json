@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "stardewcraft:item/ginger_island/ginger_field_office_fossil_display_snake",
+    "particle": "stardewcraft:block/ginger_island/field_office_fossil_display_particle"
+  }
+}

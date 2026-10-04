@@ -1,0 +1,35 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "conditions": [
+        {
+          "condition": "minecraft:block_state_property",
+          "block": "stardewcraft:ginger_south_palm",
+          "properties": {
+            "part": "main"
+          }
+        },
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "stardewcraft:ginger_south_palm",
+          "functions": [
+            {
+              "function": "minecraft:copy_state",
+              "block": "stardewcraft:ginger_south_palm",
+              "properties": [
+                "variant"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

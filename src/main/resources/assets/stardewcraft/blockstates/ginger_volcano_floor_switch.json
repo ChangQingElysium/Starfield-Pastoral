@@ -1,0 +1,36 @@
+{
+  "variants": {
+    "facing=north,pressed=false": {
+      "model": "stardewcraft:block/ginger_island/volcano_floor_switch",
+      "y": 0
+    },
+    "facing=north,pressed=true": {
+      "model": "stardewcraft:block/ginger_island/volcano_floor_switch_pressed",
+      "y": 0
+    },
+    "facing=east,pressed=false": {
+      "model": "stardewcraft:block/ginger_island/volcano_floor_switch",
+      "y": 90
+    },
+    "facing=east,pressed=true": {
+      "model": "stardewcraft:block/ginger_island/volcano_floor_switch_pressed",
+      "y": 90
+    },
+    "facing=south,pressed=false": {
+      "model": "stardewcraft:block/ginger_island/volcano_floor_switch",
+      "y": 180
+    },
+    "facing=south,pressed=true": {
+      "model": "stardewcraft:block/ginger_island/volcano_floor_switch_pressed",
+      "y": 180
+    },
+    "facing=west,pressed=false": {
+      "model": "stardewcraft:block/ginger_island/volcano_floor_switch",
+      "y": 270
+    },
+    "facing=west,pressed=true": {
+      "model": "stardewcraft:block/ginger_island/volcano_floor_switch_pressed",
+      "y": 270
+    }
+  }
+}

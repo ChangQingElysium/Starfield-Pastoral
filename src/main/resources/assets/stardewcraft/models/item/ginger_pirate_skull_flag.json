@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "stardewcraft:item/ginger_island/ginger_pirate_skull_flag",
+    "particle": "stardewcraft:block/ginger_island/pirate_skull_flag_particle"
+  }
+}

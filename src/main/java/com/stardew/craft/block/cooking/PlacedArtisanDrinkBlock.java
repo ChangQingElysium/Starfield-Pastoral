@@ -5,7 +5,6 @@ import com.stardew.craft.StardewCraft;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
@@ -48,13 +47,6 @@ public final class PlacedArtisanDrinkBlock extends CookingPlacedFoodBlock {
     @Override
     protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return bottleShapes.get(state.getValue(FACING));
-    }
-
-    @Override
-    public void setPlacedBy(Level level, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack) {
-        if (level.getBlockEntity(pos) instanceof CookingPlacedFoodBlockEntity food) {
-            food.setStoredFood(stack);
-        }
     }
 
     @Override

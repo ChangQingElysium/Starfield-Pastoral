@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "stardewcraft:item/ginger_island/ginger_captain_cabin_shell",
+    "particle": "stardewcraft:block/ginger_island/captain_cabin_shell_particle"
+  }
+}

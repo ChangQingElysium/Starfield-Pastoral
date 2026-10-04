@@ -86,7 +86,7 @@ public class CoffeeBeanItem extends Item implements IStardewItem {
         if (!level.isClientSide) {
             int season = StardewTimeManager.get().getCurrentSeason();
             // 咖啡豆可以在春季(0)或夏季(1)种植
-            if (!(season == 0 || season == 1)) {
+            if (!com.stardew.craft.farming.SeasonLocationRules.isPlantingSeasonAllowed(level, abovePos, season, 0, 1)) {
                 if (context.getPlayer() != null) {
                     context.getPlayer().displayClientMessage(
                             net.minecraft.network.chat.Component.translatable("stardewcraft.message.seed.wrong_season"),
@@ -97,7 +97,9 @@ public class CoffeeBeanItem extends Item implements IStardewItem {
         }
 
         if (!level.isClientSide) {
-            level.setBlock(abovePos, ModBlocks.COFFEE_BEAN_CROP.get().defaultBlockState(), 3);
+            if (!com.stardew.craft.farming.CropPlanting.place(level, abovePos, ModBlocks.COFFEE_BEAN_CROP.get().defaultBlockState())) {
+                return InteractionResult.FAIL;
+            }
             level.playSound(null, abovePos,
                     net.minecraft.sounds.SoundEvents.HOE_TILL,
                     net.minecraft.sounds.SoundSource.BLOCKS,

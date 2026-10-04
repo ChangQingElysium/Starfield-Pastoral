@@ -48,7 +48,12 @@ final class CommonWeaponAppliedHitRules {
         ItemStack weapon = hit.weapon();
         if (StardewEnchantments.has(weapon, StardewEnchantments.VAMPIRIC)
                 && serverPlayer.getRandom().nextFloat() < 0.09F) {
-            CombatHealing.healFraction(serverPlayer, 0.10F, 1.0F);
+            // 原版 VampiricEnchantment：按被杀怪物最大生命 ±随机 取 10%，至少 1
+            int monsterMax = Math.max(0, Math.round(hit.target().getMaxHealth()));
+            int low = -monsterMax / 10;
+            int high = monsterMax / 15 + 1;
+            int rolled = monsterMax + low + serverPlayer.getRandom().nextInt(high - low);
+            CombatHealing.heal(serverPlayer, Math.max(1, (int) (rolled * 0.1F)));
         }
     }
 
@@ -85,10 +90,15 @@ final class CommonWeaponAppliedHitRules {
         }
         if (hit.inStardewDimension()
                 && CombatTargetRules.isCombatMonster(target)) {
+            int experience = CombatExperienceRules.experienceForKill(target);
+            // GameLocation.monsterKilled: kills on the Farm give max(1, experience / 3).
+            if (com.stardew.craft.core.FarmAreaResolver.isInFarmArea(target.level(), target.blockPosition())) {
+                experience = Math.max(1, experience / 3);
+            }
             PlayerStardewDataAPI.addExperience(
                     serverPlayer,
                     SkillType.COMBAT,
-                    CombatExperienceRules.experienceForKill(target)
+                    experience
             );
         }
     }

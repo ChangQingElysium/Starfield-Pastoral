@@ -27,13 +27,23 @@ public final class OrdinaryMinePopulation {
     private final boolean bottom;
     private final MineBuildingTheme theme;
     private final boolean sourceDark;
+    private final boolean loadedDark;
     private boolean ghostAdded;
     private int selectedDustConstructor=-1;
 
     public OrdinaryMinePopulation(ServerLevel level,int floor,OrdinaryMineLayout layout,MineFloorData data) {
         this.level=level; this.floor=floor; this.layout=layout; this.data=data; random=level.random;
         theme=layout.metadata.has("building_theme")?MineBuildingTheme.valueOf(layout.metadata.get("building_theme").getAsString().toUpperCase(Locale.ROOT)):OrdinaryMineRuntime.theme(floor);
-        sourceDark=!(floor>=40 && floor<80) && (floor%40>30 || theme.id().endsWith("dark"));
+        // MineShaft.loadedDarkArea: skull caverns derive it from the loaded map number (%40>=30, or the dark 45 map),
+        // not from the floor number; isDarkArea() additionally accepts mineLevel%40>30.
+        if(floor>120) {
+            int map=layout.metadata.has("source_layout_number")?layout.metadata.get("source_layout_number").getAsInt():-1;
+            loadedDark=map%40>=30 || map==45;
+            sourceDark=loadedDark || floor%40>30;
+        } else {
+            sourceDark=!(floor>=40 && floor<80) && (floor%40>30 || theme.id().endsWith("dark"));
+            loadedDark=sourceDark;
+        }
         var players=level.getServer().getPlayerList().getPlayers();
         luck=players.stream().mapToDouble(PlayerStardewDataAPI::getDailyLuck).average().orElse(0);
         mining=players.stream().mapToInt(p->PlayerStardewDataAPI.getSkillLevel(p,SkillType.MINING)).average().orElse(0);
@@ -149,11 +159,12 @@ public final class OrdinaryMinePopulation {
         progress.initializePlatforms(floor,platforms);
         clearings();
         areaDebrisClusters();
-        if(random.nextDouble()<.95 && floor>1 && (floor>120 || floor%5!=0)) {
+        if(random.nextDouble()<.95 && floor>1 && floor%5!=0) {
             int x=random.nextInt(layout.width),z=random.nextInt(layout.depth);
             if(clear(x,z,true)) OrdinaryMineRuntime.placeLadder(level,floor,pos(x,z),data);
         }
-        if((floor>120 || floor%5!=0) && floor>2) oreClusters();
+        // MineShaft L1715: no ore clumps on any multiple-of-5 level, skull caverns included.
+        if(floor%5!=0 && floor>2) oreClusters();
         // Source stonesLeft counts the initial stone pass; recursively added ores are tracked
         // for one-time removal but do not inflate the source discovery budget.
         MineFloorDataManager.get(level).setFloorData(floor,data);
@@ -216,7 +227,7 @@ public final class OrdinaryMinePopulation {
         selectedDustConstructor=-1;
         double distance=layout.distanceFromEntry(x,z);
         if(floor>120) {
-            if(sourceDark)return random.nextDouble()<.18 && distance>8?"carbon_ghost":"mummy";
+            if(loadedDark)return random.nextDouble()<.18 && distance>8?"carbon_ghost":"mummy";
             if(floor%20==0 && distance>10)return "iridium_bat";
             if(floor%16==0){bugFacing=random.nextInt(4);return "bug";}
             if(random.nextDouble()<.33 && distance>10)return "serpent";

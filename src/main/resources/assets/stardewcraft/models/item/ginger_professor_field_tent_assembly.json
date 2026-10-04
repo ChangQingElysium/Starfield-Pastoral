@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "stardewcraft:item/ginger_island/ginger_professor_field_tent_assembly",
+    "particle": "stardewcraft:block/ginger_island/professor_field_tent_assembly_particle"
+  }
+}

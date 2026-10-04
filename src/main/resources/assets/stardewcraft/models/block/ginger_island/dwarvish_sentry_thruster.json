@@ -1,0 +1,129 @@
+{
+  "parent": "minecraft:block/block",
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "0": "stardewcraft:block/ginger_island/dwarvish_sentry_thruster",
+    "particle": "stardewcraft:block/ginger_island/dwarvish_sentry_thruster_particle"
+  },
+  "parts": [
+    {
+      "from": [
+        -4,
+        2.75,
+        0
+      ],
+      "to": [
+        4,
+        10.75,
+        0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0.0,
+            0.0,
+            3.2,
+            16.0
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            0.0,
+            0.0,
+            3.2,
+            16.0
+          ],
+          "texture": "#0"
+        }
+      },
+      "transform": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    {
+      "from": [
+        -4,
+        2.75,
+        0
+      ],
+      "to": [
+        4,
+        10.75,
+        0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0.0,
+            0.0,
+            3.2,
+            16.0
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            0.0,
+            0.0,
+            3.2,
+            16.0
+          ],
+          "texture": "#0"
+        }
+      },
+      "transform": [
+        0.0,
+        0.0,
+        -1.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    }
+  ],
+  "loader": "stardewcraft:geometry",
+  "stardewcraft:collision": {
+    "mode": "custom",
+    "boxes": [
+      {
+        "from": [
+          -4.0,
+          2.75,
+          -4.0
+        ],
+        "to": [
+          4.0,
+          10.75,
+          4.0
+        ]
+      }
+    ],
+    "policy": "aabb"
+  }
+}

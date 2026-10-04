@@ -1,8 +1,6 @@
 package com.stardew.craft.event;
 
 import com.stardew.craft.StardewCraft;
-import com.stardew.craft.block.ModBlocks;
-import com.stardew.craft.block.decor.MapDecorStaticBlock;
 import com.stardew.craft.core.ModDimensions;
 import com.stardew.craft.core.ModMiningDimensions;
 import com.stardew.craft.item.ModItems;
@@ -10,7 +8,6 @@ import com.stardew.craft.network.payload.OpenSleepConfirmScreenPayload;
 import com.stardew.craft.network.payload.SleepFadeRestorePayload;
 import com.stardew.craft.time.StardewTimeManager;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -151,8 +148,7 @@ public final class SleepInteractionHandler {
 
     private static boolean isSleepAnchorState(BlockState state) {
         return state.getBlock() instanceof BedBlock
-                || state.is(ModBlocks.BED_1.get())
-                || state.is(ModBlocks.BED_2.get());
+                || state.getBlock() instanceof com.stardew.craft.block.decor.BedDecorBlock;
     }
 
     private static BlockPos resolveSleepAnchor(Level level, BlockPos pos, BlockState state) {
@@ -162,46 +158,10 @@ public final class SleepInteractionHandler {
                 return headPos;
             }
         }
-        if ((state.is(ModBlocks.BED_1.get()) || state.is(ModBlocks.BED_2.get()))
-                && state.getBlock() instanceof MapDecorStaticBlock decorBlock
-                && state.hasProperty(MapDecorStaticBlock.FACING)) {
-            BlockPos mainPos = decorBlock.findMainPos(level, pos, state);
-            if (mainPos == null) {
-                mainPos = pos;
-            }
-            Direction facing = state.getValue(MapDecorStaticBlock.FACING);
-            LocalCellOffset clickedOffset = unrotateCellOffset(
-                    pos.getX() - mainPos.getX(),
-                    pos.getZ() - mainPos.getZ(),
-                    facing);
-            int laneX = state.is(ModBlocks.BED_2.get()) && clickedOffset.dx() < 0 ? -1 : 0;
-            LocalCellOffset headOffset = rotateCellOffset(laneX, 1, facing);
-            BlockPos headPos = mainPos.offset(headOffset.dx(), 0, headOffset.dz());
-            if (level.getBlockState(headPos).is(state.getBlock())) {
-                return headPos;
-            }
+        if (state.getBlock() instanceof com.stardew.craft.block.decor.BedDecorBlock bed) {
+            return bed.sleepAnchor(level, pos, state);
         }
         return pos;
     }
 
-    private static LocalCellOffset rotateCellOffset(int localDx, int localDz, Direction facing) {
-        return switch (facing) {
-            case EAST -> new LocalCellOffset(-localDz, localDx);
-            case SOUTH -> new LocalCellOffset(-localDx, -localDz);
-            case WEST -> new LocalCellOffset(localDz, -localDx);
-            default -> new LocalCellOffset(localDx, localDz);
-        };
-    }
-
-    private static LocalCellOffset unrotateCellOffset(int worldDx, int worldDz, Direction facing) {
-        return switch (facing) {
-            case EAST -> new LocalCellOffset(worldDz, -worldDx);
-            case SOUTH -> new LocalCellOffset(-worldDx, -worldDz);
-            case WEST -> new LocalCellOffset(-worldDz, worldDx);
-            default -> new LocalCellOffset(worldDx, worldDz);
-        };
-    }
-
-    private record LocalCellOffset(int dx, int dz) {
-    }
 }

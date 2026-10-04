@@ -1,0 +1,235 @@
+{
+  "parent": "minecraft:block/block",
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "0": "stardewcraft:block/ginger_island/bridge_0_0",
+    "1": "stardewcraft:block/ginger_island/bridge_0_1",
+    "particle": "stardewcraft:block/ginger_island/bridge_0_particle"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        5,
+        1
+      ],
+      "to": [
+        16,
+        8,
+        7
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            0.0,
+            0.0,
+            8.0,
+            3.0
+          ],
+          "texture": "#0"
+        },
+        "down": {
+          "uv": [
+            0.0,
+            11.0,
+            8.0,
+            14.0
+          ],
+          "texture": "#0"
+        },
+        "north": {
+          "uv": [
+            0.0,
+            4.0,
+            8.0,
+            5.5
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            0.0,
+            4.0,
+            8.0,
+            5.5
+          ],
+          "texture": "#0"
+        },
+        "east": {
+          "uv": [
+            0.0,
+            6.0,
+            3.0,
+            7.5
+          ],
+          "texture": "#0"
+        },
+        "west": {
+          "uv": [
+            0.0,
+            6.0,
+            3.0,
+            7.5
+          ],
+          "texture": "#0"
+        }
+      }
+    },
+    {
+      "from": [
+        0,
+        5,
+        9
+      ],
+      "to": [
+        16,
+        8,
+        15
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            8.0,
+            0.0,
+            16.0,
+            3.0
+          ],
+          "texture": "#0"
+        },
+        "down": {
+          "uv": [
+            0.0,
+            11.0,
+            8.0,
+            14.0
+          ],
+          "texture": "#0"
+        },
+        "north": {
+          "uv": [
+            8.0,
+            4.0,
+            16.0,
+            5.5
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            8.0,
+            4.0,
+            16.0,
+            5.5
+          ],
+          "texture": "#0"
+        },
+        "east": {
+          "uv": [
+            0.0,
+            6.0,
+            3.0,
+            7.5
+          ],
+          "texture": "#0"
+        },
+        "west": {
+          "uv": [
+            0.0,
+            6.0,
+            3.0,
+            7.5
+          ],
+          "texture": "#0"
+        }
+      }
+    },
+    {
+      "from": [
+        8,
+        8,
+        0
+      ],
+      "to": [
+        12,
+        10,
+        16
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            0.0,
+            8.0,
+            8.0,
+            10.0
+          ],
+          "texture": "#0",
+          "rotation": 90
+        },
+        "down": {
+          "uv": [
+            0.0,
+            8.0,
+            8.0,
+            10.0
+          ],
+          "texture": "#0",
+          "rotation": 90
+        },
+        "east": {
+          "uv": [
+            8.0,
+            8.0,
+            16.0,
+            9.0
+          ],
+          "texture": "#0"
+        },
+        "west": {
+          "uv": [
+            8.0,
+            8.0,
+            16.0,
+            9.0
+          ],
+          "texture": "#0"
+        },
+        "north": {
+          "uv": [
+            0.0,
+            6.0,
+            2.0,
+            7.0
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            0.0,
+            6.0,
+            2.0,
+            7.0
+          ],
+          "texture": "#0"
+        }
+      }
+    }
+  ],
+  "stardewcraft:collision": {
+    "mode": "custom",
+    "boxes": [
+      {
+        "from": [
+          0,
+          5,
+          0
+        ],
+        "to": [
+          16,
+          10,
+          16
+        ]
+      }
+    ],
+    "policy": "aabb"
+  }
+}

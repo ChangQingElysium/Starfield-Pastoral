@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "stardewcraft:item/ginger_island/ginger_banana_altar_assembly",
+    "particle": "stardewcraft:block/ginger_island/banana_altar_assembly_particle"
+  }
+}

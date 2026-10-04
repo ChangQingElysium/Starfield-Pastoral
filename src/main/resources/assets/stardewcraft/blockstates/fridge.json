@@ -1,13 +1,13 @@
 {
   "variants": {
     "part=main,facing=north": {
-      "model": "stardewcraft:block/utility/fridge"
+      "model": "stardewcraft:block/utility/fridge_body"
     },
     "part=extension,facing=north": {
       "model": "stardewcraft:block/utility/fridge_extension"
     },
     "part=main,facing=east": {
-      "model": "stardewcraft:block/utility/fridge",
+      "model": "stardewcraft:block/utility/fridge_body",
       "y": 90
     },
     "part=extension,facing=east": {
@@ -15,7 +15,7 @@
       "y": 90
     },
     "part=main,facing=south": {
-      "model": "stardewcraft:block/utility/fridge",
+      "model": "stardewcraft:block/utility/fridge_body",
       "y": 180
     },
     "part=extension,facing=south": {
@@ -23,7 +23,7 @@
       "y": 180
     },
     "part=main,facing=west": {
-      "model": "stardewcraft:block/utility/fridge",
+      "model": "stardewcraft:block/utility/fridge_body",
       "y": 270
     },
     "part=extension,facing=west": {

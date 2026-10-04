@@ -5,9 +5,9 @@ import com.stardew.craft.blockentity.WizardBuildingCatalogBlockEntity;
 import com.stardew.craft.client.ClientPlayerDataCache;
 import com.stardew.craft.world.WizardBuildingCatalogService;
 import net.minecraft.resources.ResourceLocation;
-import software.bernie.geckolib.model.GeoModel;
+import com.stardew.craft.client.model.nativebb.BlockbenchModel;
 
-public final class WizardBuildingCatalogGeoModel extends GeoModel<WizardBuildingCatalogBlockEntity> {
+public final class WizardBuildingCatalogGeoModel extends BlockbenchModel<WizardBuildingCatalogBlockEntity> {
     private static final ResourceLocation INACTIVE_MODEL = resource(
             "geo/block/decor/wizard_building_catalog_inactive.geo.json");
     private static final ResourceLocation ACTIVE_MODEL = resource(

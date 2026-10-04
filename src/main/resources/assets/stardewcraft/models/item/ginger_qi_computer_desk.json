@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "stardewcraft:item/ginger_island/ginger_qi_computer_desk",
+    "particle": "stardewcraft:block/ginger_island/qi_computer_desk_particle"
+  }
+}

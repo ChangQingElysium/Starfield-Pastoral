@@ -171,6 +171,7 @@ public final class PetManagement {
             var pet = new PetRecord(session.nonce(), session.farm(), variant, name, StardewTimeManager.get().getAbsoluteDay());
             if (free != null) pet.bowl = free.position();
             data.put(pet);
+            PetService.gotPet(player.server, PetService.farm(session.farm()));
             var level = player.server.getLevel(ModDimensions.STARDEW_VALLEY); if (level != null) PetService.project(level);
             PetService.message(player, "adopted", name);
             return "";

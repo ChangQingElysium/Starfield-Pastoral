@@ -4,7 +4,6 @@ import com.stardew.craft.StardewCraft;
 import com.stardew.craft.client.gui.common.CommonGuiTextures;
 import com.stardew.craft.client.gui.common.GuiText;
 import com.stardew.craft.item.ModItems;
-import com.stardew.craft.shop.GeodeLootService;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
@@ -21,7 +20,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.item.ItemStack;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /** Geode source pages built from the output candidates exposed by the gameplay service. */
@@ -39,7 +37,7 @@ public final class GeodeProcessingCategory implements IRecipeCategory<GeodeProce
     private final IDrawable icon;
     private final Component title;
 
-    public record DisplayEntry(ItemStack geode, ItemStack output, int minCount, int maxCount) {
+    public record DisplayEntry(ItemStack geode, ItemStack output, int minCount, int maxCount, boolean crusherAllowed) {
         public DisplayEntry {
             geode = geode == null ? ItemStack.EMPTY : geode.copy();
             output = output == null ? ItemStack.EMPTY : output.copy();
@@ -48,7 +46,7 @@ public final class GeodeProcessingCategory implements IRecipeCategory<GeodeProce
         }
 
         public DisplayEntry(ItemStack geode, ItemStack output) {
-            this(geode, output, Math.max(1, output.getCount()), Math.max(1, output.getCount()));
+            this(geode, output, Math.max(1, output.getCount()), Math.max(1, output.getCount()), true);
         }
 
         @Override
@@ -63,7 +61,7 @@ public final class GeodeProcessingCategory implements IRecipeCategory<GeodeProce
 
         public String contentSignature() {
             return JeiRecipeSignatures.stack(geode) + '|' + JeiRecipeSignatures.stack(output)
-                    + '|' + minCount + '|' + maxCount;
+                    + '|' + minCount + '|' + maxCount + '|' + crusherAllowed;
         }
     }
 
@@ -103,7 +101,7 @@ public final class GeodeProcessingCategory implements IRecipeCategory<GeodeProce
         builder.addSlot(RecipeIngredientRole.INPUT, INPUT_X, SLOT_Y)
                 .addItemStack(recipe.geode())
                 .setSlotName("geode");
-        builder.addSlot(RecipeIngredientRole.CATALYST, CRUSHER_X, SLOT_Y)
+        if (recipe.crusherAllowed()) builder.addSlot(RecipeIngredientRole.CATALYST, CRUSHER_X, SLOT_Y)
                 .addItemStack(new ItemStack(ModItems.GEODE_CRUSHER.get()))
                 .setSlotName("processor");
         builder.addSlot(RecipeIngredientRole.OUTPUT, OUTPUT_X, SLOT_Y)
@@ -133,17 +131,9 @@ public final class GeodeProcessingCategory implements IRecipeCategory<GeodeProce
     }
 
     public static List<DisplayEntry> buildAllEntries() {
-        List<DisplayEntry> result = new ArrayList<>();
-        addVanilla(result, new ItemStack(ModItems.GEODE.get()));
-        addVanilla(result, new ItemStack(ModItems.FROZEN_GEODE.get()));
-        addVanilla(result, new ItemStack(ModItems.MAGMA_GEODE.get()));
-        addVanilla(result, new ItemStack(ModItems.OMNI_GEODE.get()));
-        return List.copyOf(result);
-    }
-
-    private static void addVanilla(List<DisplayEntry> result, ItemStack geode) {
-        for (GeodeLootService.DisplayOutput output : GeodeLootService.getDisplayOutputs(geode)) {
-            result.add(new DisplayEntry(geode, output.stack(), output.minCount(), output.maxCount()));
-        }
+        return com.stardew.craft.client.ClientJeiCatalog.geodes().stream()
+                .map(entry -> new DisplayEntry(entry.geode(), entry.output(), entry.output().getCount(),
+                        entry.output().getCount(), entry.crusherAllowed()))
+                .toList();
     }
 }

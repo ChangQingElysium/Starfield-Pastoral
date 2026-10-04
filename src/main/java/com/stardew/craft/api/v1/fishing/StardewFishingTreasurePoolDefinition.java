@@ -8,13 +8,14 @@ import com.stardew.craft.api.v1.condition.StardewConditions;
 
 import java.util.List;
 
-/** Server-authoritative additive loot applied after Stardew's built-in treasure algorithm. */
+/** Server-authoritative additions or replacements for the data-defined base treasure query. */
 public record StardewFishingTreasurePoolDefinition(
         String chest,
         float chance,
         int rolls,
         List<StardewCondition> availableWhen,
-        List<StardewFishingTreasureEntry> entries
+        List<StardewFishingTreasureEntry> entries,
+        boolean replaceBase
 ) {
     private static final Codec<String> CHEST_CODEC = Codec.STRING.validate(value -> switch (value) {
         case "any", "normal", "golden" -> DataResult.success(value);
@@ -31,7 +32,8 @@ public record StardewFishingTreasurePoolDefinition(
             StardewConditions.CODEC.listOf().optionalFieldOf("available_when", List.of())
                     .forGetter(StardewFishingTreasurePoolDefinition::availableWhen),
             StardewFishingTreasureEntry.CODEC.listOf().fieldOf("entries")
-                    .forGetter(StardewFishingTreasurePoolDefinition::entries)
+                    .forGetter(StardewFishingTreasurePoolDefinition::entries),
+            Codec.BOOL.optionalFieldOf("replace_base", false).forGetter(StardewFishingTreasurePoolDefinition::replaceBase)
     ).apply(instance, StardewFishingTreasurePoolDefinition::new));
 
     public StardewFishingTreasurePoolDefinition {
@@ -40,6 +42,11 @@ public record StardewFishingTreasurePoolDefinition(
         if (entries.isEmpty()) {
             throw new IllegalArgumentException("fishing treasure pool needs at least one entry");
         }
+    }
+
+    public StardewFishingTreasurePoolDefinition(String chest, float chance, int rolls,
+            List<StardewCondition> availableWhen, List<StardewFishingTreasureEntry> entries) {
+        this(chest, chance, rolls, availableWhen, entries, false);
     }
 
     public boolean accepts(boolean golden) {

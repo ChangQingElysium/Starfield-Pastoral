@@ -27,7 +27,8 @@ public final class ModBlockEntities {
 
 	@SuppressWarnings("null")
 	public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<TapperBlockEntity>> TAPPER =
-			BLOCK_ENTITIES.register("tapper", () -> BlockEntityType.Builder.of(TapperBlockEntity::new, ModBlocks.TAPPER.get()).build(null));
+			BLOCK_ENTITIES.register("tapper", () -> BlockEntityType.Builder.of(TapperBlockEntity::new, ModBlocks.TAPPER.get(),
+                    com.stardew.craft.gingerisland.GingerIslandBlocks.get("ginger_heavy_tapper")).build(null));
 
 	@SuppressWarnings("null")
 	public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<WildWeedsBlockEntity>> WILD_WEEDS =
@@ -160,7 +161,8 @@ public final class ModBlockEntities {
 
 	@SuppressWarnings("null")
 	public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<IncubatorBlockEntity>> INCUBATOR =
-			BLOCK_ENTITIES.register("incubator", () -> BlockEntityType.Builder.of(IncubatorBlockEntity::new, ModBlocks.INCUBATOR.get()).build(null));
+			BLOCK_ENTITIES.register("incubator", () -> BlockEntityType.Builder.of(IncubatorBlockEntity::new, ModBlocks.INCUBATOR.get(),
+                    com.stardew.craft.gingerisland.GingerIslandBlocks.get("ginger_ostrich_incubator_empty")).build(null));
 
 	@SuppressWarnings("null")
 	public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<OilMakerBlockEntity>> OIL_MAKER =
@@ -181,6 +183,14 @@ public final class ModBlockEntities {
 	@SuppressWarnings("null")
 	public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<WaterLanternBlockEntity>> WATER_LANTERN =
 			BLOCK_ENTITIES.register("water_lantern", () -> BlockEntityType.Builder.of(WaterLanternBlockEntity::new, ModBlocks.WATER_LANTERN.get()).build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<WillyBoatBlockEntity>> WILLY_BOAT =
+            BLOCK_ENTITIES.register("willy_boat", () -> BlockEntityType.Builder.of(WillyBoatBlockEntity::new,
+                    com.stardew.craft.gingerisland.GingerIslandBlocks.get("ginger_willy_boat")).build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<GingerIslandGemPedestalBlockEntity>> GINGER_GEM_PEDESTAL =
+            BLOCK_ENTITIES.register("ginger_gem_pedestal", () -> BlockEntityType.Builder.of(GingerIslandGemPedestalBlockEntity::new,
+                    com.stardew.craft.gingerisland.GingerIslandBlocks.get("ginger_gem_pedestal")).build(null));
 
 	public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<PlaygroundBlockEntity>> PLAYGROUND =
             BLOCK_ENTITIES.register("playground", () -> BlockEntityType.Builder.of(PlaygroundBlockEntity::new,

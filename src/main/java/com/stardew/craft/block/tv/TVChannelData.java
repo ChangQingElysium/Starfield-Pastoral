@@ -137,6 +137,11 @@ public final class TVChannelData {
         "shrimp_cocktail"        // 32
     };
 
+    /** All 32 recipes taught by the Queen of Sauce show (vanilla Tv_CookingChannel). */
+    public static java.util.List<String> allCookingRecipeIds() {
+        return java.util.Arrays.stream(WEEK_RECIPE).filter(java.util.Objects::nonNull).toList();
+    }
+
     static String getRecipeIdForWeek(int week) {
         if (week >= 1 && week <= 32) return WEEK_RECIPE[week];
         return WEEK_RECIPE[1];

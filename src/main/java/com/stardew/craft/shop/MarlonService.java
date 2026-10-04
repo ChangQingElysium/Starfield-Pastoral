@@ -41,6 +41,7 @@ public final class MarlonService {
     private MarlonService() {}
 
     public static boolean isPlayerAtCounter(ServerPlayer player) {
+        if (!player.level().dimension().equals(com.stardew.craft.core.ModDimensions.STARDEW_VALLEY)) return false;
         int px = (int) Math.floor(player.getX());
         int py = (int) Math.floor(player.getY());
         int pz = (int) Math.floor(player.getZ());
@@ -53,6 +54,7 @@ public final class MarlonService {
         if (player == null || !DesertFestivalMineService.isActive()) {
             return false;
         }
+        if (!player.level().dimension().equals(com.stardew.craft.core.ModDimensions.STARDEW_VALLEY)) return false;
         int px = (int) Math.floor(player.getX());
         int py = (int) Math.floor(player.getY());
         int pz = (int) Math.floor(player.getZ());
@@ -68,19 +70,22 @@ public final class MarlonService {
         marlon.setYHeadRot(yaw);
 
         boolean hasLost = hasLostItems(player);
-        PacketDistributor.sendToPlayer(player, new OpenMarlonMenuPayload(hasLost, desertFestivalBooth, desertFestivalBooth, desertFestivalBooth));
+        if (!hasLost && !desertFestivalBooth) openAdventureShop(player);
+        else PacketDistributor.sendToPlayer(player, new OpenMarlonMenuPayload(hasLost, desertFestivalBooth, desertFestivalBooth, desertFestivalBooth));
         return InteractionResult.SUCCESS;
     }
 
     /**
      * Handle the player's choice from Marlon's question dialog.
-    * 0 = Shop, 1 = Monster Slayer Goals, 2 = Recovery, 3 = Desert Festival rating, 4 = Desert Festival challenge
+    * 0 = Shop, 1 = retired, 2 = Recovery, 3 = Desert Festival rating, 4 = Desert Festival challenge
      */
     public static void handleChoice(ServerPlayer player, int choice) {
+        boolean desert = isPlayerAtDesertFestivalBooth(player);
+        if (!isPlayerAtCounter(player) && !desert) return;
+        if (desert != (choice == 3 || choice == 4)) return;
         if (choice == 0) {
             openAdventureShop(player);
-        } else if (choice == 1) {
-            openGilGoals(player);
+
         } else if (choice == 2) {
             openRecoveryShop(player);
         } else if (choice == 3) {
@@ -106,7 +111,9 @@ public final class MarlonService {
         PacketDistributor.sendToPlayer(player, payload);
     }
 
-    private static void openGilGoals(ServerPlayer player) {
+    public static void openGilGoals(ServerPlayer player) {
+        if (!GilService.inGuild(player)) return;
+        PlayerDataManager.getPlayerData(player).addMailFlag("checkedMonsterBoard");
         PlayerStardewData data = PlayerDataManager.getPlayerData(player);
         List<OpenGilGoalsPayload.GoalEntry> entries = new ArrayList<>();
         for (MonsterSlayerGoalRegistry.SlayerGoal goal : MonsterSlayerGoalRegistry.getAllGoals()) {
@@ -124,28 +131,8 @@ public final class MarlonService {
 
     /** Handle a monster slayer reward claim from the client. */
     public static void handleGilClaim(ServerPlayer player, String goalKey) {
-        MonsterSlayerGoalRegistry.SlayerGoal goal = MonsterSlayerGoalRegistry.getGoal(goalKey);
-        if (goal == null) return;
-
-        PlayerStardewData data = PlayerDataManager.getPlayerData(player);
-        if (data.hasClaimedSlayerReward(goalKey)) return;
-        if (data.getMonsterKills(goalKey) < goal.requiredKills()) return;
-
-        var actionContext = com.stardew.craft.api.v1.action.StardewActionContext.forPlayer(player);
-        for (var reward : goal.rewards()) {
-            var result = com.stardew.craft.api.v1.action.StardewActions.execute(reward, actionContext)
-                    .resultOrPartial(message -> com.stardew.craft.StardewCraft.LOGGER.error(
-                            "[Monster slayer] Reward {} failed for {}: {}",
-                            goalKey, player.getName().getString(), message))
-                    .orElse(null);
-            if (result == null || !result.success()) {
-                return;
-            }
-        }
-        data.claimSlayerReward(goalKey);
-
-        // Refresh the Gil screen
-        openGilGoals(player);
+        // Legacy packets cannot bypass the server-owned take-only menu.
+        if (player.containerMenu instanceof GilRewardMenu menu) menu.takeGoal(player, goalKey);
     }
 
     // ──────────────────────────────────────
@@ -154,9 +141,7 @@ public final class MarlonService {
 
     /**
      * 打开物品找回商店。
-     * SDV parity: 每件物品售价 = getSellToStorePrice × 1（有 Book_Marlon 则 ×0.5），
-     * 实际我们用 sellPrice × 5（最低 250g），只能买回 1 件。
-     * stock = 1，每件物品只显示 1 个。
+     * The full lost stack costs its sale value (half with Book_Marlon); one stack is mailed next morning.
      */
     private static void openRecoveryShop(ServerPlayer player) {
         PlayerStardewData data = PlayerDataManager.getPlayerData(player);
@@ -195,13 +180,14 @@ public final class MarlonService {
 
     /**
      * 服务端处理物品找回购买（从 ShopPurchasePayload 调用）。
-     * SDV parity: 买回 1 件 → 原始 ItemStack（含 NBT/附魔/数量）还给玩家 → 清空整个 lostItems 列表。
+     * SDV parity: 选定一组物品，清空遗失清单，次日通过邮件返还完整组件和数量。
      */
     public static void handleRecoveryPurchaseFromShop(ServerPlayer player, int itemIndex) {
+        if (!isPlayerAtCounter(player)) { sendRecoveryResult(player, false); return; }
         PlayerStardewData data = PlayerDataManager.getPlayerData(player);
         List<ItemStack> lostItems = data.getItemsLostLastDeath();
 
-        if (itemIndex < 0 || itemIndex >= lostItems.size()) {
+        if (itemIndex < 0 || itemIndex >= lostItems.size() || !data.getMarlonRecoveredItem().isEmpty()) {
             sendRecoveryResult(player, false);
             return;
         }
@@ -218,18 +204,15 @@ public final class MarlonService {
         }
         com.stardew.craft.player.PlayerStardewDataAPI.removeMoney(player, price);
 
-        // 把原始 ItemStack 还给玩家（保留所有 NBT）
         ItemStack recovered = chosen.copy();
-        if (!player.getInventory().add(recovered)) {
-            player.drop(recovered, false);
-        }
-        player.getInventory().setChanged();
-        player.inventoryMenu.broadcastChanges();
-
-        // SDV parity: 买回 1 件后清空全部
+        data.setMarlonRecoveredItem(recovered);
         data.clearItemsLostLastDeath();
+        data.removeMailFlag("MarlonRecovery");
+        com.stardew.craft.mail.MailService.addMailForTomorrow(player, "MarlonRecovery");
 
         sendRecoveryResult(player, true);
+        PacketDistributor.sendToPlayer(player, new com.stardew.craft.network.payload.MarlonRecoveryConfirmedPayload(net.minecraft.network.chat.Component.translatable(
+                recovered.getCount() > 1 ? "stardewcraft.marlon.recovery_engaged_stack" : "stardewcraft.marlon.recovery_engaged", recovered.getHoverName())));
 
         com.stardew.craft.StardewCraft.LOGGER.info("[MarlonRecovery] {} recovered '{}' for {}g",
                 player.getName().getString(), recovered.getHoverName().getString(), price);
@@ -254,11 +237,11 @@ public final class MarlonService {
     private static int getItemSellPrice(ItemStack stack) {
         int price = StardewItemDataApi.getSellPrice(stack);
         if (price > 0) return price;
-        return 50;
+        return 0;
     }
 
     private static int getRecoveryPrice(PlayerStardewData data, ItemStack stack) {
-        int price = Math.max(250, getItemSellPrice(stack) * 5);
+        int price = (int) Math.min(Integer.MAX_VALUE, (long) getItemSellPrice(stack) * stack.getCount());
         return BookPowerEffects.applyMarlonRecoveryPrice(data, price);
     }
 }

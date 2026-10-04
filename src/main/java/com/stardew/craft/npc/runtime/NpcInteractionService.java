@@ -366,6 +366,7 @@ public final class NpcInteractionService {
         if (addonResult != InteractionResult.PASS) {
             return addonResult;
         }
+        if ("gil".equals(npcId)) return com.stardew.craft.shop.GilService.interact(serverPlayer);
         // Joja-line NPCs: 不进入通用好感/打招呼流程。
         // 女收银员（joja_cashier）— 无论玩家站在哪里，右键直接打开 Joja 超市商店界面。
         if ("joja_cashier".equals(npcId)) {
@@ -1749,7 +1750,7 @@ public final class NpcInteractionService {
 
         if (birthday) {
             // Personality-branched birthday responses (vanilla NPC.cs parity)
-            boolean positive = (taste == GiftTaste.LOVED || taste == GiftTaste.LIKED || taste == GiftTaste.NEUTRAL);
+            boolean positive = (taste == GiftTaste.LOVED || taste == GiftTaste.LIKED);
             boolean negative = (taste == GiftTaste.DISLIKED || taste == GiftTaste.HATED);
 
             if (positive) {
@@ -1893,8 +1894,8 @@ public final class NpcInteractionService {
 
     /**
      * Broadcast an emote bubble above the NPC entity based on gift taste.
-     * Vanilla parity: loved → heart(20), liked → happy(32), hated → angry(12),
-     * disliked → sad(28), neutral → no emote.
+     * Vanilla parity: loved → heart(20), hated → angry(12);
+     * liked / disliked / neutral → no emote.
      */
     private static void broadcastGiftEmote(
             net.minecraft.world.entity.Entity npcEntity,
@@ -1902,10 +1903,8 @@ public final class NpcInteractionService {
     ) {
         EmoteType emote = switch (taste) {
             case LOVED -> EmoteCatalog.byId("heart");
-            case LIKED -> EmoteCatalog.byId("happy");
             case HATED -> EmoteCatalog.byId("angry");
-            case DISLIKED -> EmoteCatalog.byId("sad");
-            case NEUTRAL -> null;
+            case LIKED, DISLIKED, NEUTRAL -> null;
         };
         if (emote != null) {
             int baseIndex = EmoteCatalog.getBubbleBaseIndex(emote);
@@ -2017,11 +2016,34 @@ public final class NpcInteractionService {
                                 .answeredDialogueIds(player.getUUID()))));
     }
 
+    /**
+     * Dialogue.cs {@code $d cc/joja} read event 191393 (community center opening) from the
+     * server-side seen-event store, which the client does not mirror. Attach it as markers.
+     */
+    private static OpenNpcDialogueScreenPayload withWorldStateMarkers(
+            ServerPlayer player,
+            OpenNpcDialogueScreenPayload payload
+    ) {
+        var seen = com.stardew.craft.cutscene.server.EventSeenData.get(player.serverLevel());
+        List<String> ids = new ArrayList<>(payload.answeredDialogueIds());
+        if (seen.hasSeen(player.getUUID(), OpenNpcDialogueScreenPayload.CC_OPEN_EVENT_ID)) {
+            ids.add(OpenNpcDialogueScreenPayload.CC_OPEN_SELF_MARKER);
+        }
+        if (seen.hasAnyPlayerSeen(OpenNpcDialogueScreenPayload.CC_OPEN_EVENT_ID)) {
+            ids.add(OpenNpcDialogueScreenPayload.CC_OPEN_ANY_MARKER);
+        }
+        if (ids.size() == payload.answeredDialogueIds().size()) {
+            return payload;
+        }
+        return new OpenNpcDialogueScreenPayload(payload.npcId(), payload.translateKey(),
+                payload.friendshipPoints(), payload.afterCloseItemId(), payload.garbleDwarvish(), ids);
+    }
+
     /** Common server send path, also used by wizard/Joja/shop dialogue adapters. */
     public static void sendDialogue(ServerPlayer player,OpenNpcDialogueScreenPayload payload) {
         beginDialogueSession(player,payload.npcId());
         NpcQuestionAuthority.open(player,payload.npcId(),payload.translateKey());
-        PacketDistributor.sendToPlayer(player,payload);
+        PacketDistributor.sendToPlayer(player,withWorldStateMarkers(player,payload));
     }
 
     public static void handleClientQuestionAnswer(

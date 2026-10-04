@@ -243,6 +243,11 @@
       "price": 100
     },
     {
+      "item": "recipe:stardewcraft:grass_starter",
+      "price": 1000,
+      "stock": 1
+    },
+    {
       "item": "stardewcraft:basic_fertilizer",
       "price": 100
     },

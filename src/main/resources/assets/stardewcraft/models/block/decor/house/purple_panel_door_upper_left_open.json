@@ -1,0 +1,340 @@
+{
+  "credit": "Made with Blockbench",
+  "texture_size": [
+    64,
+    64
+  ],
+  "textures": {
+    "0": "stardewcraft:block/decor/house/purple_panel_door",
+    "particle": "stardewcraft:block/decor/house/purple_panel_door_particle"
+  },
+  "elements": [
+    {
+      "name": "left_stile",
+      "from": [
+        13,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        3
+      ],
+      "faces": {
+        "west": {
+          "uv": [
+            0,
+            0.0,
+            0.75,
+            4.0
+          ],
+          "texture": "#0"
+        },
+        "north": {
+          "uv": [
+            8,
+            0.0,
+            8.75,
+            4.0
+          ],
+          "texture": "#0"
+        },
+        "east": {
+          "uv": [
+            7.25,
+            0.0,
+            8,
+            4.0
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            8,
+            0.0,
+            8.75,
+            4.0
+          ],
+          "texture": "#0"
+        },
+        "up": {
+          "uv": [
+            0,
+            8.5,
+            0.75,
+            9.25
+          ],
+          "texture": "#0",
+          "rotation": 270
+        }
+      }
+    },
+    {
+      "name": "right_stile",
+      "from": [
+        13,
+        0,
+        13
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "west": {
+          "uv": [
+            3.25,
+            0.0,
+            4,
+            4.0
+          ],
+          "texture": "#0"
+        },
+        "north": {
+          "uv": [
+            8,
+            0.0,
+            8.75,
+            4.0
+          ],
+          "texture": "#0"
+        },
+        "east": {
+          "uv": [
+            4,
+            0.0,
+            4.75,
+            4.0
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            8,
+            0.0,
+            8.75,
+            4.0
+          ],
+          "texture": "#0"
+        },
+        "up": {
+          "uv": [
+            0,
+            8.5,
+            0.75,
+            9.25
+          ],
+          "texture": "#0",
+          "rotation": 270
+        }
+      }
+    },
+    {
+      "name": "top_rail",
+      "from": [
+        13,
+        12,
+        3
+      ],
+      "to": [
+        16,
+        16,
+        13
+      ],
+      "faces": {
+        "west": {
+          "uv": [
+            0.75,
+            0.0,
+            3.25,
+            1.0
+          ],
+          "texture": "#0"
+        },
+        "north": {
+          "uv": [
+            8,
+            0.0,
+            8.75,
+            1.0
+          ],
+          "texture": "#0"
+        },
+        "east": {
+          "uv": [
+            4.75,
+            0.0,
+            7.25,
+            1.0
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            8,
+            0.0,
+            8.75,
+            1.0
+          ],
+          "texture": "#0"
+        },
+        "up": {
+          "uv": [
+            0,
+            8.5,
+            2.5,
+            9.25
+          ],
+          "texture": "#0",
+          "rotation": 270
+        },
+        "down": {
+          "uv": [
+            0,
+            9.5,
+            2.5,
+            10.25
+          ],
+          "texture": "#0",
+          "rotation": 90
+        }
+      }
+    },
+    {
+      "name": "upper_panel",
+      "from": [
+        14,
+        2,
+        3
+      ],
+      "to": [
+        15,
+        12,
+        13
+      ],
+      "faces": {
+        "west": {
+          "uv": [
+            0.75,
+            1.0,
+            3.25,
+            3.5
+          ],
+          "texture": "#0"
+        },
+        "north": {
+          "uv": [
+            8,
+            1.0,
+            8.25,
+            3.5
+          ],
+          "texture": "#0"
+        },
+        "east": {
+          "uv": [
+            4.75,
+            1.0,
+            7.25,
+            3.5
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            8,
+            1.0,
+            8.25,
+            3.5
+          ],
+          "texture": "#0"
+        },
+        "up": {
+          "uv": [
+            0,
+            8.5,
+            2.5,
+            8.75
+          ],
+          "texture": "#0",
+          "rotation": 270
+        },
+        "down": {
+          "uv": [
+            0,
+            9.5,
+            2.5,
+            9.75
+          ],
+          "texture": "#0",
+          "rotation": 90
+        }
+      }
+    },
+    {
+      "name": "middle_rail",
+      "from": [
+        13,
+        0,
+        3
+      ],
+      "to": [
+        16,
+        2,
+        13
+      ],
+      "faces": {
+        "west": {
+          "uv": [
+            0.75,
+            3.5,
+            3.25,
+            4.0
+          ],
+          "texture": "#0"
+        },
+        "north": {
+          "uv": [
+            8,
+            3.5,
+            8.75,
+            4.0
+          ],
+          "texture": "#0"
+        },
+        "east": {
+          "uv": [
+            4.75,
+            3.5,
+            7.25,
+            4.0
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            8,
+            3.5,
+            8.75,
+            4.0
+          ],
+          "texture": "#0"
+        },
+        "up": {
+          "uv": [
+            0,
+            8.5,
+            2.5,
+            9.25
+          ],
+          "texture": "#0",
+          "rotation": 270
+        }
+      }
+    }
+  ],
+  "parent": "minecraft:block/block",
+  "render_type": "minecraft:solid"
+}

@@ -3,7 +3,7 @@
   "cycles": {
     "default": {
       "duration": {
-        "minutes": 5040
+        "mornings": 4
       }
     }
   }

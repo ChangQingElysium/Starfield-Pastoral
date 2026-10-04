@@ -1,0 +1,29 @@
+{
+  "parent": "stardewcraft:block/ginger_island/marker_north",
+  "overrides": [
+    {
+      "predicate": {
+        "stardewcraft:ginger_island_variant": 0.0
+      },
+      "model": "stardewcraft:block/ginger_island/marker_north"
+    },
+    {
+      "predicate": {
+        "stardewcraft:ginger_island_variant": 0.3333333333333333
+      },
+      "model": "stardewcraft:block/ginger_island/marker_east"
+    },
+    {
+      "predicate": {
+        "stardewcraft:ginger_island_variant": 0.6666666666666666
+      },
+      "model": "stardewcraft:block/ginger_island/marker_south"
+    },
+    {
+      "predicate": {
+        "stardewcraft:ginger_island_variant": 1.0
+      },
+      "model": "stardewcraft:block/ginger_island/marker_west"
+    }
+  ]
+}

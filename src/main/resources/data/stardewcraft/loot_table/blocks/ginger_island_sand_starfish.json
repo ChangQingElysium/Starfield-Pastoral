@@ -1,0 +1,36 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "conditions": [
+        {
+          "condition": "minecraft:block_state_property",
+          "block": "stardewcraft:ginger_island_sand_starfish",
+          "properties": {
+            "part": "main"
+          }
+        },
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "stardewcraft:ginger_island_starfish_gold",
+          "functions": [
+            {
+              "function": "minecraft:set_components",
+              "components": {
+                "minecraft:block_state": {
+                  "variant": "3"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

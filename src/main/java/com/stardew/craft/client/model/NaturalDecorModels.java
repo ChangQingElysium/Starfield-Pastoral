@@ -73,7 +73,7 @@ public final class NaturalDecorModels {
             for (int variant = 0; variant < kind.variants; variant++) {
                 BakedModel[] seasons = new BakedModel[4];
                 for (int s = 0; s < 4; s++) seasons[s] = Objects.requireNonNull(event.getModels().get(id(kind, s, variant)));
-                items[variant] = new Surface(seasons, false);
+                items[variant] = new Surface(seasons, false, false);
                 if (kind.habitat == NaturalDecorKind.Habitat.SURFACE) {
                     var parts = new ArrayList<FloatingParts>();
                     for (BakedModel season : seasons) {
@@ -91,15 +91,17 @@ public final class NaturalDecorModels {
             }
             for (BlockState state : ModBlocks.NATURAL_DECOR.get(kind.id).get().getStateDefinition().getPossibleStates()) {
                 var model = items[Math.min(state.getValue(NaturalPlantBlock.VARIANT), kind.variants - 1)];
+                boolean inPlanter = state.getValue(NaturalPlantBlock.IN_PLANTER);
+                boolean tropical = state.getValue(NaturalPlantBlock.TROPICAL);
                 event.getModels().put(BlockModelShaper.stateToModelLocation(state),
-                        state.getValue(NaturalPlantBlock.IN_PLANTER) ? new Surface(model.seasons, true) : model);
+                        inPlanter || tropical ? new Surface(model.seasons, inPlanter, tropical) : model);
             }
             var itemId = new ModelResourceLocation(ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, kind.id), "inventory");
             // Dormant plants disappear only in the world; keep their items recognizable.
             if (kind.hiddenInWinter()) for (int variant = 0; variant < items.length; variant++) {
                 BakedModel[] itemSeasons = items[variant].seasons.clone();
                 itemSeasons[3] = itemSeasons[0];
-                items[variant] = new Surface(itemSeasons, false);
+                items[variant] = new Surface(itemSeasons, false, false);
             }
             event.getModels().put(itemId, new PlantItem(Objects.requireNonNull(event.getModels().get(itemId)), items));
         }
@@ -121,10 +123,11 @@ public final class NaturalDecorModels {
     private static final class Surface extends BakedModelWrapper<BakedModel> implements IDynamicBakedModel {
         private final BakedModel[] seasons;
         private final List<BakedQuad>[] lowered;
+        private final boolean tropical;
 
         @SuppressWarnings("unchecked")
-        Surface(BakedModel[] seasons, boolean inPlanter) {
-            super(seasons[0]); this.seasons = seasons;
+        Surface(BakedModel[] seasons, boolean inPlanter, boolean tropical) {
+            super(seasons[0]); this.seasons = seasons; this.tropical = tropical;
             lowered = inPlanter ? new List[4] : null;
             if (lowered != null) for (int s = 0; s < 4; s++) {
                 var quads = new ArrayList<BakedQuad>();
@@ -152,10 +155,11 @@ public final class NaturalDecorModels {
                 RandomSource random, ModelData data, @Nullable RenderType type) {
             // Item passes use entity render types; only filter chunk layers for placed blocks.
             if (side != null || (state != null && type != null && type != RenderType.cutout())) return List.of();
-            int season = TerrainSeasonTextures.currentTextureSet();
+            int season = season();
             return lowered == null ? seasons[season].getQuads(state, null, random, data, type) : lowered[season];
         }
-        @Override public TextureAtlasSprite getParticleIcon() { return seasons[TerrainSeasonTextures.currentTextureSet()].getParticleIcon(); }
+        private int season() { return tropical ? 1 : TerrainSeasonTextures.currentTextureSet(); }
+        @Override public TextureAtlasSprite getParticleIcon() { return seasons[season()].getParticleIcon(); }
         @Override public TextureAtlasSprite getParticleIcon(ModelData data) { return getParticleIcon(); }
     }
 
@@ -163,11 +167,15 @@ public final class NaturalDecorModels {
         private final ItemOverrides overrides;
         PlantItem(BakedModel original, Surface[] variants) {
             super(original);
+            Surface[] tropicalVariants = new Surface[variants.length];
+            for (int i = 0; i < variants.length; i++) tropicalVariants[i] = new Surface(variants[i].seasons, false, true);
             overrides = new ItemOverrides() {
                 @Override public BakedModel resolve(BakedModel model, ItemStack stack, @Nullable ClientLevel level,
                         @Nullable LivingEntity entity, int seed) {
-                    Integer v = stack.getOrDefault(DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY).get(NaturalPlantBlock.VARIANT);
-                    return variants[v == null ? 0 : Math.min(v, variants.length - 1)];
+                    var properties = stack.getOrDefault(DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY);
+                    Integer v = properties.get(NaturalPlantBlock.VARIANT);
+                    int variant = v == null ? 0 : Math.min(v, variants.length - 1);
+                    return Boolean.TRUE.equals(properties.get(NaturalPlantBlock.TROPICAL)) ? tropicalVariants[variant] : variants[variant];
                 }
             };
         }

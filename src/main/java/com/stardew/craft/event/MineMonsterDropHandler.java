@@ -80,23 +80,35 @@ public class MineMonsterDropHandler {
             com.stardew.craft.book.BookAcquisitionService.recordMonsterKilledAndMaybeAddVoidBook(killer, drops, entity, random, !specialMineDrop);
             if (!specialMineDrop && tags.contains("sd_secret_woods_slime") && random.nextDouble() < .1)
                 addDrop(drops, entity, MonsterSourceLoot.item("292", 1));
-            if (tags.contains("sd_mob_prismatic_slime"))
-                com.stardew.craft.specialorder.SpecialOrderManager.recordMonsterSlain(killer, "Prismatic Slime");
         }
 
         // ---- Monster Slayer kill tracking (SDV Gil goals) ----
         if (event.getSource() != null && event.getSource().getEntity() instanceof ServerPlayer player) {
             java.util.Set<String> progressedGoals = new java.util.LinkedHashSet<>();
-            for (String tag : tags) {
-                progressedGoals.addAll(MonsterSlayerGoalRegistry.getGoalKeysForTag(tag));
+            // Prismatic Slime has its own name and bred baby slimes are skipped by Stats.monsterKilled.
+            boolean countsForSlayerGoals = !tags.contains("sd_mob_prismatic_slime")
+                    && !(entity instanceof com.stardew.craft.entity.monster.GreenSlimeEntity slime && !slime.firstGeneration());
+            if (countsForSlayerGoals) {
+                for (String tag : tags) {
+                    progressedGoals.addAll(MonsterSlayerGoalRegistry.getGoalKeysForTag(tag));
+                }
             }
             PlayerStardewData slayerData = PlayerDataManager.getPlayerData(player);
             progressedGoals.forEach(goalKey -> slayerData.addMonsterKills(goalKey, 1));
+            // One kill event per monster: SDV matches monster.Name.Contains(target) once per quest/objective.
+            java.util.Set<String> mobTags = new java.util.LinkedHashSet<>();
             for (String tag : tags) {
-                if (tag.startsWith("sd_mob_")) {
-                    com.stardew.craft.quest.StardewQuestEvents.fireMonsterSlain(player, tag);
-                    com.stardew.craft.specialorder.SpecialOrderManager.recordMonsterSlain(player, tag);
-                }
+                if (tag.startsWith("sd_mob_")) mobTags.add(tag);
+            }
+            if (!mobTags.isEmpty()) {
+                com.stardew.craft.quest.StardewQuestEvents.fireMonsterSlain(player, mobTags);
+            }
+            java.util.Set<String> orderNames = new java.util.LinkedHashSet<>(mobTags);
+            if (tags.contains("sd_mob_prismatic_slime")) orderNames.add("Prismatic Slime");
+            if (!orderNames.isEmpty()) {
+                // SlayObjective.IgnoreFarmMonsters defaults to true.
+                boolean onFarm = com.stardew.craft.core.FarmAreaResolver.isInFarmArea(serverLevel, entity.blockPosition());
+                com.stardew.craft.specialorder.SpecialOrderManager.recordMonsterSlain(player, orderNames, onFarm);
             }
             com.stardew.craft.festival.desert.DesertFestivalMarlonChallengeService.recordMonsterSlain(player, tags);
             if (MonsterFactory.ownedFloor(nativeMonster) != null

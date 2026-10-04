@@ -415,8 +415,9 @@ public class PlayerStardewDataAPI {
      * 睡觉恢复能量
      */
     public static void sleep(ServerPlayer player, int sleepTime) {
+        // 原版 Farmer.dayupdate 先 ClearBuffs 再回体力，MaxStamina 不再含食物加成
+        com.stardew.craft.mastery.MasteryBuffLifecycle.clearAllBuffs(player);
         getData(player).sleep(sleepTime);
-        com.stardew.craft.mastery.MasteryBuffLifecycle.clearAllDailyMasteryBuffs(player);
     }
     
     // ============ 生命值相关 ============

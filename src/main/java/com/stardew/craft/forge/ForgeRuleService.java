@@ -66,6 +66,9 @@ public final class ForgeRuleService {
     );
 
     private static final List<ResourceKey<Enchantment>> PRISMATIC_ENCHANTMENTS = List.of(
+            StardewEnchantments.ARTFUL,
+            StardewEnchantments.BUG_KILLER,
+            StardewEnchantments.VAMPIRIC,
             StardewEnchantments.CRUSADER,
             StardewEnchantments.HAYMAKER,
             StardewEnchantments.POWERFUL,
@@ -289,10 +292,9 @@ public final class ForgeRuleService {
             return false;
         }
         WeaponForgeData.State state = WeaponForgeData.read(left);
+        // 原版 IsValidUnforge：只看锻造等级（钻石标记本身不计）与外观；龙牙附魔不属于锻造，不能单独分解
         return totalLevels(state.gemForges()) > 0
-                || !state.appearanceWeaponId().isEmpty()
-            || !state.dragonToothEnchantment().isEmpty()
-            || state.diamondForge();
+                || !state.appearanceWeaponId().isEmpty();
     }
 
     public static UnforgeResult unforgeForReal(ItemStack left, ItemStack right) {
@@ -315,7 +317,7 @@ public final class ForgeRuleService {
                 oldState.previousEnchantments(),
                 oldState.galaxySoulLevel(),
                 "",
-                "",
+                oldState.dragonToothEnchantment(),
                 false));
         refreshWeaponAttributeModifiers(result);
         return new UnforgeResult(result, returnedAppearance.isEmpty() ? List.of() : List.of(returnedAppearance), refund);
@@ -410,7 +412,11 @@ public final class ForgeRuleService {
         if (!(left.getItem() instanceof IStardewWeapon weapon) || weapon.getWeaponData() == null) {
             return false;
         }
-        return true;
+        // 原版 Tool.CanForge：武器等级 < 15 且名字不含 Galaxy
+        if (weapon.getWeaponData().getLevel() >= 15) {
+            return false;
+        }
+        return !BuiltInRegistries.ITEM.getKey(left.getItem()).getPath().contains("galaxy");
     }
 
     private static boolean isWeaponAppearanceCraft(ItemStack left, ItemStack right) {
@@ -435,7 +441,10 @@ public final class ForgeRuleService {
     }
 
     private static boolean isRingCombinationCraft(ItemStack left, ItemStack right) {
-        return CombinedRingData.isCombinableRing(left) && CombinedRingData.isCombinableRing(right);
+        return CombinedRingData.isCombinableRing(left)
+                && CombinedRingData.isCombinableRing(right)
+                // 原版 Ring.CanCombine：QualifiedItemId 相同的两枚戒指不能合成
+                && left.getItem() != right.getItem();
     }
 
     private static boolean isPrismaticShard(ItemStack stack) {
@@ -632,9 +641,6 @@ public final class ForgeRuleService {
         }
         if (!state.appearanceWeaponId().isEmpty()) {
             totalCost += APPEARANCE_FORGE_COST;
-        }
-        if (!state.dragonToothEnchantment().isEmpty()) {
-            totalCost += 10;
         }
         if (state.diamondForge()) {
             totalCost += DIAMOND_FORGE_COST;

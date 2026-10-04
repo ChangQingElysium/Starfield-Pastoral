@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "stardewcraft:block/building/gray_metal_siding/connected/2_111",
+    "particle": "stardewcraft:block/building/gray_metal_siding/connected/2_255"
+  }
+}

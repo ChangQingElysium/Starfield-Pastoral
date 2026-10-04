@@ -1,5 +1,7 @@
 {
   "variants": {
-    "": { "model": "stardewcraft:block/forage/fiddlehead_fern" }
+    "": {
+      "model": "stardewcraft:block/crop3d/forage_fiddlehead_fern/mature"
+    }
   }
 }

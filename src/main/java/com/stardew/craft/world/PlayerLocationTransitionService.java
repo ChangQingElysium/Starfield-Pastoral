@@ -92,6 +92,11 @@ public final class PlayerLocationTransitionService {
         if (!dimensionChanged && !locationChanged) {
             return;
         }
+        // Game1.ShouldDismountOnWarp: going from an outdoor location to an indoor one drops a rider off the horse.
+        if (player.getVehicle() instanceof net.minecraft.world.entity.animal.horse.AbstractHorse
+                && isIndoor(locationId) && !isIndoor(previous.locationId())) {
+            player.stopRiding();
+        }
         StardewLocationTransitionRegistry.dispatch(
                 transition(
                         player,
@@ -104,6 +109,11 @@ public final class PlayerLocationTransitionService {
                                         .DIMENSION_CHANGED
                                 : StardewLocationTransition.Reason
                                         .LOCATION_CHANGED));
+    }
+
+    private static boolean isIndoor(ResourceLocation locationId) {
+        return locationId != null && StardewLocations.get(locationId)
+                .map(com.stardew.craft.api.v1.world.StardewLocation::indoor).orElse(false);
     }
 
     private static StardewLocationTransition transition(

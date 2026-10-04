@@ -1,0 +1,15 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "stardewcraft:block/gray_brown_bricks"
+      },
+      {
+        "model": "stardewcraft:block/gray_brown_bricks_1"
+      },
+      {
+        "model": "stardewcraft:block/gray_brown_bricks_2"
+      }
+    ]
+  }
+}

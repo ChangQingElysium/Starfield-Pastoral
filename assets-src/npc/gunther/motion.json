@@ -1,0 +1,105 @@
+{
+  "intent": "成年男性博物馆管理员；沉稳克制，平地低抬脚，双侧承重完整，肩臂小幅反向摆动。",
+  "intervalMin": 4.2,
+  "intervalMax": 8.1,
+  "durationMin": 0.96,
+  "durationMax": 1.16,
+  "doubleChance": 0.06,
+  "groundOffset": 0,
+  "walkStride": 0.784333,
+  "lookLimits": {
+    "yaw": 12,
+    "pitch": 6
+  },
+  "attentionRig": {
+    "hipHeight": 12,
+    "soleY": 0,
+    "toeDepth": 3,
+    "halfStance": 2.25,
+    "rightZ": 0.12,
+    "leftZ": -0.16,
+    "rightYaw": -3,
+    "leftYaw": 3,
+    "lift": 0.6,
+    "lean": 1.05,
+    "armSwing": 2.6
+  },
+  "translucentParts": [
+    "glasses_front",
+    "glasses_temple_right",
+    "glasses_temple_left"
+  ],
+  "cloth": {
+    "bone": "coat",
+    "kind": "mantle",
+    "anchorY": 12.04,
+    "hemY": 9.04,
+    "margin": 0.4,
+    "standingDepthMargin": 0.3,
+    "contactBlend": 0.45,
+    "preserveLayerOffset": true
+  },
+  "gait": {
+    "id": "gunther",
+    "revision": "character-articulated-3",
+    "levelWalk": true,
+    "intent": "成年男性博物馆管理员；沉稳克制，平地低抬脚，双侧承重完整，肩臂小幅反向摆动。",
+    "rootMean": 0.39,
+    "bob": 0.25,
+    "sway": 0.38,
+    "rootYaw": 1.35,
+    "bodyPitch": -1.4,
+    "headPitch": 0.85,
+    "bodyYaw": 3.3,
+    "bodyRoll": 0.68,
+    "bodyNod": 0.52,
+    "bodyLag": 0.078,
+    "headNod": 0.3,
+    "headLag": 0.115,
+    "headYaw": 1.35,
+    "headRoll": 0.28,
+    "headYawLag": 0.065,
+    "halfStance": 2.25,
+    "groundOffset": 0,
+    "stride": 12.549328,
+    "stance": 0.6,
+    "footLift": 0.24,
+    "heelPitch": 4.9,
+    "toePitch": 8.4,
+    "swingPeak": 0.53,
+    "armSwing": 13.8,
+    "armOpening": 5.4,
+    "armPhase": 0.045,
+    "elbowBase": 7,
+    "elbowSwing": 4,
+    "previewSpeed": 0.72,
+    "sides": {
+      "right": {
+        "hip": [
+          -2.25,
+          12,
+          0
+        ],
+        "knee": 6,
+        "ankle": 1.5,
+        "sole": 0,
+        "heel": 2,
+        "toe": -3
+      },
+      "left": {
+        "hip": [
+          2.25,
+          12,
+          0
+        ],
+        "knee": 6,
+        "ankle": 1.5,
+        "sole": 0,
+        "heel": 2,
+        "toe": -3
+      }
+    },
+    "reachMargin": 0.036347
+  },
+  "hipSkinHeight": 3
+}

@@ -1,0 +1,5894 @@
+{
+  "parent": "minecraft:block/block",
+  "loader": "neoforge:composite",
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+    "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+    "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+  },
+  "children": {
+    "0": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            3.0,
+            0.0,
+            3.0
+          ],
+          "to": [
+            13.0,
+            7.0,
+            13.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                0.0625,
+                0.0625,
+                0.375,
+                0.28125
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                0.4375,
+                0.0625,
+                0.75,
+                0.28125
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                0.8125,
+                0.0625,
+                1.125,
+                0.28125
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                1.1875,
+                0.0625,
+                1.5,
+                0.28125
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                1.5625,
+                0.0625,
+                1.875,
+                0.375
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                1.9375,
+                0.0625,
+                2.25,
+                0.375
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "1": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            3.5,
+            6.5,
+            3.5
+          ],
+          "to": [
+            12.5,
+            26.5,
+            12.5
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                2.3125,
+                0.0625,
+                2.59375,
+                0.6875
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                2.65625,
+                0.0625,
+                2.9375,
+                0.6875
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                3.0,
+                0.0625,
+                3.28125,
+                0.6875
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                3.34375,
+                0.0625,
+                3.625,
+                0.6875
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                3.6875,
+                0.0625,
+                3.96875,
+                0.34375
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                4.03125,
+                0.0625,
+                4.3125,
+                0.34375
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "2": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            4.0,
+            9.5,
+            4.0
+          ],
+          "to": [
+            12.0,
+            31.5,
+            12.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                4.375,
+                0.0625,
+                4.625,
+                0.75
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                4.6875,
+                0.0625,
+                4.9375,
+                0.75
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                5.0,
+                0.0625,
+                5.25,
+                0.75
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                5.3125,
+                0.0625,
+                5.5625,
+                0.75
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                5.625,
+                0.0625,
+                5.875,
+                0.3125
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                5.9375,
+                0.0625,
+                6.1875,
+                0.3125
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          1.0,
+          0.0
+        ]
+      }
+    },
+    "3": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            4.1,
+            -1.5,
+            4.1
+          ],
+          "to": [
+            11.9,
+            18.5,
+            11.9
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                6.25,
+                0.0625,
+                6.5,
+                0.6875
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                6.5625,
+                0.0625,
+                6.8125,
+                0.6875
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                6.875,
+                0.0625,
+                7.125,
+                0.6875
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                7.1875,
+                0.0625,
+                7.4375,
+                0.6875
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                7.5,
+                0.0625,
+                7.75,
+                0.3125
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                7.8125,
+                0.0625,
+                8.0625,
+                0.3125
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          3.0,
+          0.0
+        ]
+      }
+    },
+    "4": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            3.5,
+            13.5,
+            3.5
+          ],
+          "to": [
+            12.5,
+            21.5,
+            12.5
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                8.125,
+                0.0625,
+                8.40625,
+                0.3125
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                8.46875,
+                0.0625,
+                8.75,
+                0.3125
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                8.8125,
+                0.0625,
+                9.09375,
+                0.3125
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                9.15625,
+                0.0625,
+                9.4375,
+                0.3125
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                9.5,
+                0.0625,
+                9.78125,
+                0.34375
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                9.84375,
+                0.0625,
+                10.125,
+                0.34375
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          3.0,
+          0.0
+        ]
+      }
+    },
+    "5": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            4.0,
+            0.15,
+            4.0
+          ],
+          "to": [
+            12.0,
+            7.2,
+            12.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                10.1875,
+                0.0625,
+                10.4375,
+                0.3125
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                10.5,
+                0.0625,
+                10.75,
+                0.3125
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                10.8125,
+                0.0625,
+                11.0625,
+                0.3125
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                11.125,
+                0.0625,
+                11.375,
+                0.3125
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                11.4375,
+                0.0625,
+                11.6875,
+                0.3125
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                11.75,
+                0.0625,
+                12.0,
+                0.3125
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              8,
+              0.15,
+              8
+            ],
+            "axis": "y",
+            "angle": 45,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "6": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            4.5,
+            6.65,
+            4.5
+          ],
+          "to": [
+            11.5,
+            26.65,
+            11.5
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                12.0625,
+                0.0625,
+                12.28125,
+                0.6875
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                12.34375,
+                0.0625,
+                12.5625,
+                0.6875
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                12.625,
+                0.0625,
+                12.84375,
+                0.6875
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                12.90625,
+                0.0625,
+                13.125,
+                0.6875
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                13.1875,
+                0.0625,
+                13.40625,
+                0.28125
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                13.46875,
+                0.0625,
+                13.6875,
+                0.28125
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              8,
+              6.65,
+              8
+            ],
+            "axis": "y",
+            "angle": 45,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "7": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            4.75,
+            9.649999999999999,
+            4.75
+          ],
+          "to": [
+            11.25,
+            31.65,
+            11.25
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                13.75,
+                0.0625,
+                13.96875,
+                0.75
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                14.03125,
+                0.0625,
+                14.25,
+                0.75
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                14.3125,
+                0.0625,
+                14.53125,
+                0.75
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                14.59375,
+                0.0625,
+                14.8125,
+                0.75
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                14.875,
+                0.0625,
+                15.09375,
+                0.28125
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                15.15625,
+                0.0625,
+                15.375,
+                0.28125
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              8,
+              9.649999999999999,
+              8
+            ],
+            "axis": "y",
+            "angle": 45,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          1.0,
+          0.0
+        ]
+      }
+    },
+    "8": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            5.25,
+            -1.3500000000000014,
+            5.25
+          ],
+          "to": [
+            10.75,
+            18.650000000000006,
+            10.75
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                15.4375,
+                0.0625,
+                15.625,
+                0.6875
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                15.6875,
+                0.0625,
+                15.875,
+                0.6875
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                0.0625,
+                0.8125,
+                0.25,
+                1.4375
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                0.3125,
+                0.8125,
+                0.5,
+                1.4375
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                0.5625,
+                0.8125,
+                0.75,
+                1.0
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                0.8125,
+                0.8125,
+                1.0,
+                1.0
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              8,
+              -1.3500000000000014,
+              8
+            ],
+            "axis": "y",
+            "angle": 45,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          3.0,
+          0.0
+        ]
+      }
+    },
+    "9": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            -4.0,
+            1.5,
+            6.0
+          ],
+          "to": [
+            20.0,
+            1.5,
+            24.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                1.0625,
+                1.375,
+                1.8125,
+                0.8125
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                1.875,
+                0.8125,
+                2.625,
+                1.375
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              8,
+              1.5,
+              24
+            ],
+            "axis": "x",
+            "angle": 22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          4.0,
+          -1.0
+        ]
+      }
+    },
+    "10": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            7.5,
+            1.1500000000000057,
+            6.0
+          ],
+          "to": [
+            8.5,
+            2.1500000000000057,
+            24.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                2.6875,
+                0.8125,
+                2.71875,
+                0.84375
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                2.78125,
+                0.8125,
+                3.34375,
+                0.84375
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                3.40625,
+                0.8125,
+                3.4375,
+                0.84375
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                3.5,
+                0.8125,
+                4.0625,
+                0.84375
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                4.125,
+                0.8125,
+                4.15625,
+                1.375
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                4.21875,
+                0.8125,
+                4.25,
+                1.375
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              8,
+              1.5,
+              24
+            ],
+            "axis": "x",
+            "angle": 22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          4.0,
+          -1.0
+        ]
+      }
+    },
+    "11": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            -4.0,
+            8.388300000000001,
+            9.370170000000002
+          ],
+          "to": [
+            20.0,
+            8.388300000000001,
+            23.37017
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                4.3125,
+                1.25,
+                5.0625,
+                0.8125
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                5.125,
+                0.8125,
+                5.875,
+                1.25
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              8,
+              8.388300000000001,
+              23.37017
+            ],
+            "axis": "x",
+            "angle": -22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          4.0,
+          -2.0
+        ]
+      }
+    },
+    "12": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            7.5,
+            8.038300000000007,
+            9.370170000000002
+          ],
+          "to": [
+            8.5,
+            9.038300000000007,
+            23.37017
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                5.9375,
+                0.8125,
+                5.96875,
+                0.84375
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                6.03125,
+                0.8125,
+                6.46875,
+                0.84375
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                6.53125,
+                0.8125,
+                6.5625,
+                0.84375
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                6.625,
+                0.8125,
+                7.0625,
+                0.84375
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                7.125,
+                0.8125,
+                7.15625,
+                1.25
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                7.21875,
+                0.8125,
+                7.25,
+                1.25
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              8,
+              8.388300000000001,
+              23.37017
+            ],
+            "axis": "x",
+            "angle": -22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          4.0,
+          -2.0
+        ]
+      }
+    },
+    "13": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            -4.0,
+            3.0307300000000055,
+            10.435850000000002
+          ],
+          "to": [
+            20.0,
+            3.0307300000000055,
+            26.43585
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                7.3125,
+                1.3125,
+                8.0625,
+                0.8125
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                8.125,
+                0.8125,
+                8.875,
+                1.3125
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              8,
+              3.0307300000000055,
+              26.43585
+            ],
+            "axis": "x",
+            "angle": -45,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          4.0,
+          -3.0
+        ]
+      }
+    },
+    "14": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            7.5,
+            2.680729999999997,
+            10.435850000000002
+          ],
+          "to": [
+            8.5,
+            3.680729999999997,
+            26.43585
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                8.9375,
+                0.8125,
+                8.96875,
+                0.84375
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                9.03125,
+                0.8125,
+                9.53125,
+                0.84375
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                9.59375,
+                0.8125,
+                9.625,
+                0.84375
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                9.6875,
+                0.8125,
+                10.1875,
+                0.84375
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                10.25,
+                0.8125,
+                10.28125,
+                1.3125
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                10.34375,
+                0.8125,
+                10.375,
+                1.3125
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              8,
+              3.0307300000000055,
+              26.43585
+            ],
+            "axis": "x",
+            "angle": -45,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          4.0,
+          -3.0
+        ]
+      }
+    },
+    "15": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            8.0,
+            0.20000000000000284,
+            -4.0
+          ],
+          "to": [
+            25.0,
+            0.20000000000000284,
+            20.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                10.4375,
+                0.8125,
+                10.96875,
+                1.5625
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                11.03125,
+                1.5625,
+                11.5625,
+                0.8125
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              8,
+              0.20000000000000284,
+              8
+            ],
+            "axis": "z",
+            "angle": 22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          4.0,
+          0.0
+        ]
+      }
+    },
+    "16": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            8.0,
+            15.850000000000001,
+            7.5
+          ],
+          "to": [
+            25.0,
+            16.849999999999994,
+            8.5
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                11.625,
+                0.8125,
+                12.15625,
+                0.84375
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                12.21875,
+                0.8125,
+                12.25,
+                0.84375
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                12.3125,
+                0.8125,
+                12.84375,
+                0.84375
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                12.90625,
+                0.8125,
+                12.9375,
+                0.84375
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                13.0,
+                0.8125,
+                13.53125,
+                0.84375
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                13.59375,
+                0.8125,
+                14.125,
+                0.84375
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              8,
+              16.200000000000003,
+              8
+            ],
+            "axis": "z",
+            "angle": 22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          3.0,
+          0.0
+        ]
+      }
+    },
+    "17": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            7.705950000000001,
+            6.705619999999996,
+            -4.0
+          ],
+          "to": [
+            21.70595,
+            6.705619999999996,
+            20.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                14.1875,
+                0.8125,
+                14.625,
+                1.5625
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                14.6875,
+                1.5625,
+                15.125,
+                0.8125
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              7.705950000000001,
+              6.705619999999996,
+              8
+            ],
+            "axis": "z",
+            "angle": -22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          4.0,
+          0.0
+        ]
+      }
+    },
+    "18": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            7.705950000000001,
+            6.355620000000002,
+            7.5
+          ],
+          "to": [
+            21.70595,
+            7.355620000000002,
+            8.5
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                15.1875,
+                0.8125,
+                15.625,
+                0.84375
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                15.6875,
+                0.8125,
+                15.71875,
+                0.84375
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                0.0625,
+                1.625,
+                0.5,
+                1.65625
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                0.5625,
+                1.625,
+                0.59375,
+                1.65625
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                0.65625,
+                1.625,
+                1.09375,
+                1.65625
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                1.15625,
+                1.625,
+                1.59375,
+                1.65625
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              7.705950000000001,
+              6.705619999999996,
+              8
+            ],
+            "axis": "z",
+            "angle": -22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          4.0,
+          0.0
+        ]
+      }
+    },
+    "19": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            4.640270000000001,
+            1.3480500000000006,
+            -4.0
+          ],
+          "to": [
+            22.64027,
+            1.3480500000000006,
+            20.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                1.65625,
+                1.625,
+                2.21875,
+                2.375
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                2.28125,
+                2.375,
+                2.84375,
+                1.625
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              4.640270000000001,
+              1.3480500000000006,
+              8
+            ],
+            "axis": "z",
+            "angle": -45,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          2.0,
+          4.0,
+          0.0
+        ]
+      }
+    },
+    "20": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            4.640270000000001,
+            0.9980500000000063,
+            7.5
+          ],
+          "to": [
+            22.64027,
+            1.9980500000000063,
+            8.5
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                2.90625,
+                1.625,
+                3.46875,
+                1.65625
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                3.53125,
+                1.625,
+                3.5625,
+                1.65625
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                3.625,
+                1.625,
+                4.1875,
+                1.65625
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                4.25,
+                1.625,
+                4.28125,
+                1.65625
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                4.34375,
+                1.625,
+                4.90625,
+                1.65625
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                4.96875,
+                1.625,
+                5.53125,
+                1.65625
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              4.640270000000001,
+              1.3480500000000006,
+              8
+            ],
+            "axis": "z",
+            "angle": -45,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          2.0,
+          4.0,
+          0.0
+        ]
+      }
+    },
+    "21": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            -4.5,
+            1.7999999999999972,
+            8.0
+          ],
+          "to": [
+            20.5,
+            1.7999999999999972,
+            27.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                5.59375,
+                1.625,
+                6.375,
+                2.21875
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                6.4375,
+                2.21875,
+                7.21875,
+                1.625
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              8,
+              1.7999999999999972,
+              8
+            ],
+            "axis": "x",
+            "angle": -22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          4.0,
+          0.0
+        ]
+      }
+    },
+    "22": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            7.5,
+            1.4500000000000028,
+            8.0
+          ],
+          "to": [
+            8.5,
+            2.450000000000003,
+            27.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                7.28125,
+                1.625,
+                7.3125,
+                1.65625
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                7.375,
+                1.625,
+                7.96875,
+                1.65625
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                8.03125,
+                1.625,
+                8.0625,
+                1.65625
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                8.125,
+                1.625,
+                8.71875,
+                1.65625
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                8.78125,
+                1.625,
+                8.8125,
+                2.21875
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                8.875,
+                1.625,
+                8.90625,
+                2.21875
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              8,
+              1.7999999999999972,
+              8
+            ],
+            "axis": "x",
+            "angle": -22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          4.0,
+          0.0
+        ]
+      }
+    },
+    "23": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            -4.5,
+            9.070989999999995,
+            9.553709999999999
+          ],
+          "to": [
+            20.5,
+            9.070989999999995,
+            23.553710000000002
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                8.96875,
+                1.625,
+                9.75,
+                2.0625
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                9.8125,
+                2.0625,
+                10.59375,
+                1.625
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              8,
+              9.070989999999995,
+              9.553709999999999
+            ],
+            "axis": "x",
+            "angle": 22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          4.0,
+          1.0
+        ]
+      }
+    },
+    "24": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            7.5,
+            8.72099,
+            9.553709999999999
+          ],
+          "to": [
+            8.5,
+            9.72099,
+            23.553710000000002
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                10.65625,
+                1.625,
+                10.6875,
+                1.65625
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                10.75,
+                1.625,
+                11.1875,
+                1.65625
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                11.25,
+                1.625,
+                11.28125,
+                1.65625
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                11.34375,
+                1.625,
+                11.78125,
+                1.65625
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                11.84375,
+                1.625,
+                11.875,
+                2.0625
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                11.9375,
+                1.625,
+                11.96875,
+                2.0625
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              8,
+              9.070989999999995,
+              9.553709999999999
+            ],
+            "axis": "x",
+            "angle": 22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          4.0,
+          1.0
+        ]
+      }
+    },
+    "25": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            -4.5,
+            3.7134199999999993,
+            6.488019999999999
+          ],
+          "to": [
+            20.5,
+            3.7134199999999993,
+            22.48802
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                12.03125,
+                1.625,
+                12.8125,
+                2.125
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                12.875,
+                2.125,
+                13.65625,
+                1.625
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              8,
+              3.7134199999999993,
+              6.488019999999999
+            ],
+            "axis": "x",
+            "angle": 45,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          4.0,
+          2.0
+        ]
+      }
+    },
+    "26": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            7.5,
+            3.363420000000005,
+            6.488019999999999
+          ],
+          "to": [
+            8.5,
+            4.363420000000005,
+            22.48802
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                13.71875,
+                1.625,
+                13.75,
+                1.65625
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                13.8125,
+                1.625,
+                14.3125,
+                1.65625
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                14.375,
+                1.625,
+                14.40625,
+                1.65625
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                14.46875,
+                1.625,
+                14.96875,
+                1.65625
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                15.03125,
+                1.625,
+                15.0625,
+                2.125
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                15.125,
+                1.625,
+                15.15625,
+                2.125
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              8,
+              3.7134199999999993,
+              6.488019999999999
+            ],
+            "axis": "x",
+            "angle": 45,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          4.0,
+          2.0
+        ]
+      }
+    },
+    "27": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            6.0,
+            1.2999999999999972,
+            -4.0
+          ],
+          "to": [
+            24.0,
+            1.2999999999999972,
+            20.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                15.78125,
+                1.625,
+                15.21875,
+                2.375
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                0.625,
+                3.1875,
+                0.0625,
+                2.4375
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              24,
+              1.2999999999999972,
+              8
+            ],
+            "axis": "z",
+            "angle": -22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          -1.0,
+          4.0,
+          0.0
+        ]
+      }
+    },
+    "28": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            6.0,
+            0.9500000000000028,
+            7.5
+          ],
+          "to": [
+            24.0,
+            1.9500000000000028,
+            8.5
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                0.6875,
+                2.4375,
+                1.25,
+                2.46875
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                1.3125,
+                2.4375,
+                1.34375,
+                2.46875
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                1.40625,
+                2.4375,
+                1.96875,
+                2.46875
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                2.03125,
+                2.4375,
+                2.0625,
+                2.46875
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                2.125,
+                2.4375,
+                2.6875,
+                2.46875
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                2.75,
+                2.4375,
+                3.3125,
+                2.46875
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              24,
+              1.2999999999999972,
+              8
+            ],
+            "axis": "z",
+            "angle": -22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          -1.0,
+          4.0,
+          0.0
+        ]
+      }
+    },
+    "29": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            9.370170000000002,
+            8.188299999999998,
+            -4.0
+          ],
+          "to": [
+            23.37017,
+            8.188299999999998,
+            20.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                3.8125,
+                2.4375,
+                3.375,
+                3.1875
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                4.3125,
+                3.1875,
+                3.875,
+                2.4375
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              23.37017,
+              8.188299999999998,
+              8
+            ],
+            "axis": "z",
+            "angle": 22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          -2.0,
+          4.0,
+          0.0
+        ]
+      }
+    },
+    "30": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            9.370170000000002,
+            7.838300000000004,
+            7.5
+          ],
+          "to": [
+            23.37017,
+            8.838300000000004,
+            8.5
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                4.375,
+                2.4375,
+                4.8125,
+                2.46875
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                4.875,
+                2.4375,
+                4.90625,
+                2.46875
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                4.96875,
+                2.4375,
+                5.40625,
+                2.46875
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                5.46875,
+                2.4375,
+                5.5,
+                2.46875
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                5.5625,
+                2.4375,
+                6.0,
+                2.46875
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                6.0625,
+                2.4375,
+                6.5,
+                2.46875
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              23.37017,
+              8.188299999999998,
+              8
+            ],
+            "axis": "z",
+            "angle": 22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          -2.0,
+          4.0,
+          0.0
+        ]
+      }
+    },
+    "31": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            10.435850000000002,
+            2.8307300000000026,
+            -4.0
+          ],
+          "to": [
+            26.43585,
+            2.8307300000000026,
+            20.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                7.0625,
+                2.4375,
+                6.5625,
+                3.1875
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                7.625,
+                3.1875,
+                7.125,
+                2.4375
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              26.43585,
+              2.8307300000000026,
+              8
+            ],
+            "axis": "z",
+            "angle": 45,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          -3.0,
+          4.0,
+          0.0
+        ]
+      }
+    },
+    "32": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            10.435850000000002,
+            2.480729999999994,
+            7.5
+          ],
+          "to": [
+            26.43585,
+            3.480729999999994,
+            8.5
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                7.6875,
+                2.4375,
+                8.1875,
+                2.46875
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                8.25,
+                2.4375,
+                8.28125,
+                2.46875
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                8.34375,
+                2.4375,
+                8.84375,
+                2.46875
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                8.90625,
+                2.4375,
+                8.9375,
+                2.46875
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                9.0,
+                2.4375,
+                9.5,
+                2.46875
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                9.5625,
+                2.4375,
+                10.0625,
+                2.46875
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              26.43585,
+              2.8307300000000026,
+              8
+            ],
+            "axis": "z",
+            "angle": 45,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          -3.0,
+          4.0,
+          0.0
+        ]
+      }
+    },
+    "33": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            4.0,
+            6.099999999999994,
+            4.0
+          ],
+          "to": [
+            28.0,
+            6.099999999999994,
+            28.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                10.125,
+                2.4375,
+                10.875,
+                3.1875
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                12.4375,
+                3.1875,
+                13.1875,
+                2.4375
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              40,
+              6.099999999999994,
+              40
+            ],
+            "axis": "x",
+            "angle": -22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          -2.0,
+          4.0,
+          -2.0
+        ]
+      }
+    },
+    "34": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            4.0,
+            6.099999999999994,
+            -4.0
+          ],
+          "to": [
+            28.0,
+            6.099999999999994,
+            20.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                10.125,
+                3.1875,
+                10.875,
+                3.9375
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                12.4375,
+                3.9375,
+                13.1875,
+                3.1875
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              40,
+              6.099999999999994,
+              8
+            ],
+            "axis": "x",
+            "angle": -22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          -2.0,
+          4.0,
+          0.0
+        ]
+      }
+    },
+    "35": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            4.0,
+            6.099999999999994,
+            4.0
+          ],
+          "to": [
+            28.0,
+            6.099999999999994,
+            28.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                10.125,
+                3.9375,
+                10.875,
+                4.6875
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                12.4375,
+                4.6875,
+                13.1875,
+                3.9375
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              40,
+              6.099999999999994,
+              -8
+            ],
+            "axis": "x",
+            "angle": -22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          -2.0,
+          4.0,
+          1.0
+        ]
+      }
+    },
+    "36": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            -4.0,
+            6.099999999999994,
+            4.0
+          ],
+          "to": [
+            20.0,
+            6.099999999999994,
+            28.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                10.875,
+                2.4375,
+                11.625,
+                3.1875
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                13.1875,
+                3.1875,
+                13.9375,
+                2.4375
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              8,
+              6.099999999999994,
+              40
+            ],
+            "axis": "x",
+            "angle": -22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          4.0,
+          -2.0
+        ]
+      }
+    },
+    "37": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            -4.0,
+            6.099999999999994,
+            -4.0
+          ],
+          "to": [
+            20.0,
+            6.099999999999994,
+            20.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                10.875,
+                3.1875,
+                11.625,
+                3.9375
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                13.1875,
+                3.9375,
+                13.9375,
+                3.1875
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              8,
+              6.099999999999994,
+              8
+            ],
+            "axis": "x",
+            "angle": -22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          4.0,
+          0.0
+        ]
+      }
+    },
+    "38": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            -4.0,
+            6.099999999999994,
+            4.0
+          ],
+          "to": [
+            20.0,
+            6.099999999999994,
+            28.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                10.875,
+                3.9375,
+                11.625,
+                4.6875
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                13.1875,
+                4.6875,
+                13.9375,
+                3.9375
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              8,
+              6.099999999999994,
+              -8
+            ],
+            "axis": "x",
+            "angle": -22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          4.0,
+          1.0
+        ]
+      }
+    },
+    "39": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            4.0,
+            6.099999999999994,
+            4.0
+          ],
+          "to": [
+            28.0,
+            6.099999999999994,
+            28.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                11.625,
+                2.4375,
+                12.375,
+                3.1875
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                13.9375,
+                3.1875,
+                14.6875,
+                2.4375
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              -8,
+              6.099999999999994,
+              40
+            ],
+            "axis": "x",
+            "angle": -22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          4.0,
+          -2.0
+        ]
+      }
+    },
+    "40": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            4.0,
+            6.099999999999994,
+            -4.0
+          ],
+          "to": [
+            28.0,
+            6.099999999999994,
+            20.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                11.625,
+                3.1875,
+                12.375,
+                3.9375
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                13.9375,
+                3.9375,
+                14.6875,
+                3.1875
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              -8,
+              6.099999999999994,
+              8
+            ],
+            "axis": "x",
+            "angle": -22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          4.0,
+          0.0
+        ]
+      }
+    },
+    "41": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            4.0,
+            6.099999999999994,
+            4.0
+          ],
+          "to": [
+            28.0,
+            6.099999999999994,
+            28.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                11.625,
+                3.9375,
+                12.375,
+                4.6875
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                13.9375,
+                4.6875,
+                14.6875,
+                3.9375
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              -8,
+              6.099999999999994,
+              -8
+            ],
+            "axis": "x",
+            "angle": -22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          4.0,
+          1.0
+        ]
+      }
+    },
+    "42": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            4.0,
+            8.099999999999994,
+            4.0
+          ],
+          "to": [
+            28.0,
+            8.099999999999994,
+            28.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                0.0625,
+                4.75,
+                0.8125,
+                5.5
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                2.375,
+                5.5,
+                3.125,
+                4.75
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              40,
+              8.099999999999994,
+              40
+            ],
+            "axis": "x",
+            "angle": -22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          -2.0,
+          4.0,
+          -2.0
+        ]
+      }
+    },
+    "43": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            4.0,
+            8.099999999999994,
+            -4.0
+          ],
+          "to": [
+            28.0,
+            8.099999999999994,
+            20.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                0.0625,
+                5.5,
+                0.8125,
+                6.25
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                2.375,
+                6.25,
+                3.125,
+                5.5
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              40,
+              8.099999999999994,
+              8
+            ],
+            "axis": "x",
+            "angle": -22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          -2.0,
+          4.0,
+          0.0
+        ]
+      }
+    },
+    "44": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            4.0,
+            8.099999999999994,
+            4.0
+          ],
+          "to": [
+            28.0,
+            8.099999999999994,
+            28.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                0.0625,
+                6.25,
+                0.8125,
+                7.0
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                2.375,
+                7.0,
+                3.125,
+                6.25
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              40,
+              8.099999999999994,
+              -8
+            ],
+            "axis": "x",
+            "angle": -22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          -2.0,
+          4.0,
+          1.0
+        ]
+      }
+    },
+    "45": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            -4.0,
+            8.099999999999994,
+            4.0
+          ],
+          "to": [
+            20.0,
+            8.099999999999994,
+            28.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                0.8125,
+                4.75,
+                1.5625,
+                5.5
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                3.125,
+                5.5,
+                3.875,
+                4.75
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              8,
+              8.099999999999994,
+              40
+            ],
+            "axis": "x",
+            "angle": -22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          4.0,
+          -2.0
+        ]
+      }
+    },
+    "46": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            -4.0,
+            8.099999999999994,
+            -4.0
+          ],
+          "to": [
+            20.0,
+            8.099999999999994,
+            20.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                0.8125,
+                5.5,
+                1.5625,
+                6.25
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                3.125,
+                6.25,
+                3.875,
+                5.5
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              8,
+              8.099999999999994,
+              8
+            ],
+            "axis": "x",
+            "angle": -22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          4.0,
+          0.0
+        ]
+      }
+    },
+    "47": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            -4.0,
+            8.099999999999994,
+            4.0
+          ],
+          "to": [
+            20.0,
+            8.099999999999994,
+            28.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                0.8125,
+                6.25,
+                1.5625,
+                7.0
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                3.125,
+                7.0,
+                3.875,
+                6.25
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              8,
+              8.099999999999994,
+              -8
+            ],
+            "axis": "x",
+            "angle": -22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          4.0,
+          1.0
+        ]
+      }
+    },
+    "48": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            4.0,
+            8.099999999999994,
+            4.0
+          ],
+          "to": [
+            28.0,
+            8.099999999999994,
+            28.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                1.5625,
+                4.75,
+                2.3125,
+                5.5
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                3.875,
+                5.5,
+                4.625,
+                4.75
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              -8,
+              8.099999999999994,
+              40
+            ],
+            "axis": "x",
+            "angle": -22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          4.0,
+          -2.0
+        ]
+      }
+    },
+    "49": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            4.0,
+            8.099999999999994,
+            -4.0
+          ],
+          "to": [
+            28.0,
+            8.099999999999994,
+            20.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                1.5625,
+                5.5,
+                2.3125,
+                6.25
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                3.875,
+                6.25,
+                4.625,
+                5.5
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              -8,
+              8.099999999999994,
+              8
+            ],
+            "axis": "x",
+            "angle": -22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          4.0,
+          0.0
+        ]
+      }
+    },
+    "50": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            4.0,
+            8.099999999999994,
+            4.0
+          ],
+          "to": [
+            28.0,
+            8.099999999999994,
+            28.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                1.5625,
+                6.25,
+                2.3125,
+                7.0
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                3.875,
+                7.0,
+                4.625,
+                6.25
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              -8,
+              8.099999999999994,
+              -8
+            ],
+            "axis": "x",
+            "angle": -22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          4.0,
+          1.0
+        ]
+      }
+    },
+    "51": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            4.0,
+            5.200000000000003,
+            4.0
+          ],
+          "to": [
+            28.0,
+            5.200000000000003,
+            28.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                4.6875,
+                4.75,
+                5.4375,
+                5.5
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                7.0,
+                5.5,
+                7.75,
+                4.75
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              40,
+              5.200000000000003,
+              40
+            ],
+            "axis": "x",
+            "angle": 22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          -2.0,
+          4.0,
+          -2.0
+        ]
+      }
+    },
+    "52": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            4.0,
+            5.200000000000003,
+            -4.0
+          ],
+          "to": [
+            28.0,
+            5.200000000000003,
+            20.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                4.6875,
+                5.5,
+                5.4375,
+                6.25
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                7.0,
+                6.25,
+                7.75,
+                5.5
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              40,
+              5.200000000000003,
+              8
+            ],
+            "axis": "x",
+            "angle": 22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          -2.0,
+          4.0,
+          0.0
+        ]
+      }
+    },
+    "53": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            4.0,
+            5.200000000000003,
+            4.0
+          ],
+          "to": [
+            28.0,
+            5.200000000000003,
+            28.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                4.6875,
+                6.25,
+                5.4375,
+                7.0
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                7.0,
+                7.0,
+                7.75,
+                6.25
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              40,
+              5.200000000000003,
+              -8
+            ],
+            "axis": "x",
+            "angle": 22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          -2.0,
+          4.0,
+          1.0
+        ]
+      }
+    },
+    "54": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            -4.0,
+            5.200000000000003,
+            4.0
+          ],
+          "to": [
+            20.0,
+            5.200000000000003,
+            28.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                5.4375,
+                4.75,
+                6.1875,
+                5.5
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                7.75,
+                5.5,
+                8.5,
+                4.75
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              8,
+              5.200000000000003,
+              40
+            ],
+            "axis": "x",
+            "angle": 22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          4.0,
+          -2.0
+        ]
+      }
+    },
+    "55": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            -4.0,
+            5.200000000000003,
+            -4.0
+          ],
+          "to": [
+            20.0,
+            5.200000000000003,
+            20.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                5.4375,
+                5.5,
+                6.1875,
+                6.25
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                7.75,
+                6.25,
+                8.5,
+                5.5
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              8,
+              5.200000000000003,
+              8
+            ],
+            "axis": "x",
+            "angle": 22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          4.0,
+          0.0
+        ]
+      }
+    },
+    "56": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            -4.0,
+            5.200000000000003,
+            4.0
+          ],
+          "to": [
+            20.0,
+            5.200000000000003,
+            28.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                5.4375,
+                6.25,
+                6.1875,
+                7.0
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                7.75,
+                7.0,
+                8.5,
+                6.25
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              8,
+              5.200000000000003,
+              -8
+            ],
+            "axis": "x",
+            "angle": 22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          4.0,
+          1.0
+        ]
+      }
+    },
+    "57": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            4.0,
+            5.200000000000003,
+            4.0
+          ],
+          "to": [
+            28.0,
+            5.200000000000003,
+            28.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                6.1875,
+                4.75,
+                6.9375,
+                5.5
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                8.5,
+                5.5,
+                9.25,
+                4.75
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              -8,
+              5.200000000000003,
+              40
+            ],
+            "axis": "x",
+            "angle": 22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          4.0,
+          -2.0
+        ]
+      }
+    },
+    "58": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            4.0,
+            5.200000000000003,
+            -4.0
+          ],
+          "to": [
+            28.0,
+            5.200000000000003,
+            20.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                6.1875,
+                5.5,
+                6.9375,
+                6.25
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                8.5,
+                6.25,
+                9.25,
+                5.5
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              -8,
+              5.200000000000003,
+              8
+            ],
+            "axis": "x",
+            "angle": 22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          4.0,
+          0.0
+        ]
+      }
+    },
+    "59": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            4.0,
+            5.200000000000003,
+            4.0
+          ],
+          "to": [
+            28.0,
+            5.200000000000003,
+            28.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                6.1875,
+                6.25,
+                6.9375,
+                7.0
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                8.5,
+                7.0,
+                9.25,
+                6.25
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              -8,
+              5.200000000000003,
+              -8
+            ],
+            "axis": "x",
+            "angle": 22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          4.0,
+          1.0
+        ]
+      }
+    },
+    "60": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            4.0,
+            7.400000000000006,
+            4.0
+          ],
+          "to": [
+            28.0,
+            7.400000000000006,
+            28.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                9.3125,
+                4.75,
+                10.0625,
+                5.5
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                11.625,
+                5.5,
+                12.375,
+                4.75
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              40,
+              7.400000000000006,
+              40
+            ],
+            "axis": "x",
+            "angle": 22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          -2.0,
+          4.0,
+          -2.0
+        ]
+      }
+    },
+    "61": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            4.0,
+            7.400000000000006,
+            -4.0
+          ],
+          "to": [
+            28.0,
+            7.400000000000006,
+            20.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                9.3125,
+                5.5,
+                10.0625,
+                6.25
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                11.625,
+                6.25,
+                12.375,
+                5.5
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              40,
+              7.400000000000006,
+              8
+            ],
+            "axis": "x",
+            "angle": 22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          -2.0,
+          4.0,
+          0.0
+        ]
+      }
+    },
+    "62": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            4.0,
+            7.400000000000006,
+            4.0
+          ],
+          "to": [
+            28.0,
+            7.400000000000006,
+            28.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                9.3125,
+                6.25,
+                10.0625,
+                7.0
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                11.625,
+                7.0,
+                12.375,
+                6.25
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              40,
+              7.400000000000006,
+              -8
+            ],
+            "axis": "x",
+            "angle": 22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          -2.0,
+          4.0,
+          1.0
+        ]
+      }
+    },
+    "63": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            -4.0,
+            7.400000000000006,
+            4.0
+          ],
+          "to": [
+            20.0,
+            7.400000000000006,
+            28.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                10.0625,
+                4.75,
+                10.8125,
+                5.5
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                12.375,
+                5.5,
+                13.125,
+                4.75
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              8,
+              7.400000000000006,
+              40
+            ],
+            "axis": "x",
+            "angle": 22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          4.0,
+          -2.0
+        ]
+      }
+    },
+    "64": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            -4.0,
+            7.400000000000006,
+            -4.0
+          ],
+          "to": [
+            20.0,
+            7.400000000000006,
+            20.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                10.0625,
+                5.5,
+                10.8125,
+                6.25
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                12.375,
+                6.25,
+                13.125,
+                5.5
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              8,
+              7.400000000000006,
+              8
+            ],
+            "axis": "x",
+            "angle": 22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          4.0,
+          0.0
+        ]
+      }
+    },
+    "65": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            -4.0,
+            7.400000000000006,
+            4.0
+          ],
+          "to": [
+            20.0,
+            7.400000000000006,
+            28.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                10.0625,
+                6.25,
+                10.8125,
+                7.0
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                12.375,
+                7.0,
+                13.125,
+                6.25
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              8,
+              7.400000000000006,
+              -8
+            ],
+            "axis": "x",
+            "angle": 22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          4.0,
+          1.0
+        ]
+      }
+    },
+    "66": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            4.0,
+            7.400000000000006,
+            4.0
+          ],
+          "to": [
+            28.0,
+            7.400000000000006,
+            28.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                10.8125,
+                4.75,
+                11.5625,
+                5.5
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                13.125,
+                5.5,
+                13.875,
+                4.75
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              -8,
+              7.400000000000006,
+              40
+            ],
+            "axis": "x",
+            "angle": 22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          4.0,
+          -2.0
+        ]
+      }
+    },
+    "67": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            4.0,
+            7.400000000000006,
+            -4.0
+          ],
+          "to": [
+            28.0,
+            7.400000000000006,
+            20.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                10.8125,
+                5.5,
+                11.5625,
+                6.25
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                13.125,
+                6.25,
+                13.875,
+                5.5
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              -8,
+              7.400000000000006,
+              8
+            ],
+            "axis": "x",
+            "angle": 22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          4.0,
+          0.0
+        ]
+      }
+    },
+    "68": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            4.0,
+            7.400000000000006,
+            4.0
+          ],
+          "to": [
+            28.0,
+            7.400000000000006,
+            28.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                10.8125,
+                6.25,
+                11.5625,
+                7.0
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                13.125,
+                7.0,
+                13.875,
+                6.25
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              -8,
+              7.400000000000006,
+              -8
+            ],
+            "axis": "x",
+            "angle": 22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          4.0,
+          1.0
+        ]
+      }
+    },
+    "69": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            14.0,
+            7.0,
+            -4.0
+          ],
+          "to": [
+            32.0,
+            7.0,
+            26.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                13.9375,
+                5.6875,
+                14.5,
+                4.75
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                14.5625,
+                4.75,
+                15.125,
+                5.6875
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              23,
+              7,
+              26
+            ],
+            "axis": "x",
+            "angle": -45,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          -1.0,
+          4.0,
+          -1.0
+        ]
+      }
+    },
+    "70": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            -11.0,
+            7.299999999999997,
+            12.0
+          ],
+          "to": [
+            20.0,
+            7.299999999999997,
+            32.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                0.0625,
+                7.0625,
+                1.03125,
+                7.6875
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                1.09375,
+                7.6875,
+                2.0625,
+                7.0625
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              -11,
+              7.299999999999997,
+              22
+            ],
+            "axis": "z",
+            "angle": -45,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          1.0,
+          4.0,
+          -1.0
+        ]
+      }
+    },
+    "71": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            1.0,
+            8.0,
+            -11.0
+          ],
+          "to": [
+            19.0,
+            8.0,
+            17.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                2.125,
+                7.0625,
+                2.6875,
+                7.9375
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                2.75,
+                7.9375,
+                3.3125,
+                7.0625
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              10,
+              8,
+              -11
+            ],
+            "axis": "x",
+            "angle": 45,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          4.0,
+          1.0
+        ]
+      }
+    },
+    "72": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            -3.0,
+            6.799999999999997,
+            1.0
+          ],
+          "to": [
+            26.0,
+            6.799999999999997,
+            19.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                4.28125,
+                7.0625,
+                3.375,
+                7.625
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                5.25,
+                7.625,
+                4.34375,
+                7.0625
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              26,
+              6.799999999999997,
+              10
+            ],
+            "axis": "z",
+            "angle": 45,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          -1.0,
+          4.0,
+          0.0
+        ]
+      }
+    },
+    "73": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            3.0,
+            4.0,
+            7.0
+          ],
+          "to": [
+            15.0,
+            4.0,
+            23.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                5.3125,
+                7.5625,
+                5.6875,
+                7.0625
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                5.75,
+                7.0625,
+                6.125,
+                7.5625
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              9,
+              4,
+              23
+            ],
+            "axis": "x",
+            "angle": 22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          4.0,
+          -1.0
+        ]
+      }
+    },
+    "74": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            1.0,
+            4.799999999999997,
+            9.0
+          ],
+          "to": [
+            13.0,
+            4.799999999999997,
+            27.0
+          ],
+          "faces": {
+            "up": {
+              "uv": [
+                6.1875,
+                7.0625,
+                6.5625,
+                7.625
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                6.625,
+                7.625,
+                7.0,
+                7.0625
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              7,
+              4.799999999999997,
+              9
+            ],
+            "axis": "x",
+            "angle": -22.5,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          4.0,
+          0.0
+        ]
+      }
+    },
+    "75": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            2.0,
+            1.7000000000000028,
+            1.0
+          ],
+          "to": [
+            13.0,
+            6.700000000000003,
+            12.0
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                7.0625,
+                7.0625,
+                7.40625,
+                7.21875
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                7.46875,
+                7.0625,
+                7.8125,
+                7.21875
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                7.875,
+                7.0625,
+                8.21875,
+                7.21875
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                8.28125,
+                7.0625,
+                8.625,
+                7.21875
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                8.6875,
+                7.0625,
+                9.03125,
+                7.40625
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                9.09375,
+                7.0625,
+                9.4375,
+                7.40625
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              8,
+              4,
+              8
+            ],
+            "axis": "y",
+            "angle": 45,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          4.0,
+          0.0
+        ]
+      }
+    },
+    "76": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            4.5,
+            4.700000000000003,
+            4.5
+          ],
+          "to": [
+            11.5,
+            7.700000000000003,
+            11.5
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                9.5,
+                7.0625,
+                9.71875,
+                7.15625
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                9.78125,
+                7.0625,
+                10.0,
+                7.15625
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                10.0625,
+                7.0625,
+                10.28125,
+                7.15625
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                10.34375,
+                7.0625,
+                10.5625,
+                7.15625
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                10.625,
+                7.0625,
+                10.84375,
+                7.28125
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                10.90625,
+                7.0625,
+                11.125,
+                7.28125
+              ],
+              "texture": "#0"
+            }
+          },
+          "rotation": {
+            "origin": [
+              8,
+              6,
+              8
+            ],
+            "axis": "y",
+            "angle": 45,
+            "rescale": false
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          4.0,
+          0.0
+        ]
+      }
+    },
+    "77": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            3.25,
+            12.0,
+            3.25
+          ],
+          "to": [
+            12.75,
+            14.0,
+            12.75
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                11.1875,
+                7.0625,
+                11.5,
+                7.125
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                11.5625,
+                7.0625,
+                11.875,
+                7.125
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                11.9375,
+                7.0625,
+                12.25,
+                7.125
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                12.3125,
+                7.0625,
+                12.625,
+                7.125
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                12.6875,
+                7.0625,
+                13.0,
+                7.375
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                13.0625,
+                7.0625,
+                13.375,
+                7.375
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "78": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            3.25,
+            8.0,
+            3.35
+          ],
+          "to": [
+            12.75,
+            10.0,
+            12.85
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                13.4375,
+                7.0625,
+                13.75,
+                7.125
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                13.8125,
+                7.0625,
+                14.125,
+                7.125
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                14.1875,
+                7.0625,
+                14.5,
+                7.125
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                14.5625,
+                7.0625,
+                14.875,
+                7.125
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                14.9375,
+                7.0625,
+                15.25,
+                7.375
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                15.3125,
+                7.0625,
+                15.625,
+                7.375
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          1.0,
+          0.0
+        ]
+      }
+    },
+    "79": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            3.75,
+            5.0,
+            3.6
+          ],
+          "to": [
+            12.25,
+            7.0,
+            12.1
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                0.0625,
+                8.0,
+                0.34375,
+                8.0625
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                0.40625,
+                8.0,
+                0.6875,
+                8.0625
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                0.75,
+                8.0,
+                1.03125,
+                8.0625
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                1.09375,
+                8.0,
+                1.375,
+                8.0625
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                1.4375,
+                8.0,
+                1.71875,
+                8.28125
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                1.78125,
+                8.0,
+                2.0625,
+                8.28125
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          2.0,
+          0.0
+        ]
+      }
+    },
+    "80": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            4.0,
+            1.0,
+            4.15
+          ],
+          "to": [
+            12.0,
+            3.0,
+            12.15
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                2.125,
+                8.0,
+                2.375,
+                8.0625
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                2.4375,
+                8.0,
+                2.6875,
+                8.0625
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                2.75,
+                8.0,
+                3.0,
+                8.0625
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                3.0625,
+                8.0,
+                3.3125,
+                8.0625
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                3.375,
+                8.0,
+                3.625,
+                8.25
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                3.6875,
+                8.0,
+                3.9375,
+                8.25
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          3.0,
+          0.0
+        ]
+      }
+    },
+    "81": {
+      "parent": "minecraft:block/block",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/south_palm_ground_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_ground_1",
+        "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+      },
+      "render_type": "minecraft:cutout",
+      "elements": [
+        {
+          "from": [
+            3.8,
+            10.0,
+            3.8
+          ],
+          "to": [
+            12.2,
+            12.0,
+            12.2
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                4.0,
+                8.0,
+                4.25,
+                8.0625
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                4.3125,
+                8.0,
+                4.5625,
+                8.0625
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                4.625,
+                8.0,
+                4.875,
+                8.0625
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                4.9375,
+                8.0,
+                5.1875,
+                8.0625
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                5.25,
+                8.0,
+                5.5,
+                8.25
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                5.5625,
+                8.0,
+                5.8125,
+                8.25
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ],
+      "transform": {
+        "translation": [
+          0.0,
+          3.0,
+          0.0
+        ]
+      }
+    }
+  },
+  "stardewcraft:collision": {
+    "mode": "custom",
+    "boxes": [
+      {
+        "from": [
+          2,
+          0,
+          2
+        ],
+        "to": [
+          14,
+          8,
+          14
+        ]
+      },
+      {
+        "from": [
+          3,
+          7,
+          3
+        ],
+        "to": [
+          13,
+          27,
+          13
+        ]
+      },
+      {
+        "from": [
+          3,
+          26,
+          3
+        ],
+        "to": [
+          13,
+          48,
+          13
+        ]
+      },
+      {
+        "from": [
+          3,
+          47,
+          3
+        ],
+        "to": [
+          13,
+          67,
+          13
+        ]
+      }
+    ],
+    "policy": "compound_palm_trunk"
+  }
+}

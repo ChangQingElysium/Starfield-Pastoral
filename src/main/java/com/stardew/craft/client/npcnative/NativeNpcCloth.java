@@ -10,6 +10,8 @@ public final class NativeNpcCloth {
     private final NativeNpcModel model;
     private final float depthSign;
     private final NativeNpcModel.Cloth settings;
+    private final float attachmentFalloff,envelopeFalloff;
+    private final NativeNpcSkin hipSkin;
     private final int bone,right,left,control,rows;
     private final int[] legSide;
     private final float[][] rest,legs,otherLeg,shape,envelope,influence;
@@ -21,6 +23,12 @@ public final class NativeNpcCloth {
 
     public NativeNpcCloth(NativeNpcModel model) {
         this.model=model;settings=model.profile().cloth();
+        // A three-unit coat hem cannot spend most of its height in a long robe's
+        // fixed attachment band. Keep the exact seam fixed, then clear the thighs.
+        float length=settings.anchorY()-settings.hemY();
+        attachmentFalloff=length<=4?length*.08F:1.4F;
+        envelopeFalloff=length<=4?length*.08F:1.2F;
+        hipSkin=model.quads().stream().anyMatch(q->hipBound(model,q))?new NativeNpcSkin(model):null;
         // Solve a front apron in mirrored depth space using the same connected-panel constraints.
         depthSign=settings.kind().equals("apron")?-1:1;
         bone=index(settings.bone());right=index("leg_right");left=index("leg_left");control=index("cloth_motion");
@@ -64,6 +72,10 @@ public final class NativeNpcCloth {
     private int index(String name) {
         for(int i=0;i<model.bones().size();i++)if(model.bones().get(i).name().equals(name))return i;
         throw new IllegalArgumentException("Missing cloth bone: "+name);
+    }
+    public static boolean hipBound(NativeNpcModel model,NativeNpcModel.Quad q) {
+        return q.skin()!=null && model.bones().get(q.skin().upper()).name().equals("root")
+                && model.bones().get(q.skin().lower()).name().startsWith("leg_");
     }
     private static boolean valid(float[] bounds) { return bounds[0]<=bounds[1]&&bounds[2]<=bounds[3]; }
     private static void clear(float[][] bounds) {
@@ -121,14 +133,19 @@ public final class NativeNpcCloth {
 
     /** Returns world/model-space vertices only for cloth quads; arrays are reused until the next update. */
     public float[][][] update(Matrix4f[] transforms) {
+        var hipSurface=hipSkin==null?null:hipSkin.update(transforms,null);
         inverse.set(transforms[bone]).invert();clear(legs);clear(otherLeg);
         relative.set(inverse).mul(transforms[control]);relative.transformPosition(motion.set(0,0,0));
         // Optional activity-authored fold: preserve row order and solve contacts at lifted heights.
         hemLift=settings.supportLift()?Math.clamp(motion.y,0,(settings.anchorY()-settings.hemY())*.49F):0;
         float blend=settings.contactBlend()==null?0:settings.contactBlend();
-        for(var q:model.quads())if(legSide[q.bone()]!=0) {
+        for(int qi=0;qi<model.quads().size();qi++)if(legSide[model.quads().get(qi).bone()]!=0) {
+            var q=model.quads().get(qi);
             relative.set(inverse).mul(transforms[q.bone()]);
-            for(int k=0;k<4;k++)relative.transformPosition(corners[k].set(q.vertices()[k][0],q.vertices()[k][1],q.vertices()[k][2]));
+            for(int k=0;k<4;k++) {
+                if(hipBound(model,q))inverse.transformPosition(corners[k].set(hipSurface[qi][k]));
+                else relative.transformPosition(corners[k].set(q.vertices()[k][0],q.vertices()[k][1],q.vertices()[k][2]));
+            }
             for(var corner:corners)corner.z*=depthSign;
             legSection(blend>0 && legSide[q.bone()]==2?otherLeg:legs,corners);
         }
@@ -177,7 +194,7 @@ public final class NativeNpcCloth {
                 }
             }
             // Do not stretch or detach the attachment edge above the legs.
-            float attached=smooth((settings.anchorY()-height(row))/1.4F);
+            float attached=smooth((settings.anchorY()-height(row))/attachmentFalloff);
             for(int k=0;k<4;k++)s[k]=r[k]+(s[k]-r[k])*attached;
         }
         // Spread local contact below its height rather than applying one displacement to every row.
@@ -198,7 +215,7 @@ public final class NativeNpcCloth {
             // A mean, not a sum: repeated contact rows must not inflate the whole garment.
             // Contact margins are measured against final opaque surfaces after this smoothing.
             value=Math.max(0,value+.20F*(float)Math.log(skirt?sum/rows:sum));
-            envelope[row][k]=value*smooth((settings.anchorY()-height(row))/1.2F);
+            envelope[row][k]=value*smooth((settings.anchorY()-height(row))/envelopeFalloff);
         }
         for(int row=0;row<rows;row++) {
             float free=smooth((settings.anchorY()-height(row))/(settings.anchorY()-settings.hemY()));

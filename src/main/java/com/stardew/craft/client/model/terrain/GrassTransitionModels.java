@@ -157,6 +157,12 @@ public final class GrassTransitionModels {
                 && above.getCollisionShape(level, abovePos).isEmpty();
     }
 
+    static net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level> dimension(BlockAndTintGetter view) {
+        // Chunk render views do not expose their dimension; use the active client level for those.
+        var level = view instanceof net.minecraft.world.level.Level world ? world : net.minecraft.client.Minecraft.getInstance().level;
+        return level == null ? null : level.dimension();
+    }
+
     private static int textureSet(ModelData data) {
         Integer set = data.get(TEXTURE_SET);
         return set == null ? TerrainSeasonTextures.currentTextureSet() : set;
@@ -210,7 +216,7 @@ public final class GrassTransitionModels {
 
         @Override
         public ModelData getModelData(BlockAndTintGetter level, BlockPos pos, BlockState state, ModelData data) {
-            int set = TerrainSeasonTextures.currentTextureSet();
+            int set = TerrainSeasonTextures.textureSetAt(TerrainSeasonTextures.currentTextureSet(), dimension(level), pos, state);
             ModelData base = surface(set).getModelData(level, pos, state, data);
             int grass = 0, dark = 0, soil = 0, moisture = 0, peers = 0;
             // GrassConnectionMask uses its original three ranks; farmland receives

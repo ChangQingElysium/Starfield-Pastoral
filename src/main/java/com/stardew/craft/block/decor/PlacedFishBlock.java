@@ -8,6 +8,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -75,11 +76,26 @@ public final class PlacedFishBlock extends HorizontalDirectionalBlock implements
     }
     @Override protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         if (!player.getMainHandItem().isEmpty() || !player.mayBuild()) return InteractionResult.PASS;
+        return pickup(state, level, pos, player, InteractionHand.MAIN_HAND);
+    }
+    @Override protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
+                                                         Player player, InteractionHand hand, BlockHitResult hit) {
+        if (!player.isShiftKeyDown()) return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        return pickup(state, level, pos, player, hand).consumesAction()
+                ? ItemInteractionResult.sidedSuccess(level.isClientSide)
+                : ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+    }
+    private InteractionResult pickup(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand) {
+        if (!player.mayBuild() || !level.getBlockState(pos).is(this)) return InteractionResult.PASS;
         if (!(level.getBlockEntity(pos) instanceof PlacedFishBlockEntity fish) || fish.fish().isEmpty()) return InteractionResult.PASS;
         if (!level.isClientSide) {
             ItemStack stack = fish.takeFish();
-            level.removeBlock(pos, false);
-            player.setItemInHand(InteractionHand.MAIN_HAND, stack);
+            if (!level.removeBlock(pos, false)) {
+                fish.storeFish(stack);
+                return InteractionResult.PASS;
+            }
+            if (player.getItemInHand(hand).isEmpty()) player.setItemInHand(hand, stack);
+            else if (!player.addItem(stack)) player.drop(stack, false);
             level.playSound(null, pos, ModSounds.DWOP.get(), SoundSource.BLOCKS, .65F, 1.15F);
             level.gameEvent(GameEvent.BLOCK_DESTROY, pos, GameEvent.Context.of(player, state));
         }

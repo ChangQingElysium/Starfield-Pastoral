@@ -203,6 +203,11 @@ public class CrabPotBlock extends Block implements EntityBlock, SimpleWaterlogge
 						level.setBlock(pos, newState.setValue(WORKING, workingNow), 3);
 					}
 					UtilityDropHelper.grantHarvestRewards(level, pos, player);
+					if (player instanceof net.minecraft.server.level.ServerPlayer xpPlayer) {
+						// CrabPot.checkForAction: who.gainExperience(1, 5) on every harvest.
+						com.stardew.craft.player.PlayerStardewDataAPI.addExperience(
+								xpPlayer, com.stardew.craft.player.SkillType.FISHING, 5);
+					}
 					return InteractionResult.SUCCESS;
 				}
 			}

@@ -1479,6 +1479,26 @@
       }
     ]
   },
+  "music_lava_mine": {
+    "sounds": [
+      {
+        "name": "stardewcraft:music/near_the_planet_core",
+        "stream": false
+      },
+      {
+        "name": "stardewcraft:music/of_dwarves",
+        "stream": false
+      },
+      {
+        "name": "stardewcraft:music/overcast",
+        "stream": false
+      },
+      {
+        "name": "stardewcraft:music/tribal",
+        "stream": false
+      }
+    ]
+  },
   "music_saloon": {
     "sounds": [
       {
@@ -1951,6 +1971,38 @@
       },
       {
         "name": "stardewcraft:pet/watering_can3",
+        "stream": false
+      }
+    ]
+  },
+  "cowboy_gunload": {
+    "sounds": [
+      {
+        "name": "stardewcraft:cowboy_gunload",
+        "stream": false
+      }
+    ]
+  },
+  "magma_sprite_spot": {
+    "sounds": [
+      {
+        "name": "stardewcraft:monster/magma_sprite_spot",
+        "stream": false
+      }
+    ]
+  },
+  "fall_down": {
+    "sounds": [
+      {
+        "name": "stardewcraft:fall_down",
+        "stream": false
+      }
+    ]
+  },
+  "club_smash": {
+    "sounds": [
+      {
+        "name": "stardewcraft:clubsmash",
         "stream": false
       }
     ]

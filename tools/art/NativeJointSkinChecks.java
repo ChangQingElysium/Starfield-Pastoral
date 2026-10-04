@@ -63,7 +63,8 @@ public final class NativeJointSkinChecks {
     }
     public static void main(String[] args)throws Exception {
         var gson=new Gson();Path directory=Path.of(args[0]),out=Path.of(args[1]);int models=0,pairs=0;
-        try(var files=Files.list(directory)) {
+        // Accept one compiled model for an isolated character check as well.
+        try(var files=Files.isRegularFile(directory)?java.util.stream.Stream.of(directory):Files.list(directory)) {
             for(var file:files.filter(p->p.toString().endsWith(".json")).sorted().toList()) {
                 String id=file.getFileName().toString().replace(".json","");
                 var model=gson.fromJson(Files.readString(file),NativeNpcModel.class);

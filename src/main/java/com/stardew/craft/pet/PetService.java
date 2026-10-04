@@ -53,7 +53,7 @@ public final class PetService {
             var near = PetHomes.near(player.serverLevel(), farm, player.blockPosition().relative(player.getDirection().getOpposite(), 2), variant, 3);
             if (near != null) pet.position = Vec3.atBottomCenterOf(near);
         }
-        data.put(pet); return true;
+        data.put(pet); gotPet(player.server, farm); return true;
     }
     public static void remember(ServerLevel level, PetEntity entity) {
         var data = PetWorldData.get(level.getServer()); var pet = data.find(entity.getUUID());
@@ -74,6 +74,25 @@ public final class PetService {
         for (var farm : farms.values()) PetHomes.prepare(level, farm);
         onNewDay(level); updateBowls(level); project(level);
     }
+    private static final java.util.Map<UUID, UUID> inFarm = new java.util.HashMap<>();
+    /** Pet.behaviorOnFarmerLocationEntry: before 20:00 a pet naps with 50% chance when a farmer enters the farm. */
+    @SubscribeEvent public static void farmEntry(ServerTickEvent.Post event) {
+        var server = event.getServer(); if (server.getTickCount() % 20 != 0) return;
+        var level = server.getLevel(ModDimensions.STARDEW_VALLEY); if (level == null) return;
+        boolean day = StardewTimeManager.get().getCurrentTime() < 1200;
+        inFarm.keySet().removeIf(id -> server.getPlayerList().getPlayer(id) == null);
+        for (var player : level.players()) {
+            var farm = FarmInstanceRegistry.get().getFarmForPlayer(player.getUUID());
+            UUID now = farm != null && farm.isInitialized() && farm.contains(player.blockPosition()) ? farm.getInstanceId() : null;
+            UUID before = now == null ? inFarm.remove(player.getUUID()) : inFarm.put(player.getUUID(), now);
+            if (now == null || now.equals(before) || !day) continue;
+            var data = PetWorldData.get(server);
+            for (var pet : data.all()) {
+                if (!pet.farm.equals(now) || !pet.variant.available()) continue;
+                if (level.getEntity(pet.id) instanceof PetEntity entity && !pet.indoors && level.random.nextBoolean()) entity.napNow();
+            }
+        }
+    }
     public static void onNewDay(ServerLevel level) {
         var data = PetWorldData.get(level.getServer()); int day = StardewTimeManager.get().getAbsoluteDay();
         for (var pet : data.all()) {
@@ -88,8 +107,23 @@ public final class PetService {
             if (pet.friendship == 1000 && !data.loved(pet.farm)) {
                 data.markLoved(pet.farm);
                 PetManagement.scheduleAdoptionMail(level.getServer(), farm(pet.farm));
+                lovesYou(level.getServer(), farm(pet.farm), pet.name);
             }
             data.setDirty();
+        }
+    }
+    /** Event.namePet: every farmer of the farm gets the "gotPet" active dialogue topic. */
+    public static void gotPet(net.minecraft.server.MinecraftServer server, FarmInstance farm) {
+        if (farm == null) return;
+        var topics = com.stardew.craft.npc.runtime.NpcDialogueEventData.get(server);
+        for (var farmer : farm.getAllFarmers()) topics.activate(farmer, "gotPet");
+    }
+    /** Pet.GrantLoveMailIfNecessary: PetLovesYou shown to the farm's online farmers. */
+    private static void lovesYou(net.minecraft.server.MinecraftServer server, FarmInstance farm, String name) {
+        if (farm == null) return;
+        for (var farmer : farm.getAllFarmers()) {
+            var online = server.getPlayerList().getPlayer(farmer);
+            if (online != null) message(online, "loves_you", name);
         }
     }
     public static void assignFreeBowl(PetWorldData data, PetRecord pet) {
@@ -184,7 +218,7 @@ public final class PetService {
             if (pet.friendship == 1000 && !data.loved(pet.farm)) {
                 data.markLoved(pet.farm);
                 PetManagement.scheduleAdoptionMail(player.server, farm(pet.farm));
-                message(player, "loves_you", pet.name);
+                lovesYou(player.server, farm(pet.farm), pet.name);
             }
         }
         data.setDirty(); entity.feedback.content(); entity.feedback.emote(20);

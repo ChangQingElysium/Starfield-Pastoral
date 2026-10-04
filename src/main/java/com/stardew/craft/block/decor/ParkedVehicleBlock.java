@@ -1,6 +1,12 @@
 package com.stardew.craft.block.decor;
 
 import com.stardew.craft.blockentity.ParkedVehicleBlockEntity;
+import com.stardew.craft.desert.DesertBusService;
+import com.stardew.craft.desert.DesertConstants;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.BlockHitResult;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -148,6 +154,17 @@ public final class ParkedVehicleBlock extends MapDecorStaticBlock implements Ent
         }
         return true;
     }
+    @Override
+    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos,
+                                                Player player, BlockHitResult hit) {
+        BlockPos main = findMainPos(level, pos, state);
+        if (!bus || main == null || !DesertConstants.isInDesertRegion(level.dimension(), main)) {
+            return InteractionResult.PASS;
+        }
+        if (player instanceof ServerPlayer serverPlayer) DesertBusService.beginReturnRide(serverPlayer);
+        return InteractionResult.sidedSuccess(level.isClientSide);
+    }
+
     @Override public RenderShape getRenderShape(BlockState state) { return RenderShape.ENTITYBLOCK_ANIMATED; }
     @Override public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return state.getValue(PART) == Part.MAIN ? new ParkedVehicleBlockEntity(pos, state) : null;

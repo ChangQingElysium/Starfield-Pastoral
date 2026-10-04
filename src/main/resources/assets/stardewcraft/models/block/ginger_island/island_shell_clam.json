@@ -1,0 +1,382 @@
+{
+  "parent": "minecraft:block/block",
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "0": "stardewcraft:block/ginger_island/island_shell_clam",
+    "particle": "stardewcraft:block/ginger_island/island_shell_clam_particle"
+  },
+  "elements": [
+    {
+      "from": [
+        4,
+        0,
+        3
+      ],
+      "to": [
+        12,
+        1,
+        5
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0.25,
+            0.25,
+            2.25,
+            0.5
+          ],
+          "texture": "#0"
+        },
+        "east": {
+          "uv": [
+            2.5,
+            0.25,
+            3.0,
+            0.5
+          ],
+          "texture": "#0"
+        },
+        "west": {
+          "uv": [
+            3.25,
+            0.25,
+            3.75,
+            0.5
+          ],
+          "texture": "#0"
+        },
+        "up": {
+          "uv": [
+            4.0,
+            0.25,
+            6.0,
+            0.75
+          ],
+          "texture": "#0"
+        },
+        "down": {
+          "uv": [
+            6.25,
+            0.25,
+            8.25,
+            0.75
+          ],
+          "texture": "#0"
+        }
+      },
+      "rotation": {
+        "origin": [
+          8,
+          0,
+          8
+        ],
+        "axis": "y",
+        "angle": 22.5,
+        "rescale": false
+      }
+    },
+    {
+      "from": [
+        3,
+        0,
+        5
+      ],
+      "to": [
+        13,
+        2,
+        8
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            8.5,
+            0.25,
+            11.0,
+            0.75
+          ],
+          "texture": "#0"
+        },
+        "east": {
+          "uv": [
+            11.25,
+            0.25,
+            12.0,
+            0.75
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            12.25,
+            0.25,
+            14.75,
+            0.75
+          ],
+          "texture": "#0"
+        },
+        "west": {
+          "uv": [
+            15.0,
+            0.25,
+            15.75,
+            0.75
+          ],
+          "texture": "#0"
+        },
+        "up": {
+          "uv": [
+            0.25,
+            1.0,
+            2.75,
+            1.75
+          ],
+          "texture": "#0"
+        },
+        "down": {
+          "uv": [
+            3.0,
+            1.0,
+            5.5,
+            1.75
+          ],
+          "texture": "#0"
+        }
+      },
+      "rotation": {
+        "origin": [
+          8,
+          0,
+          8
+        ],
+        "axis": "y",
+        "angle": 22.5,
+        "rescale": false
+      }
+    },
+    {
+      "from": [
+        4,
+        0,
+        8
+      ],
+      "to": [
+        12,
+        1,
+        10
+      ],
+      "faces": {
+        "east": {
+          "uv": [
+            5.75,
+            1.0,
+            6.25,
+            1.25
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            6.5,
+            1.0,
+            8.5,
+            1.25
+          ],
+          "texture": "#0"
+        },
+        "west": {
+          "uv": [
+            8.75,
+            1.0,
+            9.25,
+            1.25
+          ],
+          "texture": "#0"
+        },
+        "up": {
+          "uv": [
+            9.5,
+            1.0,
+            11.5,
+            1.5
+          ],
+          "texture": "#0"
+        },
+        "down": {
+          "uv": [
+            11.75,
+            1.0,
+            13.75,
+            1.5
+          ],
+          "texture": "#0"
+        }
+      },
+      "rotation": {
+        "origin": [
+          8,
+          0,
+          8
+        ],
+        "axis": "y",
+        "angle": 22.5,
+        "rescale": false
+      }
+    },
+    {
+      "from": [
+        6,
+        0,
+        10
+      ],
+      "to": [
+        10,
+        1,
+        12
+      ],
+      "faces": {
+        "east": {
+          "uv": [
+            14.0,
+            1.0,
+            14.5,
+            1.25
+          ],
+          "texture": "#0"
+        },
+        "west": {
+          "uv": [
+            14.75,
+            1.0,
+            15.25,
+            1.25
+          ],
+          "texture": "#0"
+        },
+        "up": {
+          "uv": [
+            0.25,
+            2.0,
+            1.25,
+            2.5
+          ],
+          "texture": "#0"
+        },
+        "down": {
+          "uv": [
+            1.5,
+            2.0,
+            2.5,
+            2.5
+          ],
+          "texture": "#0"
+        }
+      },
+      "rotation": {
+        "origin": [
+          8,
+          0,
+          8
+        ],
+        "axis": "y",
+        "angle": 22.5,
+        "rescale": false
+      }
+    },
+    {
+      "from": [
+        5,
+        0,
+        12
+      ],
+      "to": [
+        11,
+        1,
+        13
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            2.75,
+            2.0,
+            4.25,
+            2.25
+          ],
+          "texture": "#0"
+        },
+        "east": {
+          "uv": [
+            4.5,
+            2.0,
+            4.75,
+            2.25
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            5.0,
+            2.0,
+            6.5,
+            2.25
+          ],
+          "texture": "#0"
+        },
+        "west": {
+          "uv": [
+            6.75,
+            2.0,
+            7.0,
+            2.25
+          ],
+          "texture": "#0"
+        },
+        "up": {
+          "uv": [
+            7.25,
+            2.0,
+            8.75,
+            2.25
+          ],
+          "texture": "#0"
+        },
+        "down": {
+          "uv": [
+            9.0,
+            2.0,
+            10.5,
+            2.25
+          ],
+          "texture": "#0"
+        }
+      },
+      "rotation": {
+        "origin": [
+          8,
+          0,
+          8
+        ],
+        "axis": "y",
+        "angle": 22.5,
+        "rescale": false
+      }
+    }
+  ],
+  "stardewcraft:collision": {
+    "mode": "custom",
+    "boxes": [
+      {
+        "from": [
+          2.2326,
+          0.0,
+          1.8499
+        ],
+        "to": [
+          12.6851,
+          2.0,
+          13.7674
+        ]
+      }
+    ],
+    "policy": "aabb"
+  }
+}

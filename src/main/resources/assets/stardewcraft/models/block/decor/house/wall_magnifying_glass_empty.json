@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "stardewcraft:block/decor/house/wall_magnifying_glass_particle"
+  },
+  "elements": []
+}

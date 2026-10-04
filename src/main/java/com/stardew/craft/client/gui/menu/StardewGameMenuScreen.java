@@ -3806,7 +3806,7 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
         return isDatableNpc(entry.npcId());
     }
 
-    private boolean isDatableNpc(String npcId) {
+    static boolean isDatableNpc(String npcId) {
         var definition =
                 com.stardew.craft.api.v1.npc.StardewNpcProfiles.resolve(npcId)
                         .orElse(null);
@@ -4070,7 +4070,7 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
         animalScroll = Mth.clamp((int) (total * percentage), 0, maxScroll);
     }
 
-    private String normalizeNpcId(String npcId) {
+    private static String normalizeNpcId(String npcId) {
         if (npcId == null || npcId.isBlank()) {
             return "";
         }
@@ -5160,6 +5160,10 @@ public class StardewGameMenuScreen extends AbstractContainerScreen<StardewGameMe
                     if (index >= socialEntries.size()) break;
                     int rowY = socialClickableRowPosition(visibleRow);
                     if (contains(mouseX, mouseY, menuX, rowY, socialPageWidth(), ui(SOCIAL_ROW_HEIGHT_SDV))) {
+                        // SocialPage.isCharacterSlotClickable: only met characters open a profile.
+                        if (!socialEntries.get(index).met()) {
+                            return true;
+                        }
                         this.minecraft.setScreen(new StardewNpcProfileScreen(this, socialEntries.get(index), socialEntries));
                         playUiSound(ModSounds.BIG_SELECT.get(), 1.0F, 1.0F);
                         return true;

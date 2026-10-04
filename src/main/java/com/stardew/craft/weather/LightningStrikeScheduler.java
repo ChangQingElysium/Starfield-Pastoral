@@ -28,7 +28,7 @@ import java.util.List;
  */
 public final class LightningStrikeScheduler {
 
-    /** SDV: 0.125 + luck. We drop the luck term (no per-player context at global tick). */
+    /** SDV: 0.125 + team average daily luck + average luck level / 100. */
     private static final double STRIKE_CHANCE = 0.125;
     /** SDV fallback terrain-feature hit chance: 0.25 - luck. */
     private static final double TERRAIN_STRIKE_CHANCE = 0.25;
@@ -49,7 +49,15 @@ public final class LightningStrikeScheduler {
     }
 
     private static void tick(ServerLevel level) {
-        if (level.random.nextDouble() >= STRIKE_CHANCE) return;
+        // Utility.performLightningUpdate: 0.125 + team AverageDailyLuck + AverageLuckLevel / 100.
+        double luck = averageDailyLuck(level) + averageLuckLevel(level) / 100.0;
+        if (level.random.nextDouble() >= STRIKE_CHANCE + luck) {
+            // else-branch: 10% chance of a small flash only.
+            if (level.random.nextDouble() < 0.1) {
+                flash(level, null);
+            }
+            return;
+        }
 
         LightningRodRegistry registry = LightningRodRegistry.get(level);
         // SDV picks up to 2 rods per successful roll; the FIRST empty rod
@@ -63,12 +71,51 @@ public final class LightningStrikeScheduler {
                 BlockPos pos = snapshot.get(swap);
                 snapshot.set(swap, snapshot.get(i));
                 snapshot.set(i, pos);
-                if (tryStrike(level, registry, pos)) return;
+                if (tryStrike(level, registry, pos)) {
+                    flash(level, pos);
+                    return;
+                }
             }
         }
 
-        if (level.random.nextDouble() < TERRAIN_STRIKE_CHANCE) {
-            FruitTreeGrowthManager.get(level).strikeRandomMatureTree(level, level.random);
+        BlockPos bolt = null;
+        if (level.random.nextDouble() < TERRAIN_STRIKE_CHANCE - luck) {
+            bolt = FruitTreeGrowthManager.get(level).strikeRandomMatureTree(level, level.random);
+        }
+        flash(level, bolt);
+    }
+
+    private static double averageDailyLuck(ServerLevel level) {
+        return level.getServer().getPlayerList().getPlayers().stream()
+                .mapToDouble(com.stardew.craft.player.PlayerStardewDataAPI::getDailyLuck).average().orElse(0.0);
+    }
+
+    private static double averageLuckLevel(ServerLevel level) {
+        return level.getServer().getPlayerList().getPlayers().stream()
+                .mapToInt(player -> com.stardew.craft.player.PlayerDataManager.getPlayerData(player).getLuckLevel())
+                .average().orElse(0.0);
+    }
+
+    /**
+     * Farm.LightningStrikeEvent: a flash (and, when something is hit, a bolt) shown to players on the farm.
+     * Rendered with a visual-only vanilla bolt, which flashes the sky and plays thunder.
+     */
+    private static void flash(ServerLevel level, BlockPos boltPos) {
+        for (net.minecraft.server.level.ServerPlayer player : level.players()) {
+            if (!com.stardew.craft.core.FarmAreaResolver.isInAnyFarm(level, player.blockPosition())
+                    || !level.canSeeSky(player.blockPosition())) {
+                continue;
+            }
+            BlockPos at = boltPos != null && boltPos.closerThan(player.blockPosition(), 128)
+                    ? boltPos
+                    : player.blockPosition().offset(level.random.nextInt(81) - 40, 0, level.random.nextInt(81) - 40);
+            net.minecraft.world.entity.LightningBolt bolt = net.minecraft.world.entity.EntityType.LIGHTNING_BOLT.create(level);
+            if (bolt == null) continue;
+            bolt.moveTo(net.minecraft.world.phys.Vec3.atBottomCenterOf(
+                    new BlockPos(at.getX(), level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING, at.getX(), at.getZ()), at.getZ())));
+            bolt.setVisualOnly(true);
+            level.addFreshEntity(bolt);
+            return;
         }
     }
 

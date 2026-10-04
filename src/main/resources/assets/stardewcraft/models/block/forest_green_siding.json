@@ -1,0 +1,89 @@
+{
+  "credit": "Made with Blockbench",
+  "textures": {
+    "0": "stardewcraft:block/building/forest_green_siding",
+    "1": "stardewcraft:block/building/forest_green_siding_end",
+    "2": "stardewcraft:block/building/forest_green_siding_top",
+    "3": "stardewcraft:block/building/forest_green_siding_bottom",
+    "particle": "#0"
+  },
+  "elements": [
+    {
+      "name": "深绿横木板",
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            16,
+            0,
+            0,
+            16
+          ],
+          "texture": "#0",
+          "cullface": "north"
+        },
+        "east": {
+          "uv": [
+            16,
+            0,
+            0,
+            16
+          ],
+          "texture": "#1",
+          "cullface": "east"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#0",
+          "cullface": "south"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1",
+          "cullface": "west"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#2",
+          "cullface": "up"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#3",
+          "cullface": "down"
+        }
+      }
+    }
+  ],
+  "parent": "minecraft:block/block",
+  "render_type": "minecraft:solid"
+}

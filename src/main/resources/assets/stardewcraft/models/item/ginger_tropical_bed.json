@@ -1,0 +1,16 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "stardewcraft:item/ginger_island/original_f_2176",
+    "particle": "stardewcraft:block/ginger_island/tropical_bed_particle"
+  },
+  "display": {
+    "gui": {
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ]
+    }
+  }
+}

@@ -17,9 +17,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nonnull;
@@ -122,16 +120,7 @@ public class FishPondBucketBlockEntityRenderer implements BlockEntityRenderer<Fi
         poseStack.pushPose();
         poseStack.translate(iconCenterX, iconCenterY, itemZOffset);
         poseStack.scale(innerW, innerW, 0.001f);
-        Minecraft.getInstance().getItemRenderer().renderStatic(
-            stack,
-            ItemDisplayContext.GUI,
-            packedLight,
-            OverlayTexture.NO_OVERLAY,
-            poseStack,
-            buffer,
-            be.getLevel(),
-            0
-        );
+        BubbleItemRenderer.render(stack, packedLight, poseStack, buffer, be.getLevel());
         poseStack.popPose();
 
         BubbleItemCountRenderer.renderCountAlways(poseStack, buffer, packedLight, count, x0 + (3 * PX), y1 - (3 * PX), PX);
@@ -166,16 +155,7 @@ public class FishPondBucketBlockEntityRenderer implements BlockEntityRenderer<Fi
         poseStack.pushPose();
         poseStack.translate(-0.12D, 0.06D, 0.001D);
         poseStack.scale(0.32F, 0.32F, 0.001F);
-        Minecraft.getInstance().getItemRenderer().renderStatic(
-            be.getFishSignPreview(),
-            ItemDisplayContext.GUI,
-            packedLight,
-            OverlayTexture.NO_OVERLAY,
-            poseStack,
-            buffer,
-            be.getLevel(),
-            0
-        );
+        BubbleItemRenderer.render(be.getFishSignPreview(), packedLight, poseStack, buffer, be.getLevel());
         poseStack.popPose();
 
         BubbleItemCountRenderer.renderCountAlways(poseStack, buffer, packedLight, be.getFishPopulation(), 0.02F, 0.13F, PX * 0.8F);

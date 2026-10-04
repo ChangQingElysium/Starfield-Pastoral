@@ -96,7 +96,7 @@ public final class FishingSessionManager {
 	}
 
 	public boolean start(ServerPlayer player, float castPower01) {
-		if (festivalBlocksFishing(player)) {
+		if (festivalBlocksFishing(player) || railroadWinterBlocksFishing(player)) {
 			return false;
 		}
 		if (!com.stardew.craft.festival.fair.FairFishingGameService.canStartFishingCast(player)) {
@@ -342,6 +342,7 @@ public final class FishingSessionManager {
 		if (firstCatch && minigameDifficulty < 50) {
 			minigameDifficulty = 50;
 		}
+		session.setMinigameDifficulty(minigameDifficulty);
 		boolean loseProgressOutsideBar = !firstCatch
 				|| com.stardew.craft.festival.fair.FairFishingGameService.isFishingGameActive(player)
 				|| com.stardew.craft.festival.FestivalOfIceService.isFishingContestActive(player);
@@ -631,7 +632,22 @@ public final class FishingSessionManager {
 			PacketDistributor.sendToPlayer(player, catchVisual(player, session, fish, true));
 			
 			if (!festivalFishingGame) {
-				int baseExp = 10 + session.difficulty();
+				// FishingRod.cs L1190: max(1,(quality+1)*3+difficulty/3), treasure +1.2x, perfect +1.4x, boss fish x5.
+				int svQuality = hasPlannedCatch && !ornateNecklace
+						? com.stardew.craft.item.quality.QualityHelper.getQuality(fish) : 0;
+				if (svQuality >= com.stardew.craft.item.quality.QualityHelper.IRIDIUM) {
+					svQuality = 4;
+				}
+				int baseExp = Math.max(1, (svQuality + 1) * 3 + session.minigameDifficulty() / 3);
+				if (treasureCaught) {
+					baseExp += (int) (baseExp * 1.2f);
+				}
+				if (perfect) {
+					baseExp += (int) (baseExp * 1.4f);
+				}
+				if (session.isPlannedCatchLegendaryFish()) {
+					baseExp *= 5;
+				}
 				spawnVanillaExperienceOrb(player, vanillaFishingExperience(session.difficulty(), treasureCaught));
 				PlayerStardewDataAPI.addExperience(player, SkillType.FISHING, baseExp);
 			}
@@ -646,16 +662,16 @@ public final class FishingSessionManager {
 				}
 			}
 		} else {
-			if (!festivalFishingGame) {
-				PlayerStardewDataAPI.addExperience(player, SkillType.FISHING, 2);
-			}
+			// SV: escaping grants no fishing experience.
 			// Client-side failure feedback (short visual).
 			FishingPresentationEvents.phase(player, session.id(), com.stardew.craft.fishing.FishingPresentationPhase.FAIL, session.hookEntityId(), FishingPresentationEvents.position(player, Vec3.atCenterOf(session.bobberPos())), ItemStack.EMPTY, false);
 			PacketDistributor.sendToPlayer(player, new FishingFailVisualPayload(session.id()));
 
 			if (!festivalFishingGame) {
-				// 失败时也消耗鱼饵（SV：若有 Preserving 则 50% 概率保留；Deluxe Bait 不影响消耗）
+				// 失败时也消耗鱼饵与渔具（SV：若有 Preserving 则 50% 概率保留；Deluxe Bait 不影响消耗）
 				com.stardew.craft.item.tool.FishingRodItem.consumeBait(player, rod);
+				// SV doDoneFishing: an escape also wears the tackle (escapes only happen in the minigame, never junk).
+				com.stardew.craft.item.tool.FishingRodItem.consumeTackleDurability(player, rod);
 			}
 		}
 
@@ -773,6 +789,17 @@ public final class FishingSessionManager {
 				cancel(player);
 			}
 		}
+	}
+
+	/** Railroad.isTileFishable: the railroad pond cannot be fished while IsWinterHere(). */
+	private static boolean railroadWinterBlocksFishing(ServerPlayer player) {
+		if (com.stardew.craft.time.StardewTimeManager.get().getCurrentSeason() != 3) {
+			return false;
+		}
+		return com.stardew.craft.api.v1.world.StardewLocations
+				.hierarchy(player.level().dimension().location(), player.blockPosition()).stream()
+				.anyMatch(location -> "railroad".equalsIgnoreCase(location.ledgerId())
+						|| location.aliases().stream().anyMatch("railroad"::equalsIgnoreCase));
 	}
 
 	private static boolean festivalBlocksFishing(ServerPlayer player) {

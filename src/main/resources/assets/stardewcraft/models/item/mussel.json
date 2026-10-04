@@ -1,7 +1,27 @@
 {
-    "parent":  "minecraft:item/generated",
-    "textures":  {
-                     "layer0":  "stardewcraft:item/fish/crabpot/mussel",
-                     "particle":  "stardewcraft:item/fish/crabpot/mussel"
-                 }
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "stardewcraft:item/fish/crabpot/mussel",
+    "particle": "stardewcraft:item/fish/crabpot/mussel"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "custom_model_data": 1
+      },
+      "model": "stardewcraft:item/mussel_silver"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 2
+      },
+      "model": "stardewcraft:item/mussel_gold"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 3
+      },
+      "model": "stardewcraft:item/mussel_iridium"
+    }
+  ]
 }

@@ -1,0 +1,51 @@
+{
+  "parent": "minecraft:block/block",
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "0": "stardewcraft:block/ginger_island/island_sand_arc",
+    "particle": "stardewcraft:block/ginger_island/island_sand_arc_particle"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0.025,
+        0
+      ],
+      "to": [
+        16,
+        0.025,
+        16
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            0.25,
+            0.25,
+            4.25,
+            4.25
+          ],
+          "texture": "#0"
+        }
+      }
+    }
+  ],
+  "stardewcraft:collision": {
+    "mode": "custom",
+    "boxes": [
+      {
+        "from": [
+          0,
+          0.025,
+          0
+        ],
+        "to": [
+          16,
+          0.035,
+          16
+        ]
+      }
+    ],
+    "policy": "aabb"
+  }
+}

@@ -238,14 +238,16 @@ public final class ModelVoxelShapeCache {
 
     @SuppressWarnings("null")
     private static VoxelShape loadShapeFromModelId(String modelId) {
-        if (isGeoShapeModelId(modelId) && !isGeoAabbShapeModelId(modelId)) {
+        // An authored collision profile takes precedence over the #aabb fallback.
+        if (isGeoShapeModelId(modelId)) {
             JsonObject geo = readGeo(resolveGeoPath(modelId));
             JsonObject collision = geo == null ? null : geo.getAsJsonObject("stardewcraft:collision");
             if (collision != null) {
                 String mode = collision.get("mode").getAsString();
                 if (mode.equals("custom")) return com.stardew.craft.model.ModelGeometry.shape(collision.getAsJsonArray("boxes"), false);
                 if (mode.equals("aabb")) return loadAabbShapeFromGeoModelId(modelId);
-                if (!mode.equals("voxel")) throw new IllegalArgumentException("Unknown collision mode " + mode + " in " + modelId);
+                if (mode.equals("voxel")) return loadShapeFromGeoModelId(modelId);
+                throw new IllegalArgumentException("Unknown collision mode " + mode + " in " + modelId);
             }
         }
         if (isGeoAabbShapeModelId(modelId)) {
@@ -889,6 +891,7 @@ public final class ModelVoxelShapeCache {
     }
 
     private static String resolveGeoPath(String modelId) {
+        modelId = stripGeoShapeVariant(modelId);
         String[] split = modelId.split(":", 2);
         String namespace = split.length == 2 ? split[0] : "minecraft";
         String path = split.length == 2 ? split[1] : split[0];

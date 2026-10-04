@@ -1,0 +1,97 @@
+{
+  "parent": "minecraft:block/block",
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "0": "stardewcraft:block/ginger_island/marker_south_0",
+    "1": "stardewcraft:block/ginger_island/marker_south_1",
+    "particle": "stardewcraft:block/ginger_island/marker_south_particle"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        1,
+        16
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            1.0
+          ],
+          "texture": "#1"
+        },
+        "east": {
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            1.0
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            1.0
+          ],
+          "texture": "#1"
+        },
+        "west": {
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            1.0
+          ],
+          "texture": "#1"
+        },
+        "up": {
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ],
+          "texture": "#0"
+        },
+        "down": {
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ],
+          "texture": "#1"
+        }
+      }
+    }
+  ],
+  "stardewcraft:collision": {
+    "mode": "custom",
+    "boxes": [
+      {
+        "from": [
+          0,
+          0,
+          0
+        ],
+        "to": [
+          16,
+          1,
+          16
+        ]
+      }
+    ],
+    "policy": "aabb"
+  }
+}

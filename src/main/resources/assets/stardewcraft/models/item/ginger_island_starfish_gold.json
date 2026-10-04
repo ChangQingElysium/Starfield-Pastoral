@@ -1,0 +1,29 @@
+{
+  "parent": "stardewcraft:block/ginger_island/island_starfish_gold",
+  "overrides": [
+    {
+      "predicate": {
+        "stardewcraft:ginger_island_variant": 0.0
+      },
+      "model": "stardewcraft:block/ginger_island/island_starfish_gold"
+    },
+    {
+      "predicate": {
+        "stardewcraft:ginger_island_variant": 0.3333333333333333
+      },
+      "model": "stardewcraft:block/ginger_island/island_starfish_lilac"
+    },
+    {
+      "predicate": {
+        "stardewcraft:ginger_island_variant": 0.6666666666666666
+      },
+      "model": "stardewcraft:block/ginger_island/island_starfish_mint"
+    },
+    {
+      "predicate": {
+        "stardewcraft:ginger_island_variant": 1.0
+      },
+      "model": "stardewcraft:block/ginger_island/island_sand_starfish"
+    }
+  ]
+}

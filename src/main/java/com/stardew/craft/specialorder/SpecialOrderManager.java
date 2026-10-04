@@ -50,7 +50,7 @@ import java.util.Set;
 import java.util.UUID;
 
 public final class SpecialOrderManager {
-    public static final int UNLOCK_DAYS_AFTER_FARM_CREATION = 87;
+    public static final int UNLOCK_DAYS_AFTER_FARM_CREATION = 57;
     public static final String BOARD_UNLOCK_FLAG = "specialOrdersBoardUnlocked";
 
     public record NpcDeliveryResult(boolean delivered, String messageKey) {
@@ -179,7 +179,8 @@ public final class SpecialOrderManager {
         grantRewards(player, definition, order);
         cleanupTemporaryOrderState(player.serverLevel(),List.of(player), definition);
         order.markRewardClaimed(player.getUUID());
-        if (!definition.repeatable() && order.allParticipantRewardsClaimed()) {
+        if (order.allParticipantRewardsClaimed()) {
+            // SDV SpecialOrder.CheckCompletion: completedSpecialOrders records repeatable orders too.
             data.completedOrderIds().add(order.orderId());
         }
         if (order.allParticipantRewardsClaimed()) {
@@ -264,7 +265,7 @@ public final class SpecialOrderManager {
             return;
         }
         List<SpecialOrderDefinition> candidates = candidatesIncludingCompleted.stream()
-            .filter(definition -> definition.repeatable() || !data.completedOrderIds().contains(definition.id()))
+            .filter(definition -> !data.completedOrderIds().contains(definition.id()))
             .toList();
         if (candidates.isEmpty()) {
             candidates = candidatesIncludingCompleted;
@@ -435,6 +436,14 @@ public final class SpecialOrderManager {
     }
 
     public static void recordMonsterSlain(ServerPlayer player, String monsterName) {
+        recordMonsterSlain(player, List.of(monsterName), false);
+    }
+
+    /**
+     * One kill of one monster identified by several names/tags. SDV SlayObjective.OnMonsterSlain:
+     * ignore monsters killed on the farm, otherwise count once when monster.Name.Contains(target).
+     */
+    public static void recordMonsterSlain(ServerPlayer player, java.util.Collection<String> monsterNames, boolean onFarm) {
         SpecialOrderWorldData data = SpecialOrderWorldData.get(player.serverLevel());
         boolean changed = false;
         for (SpecialOrderInstance order : data.active()) {
@@ -444,8 +453,9 @@ public final class SpecialOrderManager {
             for (int i = 0; i < definition.objectives().size(); i++) {
                 SpecialOrderDefinition.ObjectiveDefinition objective = definition.objectives().get(i);
                 if (objective.type() != SpecialOrderDefinition.ObjectiveType.SLAY) continue;
+                if (onFarm) continue;
                 String target = SpecialOrderText.resolveRaw(objective.targetName(), order);
-                if (!monsterMatches(monsterName, target)) continue;
+                if (monsterNames.stream().noneMatch(name -> monsterMatches(name, target))) continue;
                 changed |= addObjectiveProgress(player, order, order.objectives().get(i), 1, false);
             }
             changed |= completeIfReady(player, data, definition, order);
@@ -454,8 +464,10 @@ public final class SpecialOrderManager {
             data.setDirty();
             syncAll(player.server);
         }
-        progressExtensions(player, new SpecialOrderProgressEvent(
-                SpecialOrderProgressEvent.Kind.MONSTER_SLAIN, ItemStack.EMPTY, 1, monsterName));
+        for (String monsterName : monsterNames) {
+            progressExtensions(player, new SpecialOrderProgressEvent(
+                    SpecialOrderProgressEvent.Kind.MONSTER_SLAIN, ItemStack.EMPTY, 1, monsterName));
+        }
     }
 
     public static boolean donateHeldStack(ServerPlayer player, SpecialOrderDropBoxAnchor anchor, ItemStack held) {
@@ -578,6 +590,10 @@ public final class SpecialOrderManager {
         Set<String> flags = new HashSet<>();
         for (ServerPlayer player : players) {
             flags.addAll(PlayerDataManager.getPlayerData(player).getMailFlags());
+            for (String eventId : com.stardew.craft.cutscene.server.EventSeenData.get(player.serverLevel())
+                    .getSeenEvents(player.getUUID())) {
+                flags.add("event_" + eventId);
+            }
         }
         return flags;
     }
@@ -868,7 +884,7 @@ public final class SpecialOrderManager {
     private static boolean monsterMatches(String actual, String target) {
         String a = normalizeMonster(actual);
         String t = normalizeMonster(target);
-        return a.equals(t);
+        return !t.isEmpty() && a.contains(t);
     }
 
     private static String normalizeMonster(String value) {

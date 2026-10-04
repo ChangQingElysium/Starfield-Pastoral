@@ -1,0 +1,103 @@
+{
+  "parent": "minecraft:block/block",
+  "loader": "neoforge:composite",
+  "textures": {
+    "particle": "stardewcraft:block/ginger_island/bridge_0_particle"
+  },
+  "children": {
+    "0": {
+      "parent": "stardewcraft:block/ginger_island/bridge_0",
+      "transform": {
+        "translation": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "1": {
+      "parent": "stardewcraft:block/ginger_island/bridge_1",
+      "transform": {
+        "translation": [
+          1.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "2": {
+      "parent": "stardewcraft:block/ginger_island/bridge_2",
+      "transform": {
+        "translation": [
+          2.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "3": {
+      "parent": "stardewcraft:block/ginger_island/bridge_3",
+      "transform": {
+        "translation": [
+          3.0,
+          0.0,
+          0.0
+        ]
+      }
+    }
+  },
+  "stardewcraft:collision": {
+    "mode": "custom",
+    "boxes": [
+      {
+        "from": [
+          0.0,
+          5.0,
+          0.0
+        ],
+        "to": [
+          16.0,
+          10.0,
+          16.0
+        ]
+      },
+      {
+        "from": [
+          16.0,
+          5.0,
+          0.0
+        ],
+        "to": [
+          32.0,
+          10.0,
+          16.0
+        ]
+      },
+      {
+        "from": [
+          32.0,
+          5.0,
+          1.0
+        ],
+        "to": [
+          48.0,
+          8.0,
+          15.0
+        ]
+      },
+      {
+        "from": [
+          48.0,
+          5.0,
+          0.0
+        ],
+        "to": [
+          64.0,
+          10.0,
+          16.0
+        ]
+      }
+    ],
+    "policy": "compound_assembly"
+  }
+}

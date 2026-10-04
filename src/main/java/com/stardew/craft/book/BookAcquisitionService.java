@@ -21,7 +21,6 @@ public final class BookAcquisitionService {
     private static final String ROE_BOOK_DROPPED = "roeBookDropped";
     private static final String VOID_BOOK_DROPPED = "voidBookDropped";
     private static final String DEFENSE_BOOK_DROPPED = "DefenseBookDropped";
-    private static final String GOT_MYSTERY_BOOK = "GotMysteryBook";
 
     private BookAcquisitionService() {
     }
@@ -95,30 +94,4 @@ public final class BookAcquisitionService {
         PlayerDataEventHandler.syncPlayerData(player, data);
     }
 
-    public static ItemStack rollMysteryBoxBook(ServerPlayer player, Random random, double rareMod) {
-        PlayerStardewData data = PlayerDataManager.getPlayerData(player);
-        int opened = data.getStat("MysteryBoxesOpened");
-        double chance = 0.01D * rareMod + (data.hasMailFlag(GOT_MYSTERY_BOOK) ? 0.0D : opened * 0.0004D);
-        if (random.nextDouble() >= chance) {
-            PlayerDataEventHandler.syncPlayerData(player, data);
-            return ItemStack.EMPTY;
-        }
-
-        if (!data.hasMailFlag(GOT_MYSTERY_BOOK)) {
-            data.addMailFlag(GOT_MYSTERY_BOOK);
-            PlayerDataEventHandler.syncPlayerData(player, data);
-            return new ItemStack(ModItems.BOOK_MYSTERY.get());
-        }
-
-        PlayerDataEventHandler.syncPlayerData(player, data);
-        return random.nextBoolean()
-                ? new ItemStack(ModItems.PURPLE_BOOK.get())
-                : new ItemStack(ModItems.BOOK_MYSTERY.get());
-    }
-
-    public static void recordMysteryBoxOpened(ServerPlayer player) {
-        PlayerStardewData data = PlayerDataManager.getPlayerData(player);
-        data.incrementStat("MysteryBoxesOpened", 1);
-        PlayerDataEventHandler.syncPlayerData(player, data);
-    }
 }

@@ -29,6 +29,9 @@ import net.neoforged.neoforge.registries.DeferredRegister;
  */
 public class ModBlocks {
     public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(StardewCraft.MODID);
+
+    public static final java.util.Map<String, net.neoforged.neoforge.registries.DeferredBlock<Block>> GINGER_ISLAND =
+            com.stardew.craft.gingerisland.GingerIslandBlocks.registerBlocks(BLOCKS);
     public static final DeferredBlock<com.stardew.craft.pet.PetBowlBlock> PET_BOWL_WOOD = BLOCKS.register("pet_bowl_wood", () -> new com.stardew.craft.pet.PetBowlBlock(Block.Properties.of().strength(1).sound(SoundType.WOOD).noOcclusion().pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK), "wood"));
     public static final DeferredBlock<com.stardew.craft.pet.PetBowlBlock> PET_BOWL_STONE = BLOCKS.register("pet_bowl_stone", () -> new com.stardew.craft.pet.PetBowlBlock(Block.Properties.of().strength(1).sound(SoundType.STONE).noOcclusion().pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK), "stone"));
     public static final DeferredBlock<com.stardew.craft.pet.PetBowlBlock> PET_BOWL_HAY = BLOCKS.register("pet_bowl_hay", () -> new com.stardew.craft.pet.PetBowlBlock(Block.Properties.of().strength(1).sound(SoundType.GRASS).noOcclusion().pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK), "hay"));
@@ -453,6 +456,12 @@ public class ModBlocks {
         public static final DeferredBlock<com.stardew.craft.block.terrain.TerrainStairBlock> DIRT_STAIRS = BLOCKS.register("dirt_stairs",
                         () -> new com.stardew.craft.block.terrain.TerrainStairBlock.Dirt(Block.Properties.of().mapColor(MapColor.DIRT).sound(SoundType.GRAVEL).strength(0.5F)));
 
+        public static final DeferredBlock<com.stardew.craft.block.terrain.TerrainSlabBlock> SAND_SLAB = BLOCKS.register("sand_slab",
+                        () -> new com.stardew.craft.block.terrain.TerrainSlabBlock.Sand(Block.Properties.of().mapColor(MapColor.SAND).sound(SoundType.SAND).strength(0.5F)));
+
+        public static final DeferredBlock<com.stardew.craft.block.terrain.TerrainStairBlock> SAND_STAIRS = BLOCKS.register("sand_stairs",
+                        () -> new com.stardew.craft.block.terrain.TerrainStairBlock.Sand(Block.Properties.of().mapColor(MapColor.SAND).sound(SoundType.SAND).strength(0.5F)));
+
         public static final DeferredBlock<com.stardew.craft.block.terrain.TerrainSlabBlock> CLIFF_SLAB = BLOCKS.register("cliff_slab",
                         () -> new com.stardew.craft.block.terrain.TerrainSlabBlock.Cliff(Block.Properties.of().mapColor(MapColor.STONE).sound(SoundType.STONE).strength(1.5F, 6.0F).requiresCorrectToolForDrops()));
 
@@ -849,6 +858,36 @@ public class ModBlocks {
         public static final DeferredBlock<com.stardew.craft.block.decor.PaintedDoorBlock> BLUE_GLASS_DOOR = BLOCKS.register("blue_glass_door",
                         () -> new com.stardew.craft.block.decor.PaintedDoorBlock(Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_DOOR)));
 
+        public static final DeferredBlock<Block> GRAY_METAL_SIDING = BLOCKS.register("gray_metal_siding",
+                        () -> new Block(Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.IRON_BLOCK).mapColor(MapColor.METAL)));
+
+        public static final DeferredBlock<Block> GRAY_BROWN_BRICKS = BLOCKS.register("gray_brown_bricks",
+                        () -> new Block(Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.STONE_BRICKS).mapColor(MapColor.TERRACOTTA_BROWN)));
+
+        public static final DeferredBlock<Block> CHESTNUT_ROOF_TILES = BLOCKS.register("chestnut_roof_tiles",
+                        () -> new Block(Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.BRICKS).mapColor(MapColor.TERRACOTTA_BROWN)));
+
+        public static final DeferredBlock<Block> FOREST_GREEN_SIDING = BLOCKS.register("forest_green_siding",
+                        () -> new Block(Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_PLANKS).mapColor(MapColor.COLOR_GREEN)));
+
+        public static final DeferredBlock<com.stardew.craft.block.decor.PaintedDoorBlock> BLACKSMITH_DOOR = BLOCKS.register("blacksmith_door",
+                        () -> new com.stardew.craft.block.decor.PaintedDoorBlock(Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_DOOR)));
+
+        public static final DeferredBlock<com.stardew.craft.block.decor.PaintedDoorBlock> PURPLE_PANEL_DOOR = BLOCKS.register("purple_panel_door",
+                        () -> new com.stardew.craft.block.decor.PaintedDoorBlock(Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_DOOR)));
+
+        public static final DeferredBlock<com.stardew.craft.block.decor.MapDecorWallStaticBlock> LIBRARY_BOOK_SIGN = BLOCKS.register("library_book_sign",
+                        () -> new com.stardew.craft.block.decor.MapDecorWallStaticBlock(Block.Properties.of().strength(1.0F).sound(SoundType.WOOD).noOcclusion()
+                                        .pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK), "stardewcraft:block/decor/house/library_book_sign"));
+
+        public static final DeferredBlock<com.stardew.craft.block.decor.MapDecorWallStaticBlock> WALL_MAGNIFYING_GLASS = BLOCKS.register("wall_magnifying_glass",
+                        () -> new com.stardew.craft.block.decor.MapDecorWallStaticBlock(Block.Properties.of().strength(1.0F).sound(SoundType.METAL).noOcclusion()
+                                        .pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK), "stardewcraft:block/decor/house/wall_magnifying_glass"));
+
+        public static final DeferredBlock<com.stardew.craft.block.decor.TimberAwningBlock> TIMBER_AWNING = BLOCKS.register("timber_awning",
+                        () -> new com.stardew.craft.block.decor.TimberAwningBlock(Block.Properties.of().strength(2.0F).sound(SoundType.WOOD).noOcclusion()
+                                        .pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK)));
+
         public static final DeferredBlock<Block> CREAM_SIDING = BLOCKS.register("cream_siding",
                         () -> new Block(Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_PLANKS).mapColor(MapColor.SAND)));
 
@@ -864,13 +903,24 @@ public class ModBlocks {
         public static final DeferredBlock<com.stardew.craft.block.decor.PaintedDoorBlock> BROWN_GLASS_DOOR = BLOCKS.register("brown_glass_door",
                         () -> new com.stardew.craft.block.decor.PaintedDoorBlock(Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_DOOR)));
 
+        public static final DeferredBlock<com.stardew.craft.block.decor.PaintedDoorBlock> RED_BROWN_DOOR = BLOCKS.register("red_brown_door",
+                        () -> new com.stardew.craft.block.decor.PaintedDoorBlock(Block.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.OAK_DOOR)));
+
         public static final DeferredBlock<com.stardew.craft.block.decor.MapDecorWallStaticBlock> PIERRE_SIGN = BLOCKS.register("pierre_sign",
                         () -> new com.stardew.craft.block.decor.MapDecorWallStaticBlock(Block.Properties.of().strength(1.0F).sound(SoundType.WOOD).noOcclusion()
                                         .pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK), "stardewcraft:block/decor/house/pierre_sign", true));
 
+        public static final DeferredBlock<com.stardew.craft.block.decor.MapDecorWallStaticBlock> SALOON_SIGN = BLOCKS.register("saloon_sign",
+                        () -> new com.stardew.craft.block.decor.MapDecorWallStaticBlock(Block.Properties.of().strength(1.0F).sound(SoundType.WOOD).noOcclusion()
+                                        .pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK), "stardewcraft:block/decor/house/saloon_sign", true));
+
         public static final DeferredBlock<com.stardew.craft.block.decor.MapDecorWallStaticBlock> CLINIC_SIGN = BLOCKS.register("clinic_sign",
                         () -> new com.stardew.craft.block.decor.MapDecorWallStaticBlock(Block.Properties.of().strength(1.0F).sound(SoundType.WOOD).noOcclusion()
                                         .pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK), "stardewcraft:block/decor/house/clinic_sign", true));
+
+        public static final DeferredBlock<com.stardew.craft.block.decor.MapDecorWallStaticBlock> FOOD_SPIRITS_SIGN = BLOCKS.register("food_spirits_sign",
+                        () -> new com.stardew.craft.block.decor.MapDecorWallStaticBlock(Block.Properties.of().strength(1.0F).sound(SoundType.WOOD).noOcclusion()
+                                        .pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK), "stardewcraft:block/decor/house/food_spirits_sign", true));
 
         public static final DeferredBlock<com.stardew.craft.block.decor.MapDecorWallStaticBlock> SHIP_WHEEL_ORNAMENT = BLOCKS.register("ship_wheel_ornament",
                         () -> new com.stardew.craft.block.decor.MapDecorWallStaticBlock(Block.Properties.of().strength(1.0F).sound(SoundType.WOOD).noOcclusion()
@@ -3635,7 +3685,7 @@ public static final DeferredBlock<Block> DEAD_CROP = BLOCKS.register("dead_crop"
                                         .noOcclusion()
                                         .strength(1.5F, 6.0F), "stardewcraft:block/decor/grandpa_shrine/spring/grandpa_shrine"));
 
-        // ── 稻草人系列（0=基础 9 格半径，1-8=Rarecrow 8 格半径） ──
+        // ── 稻草人系列（0=基础 9 格半径，1-8=Rarecrow 9 格半径） ──
         @SuppressWarnings("null")
         public static final DeferredBlock<Block> SCARECROW_0 = BLOCKS.register("scarecrow_0",
                         () -> new com.stardew.craft.block.decor.ScarecrowBlock(Block.Properties.of()
@@ -3649,56 +3699,56 @@ public static final DeferredBlock<Block> DEAD_CROP = BLOCKS.register("dead_crop"
                                         .mapColor(net.minecraft.world.level.material.MapColor.WOOD)
                                         .sound(net.minecraft.world.level.block.SoundType.WOOD)
                                         .noOcclusion()
-                                        .strength(2.0F, 3.0F), "stardewcraft:block/scarecrow/1", 1, 8));
+                                        .strength(2.0F, 3.0F), "stardewcraft:block/scarecrow/1", 1, 9));
         @SuppressWarnings("null")
         public static final DeferredBlock<Block> SCARECROW_2 = BLOCKS.register("scarecrow_2",
                         () -> new com.stardew.craft.block.decor.ScarecrowBlock(Block.Properties.of()
                                         .mapColor(net.minecraft.world.level.material.MapColor.WOOD)
                                         .sound(net.minecraft.world.level.block.SoundType.WOOD)
                                         .noOcclusion()
-                                        .strength(2.0F, 3.0F), "stardewcraft:block/scarecrow/2", 2, 8));
+                                        .strength(2.0F, 3.0F), "stardewcraft:block/scarecrow/2", 2, 9));
         @SuppressWarnings("null")
         public static final DeferredBlock<Block> SCARECROW_3 = BLOCKS.register("scarecrow_3",
                         () -> new com.stardew.craft.block.decor.ScarecrowBlock(Block.Properties.of()
                                         .mapColor(net.minecraft.world.level.material.MapColor.WOOD)
                                         .sound(net.minecraft.world.level.block.SoundType.WOOD)
                                         .noOcclusion()
-                                        .strength(2.0F, 3.0F), "stardewcraft:block/scarecrow/3", 3, 8));
+                                        .strength(2.0F, 3.0F), "stardewcraft:block/scarecrow/3", 3, 9));
         @SuppressWarnings("null")
         public static final DeferredBlock<Block> SCARECROW_4 = BLOCKS.register("scarecrow_4",
                         () -> new com.stardew.craft.block.decor.ScarecrowBlock(Block.Properties.of()
                                         .mapColor(net.minecraft.world.level.material.MapColor.WOOD)
                                         .sound(net.minecraft.world.level.block.SoundType.WOOD)
                                         .noOcclusion()
-                                        .strength(2.0F, 3.0F), "stardewcraft:block/scarecrow/4", 4, 8));
+                                        .strength(2.0F, 3.0F), "stardewcraft:block/scarecrow/4", 4, 9));
         @SuppressWarnings("null")
         public static final DeferredBlock<Block> SCARECROW_5 = BLOCKS.register("scarecrow_5",
                         () -> new com.stardew.craft.block.decor.ScarecrowBlock(Block.Properties.of()
                                         .mapColor(net.minecraft.world.level.material.MapColor.WOOD)
                                         .sound(net.minecraft.world.level.block.SoundType.WOOD)
                                         .noOcclusion()
-                                        .strength(2.0F, 3.0F), "stardewcraft:block/scarecrow/5", 5, 8));
+                                        .strength(2.0F, 3.0F), "stardewcraft:block/scarecrow/5", 5, 9));
         @SuppressWarnings("null")
         public static final DeferredBlock<Block> SCARECROW_6 = BLOCKS.register("scarecrow_6",
                         () -> new com.stardew.craft.block.decor.ScarecrowBlock(Block.Properties.of()
                                         .mapColor(net.minecraft.world.level.material.MapColor.WOOD)
                                         .sound(net.minecraft.world.level.block.SoundType.WOOD)
                                         .noOcclusion()
-                                        .strength(2.0F, 3.0F), "stardewcraft:block/scarecrow/6", 6, 8));
+                                        .strength(2.0F, 3.0F), "stardewcraft:block/scarecrow/6", 6, 9));
         @SuppressWarnings("null")
         public static final DeferredBlock<Block> SCARECROW_7 = BLOCKS.register("scarecrow_7",
                         () -> new com.stardew.craft.block.decor.ScarecrowBlock(Block.Properties.of()
                                         .mapColor(net.minecraft.world.level.material.MapColor.WOOD)
                                         .sound(net.minecraft.world.level.block.SoundType.WOOD)
                                         .noOcclusion()
-                                        .strength(2.0F, 3.0F), "stardewcraft:block/scarecrow/7", 7, 8));
+                                        .strength(2.0F, 3.0F), "stardewcraft:block/scarecrow/7", 7, 9));
         @SuppressWarnings("null")
         public static final DeferredBlock<Block> SCARECROW_8 = BLOCKS.register("scarecrow_8",
                         () -> new com.stardew.craft.block.decor.ScarecrowBlock(Block.Properties.of()
                                         .mapColor(net.minecraft.world.level.material.MapColor.WOOD)
                                         .sound(net.minecraft.world.level.block.SoundType.WOOD)
                                         .noOcclusion()
-                                        .strength(2.0F, 3.0F), "stardewcraft:block/scarecrow/8", 8, 8));
+                                        .strength(2.0F, 3.0F), "stardewcraft:block/scarecrow/8", 8, 9));
         @SuppressWarnings("null")
         public static final DeferredBlock<Block> SCARECROW_9 = BLOCKS.register("scarecrow_9",
                         () -> new com.stardew.craft.block.decor.ScarecrowBlock(Block.Properties.of()
@@ -3712,7 +3762,7 @@ public static final DeferredBlock<Block> DEAD_CROP = BLOCKS.register("dead_crop"
                                         .mapColor(net.minecraft.world.level.material.MapColor.PLANT)
                                         .sound(net.minecraft.world.level.block.SoundType.WOOD)
                                         .noOcclusion()
-                                        .strength(1.5F, 6.0F), "stardewcraft:geo/block/decor/junimo_hut_decor.geo.json"));
+                                        .strength(1.5F, 6.0F), "stardewcraft:geo/block/utility/junimo_hut.geo.json"));
 
         // ── Wizard buildings: footprint and collision are derived from each GeckoLib model. ──
         @SuppressWarnings("null")
@@ -4199,6 +4249,13 @@ public static final DeferredBlock<Block> DEAD_CROP = BLOCKS.register("dead_crop"
                                         .sound(net.minecraft.world.level.block.SoundType.WOOD)
                                         .noOcclusion()
                                         .strength(0.3F, 0.5F)));
+        @SuppressWarnings("null")
+        public static final DeferredBlock<Block> GUILD_MONSTER_BOARD = BLOCKS.register("guild_monster_board",
+                        () -> new com.stardew.craft.block.decor.MapDecorWallStaticBlock(Block.Properties.of()
+                                        .mapColor(net.minecraft.world.level.material.MapColor.WOOD)
+                                        .sound(net.minecraft.world.level.block.SoundType.WOOD)
+                                        .noOcclusion()
+                                        .strength(0.6F, 1.0F), "stardewcraft:decor/wall_decor/common/guild_monster_board"));
         @SuppressWarnings("null")
         public static final DeferredBlock<Block> PAPER_CHECKLIST = BLOCKS.register("paper_checklist",
                         () -> new com.stardew.craft.block.decor.MapDecorWallThinBlock(Block.Properties.of()

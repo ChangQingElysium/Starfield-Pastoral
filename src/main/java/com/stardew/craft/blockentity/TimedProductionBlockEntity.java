@@ -29,7 +29,19 @@ import net.neoforged.neoforge.items.IItemHandler;
 import java.util.Optional;
 
 public abstract class TimedProductionBlockEntity extends BlockEntity implements UtilityAutomationAccess, FairyDustAcceleratable, AdvanceableUtility, StardewTimedProduction {
-    protected static final int EFFECTIVE_MINUTES_PER_DAY = 1260;
+    /**
+     * Machine minutes per calendar day: 1200 daytime minutes (6:00-26:00) plus the
+     * overnight top-up of Utility.CalculateMinutesUntilMorning, so every day totals 1600
+     * regardless of bedtime.
+     */
+    public static final int EFFECTIVE_MINUTES_PER_DAY = 1600;
+    /** Day length of the pre-F-1 machine clock; only used to migrate saved deadlines. */
+    public static final int LEGACY_MINUTES_PER_DAY = 1260;
+    /** Marks machine NBT whose absolute minutes already use the 1600-minute clock. */
+    public static final String TAG_MACHINE_CLOCK = "stardewcraftMachineClock";
+    private static final int DAYTIME_MINUTES = 1200;
+
+    private boolean legacyClockPending;
 
     protected ItemStack input = ItemStack.EMPTY;
     protected ItemStack product = ItemStack.EMPTY;
@@ -61,6 +73,7 @@ public abstract class TimedProductionBlockEntity extends BlockEntity implements 
     }
 
     protected boolean refreshReady() {
+        ensureMachineClock();
         if (readyAtAbsMinute < 0) {
             return false;
         }
@@ -117,6 +130,7 @@ public abstract class TimedProductionBlockEntity extends BlockEntity implements 
     }
 
     public long getRemainingAbsMinutes() {
+        ensureMachineClock();
         if (!hasReadyPayload() || readyAtAbsMinute < 0) {
             return 0;
         }
@@ -135,6 +149,7 @@ public abstract class TimedProductionBlockEntity extends BlockEntity implements 
 
     @Override
     public final long stardewReadyAtAbsoluteMinute() {
+        ensureMachineClock();
         return readyAtAbsMinute;
     }
 
@@ -189,6 +204,7 @@ public abstract class TimedProductionBlockEntity extends BlockEntity implements 
         if (currentLevel == null || currentLevel.isClientSide) {
             return;
         }
+        ensureMachineClock();
         if (!hasReadyPayload() || readyAtAbsMinute < 0) {
             return;
         }
@@ -208,7 +224,11 @@ public abstract class TimedProductionBlockEntity extends BlockEntity implements 
         currentLevel.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
     }
 
-    protected static long getCurrentAbsMinute() {
+    /**
+     * Current machine minute: 1600 per day, with 6:00 of day N at (N - 1) * 1600.
+     * Sleeping jumps to the next multiple, matching Utility.CalculateMinutesUntilMorning.
+     */
+    public static long getCurrentAbsMinute() {
         StardewTimeManager tm = StardewTimeManager.get();
         int currentTime = tm.getCurrentTime();
         int effectiveMinuteOfDay;
@@ -226,6 +246,68 @@ public abstract class TimedProductionBlockEntity extends BlockEntity implements 
         int season = tm.getCurrentSeason();
         int day = tm.getCurrentDay();
         return (long) (year - 1) * 112L + (long) season * 28L + (long) day;
+    }
+
+    /** Utility.CalculateMinutesUntilMorning(timeOfDay, days) on the machine clock. */
+    public static int minutesUntilMorning(long nowAbsMinute, int days) {
+        if (days < 1) {
+            return 0;
+        }
+        long morning = (Math.floorDiv(nowAbsMinute, EFFECTIVE_MINUTES_PER_DAY) + days)
+                * (long) EFFECTIVE_MINUTES_PER_DAY;
+        return Math.toIntExact(morning - nowAbsMinute);
+    }
+
+    /** Recipe duration: DaysUntilReady recipes finish on the Nth morning, others after their minutes. */
+    protected static int recipeMinutes(com.stardew.craft.item.artisan.ArtisanRecipeDataManager.Recipe recipe) {
+        return recipe.days() > 0
+                ? minutesUntilMorning(getCurrentAbsMinute(), recipe.days())
+                : recipe.minutes();
+    }
+
+    /**
+     * Maps an absolute minute of the pre-F-1 1260-minute clock to the same day and
+     * clock time on the 1600-minute clock. Daytime minutes keep their offset; the old
+     * 60-minute overnight slot is stretched over the 400-minute overnight slot. Ready
+     * state and completion moment are therefore unchanged by the migration.
+     */
+    public static long migrateLegacyAbsMinute(long legacyAbsMinute) {
+        if (legacyAbsMinute < 0) {
+            return legacyAbsMinute;
+        }
+        long day = legacyAbsMinute / LEGACY_MINUTES_PER_DAY;
+        long offset = legacyAbsMinute % LEGACY_MINUTES_PER_DAY;
+        if (offset > DAYTIME_MINUTES) {
+            int legacyNight = LEGACY_MINUTES_PER_DAY - DAYTIME_MINUTES;
+            int night = EFFECTIVE_MINUTES_PER_DAY - DAYTIME_MINUTES;
+            offset = DAYTIME_MINUTES + (offset - DAYTIME_MINUTES) * night / legacyNight;
+        }
+        return day * EFFECTIVE_MINUTES_PER_DAY + offset;
+    }
+
+    /** Subclasses whose saved minutes never used the 1260-minute clock opt out. */
+    protected boolean migratesLegacyMachineClock() {
+        return true;
+    }
+
+    /**
+     * Applies the one-time 1260 -> 1600 migration after the subclass has read its NBT.
+     * The next save writes the converted deadline with the clock marker; until then the
+     * stored NBT is untouched, so a reload converts the same original value again.
+     */
+    protected final void ensureMachineClock() {
+        if (!legacyClockPending) {
+            return;
+        }
+        legacyClockPending = false;
+        readyAtAbsMinute = migrateLegacyAbsMinute(readyAtAbsMinute);
+        lastReadyCheckAbsMinute = Long.MIN_VALUE;
+    }
+
+    @Override
+    public void onLoad() {
+        super.onLoad();
+        ensureMachineClock();
     }
 
     /**
@@ -359,6 +441,7 @@ public abstract class TimedProductionBlockEntity extends BlockEntity implements 
             StardewMachineCycleKind kind,
             boolean automation
     ) {
+        legacyClockPending = false;
         input = trackedInput.copy();
         product = plan.output();
         readyAtAbsMinute =
@@ -422,6 +505,9 @@ public abstract class TimedProductionBlockEntity extends BlockEntity implements 
             HolderLookup.Provider registries
     ) {
         super.saveAdditional(tag, registries);
+        // Subclasses write their minutes after this call, so convert before they do.
+        ensureMachineClock();
+        tag.putInt(TAG_MACHINE_CLOCK, EFFECTIVE_MINUTES_PER_DAY);
         tag.putString("stardewcraftCycleKind",
                 cycleKind.name());
         tag.putBoolean("stardewcraftCycleAutomation",
@@ -434,6 +520,10 @@ public abstract class TimedProductionBlockEntity extends BlockEntity implements 
             HolderLookup.Provider registries
     ) {
         super.loadAdditional(tag, registries);
+        // Machines saved before F-1 carry 1260-minute deadlines; subclasses read them
+        // after this call, so the conversion runs on first use (onLoad at the latest).
+        legacyClockPending = migratesLegacyMachineClock()
+                && !tag.contains(TAG_MACHINE_CLOCK);
         cycleKind = defaultCycleKind();
         if (tag.contains("stardewcraftCycleKind")) {
             try {

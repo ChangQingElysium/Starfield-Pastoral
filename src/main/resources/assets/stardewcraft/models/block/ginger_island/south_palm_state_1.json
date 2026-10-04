@@ -1,0 +1,158 @@
+{
+  "parent": "minecraft:block/block",
+  "loader": "neoforge:composite",
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "particle": "stardewcraft:block/ginger_island/south_palm_cliff_particle"
+  },
+  "display": {
+    "gui": {
+      "rotation": [
+        30,
+        495,
+        0
+      ],
+      "translation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        0.625,
+        0.625,
+        0.625
+      ]
+    }
+  },
+  "children": {
+    "authored": {
+      "parent": "minecraft:block/block",
+      "loader": "neoforge:composite",
+      "textures": {
+        "particle": "stardewcraft:block/ginger_island/south_palm_cliff_particle"
+      },
+      "children": {
+        "0": {
+          "parent": "stardewcraft:block/ginger_island/south_palm_cliff",
+          "transform": {
+            "translation": [
+              0.0,
+              0.0,
+              0.0
+            ]
+          }
+        }
+      }
+    }
+  },
+  "stardewcraft:collision": {
+    "mode": "custom",
+    "boxes": [
+      {
+        "from": [
+          2.0,
+          0,
+          2.0
+        ],
+        "to": [
+          14.0,
+          11.0,
+          14.0
+        ]
+      },
+      {
+        "from": [
+          3.0,
+          7.0,
+          -2.5
+        ],
+        "to": [
+          13.0,
+          21.0,
+          11.5
+        ]
+      },
+      {
+        "from": [
+          3.0,
+          14.0,
+          -9.5
+        ],
+        "to": [
+          13.0,
+          28.0,
+          4.5
+        ]
+      },
+      {
+        "from": [
+          3.5,
+          22.5,
+          -14.5
+        ],
+        "to": [
+          12.5,
+          36.0,
+          -2.0
+        ]
+      },
+      {
+        "from": [
+          3.5,
+          32.5,
+          -19.0
+        ],
+        "to": [
+          12.5,
+          46.5,
+          -6.5
+        ]
+      },
+      {
+        "from": [
+          3.0,
+          43.0,
+          -19.0
+        ],
+        "to": [
+          13.0,
+          65.0,
+          -10.0
+        ]
+      }
+    ],
+    "policy": "compound_palm_trunk"
+  },
+  "stardewcraft:placement": {
+    "version": 2,
+    "reason": "cliff_palm_lean_matches_facing",
+    "clockwise_y": 270,
+    "offset_pixels": [
+      0,
+      0,
+      0
+    ]
+  },
+  "transform": {
+    "matrix": [
+      [
+        0,
+        0,
+        1,
+        0.0
+      ],
+      [
+        0,
+        1,
+        0,
+        0.0
+      ],
+      [
+        -1,
+        0,
+        0,
+        1.0
+      ]
+    ]
+  }
+}

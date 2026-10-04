@@ -1,0 +1,10 @@
+{
+  "family": "stardewcraft:trash_can",
+  "tier": 4,
+  "output": "stardewcraft:iridium_trash_can_upgrade",
+  "price": 12500,
+  "material": "stardewcraft:iridium_bar",
+  "material_count": 5,
+  "days": 2,
+  "trash_can_level": 4
+}

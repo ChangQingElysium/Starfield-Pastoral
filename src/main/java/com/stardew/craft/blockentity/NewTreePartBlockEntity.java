@@ -76,7 +76,7 @@ public class NewTreePartBlockEntity extends BlockEntity {
 		super.loadAdditional(tag, registries);
 		generatedTreeId = tag.contains(TAG_TREE_ID, Tag.TAG_INT_ARRAY) ? NbtUtils.loadUUID(tag.get(TAG_TREE_ID)) : null;
 		generatedTreeSpecies = tag.contains(TAG_TREE_SPECIES, Tag.TAG_STRING) ? tag.getString(TAG_TREE_SPECIES) : null;
-		generatedTreeRoot = tag.contains(TAG_TREE_ROOT, Tag.TAG_COMPOUND)
+		generatedTreeRoot = tag.contains(TAG_TREE_ROOT, Tag.TAG_INT_ARRAY)
 				? NbtUtils.readBlockPos(tag, TAG_TREE_ROOT).orElse(null)
 				: null;
 	}

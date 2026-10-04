@@ -49,8 +49,8 @@ public class CrystalariumBlock extends Block implements EntityBlock {
     public static final BooleanProperty WORKING = BooleanProperty.create("working");
     public static final EnumProperty<Part> PART = EnumProperty.create("part", Part.class);
 
-    private static final VoxelShape[] MAIN_SHAPES = ModelVoxelShapeCache.horizontalShapes("stardewcraft:block/utility/crystalarium", Direction.SOUTH);
-    private static final VoxelShape[] EXT_SHAPES = ModelVoxelShapeCache.horizontalShapes("stardewcraft:block/utility/crystalarium_extension", Direction.SOUTH);
+    private static final VoxelShape[] MAIN_SHAPES = ModelVoxelShapeCache.horizontalShapes("stardewcraft:block/utility/crystalarium", Direction.NORTH);
+    private static final VoxelShape[] EXT_SHAPES = ModelVoxelShapeCache.horizontalShapes("stardewcraft:block/utility/crystalarium_extension", Direction.NORTH);
 
     public enum Part implements StringRepresentable {
         MAIN("main"),

@@ -70,7 +70,15 @@
     {
       "item": "recipe:stardewcraft:cookie",
       "price": 300,
-      "stock": 1
+      "stock": 1,
+      "available_when": [
+        {
+          "type": "stardewcraft:seen_event",
+          "data": {
+            "id": "evelyn_4heart"
+          }
+        }
+      ]
     },
     {
       "item": "recipe:stardewcraft:triple_shot_espresso",

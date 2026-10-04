@@ -1,0 +1,172 @@
+{
+  "variants": {
+    "facing=north,part=main,gem=empty": {
+      "model": "stardewcraft:block/ginger_island/gem_pedestal",
+      "y": 0
+    },
+    "facing=north,part=extension,gem=empty": {
+      "model": "stardewcraft:block/ginger_island/gem_pedestal_extension"
+    },
+    "facing=north,part=main,gem=amethyst": {
+      "model": "stardewcraft:block/ginger_island/gem_pedestal_amethyst",
+      "y": 0
+    },
+    "facing=north,part=extension,gem=amethyst": {
+      "model": "stardewcraft:block/ginger_island/gem_pedestal_extension"
+    },
+    "facing=north,part=main,gem=aquamarine": {
+      "model": "stardewcraft:block/ginger_island/gem_pedestal_aquamarine",
+      "y": 0
+    },
+    "facing=north,part=extension,gem=aquamarine": {
+      "model": "stardewcraft:block/ginger_island/gem_pedestal_extension"
+    },
+    "facing=north,part=main,gem=emerald": {
+      "model": "stardewcraft:block/ginger_island/gem_pedestal_emerald",
+      "y": 0
+    },
+    "facing=north,part=extension,gem=emerald": {
+      "model": "stardewcraft:block/ginger_island/gem_pedestal_extension"
+    },
+    "facing=north,part=main,gem=ruby": {
+      "model": "stardewcraft:block/ginger_island/gem_pedestal_ruby",
+      "y": 0
+    },
+    "facing=north,part=extension,gem=ruby": {
+      "model": "stardewcraft:block/ginger_island/gem_pedestal_extension"
+    },
+    "facing=north,part=main,gem=topaz": {
+      "model": "stardewcraft:block/ginger_island/gem_pedestal_topaz",
+      "y": 0
+    },
+    "facing=north,part=extension,gem=topaz": {
+      "model": "stardewcraft:block/ginger_island/gem_pedestal_extension"
+    },
+    "facing=east,part=main,gem=empty": {
+      "model": "stardewcraft:block/ginger_island/gem_pedestal",
+      "y": 90
+    },
+    "facing=east,part=extension,gem=empty": {
+      "model": "stardewcraft:block/ginger_island/gem_pedestal_extension"
+    },
+    "facing=east,part=main,gem=amethyst": {
+      "model": "stardewcraft:block/ginger_island/gem_pedestal_amethyst",
+      "y": 90
+    },
+    "facing=east,part=extension,gem=amethyst": {
+      "model": "stardewcraft:block/ginger_island/gem_pedestal_extension"
+    },
+    "facing=east,part=main,gem=aquamarine": {
+      "model": "stardewcraft:block/ginger_island/gem_pedestal_aquamarine",
+      "y": 90
+    },
+    "facing=east,part=extension,gem=aquamarine": {
+      "model": "stardewcraft:block/ginger_island/gem_pedestal_extension"
+    },
+    "facing=east,part=main,gem=emerald": {
+      "model": "stardewcraft:block/ginger_island/gem_pedestal_emerald",
+      "y": 90
+    },
+    "facing=east,part=extension,gem=emerald": {
+      "model": "stardewcraft:block/ginger_island/gem_pedestal_extension"
+    },
+    "facing=east,part=main,gem=ruby": {
+      "model": "stardewcraft:block/ginger_island/gem_pedestal_ruby",
+      "y": 90
+    },
+    "facing=east,part=extension,gem=ruby": {
+      "model": "stardewcraft:block/ginger_island/gem_pedestal_extension"
+    },
+    "facing=east,part=main,gem=topaz": {
+      "model": "stardewcraft:block/ginger_island/gem_pedestal_topaz",
+      "y": 90
+    },
+    "facing=east,part=extension,gem=topaz": {
+      "model": "stardewcraft:block/ginger_island/gem_pedestal_extension"
+    },
+    "facing=south,part=main,gem=empty": {
+      "model": "stardewcraft:block/ginger_island/gem_pedestal",
+      "y": 180
+    },
+    "facing=south,part=extension,gem=empty": {
+      "model": "stardewcraft:block/ginger_island/gem_pedestal_extension"
+    },
+    "facing=south,part=main,gem=amethyst": {
+      "model": "stardewcraft:block/ginger_island/gem_pedestal_amethyst",
+      "y": 180
+    },
+    "facing=south,part=extension,gem=amethyst": {
+      "model": "stardewcraft:block/ginger_island/gem_pedestal_extension"
+    },
+    "facing=south,part=main,gem=aquamarine": {
+      "model": "stardewcraft:block/ginger_island/gem_pedestal_aquamarine",
+      "y": 180
+    },
+    "facing=south,part=extension,gem=aquamarine": {
+      "model": "stardewcraft:block/ginger_island/gem_pedestal_extension"
+    },
+    "facing=south,part=main,gem=emerald": {
+      "model": "stardewcraft:block/ginger_island/gem_pedestal_emerald",
+      "y": 180
+    },
+    "facing=south,part=extension,gem=emerald": {
+      "model": "stardewcraft:block/ginger_island/gem_pedestal_extension"
+    },
+    "facing=south,part=main,gem=ruby": {
+      "model": "stardewcraft:block/ginger_island/gem_pedestal_ruby",
+      "y": 180
+    },
+    "facing=south,part=extension,gem=ruby": {
+      "model": "stardewcraft:block/ginger_island/gem_pedestal_extension"
+    },
+    "facing=south,part=main,gem=topaz": {
+      "model": "stardewcraft:block/ginger_island/gem_pedestal_topaz",
+      "y": 180
+    },
+    "facing=south,part=extension,gem=topaz": {
+      "model": "stardewcraft:block/ginger_island/gem_pedestal_extension"
+    },
+    "facing=west,part=main,gem=empty": {
+      "model": "stardewcraft:block/ginger_island/gem_pedestal",
+      "y": 270
+    },
+    "facing=west,part=extension,gem=empty": {
+      "model": "stardewcraft:block/ginger_island/gem_pedestal_extension"
+    },
+    "facing=west,part=main,gem=amethyst": {
+      "model": "stardewcraft:block/ginger_island/gem_pedestal_amethyst",
+      "y": 270
+    },
+    "facing=west,part=extension,gem=amethyst": {
+      "model": "stardewcraft:block/ginger_island/gem_pedestal_extension"
+    },
+    "facing=west,part=main,gem=aquamarine": {
+      "model": "stardewcraft:block/ginger_island/gem_pedestal_aquamarine",
+      "y": 270
+    },
+    "facing=west,part=extension,gem=aquamarine": {
+      "model": "stardewcraft:block/ginger_island/gem_pedestal_extension"
+    },
+    "facing=west,part=main,gem=emerald": {
+      "model": "stardewcraft:block/ginger_island/gem_pedestal_emerald",
+      "y": 270
+    },
+    "facing=west,part=extension,gem=emerald": {
+      "model": "stardewcraft:block/ginger_island/gem_pedestal_extension"
+    },
+    "facing=west,part=main,gem=ruby": {
+      "model": "stardewcraft:block/ginger_island/gem_pedestal_ruby",
+      "y": 270
+    },
+    "facing=west,part=extension,gem=ruby": {
+      "model": "stardewcraft:block/ginger_island/gem_pedestal_extension"
+    },
+    "facing=west,part=main,gem=topaz": {
+      "model": "stardewcraft:block/ginger_island/gem_pedestal_topaz",
+      "y": 270
+    },
+    "facing=west,part=extension,gem=topaz": {
+      "model": "stardewcraft:block/ginger_island/gem_pedestal_extension"
+    }
+  }
+}

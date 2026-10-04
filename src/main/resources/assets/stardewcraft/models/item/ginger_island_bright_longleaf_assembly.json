@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "stardewcraft:item/ginger_island/ginger_island_bright_longleaf_assembly",
+    "particle": "stardewcraft:block/ginger_island/island_bright_longleaf_assembly_particle"
+  }
+}

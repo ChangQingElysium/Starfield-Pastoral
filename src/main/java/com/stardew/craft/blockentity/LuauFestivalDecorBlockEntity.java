@@ -1,19 +1,14 @@
 package com.stardew.craft.blockentity;
 
+import com.stardew.craft.model.AnimatedModel;
+import com.stardew.craft.model.ModelAnimation;
 import net.minecraft.core.BlockPos;
 import com.stardew.craft.block.ModBlocks;
-import software.bernie.geckolib.animation.AnimationController;
-import software.bernie.geckolib.animation.RawAnimation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
-import software.bernie.geckolib.animatable.GeoBlockEntity;
-import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.animation.AnimatableManager;
-import software.bernie.geckolib.util.GeckoLibUtil;
 
-public class LuauFestivalDecorBlockEntity extends net.minecraft.world.level.block.entity.BlockEntity implements GeoBlockEntity {
+public class LuauFestivalDecorBlockEntity extends net.minecraft.world.level.block.entity.BlockEntity implements AnimatedModel {
     private boolean footprintChecked;
-    private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
     public LuauFestivalDecorBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.LUAU_FESTIVAL_DECOR.get(), pos, state);
@@ -30,19 +25,13 @@ public class LuauFestivalDecorBlockEntity extends net.minecraft.world.level.bloc
     }
 
     @Override
-    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
+    public ModelAnimation modelAnimation(boolean moving, float partialTick) {
         String name = getBlockState().is(ModBlocks.WIZARD_CAULDRON.get()) ? "wizard_cauldron"
                 : getBlockState().is(ModBlocks.LUAU_SOUP_POT.get()) ? "luau_soup_pot" : null;
-        if (name != null) {
-            RawAnimation simmer = RawAnimation.begin().thenLoop("animation." + name + ".simmer");
-            controllers.add(new AnimationController<>(this, "simmer", 0, state -> state.setAndContinue(simmer)));
-        }
+        return name == null ? null : ModelAnimation.loop("animation." + name + ".simmer");
     }
 
-    @Override
-    public AnimatableInstanceCache getAnimatableInstanceCache() {
-        return cache;
-    }
+    @Override public int modelTransitionTicks() { return 0; }
 
     @SuppressWarnings("null")
     public AABB getRenderBoundingBox() {

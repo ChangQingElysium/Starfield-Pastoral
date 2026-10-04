@@ -33,6 +33,9 @@ public class TerrainSlabBlock extends SlabBlock implements TerrainShapeBlock {
             super.createBlockStateDefinition(builder); builder.add(TerrainVariants.DIRT);
         }
     }
+    public static final class Sand extends TerrainSlabBlock {
+        public Sand(Properties properties) { super(Kind.SAND, properties); }
+    }
     public static final class Cliff extends TerrainSlabBlock {
         public Cliff(Properties properties) { super(Kind.CLIFF, properties); }
         @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {

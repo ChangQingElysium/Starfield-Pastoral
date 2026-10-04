@@ -5,6 +5,21 @@ import net.minecraft.world.phys.Vec3;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 class WingedFlightTest {
+    @Test void sourceHitRecoveryKeepsAcceptedKnockbackWithoutPoweredSteering(){
+        for(var flight:new MonsterFlightMotion[]{new SerpentFlightMotion(),new BatFlight(),new FlySteering()}){
+            var state=flight.save();state.putInt("Slipperiness",24);flight.load(state);
+            flight.steer(new Vec3(0,0,-4),true,true);
+            flight.knockback(0,8);flight.hit();
+            var expected=flight.velocity();
+            for(int step=0;step<9;step++){
+                flight.elapsed(step%3==2?18:16);
+                expected=expected.scale(1-1.0/24);
+                flight.steer(new Vec3(0,0,-4),true,false);
+                assertEquals(expected,flight.velocity(),"Recovery accelerated or clipped the accepted hit trajectory");
+                assertTrue(flight.velocity().z>0,"Chasing erased the reverse trajectory during recovery");
+            }
+        }
+    }
     @Test void flyWaitsForEmergenceAndHitLocksAllThreeAxes(){
         var fly=new FlySteering();fly.initialize(RandomSource.create(3));
         for(int i=0;i<60;i++){fly.advance(i%3==2?18:16,new Vec3(3,5,2),true,true);assertEquals(Vec3.ZERO,fly.velocity());}

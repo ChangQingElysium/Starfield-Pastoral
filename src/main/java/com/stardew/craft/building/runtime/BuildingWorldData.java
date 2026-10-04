@@ -210,7 +210,7 @@ public final class BuildingWorldData extends SavedData {
 
     private Result beginPrefabValidated(BuildingRecord record, UUID permit, int absoluteDay) {
         if (hasActiveConstruction(record.farmId())) return Result.INVALID_STATE;
-        ConstructionOrder order = new ConstructionOrder(3, absoluteDay, false);
+        ConstructionOrder order = new ConstructionOrder(newConstructionDays(record.family()), absoluteDay, false);
         Result result = register(record);
         if (result != Result.SUCCESS) return result;
         buildings.put(record.id(), record.advance(BuildingRecord.Action.START_CONSTRUCTION));
@@ -218,6 +218,12 @@ public final class BuildingWorldData extends SavedData {
         permits.remove(permit); permitFamilies.remove(permit);
         setDirty();
         return Result.SUCCESS;
+    }
+
+    /** Original Buildings.json BuildDays: Coop/Barn 3 days, Silo and Fish Pond 2 days. */
+    private static int newConstructionDays(net.minecraft.resources.ResourceLocation family) {
+        return UtilityBuildings.SILO.equals(family)
+                || FishPondPrefabs.FAMILY.equals(family) ? 2 : 3;
     }
 
     public synchronized Result beginUpgrade(UUID id, long revision, int absoluteDay) {

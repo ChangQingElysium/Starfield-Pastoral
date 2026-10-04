@@ -26,6 +26,11 @@
     "background": 0
   },
   {
+    "id": "incubator",
+    "text": "stardewcraft.mail.incubator",
+    "background": 0
+  },
+  {
     "id": "pierreGeneral",
     "text": "stardewcraft.mail.pierreGeneral",
     "background": 0

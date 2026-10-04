@@ -243,10 +243,15 @@ public class QuestManager {
     // ─── 事件分发 ───
 
     public void onMonsterSlain(ServerPlayer player, String monsterType) {
+        onMonsterSlain(player, List.of(monsterType));
+    }
+
+    /** One kill of a single monster carrying all of {@code monsterTags}. */
+    public void onMonsterSlain(ServerPlayer player, java.util.Collection<String> monsterTags) {
         Map<StardewProgressKey, StardewProgressSnapshot> before =
                 captureQuestSnapshots();
         for (StardewQuest q : List.copyOf(questLog)) {
-            q.onMonsterSlain(player, monsterType);
+            q.onMonsterSlain(player, monsterTags);
         }
         publishQuestChanges(
                 player, before, StardewProgressCauses.OBJECTIVE_EVENT);
@@ -469,6 +474,16 @@ public class QuestManager {
                 // 任务刚完成，发送完成通知
                 q.setNotifiedComplete(true);
                 questsCompleted++;
+                // SDV Quest.questComplete: autoGenerateActiveDialogueEvent("questComplete_" + id)
+                com.stardew.craft.npc.runtime.NpcDialogueEventData.get(player.server)
+                        .activate(player.getUUID(), "questComplete_" + q.getId());
+                // SDV Stats.checkForQuestAchievements: quest35 / quest10 letters
+                if (questsCompleted >= 40) {
+                    com.stardew.craft.mail.MailService.addMailForTomorrow(player, "quest35");
+                }
+                if (questsCompleted >= 10) {
+                    com.stardew.craft.mail.MailService.addMailForTomorrow(player, "quest10");
+                }
                 PacketDistributor.sendToPlayer(player,
                     new QuestCompletePayload(q.getId(), q.getMoneyReward()));
                 // SDV: nextQuests 在 questComplete() 中立即触发（奖励领取前）

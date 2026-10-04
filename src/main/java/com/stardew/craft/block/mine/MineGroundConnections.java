@@ -14,22 +14,22 @@ public final class MineGroundConnections {
     private MineGroundConnections() {}
 
     public static int rank(BlockState state) {
-        for (MineBuildingTheme theme : MineBuildingTheme.values()) {
+        for (MineGroundMaterial theme : MineGroundMaterial.values()) {
             int rank = theme.rank(state);
             if (rank >= 0) return rank;
         }
         return -1;
     }
 
-    public static MineBuildingTheme theme(BlockState state) {
-        for (MineBuildingTheme theme : MineBuildingTheme.values()) if (theme.rank(state) >= 0) return theme;
+    public static MineGroundMaterial theme(BlockState state) {
+        for (MineGroundMaterial theme : MineGroundMaterial.values()) if (theme.rank(state) >= 0) return theme;
         return null;
     }
 
     public static int mask(BlockGetter level, BlockPos pos, BlockState receiver, int material) {
         int rank = rank(receiver);
         if (rank < 0 || rank >= material || !open(level, pos)) return 0;
-        MineBuildingTheme theme = theme(receiver);
+        MineGroundMaterial theme = theme(receiver);
         int mask = 0;
         for (int i = 0; i < OFFSETS.length; i++) {
             BlockPos neighbor = pos.offset(OFFSETS[i][0], 0, OFFSETS[i][1]);
@@ -41,7 +41,7 @@ public final class MineGroundConnections {
     /** Wall faces and folded wall/floor edges; coplanar tops keep their authored masks. */
     public static List<TerrainFaceConnections.Connection> faceConnections(
             BlockGetter level, BlockPos pos, BlockState receiver, Direction face) {
-        MineBuildingTheme theme = theme(receiver);
+        MineGroundMaterial theme = theme(receiver);
         if (theme == null) return List.of();
         var connections = TerrainFaceConnections.collect(level, pos, receiver, face, theme::rank,
                 (p, f) -> openFace(level, p, f));

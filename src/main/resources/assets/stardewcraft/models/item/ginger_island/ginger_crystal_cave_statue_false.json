@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "stardewcraft:item/ginger_island/ginger_crystal_cave_statue",
+    "particle": "stardewcraft:block/ginger_island/crystal_cave_statue_particle"
+  }
+}

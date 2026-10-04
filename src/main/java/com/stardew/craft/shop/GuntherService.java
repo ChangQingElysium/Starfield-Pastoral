@@ -15,7 +15,13 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
 
+import com.stardew.craft.museum.MuseumQuestService;
+import com.stardew.craft.player.PlayerDataManager;
+import net.minecraft.world.item.Item;
+
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.List;
 import java.util.UUID;
 
@@ -51,6 +57,7 @@ public final class GuntherService {
     public static InteractionResult handleGuntherInteraction(ServerPlayer player, StardewNpcEntity gunther) {
         gunther.setYRot(90f);
         gunther.setYHeadRot(90f);
+        MuseumQuestService.syncDonationMailFlags(player);
 
         MuseumDonationData data = MuseumDonationData.get(player.serverLevel());
         UUID playerId = player.getUUID();
@@ -58,11 +65,23 @@ public final class GuntherService {
         boolean hasDonatable = !donationActive && playerHasDonatableItem(player);
 
         if (!donationActive && !hasDonatable) {
-            // No donatable items and not in donation mode: show normal dialogue
-            // SDV parity: "You don't have anything to donate right now."
+            // 补领入口：此前因背包满等原因没领到的奖励，再次与 Gunther 交谈时重新发放
+            if (grantUnclaimedMuseumRewards(player, data)) {
+                return InteractionResult.SUCCESS;
+            }
+            // 原版 LibraryMuseum.OpenGuntherDialogueMenu 三个分支：
+            // 成就 5（集齐全部展品）→ MuseumComplete；已发现古物（artifactFound）→ NothingToDonate；否则 NoArtifactsFound
+            String key;
+            if (isMuseumComplete(player, data)) {
+                key = "stardewcraft.npc.gunther.dialogue.museum_complete";
+            } else if (PlayerDataManager.getPlayerData(player).hasMailFlag(MuseumQuestService.FIRST_ARTIFACT_FLAG)) {
+                key = "stardewcraft.npc.gunther.dialogue.nothing_to_donate";
+            } else {
+                key = "stardewcraft.npc.gunther.dialogue.no_artifacts_found";
+            }
             com.stardew.craft.npc.runtime.NpcInteractionService.sendDialogue(player, new OpenNpcDialogueScreenPayload(
                 "gunther",
-                "stardewcraft.npc.gunther.dialogue.nothing_to_donate",
+                key,
                 0
             ));
             return InteractionResult.SUCCESS;
@@ -105,6 +124,7 @@ public final class GuntherService {
         if (!data.isDonationModeActive(playerId)) return;
         MuseumDonationData.EndSessionResult result = data.endDonationMode(playerId);
         syncDonations(data, player);
+        MuseumQuestService.syncDonationMailFlags(player);
 
         if (!result.success()) {
             com.stardew.craft.npc.runtime.NpcInteractionService.sendDialogue(player, new OpenNpcDialogueScreenPayload(
@@ -130,11 +150,19 @@ public final class GuntherService {
         List<MuseumRewardRegistry.MuseumReward> claimable =
             MuseumRewardRegistry.getClaimableRewards(data, playerId, data.getClaimedMuseumRewards(playerId));
 
+        // 原版 CanCollectReward：已能读懂矮人语时不再发矮人语指南(326)，也不会重复领取
+        if (DwarfService.canUnderstandDwarves(player)) {
+            claimable = claimable.stream()
+                .filter(reward -> !reward.actions().toString().contains(DwarfService.SPECIAL_ITEM_ID))
+                .toList();
+        }
+
         if (claimable.isEmpty()) {
             return false;
         }
 
         boolean queuedRustyKeyEvent = false;
+        boolean anyFailed = false;
         for (MuseumRewardRegistry.MuseumReward reward : claimable) {
             if (MuseumRewardRegistry.RUSTY_KEY_REWARD_ID.equals(reward.id())) {
                 EventSeenData.get(player.serverLevel()).markSeen(playerId, SewerStoryFlags.RUSTY_KEY_EVENT_READY);
@@ -152,16 +180,41 @@ public final class GuntherService {
                     break;
                 }
             }
-            if (actionFailed) continue;
+            if (actionFailed) {
+                anyFailed = true;
+                continue;
+            }
             data.claimReward(playerId, reward.id());
         }
 
+        String dialogueKey = queuedRustyKeyEvent ? "stardewcraft.npc.gunther.rusty_key_pending"
+            : anyFailed ? "stardewcraft.npc.gunther.reward_pending"
+            : "stardewcraft.npc.gunther.reward_granted";
         com.stardew.craft.npc.runtime.NpcInteractionService.sendDialogue(player, new OpenNpcDialogueScreenPayload(
             "gunther",
-            queuedRustyKeyEvent ? "stardewcraft.npc.gunther.rusty_key_pending" : "stardewcraft.npc.gunther.reward_granted",
+            dialogueKey,
             0
         ));
         return true;
+    }
+
+    private static volatile Set<String> allDonatableIds;
+
+    /** 原版成就 5（A Complete Collection）：全部可捐展品都已捐赠（项目无成就系统，以捐赠集合直接判定）。 */
+    private static boolean isMuseumComplete(ServerPlayer player, MuseumDonationData data) {
+        Set<String> all = allDonatableIds;
+        if (all == null) {
+            Set<String> computed = new HashSet<>();
+            for (Item item : BuiltInRegistries.ITEM) {
+                var id = BuiltInRegistries.ITEM.getKey(item);
+                if (!com.stardew.craft.StardewCraft.MODID.equals(id.getNamespace())) continue;
+                if ("lost_book".equals(id.getPath())) continue;
+                if (MuseumDonationItems.isDonatable(new ItemStack(item))) computed.add(id.toString());
+            }
+            if (computed.isEmpty()) return false;
+            allDonatableIds = all = computed;
+        }
+        return data.getDonatedItems(player.getUUID()).containsAll(all);
     }
 
     private static void syncDonations(MuseumDonationData data, ServerPlayer player) {

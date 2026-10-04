@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "stardewcraft:item/ginger_island/ginger_birdie_hut",
+    "particle": "stardewcraft:block/ginger_island/birdie_hut_particle"
+  }
+}

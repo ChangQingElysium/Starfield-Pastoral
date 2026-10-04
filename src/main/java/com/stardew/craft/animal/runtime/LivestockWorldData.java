@@ -101,6 +101,10 @@ public final class LivestockWorldData extends SavedData {
         eggs.values().removeIf(e -> homes.contains(e.home()) || removed.contains(e.animal()));
         hay.remove(farm); birthDays.remove(farm); feedDays.keySet().removeAll(homes); closedHomes.removeAll(homes); setDirty();
     }
+    /** Utility.areThereAnyOtherAnimalsWithThisName: exact name match among the farm's other animals. */
+    public boolean nameTaken(UUID farm, String name, UUID except) {
+        return animals.values().stream().anyMatch(a -> a.farm().equals(farm) && !a.id().equals(except) && a.name().equals(name));
+    }
     public List<LivestockRecord> all() { return List.copyOf(animals.values()); }
     public LivestockRecord find(UUID id) { return animals.get(id); }
     public int occupancy(UUID home) { return (int) animals.values().stream().filter(a -> a.home().equals(home)).count(); }

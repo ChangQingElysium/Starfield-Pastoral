@@ -79,6 +79,16 @@ def checkNativeNpcTextures = tasks.register('checkNativeNpcTextures', JavaExec) 
     javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
     args layout.buildDirectory.dir('resources/main').get().asFile.absolutePath
 }
+def checkGuntherJointSkin = tasks.register('checkGuntherJointSkin', JavaExec) {
+    group = 'verification'
+    description = 'Checks Gunther continuous elbow, knee, waist and hip surfaces.'
+    dependsOn compileNativeNpcChecks, compileNativeNpcModels
+    classpath = files(compileNativeNpcChecks) + configurations.runtimeClasspath
+    mainClass = 'NativeJointSkinChecks'
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
+    args layout.buildDirectory.file('generated/resources/nativeNpc/assets/stardewcraft/npc_native/gunther.json').get().asFile.absolutePath,
+            layout.buildDirectory.dir('reports/native-npc-joints').get().asFile.absolutePath
+}
 tasks.named('check') { dependsOn checkNativeNpcTextures }
 tasks.named('check') { dependsOn checkNativeNpcJointSkin }
 def checkNativeActorAnimation = tasks.register('checkNativeActorAnimation', JavaExec) {
@@ -173,7 +183,7 @@ def checkRobinAnimation = tasks.register('checkRobinAnimation', JavaExec) {
 }
 tasks.named('check').configure { dependsOn checkRobinAnimation }
 
-['sam', 'haley', 'elliott', 'wizard', 'mister_qi', 'alex', 'shane', 'harvey', 'leah', 'maru', 'penny', 'emily', 'pierre', 'caroline', 'lewis', 'marnie', 'demetrius', 'evelyn', 'jas', 'vincent', 'jodi', 'kent', 'willy', 'gus', 'pam', 'linus', 'clint', 'dwarf', 'krobus', 'sandy', 'leo', 'marlon'].each { id ->
+['sam', 'haley', 'elliott', 'wizard', 'mister_qi', 'alex', 'shane', 'harvey', 'leah', 'maru', 'penny', 'emily', 'pierre', 'caroline', 'lewis', 'marnie', 'demetrius', 'evelyn', 'jas', 'vincent', 'jodi', 'kent', 'willy', 'gus', 'pam', 'linus', 'clint', 'dwarf', 'krobus', 'sandy', 'leo', 'marlon', 'gunther'].each { id ->
     def motionCheck = tasks.register('check' + id.split('_').collect { it.capitalize() }.join('') + 'Animation', JavaExec) {
         group = 'verification'
         description = 'Checks ' + id + ' contact, character motion and interaction transitions.'
@@ -264,3 +274,21 @@ def checkEvelynActivity = tasks.register('checkEvelynActivity', JavaExec) {
     if (providers.gradleProperty('nativeNpcPreview').getOrElse('false').toBoolean()) args layout.buildDirectory.dir('reports').get().asFile.absolutePath
 }
 tasks.named('check') { dependsOn checkEvelynActivity }
+
+// Native island scene actors share the pose evaluator, but never humanoid attention.
+def compileNativeGiantTurtleChecks = tasks.register('compileNativeGiantTurtleChecks', JavaCompile) {
+    dependsOn tasks.named('classes')
+    source = files('tools/art/NativeGiantTurtleChecks.java')
+    classpath = sourceSets.main.output + sourceSets.main.compileClasspath
+    destinationDirectory = layout.buildDirectory.dir('classes/nativeGiantTurtleChecks')
+    javaCompiler = javaToolchains.compilerFor { languageVersion = JavaLanguageVersion.of(21) }
+}
+def checkNativeGiantTurtle = tasks.register('checkNativeGiantTurtle', JavaExec) {
+    group = 'verification'
+    dependsOn compileNativeGiantTurtleChecks
+    classpath = files(compileNativeGiantTurtleChecks) + sourceSets.main.output + configurations.runtimeClasspath
+    mainClass = 'NativeGiantTurtleChecks'
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
+    args file('src/main/resources/assets/stardewcraft/island_actor_native/giant_turtle.json').absolutePath
+}
+tasks.named('check') { dependsOn checkNativeGiantTurtle }

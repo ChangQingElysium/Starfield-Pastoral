@@ -1,0 +1,37 @@
+{
+  "parent": "minecraft:block/block",
+  "loader": "neoforge:composite",
+  "textures": {
+    "particle": "stardewcraft:block/ginger_island/resort_leaf_wrapped_column_particle"
+  },
+  "children": {
+    "0": {
+      "parent": "stardewcraft:block/ginger_island/resort_leaf_wrapped_column",
+      "transform": {
+        "translation": [
+          0.0,
+          1.0,
+          0.0
+        ]
+      }
+    }
+  },
+  "stardewcraft:collision": {
+    "mode": "custom",
+    "boxes": [
+      {
+        "from": [
+          1.4866,
+          0.0,
+          1.4866
+        ],
+        "to": [
+          14.5227,
+          48.0,
+          14.5227
+        ]
+      }
+    ],
+    "policy": "compound_assembly"
+  }
+}

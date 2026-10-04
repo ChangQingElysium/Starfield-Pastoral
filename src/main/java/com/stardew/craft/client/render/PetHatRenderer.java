@@ -16,7 +16,7 @@ public final class PetHatRenderer {
         stack.translate(0, -8 * scale, 0);
         // Native pet coordinates are model units, Y up; the cosmetic head renderer uses player-head units, Y down.
         stack.scale(16 * scale, -16 * scale, -16 * scale);
-        BlockbenchElementRenderer.renderHeadDisplay(hat.getModelLocation(), stack, buffers, light, OverlayTexture.NO_OVERLAY);
+        BlockbenchElementRenderer.renderHat(hat, stack, buffers, light, OverlayTexture.NO_OVERLAY);
         stack.popPose();
     }
 }

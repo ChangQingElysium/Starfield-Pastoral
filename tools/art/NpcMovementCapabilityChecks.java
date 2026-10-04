@@ -9,7 +9,7 @@ import java.util.Set;
 /** Verify shipped server capabilities against the animation resources actually on the classpath. */
 public final class NpcMovementCapabilityChecks {
     public static void main(String[] args) throws Exception {
-        var migrated = Set.of("sam", "sebastian", "abigail", "robin", "haley", "elliott", "wizard", "mister_qi", "alex", "shane", "harvey", "leah", "maru", "penny", "emily", "pierre", "caroline","lewis","marnie","demetrius","evelyn","george","jas","vincent","jodi","willy","gus","pam","linus","clint","dwarf","krobus","sandy");
+        var migrated = Set.of("sam", "sebastian", "abigail", "robin", "haley", "elliott", "wizard", "mister_qi", "alex", "shane", "harvey", "leah", "maru", "penny", "emily", "pierre", "caroline","lewis","marnie","demetrius","evelyn","george","jas","vincent","jodi","willy","gus","pam","linus","clint","dwarf","krobus","sandy","gunther");
         var loader = NpcMovementCapabilityChecks.class.getClassLoader();
         int checked = 0;
         try (var stream = loader.getResourceAsStream("data/stardewcraft/npc/capabilities/base_profiles.json")) {

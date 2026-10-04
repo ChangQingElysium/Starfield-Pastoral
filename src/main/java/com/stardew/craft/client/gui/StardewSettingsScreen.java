@@ -36,6 +36,7 @@ public final class StardewSettingsScreen extends Screen {
         toggle("config.stardewcraft.client.weapon_special_effects", Config.ENABLE_WEAPON_SPECIAL_EFFECTS::get, Config.ENABLE_WEAPON_SPECIAL_EFFECTS::set, Config.CLIENT_SPEC::save);
         toggle("config.stardewcraft.client.weapon_post_effects", Config.ENABLE_WEAPON_POST_EFFECTS::get, Config.ENABLE_WEAPON_POST_EFFECTS::set, Config.CLIENT_SPEC::save);
         toggle("config.stardewcraft.client.show_monster_hp_bar", Config.SHOW_MONSTER_HP_BAR::get, Config.SHOW_MONSTER_HP_BAR::set, Config.CLIENT_SPEC::save);
+        toggle("config.stardewcraft.client.use_legacy_player_bars", Config.USE_LEGACY_PLAYER_BARS::get, Config.USE_LEGACY_PLAYER_BARS::set, Config.CLIENT_SPEC::save);
         toggle("config.stardewcraft.client.enable_stardew_fonts", Config.ENABLE_STARDEW_FONTS::get, Config.ENABLE_STARDEW_FONTS::set, Config.CLIENT_SPEC::save);
         settings.add(new Setting("config.stardewcraft.client.reading_text_scale", null,
                 () -> minecraft.setScreen(new ReadingTextSettingsScreen(this)), false));

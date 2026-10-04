@@ -48,7 +48,7 @@ public final class ModMobEffects {
 
     /**
      * Statue of Blessings _0 — SDV Buffs.json Effects.Speed=0.5。
-     * 0.5 SDV tile/sec ≈ 25% MC 移速增益（与原 SpeedEffect 持平的换算）。
+     * 基础速度 5，速度每点 = MC 移速 +20%（5→6），故 +0.5 ≈ +10%。
      * 单独注册以保留独立图标 (mob_effect/statue_of_blessings_0.png)。
      */
     private static final class StatueBlessingSpeedEffect extends MobEffect {
@@ -58,7 +58,7 @@ public final class ModMobEffects {
                 Attributes.MOVEMENT_SPEED,
                 ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "effect.statue_of_blessings_0"),
                 AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL,
-                amplifier -> 0.25D
+                amplifier -> 0.10D
             );
         }
     }

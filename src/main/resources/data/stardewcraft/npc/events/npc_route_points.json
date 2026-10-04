@@ -1746,7 +1746,7 @@
     },
     "linus_schedule_01": {
       "x": 45,
-      "y": 85,
+      "y": 92,
       "z": -160,
       "note": "Linus 原版 Mountain (25,5)",
       "indoor": false
@@ -1760,35 +1760,35 @@
     },
     "linus_schedule_03": {
       "x": 53,
-      "y": 90,
+      "y": 89,
       "z": -131,
       "note": "Linus 原版 Mountain (34,15)",
       "indoor": false
     },
     "linus_schedule_04": {
       "x": 62,
-      "y": 86,
+      "y": 89,
       "z": -144,
       "note": "Linus 原版 Mountain (39,5)",
       "indoor": false
     },
     "linus_schedule_05": {
       "x": 54,
-      "y": 85,
+      "y": 89,
       "z": -146,
       "note": "Linus 原版 Mountain (30,9)",
       "indoor": false
     },
     "linus_schedule_06": {
       "x": 50,
-      "y": 86,
+      "y": 89,
       "z": -146,
       "note": "Linus 原版 Mountain (28,9)",
       "indoor": false
     },
     "linus_schedule_07": {
       "x": 70,
-      "y": 82,
+      "y": 81,
       "z": -107,
       "note": "Linus 原版 Mountain (44,27)",
       "indoor": false
@@ -1816,28 +1816,28 @@
     },
     "linus_schedule_11": {
       "x": 51,
-      "y": 85,
-      "z": -156,
+      "y": 89,
+      "z": -155,
       "note": "Linus 原版 Tent (2,2)",
       "indoor": false
     },
     "linus_schedule_12": {
       "x": 52,
-      "y": 85,
+      "y": 89,
       "z": -155,
       "note": "Linus 原版 Tent (3,2)",
       "indoor": false
     },
     "linus_schedule_13": {
-      "x": 51,
-      "y": 85,
+      "x": 52,
+      "y": 89,
       "z": -152,
       "note": "Linus 原版 Tent (1,3)",
       "indoor": false
     },
     "linus_schedule_14": {
       "x": 53,
-      "y": 85,
+      "y": 89,
       "z": -153,
       "note": "Linus 原版 Tent (4,4) / bed",
       "indoor": false
@@ -2397,7 +2397,7 @@
     },
     "sebastian_mountain_smoke": {
       "x": 51,
-      "y": 85,
+      "y": 81,
       "z": -109,
       "note": "Sebastian 山上抽烟（朝南）",
       "indoor": false
@@ -2410,7 +2410,7 @@
       "indoor": false
     },
     "sebastian_mountain_cliff": {
-      "x": 90,
+      "x": 88,
       "y": 81,
       "z": -101,
       "note": "Sebastian 山上悬崖边（朝北）",
@@ -2719,8 +2719,8 @@
     },
     "sciencehouse_outdoor_door": {
       "x": 28.5,
-      "y": 85.5,
-      "z": -115,
+      "y": 81.5,
+      "z": -114,
       "indoor": false
     },
     "samhouse_outdoor_door": {

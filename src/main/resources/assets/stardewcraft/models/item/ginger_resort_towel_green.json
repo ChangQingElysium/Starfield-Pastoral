@@ -1,0 +1,21 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "stardewcraft:item/ginger_island/ginger_resort_towel_green",
+    "particle": "stardewcraft:block/ginger_island/resort_towel_green_particle"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "stardewcraft:ginger_island_variant": 0.0
+      },
+      "model": "stardewcraft:item/ginger_island/ginger_resort_towel_green_0"
+    },
+    {
+      "predicate": {
+        "stardewcraft:ginger_island_variant": 1.0
+      },
+      "model": "stardewcraft:item/ginger_island/ginger_resort_towel_green_1"
+    }
+  ]
+}

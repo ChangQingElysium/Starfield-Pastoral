@@ -1,0 +1,17 @@
+{
+  "parent": "stardewcraft:block/ginger_island/pirate_palm_planter_teal",
+  "overrides": [
+    {
+      "predicate": {
+        "stardewcraft:ginger_island_variant": 0.0
+      },
+      "model": "stardewcraft:block/ginger_island/pirate_palm_planter_teal"
+    },
+    {
+      "predicate": {
+        "stardewcraft:ginger_island_variant": 1.0
+      },
+      "model": "stardewcraft:block/ginger_island/pirate_palm_planter_wine"
+    }
+  ]
+}

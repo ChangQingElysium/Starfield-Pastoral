@@ -54,8 +54,9 @@ public final class PrefabTreeChopHandler {
 
 	// 必须与 sounds/tree/tree_crack.ogg 时长一致（20 ticks = 1s）。
 	private static final int FALL_ANIM_TICKS = 20;
-	// 采集经验：每个木质方块（原木/树枝/原木楼梯/原木台阶）给 1 XP；树桩再给 1 XP。
-	private static final int XP_REMOVE_STUMP = 1;
+	// Tree.performTreeFall: 14 采集经验（树倒下）+ 2 采集经验（砍掉树桩）。
+	private static final int XP_FELL_TREE = 14;
+	private static final int XP_REMOVE_STUMP = 2;
 	private static final int SAP_ON_FALL = 5;
 
 	/**
@@ -166,6 +167,10 @@ public final class PrefabTreeChopHandler {
 		if (!secretNote.isEmpty()) {
 			drops.add(secretNote);
 		}
+		// Tree.performTreeFall increments TreesChopped; the woodcutting book roll lives in the same service.
+		if (!explosion) {
+			com.stardew.craft.book.BookAcquisitionService.recordTreeChoppedAndMaybeAddBook(player, drops, level.random);
+		}
 
 		// 移除除树根外的全部方块。
 		for (BlockPos m : inst.members()) {
@@ -181,9 +186,8 @@ public final class PrefabTreeChopHandler {
 		FallenPrefabTreeEntity.spawn(level, root, dir, pieces, FALL_ANIM_TICKS, drops, logBlock.defaultBlockState());
 
 		WildTreeSeedManager.get(level).untrackTree(level, root);
-		// 每个木质方块给 1 采集经验。
-		if (!explosion && logCount > 0) {
-			PlayerStardewDataAPI.addExperience(player, SkillType.FORAGING, logCount);
+		if (!explosion) {
+			PlayerStardewDataAPI.addExperience(player, SkillType.FORAGING, XP_FELL_TREE);
 		}
 	}
 

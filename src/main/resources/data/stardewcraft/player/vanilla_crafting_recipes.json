@@ -181,7 +181,7 @@
       },
       "ingredients": [
         {
-          "item": "stardewcraft:ancient_drum",
+          "item": "stardewcraft:dwarf_gadget",
           "count": 1
         },
         {
@@ -657,7 +657,7 @@
           "count": 1
         },
         {
-          "item": "stardewcraft:moss",
+          "item": "stardewcraft:bone_fragment",
           "count": 5
         }
       ]
@@ -1304,8 +1304,8 @@
           "count": 25
         },
         {
-          "item": "stardewcraft:fiber",
-          "count": 10
+          "item": "stardewcraft:wood_hard",
+          "count": 1
         }
       ]
     },
@@ -1599,11 +1599,11 @@
       "ingredients": [
         {
           "item": "stardewcraft:iron_ore",
-          "count": 12
+          "count": 4
         },
         {
           "item": "stardewcraft:coal",
-          "count": 3
+          "count": 1
         }
       ]
     },
@@ -1788,7 +1788,7 @@
     {
       "id": "mini_jukebox",
       "bigCraftable": true,
-      "unlockCondition": "default",
+      "unlockCondition": "null",
       "output": {
         "item": "stardewcraft:jukebox",
         "count": 1

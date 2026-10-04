@@ -98,6 +98,28 @@ class RuntimeSmokeVerifierTest(unittest.TestCase):
 
         self.assertAlmostEqual(1.0, result.duration_seconds)
 
+    def test_rejects_palette_failure_even_when_tests_and_shutdown_pass(self) -> None:
+        complete = (
+            line("10:00:00.000", "RecipeManager]: Loaded 1498 recipes"),
+            line("10:00:01.000", "GameTestServer]: Started game test server"),
+            line("10:00:01.500", "GameTestServer]: All 28 required tests passed"),
+            line("10:00:02.000", "MinecraftServer/]: Stopping server"),
+            line("10:00:02.100", "MinecraftServer/]: Saving worlds"),
+            line(
+                "10:00:03.000",
+                "MinecraftServer/]: ThreadedAnvilChunkStorage: "
+                "All dimensions are saved",
+            ),
+        )
+        for failure in (
+            "net.minecraft.world.level.chunk.MissingPaletteEntryException: Missing Palette entry for index 2.",
+            "java.lang.IllegalStateException: Accessing PalettedContainer from multiple threads",
+        ):
+            with self.subTest(failure=failure):
+                log = "\n".join((*complete[:2], failure, *complete[2:]))
+                with self.assertRaisesRegex(ValueError, "Palette concurrency failure"):
+                    verify_log(log, "game-test")
+
     def test_accepts_complete_dedicated_old_world_session(self) -> None:
         log = "\n".join((
             line("10:00:00.000", "RecipeManager]: Loaded 1498 recipes"),

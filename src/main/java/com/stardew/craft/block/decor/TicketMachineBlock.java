@@ -19,10 +19,10 @@ public final class TicketMachineBlock extends MapDecorStaticBlock {
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos,
                                                Player player, BlockHitResult hit) {
-        if (findMainPos(level, pos, state) == null) return InteractionResult.PASS;
+        if (DesertConstants.isInDesertRegion(level.dimension(), pos)
+                || findMainPos(level, pos, state) == null) return InteractionResult.PASS;
         if (player instanceof ServerPlayer serverPlayer) {
-            if (DesertConstants.isInDesertRegion(player.blockPosition())) DesertBusService.beginReturnRide(serverPlayer);
-            else DesertBusService.beginBusRide(serverPlayer);
+            DesertBusService.beginBusRide(serverPlayer);
         }
         return InteractionResult.sidedSuccess(level.isClientSide);
     }

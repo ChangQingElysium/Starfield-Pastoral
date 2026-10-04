@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "stardewcraft:item/ginger_island/ginger_island_curled_fern",
+    "particle": "stardewcraft:block/ginger_island/island_curled_fern_particle"
+  }
+}

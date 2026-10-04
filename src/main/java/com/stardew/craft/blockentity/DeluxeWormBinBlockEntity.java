@@ -15,7 +15,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import javax.annotation.Nullable;
 
 public class DeluxeWormBinBlockEntity extends TimedProductionBlockEntity implements BubbleItemCountProvider {
-    private static final int EFFECTIVE_MINUTES_PER_DAY = 1260;
 
     private static final String TAG_PRODUCT = "product";
     private static final String TAG_READY_AT = "readyAtAbsMinute";

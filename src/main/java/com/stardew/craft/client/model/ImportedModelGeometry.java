@@ -70,7 +70,8 @@ public final class ImportedModelGeometry extends SimpleUnbakedGeometry<ImportedM
             int emission = quad.has("light_emission") ? quad.get("light_emission").getAsInt() : 0;
             if (emission < 0 || emission > 15) throw new IllegalArgumentException("Invalid imported face emission");
             quads.add(new AuthoredQuad(vertices, quad.get("texture").getAsString(),
-                !quad.has("shade") || quad.get("shade").getAsBoolean(), emission));
+                !quad.has("shade") || quad.get("shade").getAsBoolean(), emission,
+                quad.has("tintindex") ? quad.get("tintindex").getAsInt() : -1));
         }
         return new ImportedModelGeometry(parts, quads);
     }
@@ -99,7 +100,7 @@ public final class ImportedModelGeometry extends SimpleUnbakedGeometry<ImportedM
     private record Part(BlockElement element, Matrix4f transform) {}
 
     /** Mesh faces keep their authored winding and UVs; xyz is in pixels, uv in sprite fractions. */
-    private record AuthoredQuad(float[] vertices, String texture, boolean shade, int emission) {
+    private record AuthoredQuad(float[] vertices, String texture, boolean shade, int emission, int tintIndex) {
         BakedQuad bake(TextureAtlasSprite sprite, Matrix4f transform) {
             int[] data = new int[32];
             Vector3f[] points = new Vector3f[4];
@@ -120,7 +121,7 @@ public final class ImportedModelGeometry extends SimpleUnbakedGeometry<ImportedM
             int packed = ((int) (normal.x * 127) & 255) | (((int) (normal.y * 127) & 255) << 8)
                 | (((int) (normal.z * 127) & 255) << 16);
             for (int i = 0; i < 4; i++) data[i * 8 + 7] = packed;
-            BakedQuad quad = new BakedQuad(data, -1, FaceBakery.calculateFacing(data), sprite, shade, false);
+            BakedQuad quad = new BakedQuad(data, tintIndex, FaceBakery.calculateFacing(data), sprite, shade, false);
             QuadTransformers.settingEmissivity(emission).processInPlace(quad);
             return quad;
         }

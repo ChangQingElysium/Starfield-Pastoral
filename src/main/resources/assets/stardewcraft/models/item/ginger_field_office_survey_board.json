@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "stardewcraft:item/ginger_island/ginger_field_office_survey_board",
+    "particle": "stardewcraft:block/ginger_island/field_office_survey_board_particle"
+  }
+}

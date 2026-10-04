@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "stardewcraft:item/ginger_island/ginger_dig_fossil_fragments",
+    "particle": "stardewcraft:block/ginger_island/dig_fossil_fragments_particle"
+  }
+}

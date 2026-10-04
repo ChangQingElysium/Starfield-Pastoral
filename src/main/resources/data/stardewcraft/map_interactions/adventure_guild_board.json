@@ -1,0 +1,37 @@
+{
+  "format": 1,
+  "priority": 200,
+  "source": {
+    "vanilla_version": "1.6",
+    "map": "AdventureGuild",
+    "tile_action": "Buildings tile 1306",
+    "code": "AdventureGuild.showMonsterKillList"
+  },
+  "trigger": {
+    "dimension": "stardewcraft:stardew_valley",
+    "location": "stardewcraft:adventurer_guild",
+    "positions": [
+      [
+        109,
+        61,
+        -150
+      ],
+      [
+        109,
+        62,
+        -150
+      ]
+    ],
+    "hand": "main_hand"
+  },
+  "branches": [
+    {
+      "id": "board",
+      "action": {
+        "type": "stardewcraft:guild_board",
+        "data": {}
+      }
+    }
+  ],
+  "hint": "read"
+}

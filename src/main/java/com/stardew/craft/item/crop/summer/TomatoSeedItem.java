@@ -73,7 +73,9 @@ public class TomatoSeedItem extends Item implements IStardewItem {
         }
 
         if (!level.isClientSide) {
-            level.setBlock(abovePos, getCropBlock().defaultBlockState(), 3);
+            if (!com.stardew.craft.farming.CropPlanting.place(level, abovePos, getCropBlock().defaultBlockState())) {
+                return InteractionResult.FAIL;
+            }
             level.playSound(null, abovePos,
                     net.minecraft.sounds.SoundEvents.HOE_TILL,
                     net.minecraft.sounds.SoundSource.BLOCKS,

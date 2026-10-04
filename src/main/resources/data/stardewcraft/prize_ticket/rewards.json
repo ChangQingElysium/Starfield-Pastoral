@@ -81,6 +81,11 @@
     }
   },
   {
+    "id": "level_10",
+    "level": 10,
+    "reward": { "type": "stardewcraft:item", "data": { "item": "stardewcraft:sports_cap" } }
+  },
+  {
     "id": "level_11",
     "level": 11,
     "reward": { "type": "stardewcraft:one_of", "data": { "items": ["stardewcraft:fish_smoker", "stardewcraft:dehydrator"] } }

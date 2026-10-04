@@ -1,0 +1,16 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "stardewcraft:item/ginger_island/original_f_2814",
+    "particle": "stardewcraft:block/ginger_island/squirrel_figurine_particle"
+  },
+  "display": {
+    "gui": {
+      "scale": [
+        0.5,
+        0.5,
+        1
+      ]
+    }
+  }
+}

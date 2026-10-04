@@ -3,11 +3,14 @@ package com.stardew.craft.warp;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.block.utility.WizardBuildingKind;
 import com.stardew.craft.core.ModDimensions;
+import com.stardew.craft.gingerisland.GingerIslandArrivalService;
 import com.stardew.craft.network.payload.DesertBusFadePayload;
 import com.stardew.craft.network.payload.MagicWarpFlashPayload;
 import com.stardew.craft.sound.ModSounds;
 import com.stardew.craft.weather.ModParticles;
-import net.minecraft.network.chat.Component;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
@@ -23,6 +26,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 public final class ObeliskWarpService {
     private static final String PENDING_START = "stardewcraft_obelisk_warp_start";
     private static final String PENDING_KIND = "stardewcraft_obelisk_warp_kind";
+    private static final String PENDING_ISLAND = "stardewcraft_obelisk_island_destination";
     private static final String PREVIOUS_INVISIBLE = "stardewcraft_obelisk_previous_invisible";
     private static final String PREVIOUS_INVULNERABLE = "stardewcraft_obelisk_previous_invulnerable";
     private static final int START_FADE_AT = 20;
@@ -37,9 +41,8 @@ public final class ObeliskWarpService {
             return false;
         }
         if (kind == WizardBuildingKind.ISLAND_OBELISK) {
-            player.displayClientMessage(Component.translatable(
-                    "message.stardewcraft.wizard_building.island_unavailable"), true);
-            return false;
+            return GingerIslandArrivalService.prepare(player,
+                    destination -> beginSequence(player, kind, destination));
         }
         if (destination(kind) == null) {
             return false;
@@ -48,6 +51,21 @@ public final class ObeliskWarpService {
         if (kind == WizardBuildingKind.DESERT_OBELISK && player.isPassenger()) {
             player.stopRiding();
             return true;
+        }
+
+        return beginSequence(player, kind, null);
+    }
+
+    private static boolean beginSequence(ServerPlayer player, WizardBuildingKind kind,
+                                         GingerIslandArrivalService.Destination islandDestination) {
+        if (!player.isAlive() || player.getPersistentData().contains(PENDING_START)) return false;
+        if (islandDestination != null) {
+            var tag = new CompoundTag();
+            tag.putString("dimension", islandDestination.dimension().toString());
+            tag.putLong("feet", islandDestination.feet().asLong());
+            tag.putUUID("farm", islandDestination.farmId());
+            tag.putString("location", islandDestination.locationId().toString());
+            player.getPersistentData().put(PENDING_ISLAND, tag);
         }
 
         player.closeContainer();
@@ -107,14 +125,30 @@ public final class ObeliskWarpService {
             clear(player);
             return;
         }
-        Vec3 destination = destination(kinds[ordinal]);
-        ServerLevel target = player.server.getLevel(ModDimensions.STARDEW_VALLEY);
-        if (destination != null && target != null) {
-            ModTeleport.to(player, target, destination.x, destination.y, destination.z,
-                    player.getYRot(), player.getXRot());
-            player.setDeltaMovement(Vec3.ZERO);
-            player.fallDistance = 0.0F;
+        if (kinds[ordinal] == WizardBuildingKind.ISLAND_OBELISK) {
+            var tag = player.getPersistentData().getCompound(PENDING_ISLAND);
+            try {
+                var dimension = ResourceLocation.tryParse(tag.getString("dimension"));
+                var location = ResourceLocation.tryParse(tag.getString("location"));
+                if (dimension == null || location == null || !tag.hasUUID("farm")) throw new IllegalArgumentException("Invalid island destination");
+                var island = new GingerIslandArrivalService.Destination(
+                        dimension, BlockPos.of(tag.getLong("feet")), tag.getUUID("farm"), location);
+                if (GingerIslandArrivalService.isUsable(player, island)) {
+                    ModTeleport.to(player, island.level(player.server), island.feet(), player.getYRot(), player.getXRot());
+                } else GingerIslandArrivalService.unavailable(player);
+            } catch (IllegalArgumentException invalid) {
+                GingerIslandArrivalService.unavailable(player);
+            }
+        } else {
+            Vec3 destination = destination(kinds[ordinal]);
+            ServerLevel target = player.server.getLevel(ModDimensions.STARDEW_VALLEY);
+            if (destination != null && target != null) {
+                ModTeleport.to(player, target, destination.x, destination.y, destination.z,
+                        player.getYRot(), player.getXRot());
+            }
         }
+        player.setDeltaMovement(Vec3.ZERO);
+        player.fallDistance = 0.0F;
         restorePlayerState(player);
         PacketDistributor.sendToPlayer(player, new DesertBusFadePayload((byte) 1, FADE_TICKS));
         clearKeys(player);
@@ -160,6 +194,7 @@ public final class ObeliskWarpService {
     private static void clearKeys(ServerPlayer player) {
         player.getPersistentData().remove(PENDING_START);
         player.getPersistentData().remove(PENDING_KIND);
+        player.getPersistentData().remove(PENDING_ISLAND);
         player.getPersistentData().remove(PREVIOUS_INVISIBLE);
         player.getPersistentData().remove(PREVIOUS_INVULNERABLE);
     }

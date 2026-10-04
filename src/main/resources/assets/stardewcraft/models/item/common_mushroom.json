@@ -1,7 +1,27 @@
 {
-    "parent":  "minecraft:item/generated",
-    "textures":  {
-                     "layer0":  "stardewcraft:item/forage/common_mushroom",
-                     "particle":  "stardewcraft:item/forage/common_mushroom"
-                 }
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "stardewcraft:item/forage/common_mushroom",
+    "particle": "stardewcraft:item/forage/common_mushroom"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "custom_model_data": 1
+      },
+      "model": "stardewcraft:item/common_mushroom_silver"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 2
+      },
+      "model": "stardewcraft:item/common_mushroom_gold"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 3
+      },
+      "model": "stardewcraft:item/common_mushroom_iridium"
+    }
+  ]
 }

@@ -1,5 +1,6 @@
 package com.stardew.craft.blockentity;
 
+import com.stardew.craft.model.AnimatedModel;
 import com.stardew.craft.core.ModTags;
 import com.stardew.craft.api.v1.machine.StardewMachineCycleKind;
 import com.stardew.craft.api.v1.machine.StardewProductionPlan;
@@ -16,24 +17,17 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import software.bernie.geckolib.animatable.GeoBlockEntity;
-import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.animation.AnimatableManager;
-import software.bernie.geckolib.util.GeckoLibUtil;
 
 import javax.annotation.Nullable;
 
 @SuppressWarnings("all")
-public class CrystalariumBlockEntity extends TimedProductionBlockEntity implements GeoBlockEntity {
-    private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
-    private static final int EFFECTIVE_MINUTES_PER_DAY = 1260;
+public class CrystalariumBlockEntity extends TimedProductionBlockEntity implements AnimatedModel {
     private static final int TIME_DEFAULT = 5000;
 
     private static final String TAG_INPUT = "input";
     private static final String TAG_PRODUCT = "product";
     private static final String TAG_READY_AT = "readyAtAbsMinute";
     private static final String TAG_READY = "ready";
-
 
     public record RemainingTime(int days, int hours, int minutes) {}
 
@@ -58,7 +52,6 @@ public class CrystalariumBlockEntity extends TimedProductionBlockEntity implemen
         }
         be.updateWorkingState(level, pos, state);
     }
-
 
     public boolean isReady() {
         return refreshReady();
@@ -145,7 +138,7 @@ public class CrystalariumBlockEntity extends TimedProductionBlockEntity implemen
 
         var plan = prepareMachineCycle(
                 StardewMachineCycleKind.REPEATING,
-                stack, output, recipe.minutes(),
+                stack, output, recipeMinutes(recipe),
                 player, false);
         if (plan.isEmpty()) {
             return InsertResult.fail();
@@ -205,7 +198,7 @@ public class CrystalariumBlockEntity extends TimedProductionBlockEntity implemen
             nextOutput = input.copy();
             nextOutput.setCount(1);
         }
-        int minutes = recipe != null ? recipe.minutes() : TIME_DEFAULT;
+        int minutes = recipe != null ? recipeMinutes(recipe) : TIME_DEFAULT;
         var nextPlan = prepareMachineCycle(
                 StardewMachineCycleKind.REPEATING,
                 input, nextOutput, minutes,
@@ -255,7 +248,7 @@ public class CrystalariumBlockEntity extends TimedProductionBlockEntity implemen
         }
         var plan = prepareMachineCycle(
                 StardewMachineCycleKind.REPEATING,
-                stack, output, recipe.minutes(),
+                stack, output, recipeMinutes(recipe),
                 null, true);
         if (plan.isEmpty()) {
             return stack;
@@ -300,7 +293,6 @@ public class CrystalariumBlockEntity extends TimedProductionBlockEntity implemen
         }
     }
 
-
     @Nullable
     @Override
     public Packet<ClientGamePacketListener> getUpdatePacket() {
@@ -339,15 +331,6 @@ public class CrystalariumBlockEntity extends TimedProductionBlockEntity implemen
         ready = tag.getBoolean(TAG_READY);
     }
 
-    // ==================== GeckoLib ====================
+    // ==================== Native model animation ====================
 
-    @Override
-    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        // No animations — static geo model
-    }
-
-    @Override
-    public AnimatableInstanceCache getAnimatableInstanceCache() {
-        return cache;
-    }
 }

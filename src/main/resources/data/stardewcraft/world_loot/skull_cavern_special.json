@@ -1,0 +1,40 @@
+{
+  "source": "stardewcraft:skull_cavern_treasure",
+  "group": "special",
+  "mode": "sequential",
+  "entries": [
+    {
+      "query": {
+        "type": "stardewcraft:conditional",
+        "data": {
+          "query": {
+            "type": "stardewcraft:item",
+            "data": {
+              "item": "stardewcraft:golden_animal_cracker",
+              "count": 1
+            }
+          },
+          "chance": 0.02,
+          "minimum": {
+            "mastery:farming": 1
+          }
+        }
+      }
+    },
+    {
+      "query": {
+        "type": "stardewcraft:conditional",
+        "data": {
+          "query": {
+            "type": "stardewcraft:natural_trinket",
+            "data": {}
+          },
+          "chance": 0.045,
+          "minimum": {
+            "can_spawn_trinket": 1
+          }
+        }
+      }
+    }
+  ]
+}

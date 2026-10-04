@@ -1,0 +1,16 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "stardewcraft:item/ginger_island/original_f_1755",
+    "particle": "stardewcraft:block/ginger_island/bamboo_mat_particle"
+  },
+  "display": {
+    "gui": {
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ]
+    }
+  }
+}

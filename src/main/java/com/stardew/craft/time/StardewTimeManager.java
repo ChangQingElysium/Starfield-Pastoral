@@ -365,6 +365,8 @@ public class StardewTimeManager extends SavedData {
                 try {
                     com.stardew.craft.farm.FarmDailyProcessHelper.beginDailyProcess(stardewLevel);
                     runWorldDailyStep("crops", () -> com.stardew.craft.manager.CropGrowthManager.get(stardewLevel).growDaily(stardewLevel));
+                    // Farm.DayUpdate：作物结算后调用 addCrows（Farm.cs:L533）
+                    runWorldDailyStep("crows", () -> com.stardew.craft.manager.CrowAttackScheduler.processOvernight(stardewLevel));
                     runWorldDailyStep("trees", () -> com.stardew.craft.manager.TreeGrowthManager.get(stardewLevel).growDaily(stardewLevel));
                     runWorldDailyStep("fruit_trees", () -> com.stardew.craft.manager.FruitTreeGrowthManager.get(stardewLevel).growDaily(stardewLevel));
                     runWorldDailyStep("tea_bushes", () -> com.stardew.craft.manager.TeaBushManager.get(stardewLevel).growDaily(stardewLevel));

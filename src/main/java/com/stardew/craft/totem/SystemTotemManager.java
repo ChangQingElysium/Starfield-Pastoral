@@ -35,11 +35,13 @@ public class SystemTotemManager {
     /** 山区系统柱的历史坐标；加载时迁移清除。 */
     private static final BlockPos[] OLD_POS_MOUNTAIN = {
             new BlockPos(-290, -14, 256),
-            new BlockPos(75, 81, -105)
+            new BlockPos(75, 81, -105),
+            new BlockPos(52, 88, -128)
     };
 
     /** 系统柱坐标 */
-    private static final BlockPos POS_MOUNTAIN = new BlockPos(52, 88, -128);
+    /** Authored MAIN block in the bundled r.0.-1.mca, not a runtime placement site. */
+    public static final BlockPos MOUNTAIN_POLE_POS = new BlockPos(56, 85, -128);
     private static final BlockPos POS_BEACH = new BlockPos(44, 60, 93);
     private static final BlockPos POS_DESERT = new BlockPos(-203, 64, -157);
 
@@ -49,10 +51,22 @@ public class SystemTotemManager {
         if (!level.dimension().equals(ModDimensions.STARDEW_VALLEY)) return;
 
         removeOldFarmSystemPole(level);
-        removeOldMountainSystemPoles(level);
-        ensureSystemPole(level, POS_MOUNTAIN, TotemType.MOUNTAIN, ModBlocks.TOTEM_POLE_MOUNTAIN, SYSTEM_ID_MOUNTAIN, Direction.SOUTH);
+        ensureMountainSystemPole(level);
         ensureSystemPole(level, POS_BEACH, TotemType.BEACH, ModBlocks.TOTEM_POLE_BEACH, SYSTEM_ID_BEACH, Direction.SOUTH);
         ensureSystemPole(level, POS_DESERT, TotemType.DESERT, ModBlocks.TOTEM_POLE_DESERT, SYSTEM_ID_DESERT, Direction.SOUTH);
+    }
+
+    private static void ensureMountainSystemPole(ServerLevel level) {
+        BlockState existing = level.getBlockState(MOUNTAIN_POLE_POS);
+        if (!existing.is(ModBlocks.TOTEM_POLE_MOUNTAIN.get())
+                || existing.getValue(MapDecorStaticBlock.PART) != MapDecorStaticBlock.Part.MAIN
+                || !(level.getBlockEntity(MOUNTAIN_POLE_POS) instanceof TotemPoleBlockEntity)) {
+            StardewCraft.LOGGER.warn("Authored mountain totem pole is missing at {}; keeping the site unchanged", MOUNTAIN_POLE_POS);
+            return;
+        }
+        removeOldMountainSystemPoles(level);
+        ensureSystemPole(level, MOUNTAIN_POLE_POS, TotemType.MOUNTAIN,
+                ModBlocks.TOTEM_POLE_MOUNTAIN, SYSTEM_ID_MOUNTAIN, existing.getValue(MapDecorStaticBlock.FACING));
     }
 
     private static void removeOldFarmSystemPole(ServerLevel level) {
@@ -77,11 +91,17 @@ public class SystemTotemManager {
             BlockState existing = level.getBlockState(oldPos);
             if (existing.getBlock() instanceof TotemPoleBlock existingPole
                     && existingPole.getTotemType() == TotemType.MOUNTAIN) {
-                if (level.getBlockEntity(oldPos) instanceof TotemPoleBlockEntity pole) {
-                    tracker.unregister(pole.getPoleId());
+                if (level.getBlockEntity(oldPos) instanceof TotemPoleBlockEntity pole
+                        && pole.isSystemPole() && pole.getPoleId() == SYSTEM_ID_MOUNTAIN) {
+                    // Only undo our generated pole. Restore the authored terrain it
+                    // overwrote; player-named/non-system poles are left alone.
+                    BlockState restored = oldPos.equals(new BlockPos(52, 88, -128))
+                            ? ModBlocks.GRASS_BLOCK.get().defaultBlockState()
+                            : oldPos.equals(new BlockPos(-290, -14, 256))
+                                    ? ModBlocks.DIRT.get().defaultBlockState() : Blocks.AIR.defaultBlockState();
+                    MapDecorStaticBlock.runWithDropsSuppressed(() -> level.setBlock(oldPos, restored, 35));
+                    StardewCraft.LOGGER.info("Removed old mountain system totem pole at {}", oldPos);
                 }
-                level.setBlock(oldPos, Blocks.AIR.defaultBlockState(), 35);
-                StardewCraft.LOGGER.info("Removed old mountain system totem pole at {}", oldPos);
             }
 
             TotemPoleTracker.PoleEntry tracked = tracker.getPole(SYSTEM_ID_MOUNTAIN);
@@ -100,13 +120,18 @@ public class SystemTotemManager {
         BlockState existing = level.getBlockState(pos);
         if (existing.getBlock() instanceof TotemPoleBlock existingPole
                 && existingPole.getTotemType() == type) {
-            if (existing.getValue(MapDecorStaticBlock.FACING) != facing) {
-                level.setBlock(pos, existing.setValue(MapDecorStaticBlock.FACING, facing), 3);
+            BlockState activated = existing.setValue(MapDecorStaticBlock.FACING, facing)
+                    .setValue(TotemPoleBlock.ACTIVATED, true);
+            if (existing != activated) level.setBlock(pos, activated, 3);
+            if (!existingPole.placeExtensions(level, pos, activated)) {
+                StardewCraft.LOGGER.warn("System totem pole extension space is obstructed at {}", pos);
             }
             // 确保 BE 存在且为系统柱
             if (level.getBlockEntity(pos) instanceof TotemPoleBlockEntity pole) {
                 TotemPoleTracker.PoleEntry tracked = TotemPoleTracker.get(level).getPole(systemId);
                 if (!pole.isSystemPole()
+                        || pole.getPoleId() != systemId
+                        || !pole.isActivated()
                         || !name.equals(pole.getPoleName())
                         || tracked == null
                         || !tracked.systemPole()

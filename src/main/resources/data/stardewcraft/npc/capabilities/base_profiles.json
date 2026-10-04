@@ -339,8 +339,8 @@
     {
       "id": "gunther",
       "implemented": true,
-      "pathing_enabled": false,
-      "animation_profile": "idle_only",
+      "pathing_enabled": true,
+      "animation_profile": "idle_walk",
       "age": 0,
       "manners": 0,
       "social_anxiety": 0,
@@ -512,6 +512,18 @@
       "age": 2,
       "manners": 0,
       "social_anxiety": 1,
+      "optimism": 0,
+      "gender": 0,
+      "datable": false
+    },
+    {
+      "id": "gil",
+      "implemented": true,
+      "pathing_enabled": false,
+      "animation_profile": "idle_only",
+      "age": 0,
+      "manners": 0,
+      "social_anxiety": 0,
       "optimism": 0,
       "gender": 0,
       "datable": false

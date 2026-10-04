@@ -165,6 +165,9 @@ public class MapDecorStaticBlock extends Block {
 
     @Override
     public VoxelShape getCollisionShape(@Nonnull BlockState state, @Nonnull BlockGetter level, @Nonnull BlockPos pos, @Nonnull CollisionContext context) {
+        if (!hasCollision) {
+            return Shapes.empty();
+        }
         if (npcPassable && context instanceof EntityCollisionContext entityContext
                 && entityContext.getEntity() instanceof StardewNpcEntity) {
             return Shapes.empty();
@@ -391,6 +394,26 @@ public class MapDecorStaticBlock extends Block {
         return true;
     }
 
+    /** Keep authored negative-Y parts above the clicked foundation without changing their shape. */
+    public int placementAnchorYOffset() {
+        return Math.max(0, -localOccupiedOffsets().stream().mapToInt(CellOffset::dy).min().orElse(0));
+    }
+
+    /** Put a water-aimed boat forward of the hit, keeping its stern clear of the placing player. */
+    public int waterPlacementForwardOffset() {
+        VoxelShape shape = canonicalShape();
+        return shape.isEmpty() ? 0 : Math.max(0, (int) Math.ceil(-shape.bounds().minZ)) + 1;
+    }
+
+    /** Exact reserved cells, including future visual states and MAIN; no surrounding air envelope. */
+    public Set<BlockPos> placementPositions(BlockPos main, Direction facing) {
+        Set<BlockPos> positions = new LinkedHashSet<>();
+        for (CellOffset offset : occupiedOffsets(facing)) {
+            positions.add(main.offset(offset.dx, offset.dy, offset.dz));
+        }
+        return java.util.Collections.unmodifiableSet(positions);
+    }
+
     @Override
     @Nullable
     public BlockState getStateForPlacement(@Nonnull BlockPlaceContext context) {
@@ -431,7 +454,7 @@ public class MapDecorStaticBlock extends Block {
             previous.put(target, existing);
         }
         for (BlockPos target : previous.keySet()) {
-            BlockState extension = extensionState(state, target.subtract(pos));
+            BlockState extension = extensionStateAt(level, target, state, target.subtract(pos));
             if (!level.getBlockState(target).equals(extension) && !level.setBlock(target, extension, 2 | 16)) {
                 runWithDropsSuppressed(() -> previous.forEach((cell, before) -> level.setBlock(cell, before, 2 | 16)));
                 return false;
@@ -444,6 +467,11 @@ public class MapDecorStaticBlock extends Block {
     /** Per-cell state, e.g. a light source at the lamp head, with shared placement/cleanup. */
     protected BlockState extensionState(BlockState mainState, BlockPos offset) {
         return mainState.setValue(PART, Part.EXTENSION);
+    }
+
+    /** Stateful props can preserve the fluid that each individual extension replaces. */
+    protected BlockState extensionStateAt(Level level, BlockPos target, BlockState mainState, BlockPos offset) {
+        return extensionState(mainState, offset);
     }
 
     @Override
@@ -559,14 +587,15 @@ public class MapDecorStaticBlock extends Block {
                 // 避免每个 extension 各自再掉一份物品。
                 BlockState mainState = level.getBlockState(mainPos);
                 if (mainState.is(this)) {
-                    level.setBlock(mainPos, Blocks.AIR.defaultBlockState(), 35);
+                    level.setBlock(mainPos, mainState.getFluidState().createLegacyBlock(), 35);
                 }
                 // 兜底：MAIN 级联应已清掉所有格子；如还有残留则强制清理（不会再触发掉落，因为 MAIN 已不在）。
                 Direction facing = mainFacingForCleanup(level, mainPos, state);
                 for (CellOffset offset : occupiedOffsets(facing)) {
                     BlockPos target = mainPos.offset(offset.dx, offset.dy, offset.dz);
-                    if (level.getBlockState(target).is(this)) {
-                        level.setBlock(target, Blocks.AIR.defaultBlockState(), 35);
+                    BlockState targetState = level.getBlockState(target);
+                    if (targetState.is(this)) {
+                        level.setBlock(target, targetState.getFluidState().createLegacyBlock(), 35);
                     }
                 }
                 return state;
@@ -587,13 +616,14 @@ public class MapDecorStaticBlock extends Block {
     }
 
     protected record CellOffset(int dx, int dy, int dz) {
+        public CellOffset {}
         static final CellOffset ZERO = new CellOffset(0, 0, 0);
 
         private boolean isZero() {
             return dx == 0 && dy == 0 && dz == 0;
         }
 
-        private CellOffset rotateY(Direction facing) {
+        public CellOffset rotateY(Direction facing) {
             return switch (facing) {
                 case EAST -> new CellOffset(-dz, dy, dx);
                 case SOUTH -> new CellOffset(-dx, dy, -dz);
@@ -602,7 +632,7 @@ public class MapDecorStaticBlock extends Block {
             };
         }
 
-        CellOffset unrotateY(Direction facing) {
+        public CellOffset unrotateY(Direction facing) {
             return switch (facing) {
                 case EAST -> new CellOffset(dz, dy, -dx);
                 case SOUTH -> new CellOffset(-dx, dy, -dz);

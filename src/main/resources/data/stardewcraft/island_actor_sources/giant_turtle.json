@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "model": "stardewcraft:island_actor_native/giant_turtle.json",
+  "entity": "stardewcraft:ginger_giant_turtle",
+  "texture": "stardewcraft:textures/entity/island_actor_native/giant_turtle.png",
+  "source_sha256": "e4d87586fe93b78a6881cf00f2aa8a2ccb325de6ac94814273c42442fa43c6c8",
+  "texture_sha256": "d2dbcae4364c821bd66508b700eeef2c0e48304a4d2e18be976c8d09b241378c",
+  "width": 3,
+  "height": 1.6875,
+  "depth": 3.5,
+  "native_bounds_units": [
+    [
+      -24,
+      0,
+      -27
+    ],
+    [
+      24,
+      27,
+      29
+    ]
+  ],
+  "clips": {
+    "idle": 4.8,
+    "walk": 1.2
+  },
+  "walk_stride_blocks": 0.5,
+  "walk_speed_blocks_per_second": 0.4166666666666667,
+  "gameplay": "Scene actor only; original island unlock and reward state remain separate."
+}

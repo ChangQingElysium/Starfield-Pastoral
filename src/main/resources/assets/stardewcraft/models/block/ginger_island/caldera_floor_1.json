@@ -1,0 +1,88 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "stardewcraft:block/ginger_island/caldera/caldera_floor_particle",
+    "north": "stardewcraft:block/ginger_island/caldera/caldera_floor_side",
+    "east": "stardewcraft:block/ginger_island/caldera/caldera_floor_side",
+    "south": "stardewcraft:block/ginger_island/caldera/caldera_floor_side",
+    "west": "stardewcraft:block/ginger_island/caldera/caldera_floor_side",
+    "up": "stardewcraft:block/ginger_island/caldera/caldera_floor_crack",
+    "down": "stardewcraft:block/ginger_island/caldera/caldera_floor_side"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#north",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "cullface": "north"
+        },
+        "east": {
+          "texture": "#east",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "cullface": "east"
+        },
+        "south": {
+          "texture": "#south",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "cullface": "south"
+        },
+        "west": {
+          "texture": "#west",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "cullface": "west"
+        },
+        "up": {
+          "texture": "#up",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "cullface": "up"
+        },
+        "down": {
+          "texture": "#down",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "cullface": "down"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+// Focused real-screen input lifecycle regressions, without starting a game window.
+allprojects {
+    afterEvaluate {
+        if (plugins.hasPlugin('java')) {
+            sourceSets.test.java.setSrcDirs([file('compatibility/passout-summary')])
+            sourceSets.test.resources.setSrcDirs([])
+            tasks.named('test') {
+                include 'com/stardew/craft/client/gui/overnight/PassOutSummaryScreenTest*'
+                reports.junitXml.outputLocation = layout.buildDirectory.dir('test-results/passout-summary')
+                reports.html.outputLocation = layout.buildDirectory.dir('reports/tests/passout-summary')
+            }
+        }
+    }
+}

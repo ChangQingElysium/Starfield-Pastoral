@@ -62,7 +62,9 @@ public class HotPepperSeedItem extends Item implements IStardewItem {
 
         if (!level.isClientSide) {
             @Nonnull BlockState cropState = ModBlocks.HOT_PEPPER_CROP.get().defaultBlockState();
-            level.setBlock(abovePos, cropState, 3);
+            if (!com.stardew.craft.farming.CropPlanting.place(level, abovePos, cropState)) {
+                return InteractionResult.FAIL;
+            }
             @Nonnull SoundEvent tillSound = net.minecraft.sounds.SoundEvents.HOE_TILL;
             level.playSound(null, abovePos,
                     tillSound,

@@ -224,6 +224,14 @@ public class WateringCanItem extends Item implements IStardewItem {
 
         // 获取作用范围
         BlockHitResult hitResult = getPlayerPOVHitResult(level, player, ClipContext.Fluid.NONE);
+        // Lava is non-solid: use the fluid ray only for an eligible volcano surface.
+        BlockHitResult fluidHit = getPlayerPOVHitResult(level, player, ClipContext.Fluid.ANY);
+        if (fluidHit.getType() == HitResult.Type.BLOCK
+                && com.stardew.craft.gingerisland.VolcanoCooling.canCool(level, fluidHit.getBlockPos())
+                && (hitResult.getType() != HitResult.Type.BLOCK
+                    || fluidHit.getLocation().distanceToSqr(player.getEyePosition()) <= hitResult.getLocation().distanceToSqr(player.getEyePosition()))) {
+            hitResult = fluidHit;
+        }
         if (hitResult.getType() == HitResult.Type.BLOCK) {
             @Nonnull BlockPos hitPos = hitResult.getBlockPos();
             hitPos = resolveWateringTarget(level, hitPos);
@@ -234,11 +242,12 @@ public class WateringCanItem extends Item implements IStardewItem {
             // 蓄力流程由 Item.use(air) → startUsingItem 启动，完全绕过 RightClickBlock 事件，
             // 因此在这里按每个目标格过滤，若全部被过滤则提示并返回。
             if (!level.isClientSide && player instanceof ServerPlayer sp
-                    && level.dimension() == ModDimensions.STARDEW_VALLEY
                     && !sp.isCreative()) {
                 int before = targetPositions.size();
                 targetPositions = new java.util.ArrayList<>(targetPositions);
                 targetPositions.removeIf(pos -> {
+                    if (!com.stardew.craft.gingerisland.IslandContext.canModifyAt(sp, pos)) return true;
+                    if (level.dimension() != ModDimensions.STARDEW_VALLEY) return false;
                     if (level instanceof net.minecraft.server.level.ServerLevel sl
                             && com.stardew.craft.greenhouse.GreenhouseManager.isInGreenhouseInterior(sl, pos)) {
                         return !com.stardew.craft.event.FarmAreaProtectionEvents.canModifyGreenhouseAt(sp, sl, pos);
@@ -247,6 +256,9 @@ public class WateringCanItem extends Item implements IStardewItem {
                     if (bowlPos != null) {
                         var record = com.stardew.craft.pet.PetBowlBuildings.ensure(sp.serverLevel(), bowlPos);
                         return record == null || !com.stardew.craft.building.runtime.BuildingService.canManage(sp, record);
+                    }
+                    if (com.stardew.craft.gingerisland.VolcanoCooling.canCool(level, pos)) {
+                        return com.stardew.craft.event.FarmAreaProtectionEvents.isOnProtectedFarm(sp, pos);
                     }
                     return !com.stardew.craft.event.FarmAreaProtectionEvents.canModifyAt(sp, pos);
                 });
@@ -260,8 +272,7 @@ public class WateringCanItem extends Item implements IStardewItem {
 
             boolean wateredAny = false;
 
-            // 原版(星露谷)手感：每“浇到一格”消耗 1 点水；蓄力只是改变浇到的格子数量。
-            // 如果水不够，则只浇前面的若干格（而不是一次性扣一大段）。
+            // 原版 WateringCan.DoFunction：有水即可浇满整片范围，每次使用扣水 = 蓄力等级 + 1（与浇到几格无关）。
             boolean bottomless = isBottomless(stack);
             int waterLeft = (player.isCreative() || bottomless) ? Integer.MAX_VALUE : getWater(stack);
             if (!level.isClientSide
@@ -272,15 +283,12 @@ public class WateringCanItem extends Item implements IStardewItem {
                 return;
             }
             for (BlockPos pos : targetPositions) {
-                if (!player.isCreative() && !bottomless && waterLeft <= 0) {
+                if (waterLeft <= 0) {
                     break;
                 }
 
                 if (waterTile(level, pos)) {
                     wateredAny = true;
-                    if (!player.isCreative() && !bottomless) {
-                        waterLeft -= 1;
-                    }
 
                     // 粒子效果
                     if (level.isClientSide) {
@@ -295,8 +303,7 @@ public class WateringCanItem extends Item implements IStardewItem {
             if (wateredAny) {
                 // 扣水
                 if (!player.isCreative() && !bottomless) {
-                    setWater(stack, Math.max(0, waterLeft));
-                    
+                    setWater(stack, Math.max(0, waterLeft - (chargeLevel + 1)));
                 }
                 
                 // 播放浇水音效
@@ -344,8 +351,8 @@ public class WateringCanItem extends Item implements IStardewItem {
         }
         
         // 每 20 ticks (1秒) 提升一级
-        // 星露谷原版大约是 600ms - 800ms，这里调整为 15 ticks (0.75s) 让手感更紧凑
-        int ticksPerLevel = StardewEnchantments.has(stack, StardewEnchantments.SWIFT) ? 10 : 15;
+        // 星露谷原版大约是 600ms - 800ms，原版每级 600ms = 12 ticks，Swift ×0.66 约 8 ticks
+        int ticksPerLevel = StardewEnchantments.has(stack, StardewEnchantments.SWIFT) ? 8 : 12;
         
         if (usedTicks > 0 && usedTicks % ticksPerLevel == 0) {
             int currentLevel = usedTicks / ticksPerLevel;
@@ -374,7 +381,7 @@ public class WateringCanItem extends Item implements IStardewItem {
 
     public int getChargeLevel(ItemStack stack, int ticksUsed) {
         // 与 onUseTick 保持一致
-        int ticksPerLevel = StardewEnchantments.has(stack, StardewEnchantments.SWIFT) ? 10 : 15;
+        int ticksPerLevel = StardewEnchantments.has(stack, StardewEnchantments.SWIFT) ? 8 : 12;
         int level = ticksUsed / ticksPerLevel; 
         int maxChargeLevel = getEffectiveMaxChargeLevel(stack);
         if (level > maxChargeLevel) {
@@ -396,7 +403,8 @@ public class WateringCanItem extends Item implements IStardewItem {
             return false;
         }
         for (BlockPos pos : positions) {
-            if (level.getBlockState(pos).getBlock() instanceof FarmBlock || com.stardew.craft.pet.PetBowlBlock.wateringTarget(level, pos) != null) {
+            if (level.getBlockState(pos).getBlock() instanceof FarmBlock || com.stardew.craft.pet.PetBowlBlock.wateringTarget(level, pos) != null
+                    || com.stardew.craft.gingerisland.VolcanoCooling.canCool(level, pos)) {
                 return true;
             }
         }
@@ -407,10 +415,9 @@ public class WateringCanItem extends Item implements IStardewItem {
             ServerPlayer player,
             ItemStack stack,
             int chargeLevel,
-            boolean bottomless
+            boolean ignored
     ) {
         if (player.isCreative()
-                || bottomless
                 || player.level().dimension() != ModDimensions.STARDEW_VALLEY
                 || StardewEnchantments.has(stack, StardewEnchantments.EFFICIENT)) {
             return true;
@@ -428,6 +435,7 @@ public class WateringCanItem extends Item implements IStardewItem {
     private boolean waterTile(@Nonnull Level level, @Nonnull BlockPos pos) {
         BlockState state = level.getBlockState(pos);
         if (com.stardew.craft.pet.PetBowlBlock.water(level, pos)) return true;
+        if (com.stardew.craft.gingerisland.VolcanoCooling.cool(level, pos)) return true;
         
         // 1. 耕地
         if (state.getBlock() instanceof FarmBlock) {
@@ -503,10 +511,11 @@ public class WateringCanItem extends Item implements IStardewItem {
                 BlockPos lPos = base.relative(left);
                 if (lPos.getY() == startPos.getY()) list.add(lPos);
             }
-        } else if (chargeLevel >= 5) { // Expansive (5x5，以瞄准方块为中心)
+        } else if (chargeLevel >= 5) { // Expansive (5x5，原版以目标格朝前 2 格为中心)
+            BlockPos center5 = startPos.relative(facing, 2);
             for (int dx = -2; dx <= 2; dx++) {
                 for (int dz = -2; dz <= 2; dz++) {
-                    list.add(startPos.offset(dx, 0, dz));
+                    list.add(center5.offset(dx, 0, dz));
                 }
             }
         } else {

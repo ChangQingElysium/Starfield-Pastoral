@@ -1101,18 +1101,92 @@ public final class FishingDataManager {
 			if (usingMagicBait && MAGIC_BAIT_IGNORE_KEYS.contains(head)) {
 				continue;
 			}
-			boolean result = evalGsqClause(player, level, clause);
+			Boolean known = evalGsqClause(player, level, clause);
+			// SDV GameStateQuery: an unknown query is a parse error and fails the whole
+			// condition regardless of negation.
+			if (known == null) return false;
+			boolean result = known;
 			if (negate) result = !result;
 			if (!result) return false;
 		}
 		return true;
 	}
 
-	private static boolean evalGsqClause(ServerPlayer player, ServerLevel level, String clause) {
+	/** Returns {@code null} for queries this evaluator does not know (SDV treats those as errors). */
+	private static Boolean evalGsqClause(ServerPlayer player, ServerLevel level, String clause) {
 		String[] parts = clause.split("\\s+");
 		if (parts.length == 0) return true;
 		String op = parts[0];
 		switch (op) {
+			case "TRUE":
+				return true;
+			case "FALSE":
+				return false;
+			case "RANDOM": {
+				// RANDOM <chance> [@addDailyLuck]
+				if (parts.length < 2) return false;
+				double chance;
+				try {
+					chance = Double.parseDouble(parts[1]);
+				} catch (NumberFormatException ex) {
+					return false;
+				}
+				for (int i = 2; i < parts.length; i++) {
+					if (parts[i].equalsIgnoreCase("@addDailyLuck")) {
+						chance += PlayerStardewDataAPI.getDailyLuck(player);
+						break;
+					}
+				}
+				return level.random.nextDouble() < chance;
+			}
+			case "IS_FESTIVAL_DAY": {
+				// IS_FESTIVAL_DAY [locationContext] [dayOffset]
+				int offset = 0;
+				if (parts.length >= 3) {
+					try {
+						offset = Integer.parseInt(parts[2]);
+					} catch (NumberFormatException ex) {
+						return false;
+					}
+				}
+				if (offset == 0) return FestivalService.isFestivalDay();
+				com.stardew.craft.time.StardewTimeManager tm = com.stardew.craft.time.StardewTimeManager.get();
+				if (tm == null) return false;
+				int totalDays = Math.floorMod(tm.getAbsoluteDay() - 1 + offset, 112);
+				return FestivalService.isFestivalDay(totalDays % 28 + 1, totalDays / 28);
+			}
+			case "DAY_OF_WEEK": {
+				// DAY_OF_WEEK <day1> [<day2> ...]   (.NET DayOfWeek: Sunday=0; SDV weekday = dayOfMonth % 7)
+				if (parts.length < 2) return false;
+				com.stardew.craft.time.StardewTimeManager tm = com.stardew.craft.time.StardewTimeManager.get();
+				if (tm == null) return false;
+				int today = tm.getCurrentDay() % 7;
+				for (int i = 1; i < parts.length; i++) {
+					int wanted = parseDayOfWeek(parts[i]);
+					if (wanted < 0) return false;
+					if (wanted == today) return true;
+				}
+				return false;
+			}
+			case "DAYS_PLAYED": {
+				// DAYS_PLAYED <min> [max]; DaysPlayed counts the join day as 1.
+				if (parts.length < 2) return false;
+				com.stardew.craft.time.StardewTimeManager tm = com.stardew.craft.time.StardewTimeManager.get();
+				if (tm == null) return false;
+				int min;
+				int max = Integer.MAX_VALUE;
+				try {
+					min = Integer.parseInt(parts[1]);
+					if (parts.length >= 3) max = Integer.parseInt(parts[2]);
+				} catch (NumberFormatException ex) {
+					return false;
+				}
+				int firstJoinDay = PlayerStardewDataAPI.getData(player).getFirstJoinDay();
+				int daysPlayed = firstJoinDay < 0
+						? tm.getAbsoluteDay()
+						: tm.getAbsoluteDay() - firstJoinDay + 1;
+				return daysPlayed >= min && daysPlayed <= max;
+			}
 			case "PLAYER_SPECIAL_ORDER_RULE_ACTIVE": {
 				// PLAYER_SPECIAL_ORDER_RULE_ACTIVE Current <ruleId>
 				if (parts.length < 3) return false;
@@ -1252,9 +1326,27 @@ public final class FishingDataManager {
 				return true;
 			}
 			default:
-				// Unknown predicate: be permissive (matches previous behavior).
-				return true;
+				// Unknown query: SDV reports an error and the condition fails.
+				return null;
 		}
+	}
+
+	/** SDV {@code WorldDate.TryGetDayOfWeekFor}; returns -1 when the value is not a weekday. */
+	private static int parseDayOfWeek(String raw) {
+		try {
+			return Math.floorMod(Integer.parseInt(raw), 7);
+		} catch (NumberFormatException ignored) {
+		}
+		return switch (raw.toLowerCase(java.util.Locale.ROOT)) {
+			case "sun", "sunday" -> 0;
+			case "mon", "monday" -> 1;
+			case "tue", "tuesday" -> 2;
+			case "wed", "wednesday" -> 3;
+			case "thu", "thursday" -> 4;
+			case "fri", "friday" -> 5;
+			case "sat", "saturday" -> 6;
+			default -> -1;
+		};
 	}
 
 	private static String vanillaQualifiedIdToModItemId(String qid) {

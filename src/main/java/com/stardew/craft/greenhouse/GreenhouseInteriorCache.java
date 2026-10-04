@@ -21,13 +21,15 @@ public final class GreenhouseInteriorCache {
     private static GreenhouseInteriorCache instance;
 
     private final boolean[] nonAirMask;
+    private final boolean[] plantingBedMask;
     private final int width;
     private final int height;
     private final int length;
     private final boolean loaded;
 
-    private GreenhouseInteriorCache(boolean[] nonAirMask, int width, int height, int length, boolean loaded) {
+    private GreenhouseInteriorCache(boolean[] nonAirMask, boolean[] plantingBedMask, int width, int height, int length, boolean loaded) {
         this.nonAirMask = nonAirMask;
+        this.plantingBedMask = plantingBedMask;
         this.width = width;
         this.height = height;
         this.length = length;
@@ -54,6 +56,12 @@ public final class GreenhouseInteriorCache {
         }
         int index = ry * length * width + rz * width + rx;
         return nonAirMask[index];
+    }
+
+    /** Authored soil columns, independent of the current player's soil or crop state. */
+    public boolean isPlantingBed(int rx, int rz) {
+        return loaded && rx >= 0 && rx < width && rz >= 0 && rz < length
+                && plantingBedMask[rz * width + rx];
     }
 
     private static GreenhouseInteriorCache load() {
@@ -100,26 +108,33 @@ public final class GreenhouseInteriorCache {
 
             int paletteMax = Math.max(1, schematic.getInt("PaletteMax"));
             boolean[] paletteNonAir = new boolean[Math.max(paletteMax, paletteTag.size()) + 1];
+            boolean[] paletteSoil = new boolean[paletteNonAir.length];
             for (String stateString : paletteTag.getAllKeys()) {
                 int paletteId = paletteTag.getInt(stateString);
                 if (paletteId < 0 || paletteId >= paletteNonAir.length) {
                     continue;
                 }
-                paletteNonAir[paletteId] = !parseBlock(stateString).defaultBlockState().isAir();
+                var state = parseBlock(stateString).defaultBlockState();
+                paletteNonAir[paletteId] = !state.isAir();
+                paletteSoil[paletteId] = state.is(com.stardew.craft.block.ModBlocks.DIRT.get())
+                        || com.stardew.craft.block.terrain.TerrainSoils.farmland(state);
             }
 
             int expected = width * height * length;
             int[] blockIndices = decodeVarIntArray(blockDataRaw, expected);
             boolean[] nonAirMask = new boolean[expected];
+            boolean[] plantingBedMask = new boolean[width * length];
             for (int i = 0; i < expected; i++) {
                 int paletteIndex = i < blockIndices.length ? blockIndices[i] : 0;
+                if (i < plantingBedMask.length) plantingBedMask[i] = paletteIndex >= 0
+                        && paletteIndex < paletteSoil.length && paletteSoil[paletteIndex];
                 nonAirMask[i] = paletteIndex >= 0
                         && paletteIndex < paletteNonAir.length
                         && paletteNonAir[paletteIndex];
             }
 
             StardewCraft.LOGGER.info("[GREENHOUSE] Loaded interior cache: {}x{}x{}", width, height, length);
-            return new GreenhouseInteriorCache(nonAirMask, width, height, length, true);
+            return new GreenhouseInteriorCache(nonAirMask, plantingBedMask, width, height, length, true);
         } catch (Exception e) {
             StardewCraft.LOGGER.error("[GREENHOUSE] Failed to load interior cache: {}", e.getMessage(), e);
             return empty();
@@ -127,7 +142,7 @@ public final class GreenhouseInteriorCache {
     }
 
     private static GreenhouseInteriorCache empty() {
-        return new GreenhouseInteriorCache(new boolean[0], 0, 0, 0, false);
+        return new GreenhouseInteriorCache(new boolean[0], new boolean[0], 0, 0, 0, false);
     }
 
     private static int readDim(CompoundTag tag, String key) {

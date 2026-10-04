@@ -1,0 +1,60 @@
+{
+  "variants": {
+    "facing=north,part=main,flowing=false": {
+      "model": "stardewcraft:block/ginger_island/volcano_spout_dry",
+      "y": 0
+    },
+    "facing=north,part=extension,flowing=false": {
+      "model": "stardewcraft:block/ginger_island/volcano_spout_dry_extension"
+    },
+    "facing=north,part=main,flowing=true": {
+      "model": "stardewcraft:block/ginger_island/volcano_spout",
+      "y": 0
+    },
+    "facing=north,part=extension,flowing=true": {
+      "model": "stardewcraft:block/ginger_island/volcano_spout_dry_extension"
+    },
+    "facing=east,part=main,flowing=false": {
+      "model": "stardewcraft:block/ginger_island/volcano_spout_dry",
+      "y": 90
+    },
+    "facing=east,part=extension,flowing=false": {
+      "model": "stardewcraft:block/ginger_island/volcano_spout_dry_extension"
+    },
+    "facing=east,part=main,flowing=true": {
+      "model": "stardewcraft:block/ginger_island/volcano_spout",
+      "y": 90
+    },
+    "facing=east,part=extension,flowing=true": {
+      "model": "stardewcraft:block/ginger_island/volcano_spout_dry_extension"
+    },
+    "facing=south,part=main,flowing=false": {
+      "model": "stardewcraft:block/ginger_island/volcano_spout_dry",
+      "y": 180
+    },
+    "facing=south,part=extension,flowing=false": {
+      "model": "stardewcraft:block/ginger_island/volcano_spout_dry_extension"
+    },
+    "facing=south,part=main,flowing=true": {
+      "model": "stardewcraft:block/ginger_island/volcano_spout",
+      "y": 180
+    },
+    "facing=south,part=extension,flowing=true": {
+      "model": "stardewcraft:block/ginger_island/volcano_spout_dry_extension"
+    },
+    "facing=west,part=main,flowing=false": {
+      "model": "stardewcraft:block/ginger_island/volcano_spout_dry",
+      "y": 270
+    },
+    "facing=west,part=extension,flowing=false": {
+      "model": "stardewcraft:block/ginger_island/volcano_spout_dry_extension"
+    },
+    "facing=west,part=main,flowing=true": {
+      "model": "stardewcraft:block/ginger_island/volcano_spout",
+      "y": 270
+    },
+    "facing=west,part=extension,flowing=true": {
+      "model": "stardewcraft:block/ginger_island/volcano_spout_dry_extension"
+    }
+  }
+}

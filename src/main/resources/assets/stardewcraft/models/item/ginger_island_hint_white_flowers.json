@@ -1,0 +1,17 @@
+{
+  "parent": "stardewcraft:block/ginger_island/island_hint_white_flowers",
+  "overrides": [
+    {
+      "predicate": {
+        "stardewcraft:ginger_island_variant": 0.0
+      },
+      "model": "stardewcraft:block/ginger_island/island_hint_white_flowers"
+    },
+    {
+      "predicate": {
+        "stardewcraft:ginger_island_variant": 1.0
+      },
+      "model": "stardewcraft:block/ginger_island/island_hint_yellow_flowers"
+    }
+  ]
+}

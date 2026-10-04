@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "stardewcraft:block/decor/house/library_book_sign_particle"
+  },
+  "elements": []
+}

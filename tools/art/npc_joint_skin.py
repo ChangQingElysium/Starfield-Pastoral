@@ -4,7 +4,7 @@ The editor's rigid segments, UVs and animation channels remain the authoring sou
 Only the small bridge around a real shared cut is tessellated; hands, soles and props
 retain their original rigid transforms. No rounded filler cuboids are rendered.
 """
-def skin_joints(bones, cubes, quads):
+def skin_joints(bones, cubes, quads, hip_skin=0):
     names = {b['name']: i for i, b in enumerate(bones)}
     primary = {names[n] for side in ('left', 'right')
                for n in (f'arm_{side}', f'forearm_{side}', f'leg_{side}',
@@ -153,4 +153,31 @@ def skin_joints(bones, cubes, quads):
                 part['skin'] = dict(upper=upper, lower=lower, weights=weights)
                 break
             output.append(part)
-    return output
+    if not hip_skin:
+        return output
+    root=names['root']
+    hips={names['leg_'+side]:bones[names['leg_'+side]]['origin'][1] for side in ('left','right')}
+    bound=[]
+    for q in output:
+        owner=main(q['bone'])
+        # Rigid rows above a knee bridge carry an all-zero binding; those
+        # rows still need the independent pelvis-to-thigh bridge.
+        if owner not in hips or (q.get('skin') and any(q['skin']['weights'])):
+            bound.append(q)
+            continue
+        y=hips[owner]
+        low,high=min(v[1] for v in q['vertices']),max(v[1] for v in q['vertices'])
+        if high<=y-hip_skin:
+            bound.append(q)
+            continue
+        cuts=sorted({low,high} | {y-hip_skin+i*hip_skin/8 for i in range(9) if low<y-hip_skin+i*hip_skin/8<high})
+        spans=list(zip(cuts,cuts[1:])) if high-low>1e-8 else [(low,high)]
+        for a,b in spans:
+            part=dict(q,vertices=slice_y(q,a,b))
+            if b>y-hip_skin:
+                # A planted-foot turn may translate the thigh. Pants stay sewn
+                # to the pelvis and blend into that motion below their top edge.
+                part['skin']=dict(upper=root,lower=owner,
+                    weights=[max(0.,min(1.,(y-v[1])/hip_skin)) for v in part['vertices']])
+            bound.append(part)
+    return bound

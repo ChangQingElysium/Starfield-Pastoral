@@ -98,6 +98,10 @@ public final class ShopHoursService {
 
     @javax.annotation.Nullable
     private static Component insufficientFriendshipReason(ServerPlayer player, String targetId) {
+        // GameLocation.lockedDoorWarp: minFriendship is waived while IsWinterHere().
+        if (StardewTimeManager.get().getCurrentSeason() == 3) {
+            return null;
+        }
         if (!"elliott_cabin_enter".equals(targetId)
                 || hasElliottCabinFriendship(NpcFriendshipDataManager.get(player.serverLevel()), player.getUUID())) {
             return null;
@@ -107,7 +111,7 @@ public final class ShopHoursService {
                 Component.translatable("entity.stardewcraft.npc.elliott"));
     }
 
-    // This cabin requires two hearts year-round; the town key only bypasses opening hours.
+    // This cabin requires two hearts outside winter; the town key only bypasses opening hours.
     static boolean hasElliottCabinFriendship(NpcFriendshipDataManager friendships, UUID playerId) {
         return friendships.getPointsForNpc(playerId, "elliott") >= 500;
     }

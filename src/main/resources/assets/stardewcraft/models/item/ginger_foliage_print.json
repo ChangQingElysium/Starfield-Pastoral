@@ -1,0 +1,16 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "stardewcraft:item/ginger_island/original_f_2419",
+    "particle": "stardewcraft:block/ginger_island/foliage_print_particle"
+  },
+  "display": {
+    "gui": {
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ]
+    }
+  }
+}

@@ -1,0 +1,181 @@
+{
+  "credit": "Made with Blockbench",
+  "texture_size": [
+    32,
+    32
+  ],
+  "textures": {
+    "0": "stardewcraft:block/decor/house/wall_magnifying_glass",
+    "1": "stardewcraft:block/decor/house/wall_magnifying_glass_lens",
+    "particle": "stardewcraft:block/decor/house/wall_magnifying_glass_particle"
+  },
+  "elements": [
+    {
+      "name": "镜片_0",
+      "from": [
+        5,
+        5,
+        13.5
+      ],
+      "to": [
+        13,
+        13,
+        13.5
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            2,
+            2,
+            6,
+            6
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            2,
+            2,
+            6,
+            6
+          ],
+          "texture": "#1"
+        }
+      }
+    },
+    {
+      "name": "镜片_1",
+      "from": [
+        6,
+        4,
+        13.5
+      ],
+      "to": [
+        12,
+        5,
+        13.5
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            2.5,
+            6,
+            5.5,
+            6.5
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            2.5,
+            6,
+            5.5,
+            6.5
+          ],
+          "texture": "#1"
+        }
+      }
+    },
+    {
+      "name": "镜片_2",
+      "from": [
+        6,
+        13,
+        13.5
+      ],
+      "to": [
+        12,
+        14,
+        13.5
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            2.5,
+            1.5,
+            5.5,
+            2
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            2.5,
+            1.5,
+            5.5,
+            2
+          ],
+          "texture": "#1"
+        }
+      }
+    },
+    {
+      "name": "镜片_3",
+      "from": [
+        4,
+        6,
+        13.5
+      ],
+      "to": [
+        5,
+        12,
+        13.5
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            6,
+            2.5,
+            6.5,
+            5.5
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            6,
+            2.5,
+            6.5,
+            5.5
+          ],
+          "texture": "#1"
+        }
+      }
+    },
+    {
+      "name": "镜片_4",
+      "from": [
+        13,
+        6,
+        13.5
+      ],
+      "to": [
+        14,
+        12,
+        13.5
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            1.5,
+            2.5,
+            2,
+            5.5
+          ],
+          "texture": "#1"
+        },
+        "south": {
+          "uv": [
+            1.5,
+            2.5,
+            2,
+            5.5
+          ],
+          "texture": "#1"
+        }
+      }
+    }
+  ],
+  "parent": "minecraft:block/block",
+  "render_type": "minecraft:translucent"
+}

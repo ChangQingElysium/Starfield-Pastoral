@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "stardewcraft:item/ginger_island/ginger_farm_ruin_boarding",
+    "particle": "stardewcraft:block/ginger_island/farm_ruin_boarding_particle"
+  }
+}

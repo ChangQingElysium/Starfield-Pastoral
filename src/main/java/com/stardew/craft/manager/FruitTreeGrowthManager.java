@@ -153,7 +153,9 @@ public class FruitTreeGrowthManager extends SavedData {
         }
     }
 
-    public boolean strikeRandomMatureTree(@Nonnull ServerLevel level, @Nonnull RandomSource random) {
+    /** @return the struck tree position, or null when no mature tree could be struck. */
+    @javax.annotation.Nullable
+    public BlockPos strikeRandomMatureTree(@Nonnull ServerLevel level, @Nonnull RandomSource random) {
         java.util.List<BlockPos> candidates = new java.util.ArrayList<>();
         for (GlobalPos globalPos : new java.util.ArrayList<>(matureTrees)) {
             if (globalPos.dimension() != level.dimension()) {
@@ -173,15 +175,15 @@ public class FruitTreeGrowthManager extends SavedData {
             }
         }
         if (candidates.isEmpty()) {
-            return false;
+            return null;
         }
 
         BlockPos pos = candidates.get(random.nextInt(candidates.size()));
         if (level.getBlockEntity(pos) instanceof FruitTreeBlockEntity tree) {
             tree.strikeByLightning(level, pos);
-            return true;
+            return pos;
         }
-        return false;
+        return null;
     }
 
     private void processSaplingDay(ServerLevel level, BlockPos pos, SaplingEntry entry) {

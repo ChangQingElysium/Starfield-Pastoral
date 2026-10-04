@@ -3,16 +3,12 @@ package com.stardew.craft.mixin;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(GuiGraphics.class)
 public abstract class GuiGraphicsStackCountScaleMixin {
-
-    @Shadow @Final private PoseStack pose;
 
     @SuppressWarnings("null")
     @Redirect(
@@ -36,14 +32,18 @@ public abstract class GuiGraphicsStackCountScaleMixin {
         int anchorX = x + textWidth;
         int anchorY = y + font.lineHeight;
 
-        this.pose.pushPose();
-        this.pose.translate(anchorX, anchorY, 0.0F);
-        this.pose.scale(scale, scale, 1.0F);
-        this.pose.translate(-anchorX, -anchorY, 0.0F);
-
-        int result = guiGraphics.drawString(font, text, x, y, color, dropShadow);
-        this.pose.popPose();
-        return result;
+        // Public method references are remapped in addon development as well as production;
+        // a reobfuscated @Shadow field can retain its SRG name against an official-name target.
+        PoseStack pose = guiGraphics.pose();
+        pose.pushPose();
+        try {
+            pose.translate(anchorX, anchorY, 0.0F);
+            pose.scale(scale, scale, 1.0F);
+            pose.translate(-anchorX, -anchorY, 0.0F);
+            return guiGraphics.drawString(font, text, x, y, color, dropShadow);
+        } finally {
+            pose.popPose();
+        }
     }
 
     private static float getScaleForCountText(String text) {

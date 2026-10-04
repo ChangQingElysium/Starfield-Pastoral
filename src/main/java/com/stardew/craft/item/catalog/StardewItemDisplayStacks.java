@@ -33,6 +33,9 @@ public final class StardewItemDisplayStacks {
         if (isHiddenBaseItem(item)) {
             return List.of();
         }
+        if (com.stardew.craft.gingerisland.GingerIslandVariantStacks.supports(item)) {
+            return com.stardew.craft.gingerisland.GingerIslandVariantStacks.stacksFor(item);
+        }
         if (item == ModItems.SUPPLY_CRATE.get()) {
             return java.util.stream.IntStream.range(0, 3)
                     .mapToObj(com.stardew.craft.block.ModBlocks.SUPPLY_CRATE.get()::variantStack).toList();
@@ -220,6 +223,7 @@ public final class StardewItemDisplayStacks {
     }
 
     public static boolean isHiddenBaseItem(Item item) {
+        if (com.stardew.craft.gingerisland.GingerIslandVariantStacks.isLegacyAlias(item)) return true;
         if (item instanceof FlavoredArtisanDrinkItem drink && drink.isLegacyCompatibilityItem()) {
             return true;
         }

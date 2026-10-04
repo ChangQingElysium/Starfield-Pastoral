@@ -1,0 +1,23 @@
+{
+  "parent": "stardewcraft:block/ginger_island/caldera_floor",
+  "overrides": [
+    {
+      "predicate": {
+        "stardewcraft:ginger_island_variant": 0.0
+      },
+      "model": "stardewcraft:block/ginger_island/caldera_floor_0"
+    },
+    {
+      "predicate": {
+        "stardewcraft:ginger_island_variant": 0.5
+      },
+      "model": "stardewcraft:block/ginger_island/caldera_floor_1"
+    },
+    {
+      "predicate": {
+        "stardewcraft:ginger_island_variant": 1.0
+      },
+      "model": "stardewcraft:block/ginger_island/caldera_floor_2"
+    }
+  ]
+}

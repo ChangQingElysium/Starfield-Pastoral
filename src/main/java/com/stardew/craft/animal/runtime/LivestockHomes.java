@@ -41,7 +41,7 @@ public final class LivestockHomes {
                 && home.residence() == BuildingRecord.Residence.VALID;
     }
     public static boolean accepts(BuildingRecord home, LivestockSpecies species) {
-        return species.known() && accepts(home) && home.family().equals(species.family()) && home.tier() >= species.minimumTier();
+        return species.known() && accepts(home) && home.family().equals(species.family());
     }
     public static BuildingBounds bounds(BuildingRecord home) {
         if (home.mode() == BuildingRecord.Mode.SELF_BUILT) return home.claim();

@@ -1,0 +1,17 @@
+{
+  "parent": "stardewcraft:block/ginger_island/buried_round_stone_a",
+  "overrides": [
+    {
+      "predicate": {
+        "stardewcraft:ginger_island_variant": 0.0
+      },
+      "model": "stardewcraft:block/ginger_island/buried_round_stone_a"
+    },
+    {
+      "predicate": {
+        "stardewcraft:ginger_island_variant": 1.0
+      },
+      "model": "stardewcraft:block/ginger_island/buried_round_stone_b"
+    }
+  ]
+}

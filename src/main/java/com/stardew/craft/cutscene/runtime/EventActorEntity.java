@@ -1,5 +1,7 @@
 package com.stardew.craft.cutscene.runtime;
 
+import com.stardew.craft.model.AnimatedModel;
+import com.stardew.craft.model.ModelAnimation;
 import com.stardew.craft.npc.animation.SamActivity;
 
 import com.stardew.craft.StardewCraft;
@@ -17,10 +19,6 @@ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import software.bernie.geckolib.animatable.GeoEntity;
-import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.animation.*;
-import software.bernie.geckolib.util.GeckoLibUtil;
 
 import java.util.Locale;
 
@@ -29,7 +27,7 @@ import java.util.Locale;
  * Reuses the real NPC's current model based on npcId, including native animation.
  * Has no AI, collision, gameplay interaction, or persistence.
  */
-public class EventActorEntity extends Mob implements GeoEntity {
+public class EventActorEntity extends Mob implements AnimatedModel {
 
     private static final String NBT_NPC_ID = "NpcId";
 
@@ -40,14 +38,8 @@ public class EventActorEntity extends Mob implements GeoEntity {
     private static final EntityDataAccessor<CompoundTag> DATA_GUITAR =
             SynchedEntityData.defineId(EventActorEntity.class, EntityDataSerializers.COMPOUND_TAG);
 
-    private static final RawAnimation IDLE = RawAnimation.begin().thenLoop("idle");
-    private static final RawAnimation WALK = RawAnimation.begin().thenLoop("walk");
-
-    private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
-
     private Vec3 scriptedWalkTarget;
     private double scriptedWalkSpeed;
-
 
     public EventActorEntity(EntityType<? extends Mob> type, Level level) {
         super(type, level);
@@ -198,29 +190,17 @@ public class EventActorEntity extends Mob implements GeoEntity {
     public long getGuitarStartTick() { return entityData.get(DATA_GUITAR).getLong("start"); }
     public boolean isGuitarLooping() { return entityData.get(DATA_GUITAR).getBoolean("loop"); }
 
-    // ─── GeckoLib ───
+    // ─── Native model animation ───
 
     @Override
-    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "main", 5, state -> {
-            if (hasCustomAnimation()) {
-                state.setAndContinue(isCustomAnimationLooping()
-                        ? RawAnimation.begin().thenLoop(getCustomAnimationName())
-                        : RawAnimation.begin().thenPlay(getCustomAnimationName()));
-                return PlayState.CONTINUE;
-            }
-            if (isWalking()) {
-                state.setAndContinue(WALK);
-            } else {
-                state.setAndContinue(IDLE);
-            }
-            return PlayState.CONTINUE;
-        }));
-    }
-
-    @Override
-    public AnimatableInstanceCache getAnimatableInstanceCache() {
-        return cache;
+    public ModelAnimation modelAnimation(boolean moving, float partialTick) {
+        if (hasCustomAnimation()) {
+            ModelAnimation animation = isCustomAnimationLooping() ? ModelAnimation.loop(getCustomAnimationName())
+                    : ModelAnimation.play(getCustomAnimationName());
+            double age = Math.max(0, ((double) level().getGameTime() - getCustomAnimationStartTick() + partialTick) / 20.0);
+            return animation.withTime(age);
+        }
+        return ModelAnimation.loop(isWalking() ? "walk" : "idle");
     }
 
     // ─── Override to be inert ───

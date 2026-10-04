@@ -123,7 +123,7 @@ public final class StardewCraftingRecipeData {
                 && "crab_pot".equals(recipeId.getPath())) {
             return List.of(
                     new IngredientEntry("stardewcraft:wood_normal", null, null, null, 25),
-                    new IngredientEntry("stardewcraft:iron_bar", null, null, null, 2));
+                    new IngredientEntry("stardewcraft:copper_bar", null, null, null, 2));
         }
         return recipe.ingredients().stream()
                 .filter(entry -> entry != null && hasIngredientTarget(entry) && entry.count() > 0)

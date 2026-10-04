@@ -165,6 +165,7 @@ public class WeaponStats {
         int defense = baseStats.defense;
         float knockback = baseStats.knockback;
         float weaponSpeedMultiplier = baseStats.weaponSpeedMultiplier;
+        float knockbackMultiplierBonus = 0.0f;
 
         for (WeaponForgeData.GemForge forge : forgeState.gemForges()) {
             int level = Math.max(0, forge.level());
@@ -190,24 +191,25 @@ public class WeaponStats {
 
         for (WeaponForgeData.DragonToothBonus dragonToothBonus : WeaponForgeData.dragonToothBonuses(forgeState.dragonToothEnchantment())) {
             switch (dragonToothBonus.kind()) {
-                case "attack" -> {
-                    minDamage += dragonToothBonus.level();
-                    maxDamage += dragonToothBonus.level();
-                }
+                // Attack (+3 per level, applied after the critical roll) and Crit
+                // (multiplies the critical chance) are resolved in
+                // DamageCalculator, matching Stardew's buff-based enchantments.
                 case "defense" -> defense += dragonToothBonus.level();
                 // Stardew's innate WeaponSpeedEnchantment contributes to the
                 // farmer multiplier; it does not mutate MeleeWeapon.speed.
                 case "speed" -> weaponSpeedMultiplier +=
                         0.1F * dragonToothBonus.level();
-                case "crit" -> critChance += 0.02f * dragonToothBonus.level();
                 // Stardew's innate Crit. Power enchantment is a relative
                 // +50% per level, not another +25 Crit. Power stat points.
                 case "crit_power" -> critPowerMultiplierBonus += 0.5f * dragonToothBonus.level();
-                case "lightweight" -> knockback = Math.max(0.0f, knockback - dragonToothBonus.level());
+                // KnockbackMultiplier -= 0.1 per level (multiplies the raw knockback).
+                case "lightweight" -> knockbackMultiplierBonus -= 0.1f * dragonToothBonus.level();
                 default -> {
                 }
             }
         }
+
+        knockback = Math.max(0.0f, knockback * Math.max(0.0f, 1.0f + knockbackMultiplierBonus));
 
         return builder()
             .weaponType(baseStats.weaponType)

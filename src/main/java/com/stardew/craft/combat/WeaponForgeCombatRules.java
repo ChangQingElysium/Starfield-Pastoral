@@ -18,6 +18,15 @@ final class WeaponForgeCombatRules {
         ).stream().anyMatch(bonus -> Objects.equals(kind, bonus.kind()));
     }
 
+    static int dragonToothLevel(ItemStack weapon, String kind) {
+        return WeaponForgeData.dragonToothBonuses(
+                WeaponForgeData.read(weapon).dragonToothEnchantment()
+        ).stream()
+                .filter(bonus -> Objects.equals(kind, bonus.kind()))
+                .mapToInt(WeaponForgeData.DragonToothBonus::level)
+                .sum();
+    }
+
     static boolean isSlimeSlayerTarget(LivingEntity target) {
         return target.getTags().contains("sd_mob_slime");
     }
@@ -25,7 +34,7 @@ final class WeaponForgeCombatRules {
     static boolean isSlimeGathererTarget(LivingEntity target) {
         var tags = target.getTags();
         return tags.contains("sd_mob_slime")
-                || tags.contains("sd_mob_bigslime_skull");
+                || tags.contains("sd_mob_big_slime");
     }
 
     static void dropSlimeGathererReward(

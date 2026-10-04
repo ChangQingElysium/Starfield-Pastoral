@@ -3,10 +3,10 @@ package com.stardew.craft.client.model.entity;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.entity.npc.StardewNpcEntity;
 import net.minecraft.resources.ResourceLocation;
-import software.bernie.geckolib.model.GeoModel;
+import com.stardew.craft.client.model.nativebb.BlockbenchModel;
 
 @SuppressWarnings("null")
-public class NpcGeoModel extends GeoModel<StardewNpcEntity> {
+public class NpcGeoModel extends BlockbenchModel<StardewNpcEntity> {
 
     @Override
     public ResourceLocation getModelResource(StardewNpcEntity animatable) {

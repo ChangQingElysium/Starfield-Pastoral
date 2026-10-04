@@ -61,6 +61,7 @@ docs/*
 !docs/pet-addon-api.md
 !docs/legacy-livestock-migration.md
 !docs/ci-release-postmortems.md
+!docs/native-blockbench-rendering.md
 !docs/forge-1.20.1-migration-plan.md
 !docs/porting/
 !docs/porting/*.md
@@ -118,6 +119,15 @@ replay_pid*.log
 
 scripts/*
 !scripts/import_block_model.py
+!scripts/register_ginger_island_assets.py
+!scripts/ginger_island_placement.py
+!scripts/audit_ginger_island_bindings.py
+!scripts/check_ginger_island_assets.py
+!scripts/ginger_island_catalog.py
+!scripts/ginger_island_names.py
+!scripts/study_ginger_island_terrain_reference.py
+!scripts/render_ginger_island_reference_world.py
+!scripts/read_ginger_island_reference_world.py
 !scripts/import_farm_building_prefabs.py
 !scripts/import_greenhouse_prefabs.py
 !scripts/import_standard_farm.py
@@ -268,6 +278,10 @@ tools/npc/*
 /assets-src/**
 !/assets-src/npc/
 !/assets-src/npc/models.json
+!/assets-src/npc/gunther/
+!/assets-src/npc/gunther/gunther.bbmodel
+!/assets-src/npc/gunther/motion.json
+!/assets-src/npc/gunther/animation.md
 !/assets-src/npc/abigail/
 !/assets-src/npc/abigail/abigail.bbmodel
 !/assets-src/npc/abigail/motion.json
@@ -396,8 +410,20 @@ tools/npc/*
 !/assets-src/npc/willy/
 !/assets-src/npc/willy/willy.bbmodel
 !/assets-src/npc/willy/motion.json
+!/assets-src/npc/gil/
+!/assets-src/npc/gil/gil.bbmodel
+!/assets-src/npc/gil/motion.json
+!/assets-src/npc/gil/animation.md
 !/assets-src/npc/wizard/
+!/assets-src/npc/gil/
+!/assets-src/npc/gil/gil.bbmodel
+!/assets-src/npc/gil/motion.json
+!/assets-src/npc/gil/animation.md
 !/assets-src/npc/wizard/wizard.bbmodel
+!/assets-src/npc/gil/
+!/assets-src/npc/gil/gil.bbmodel
+!/assets-src/npc/gil/motion.json
+!/assets-src/npc/gil/animation.md
 !/assets-src/npc/wizard/motion.json
 !/assets-src/furniture/
 !/assets-src/furniture/sebastian_computer/
@@ -417,6 +443,7 @@ tools/npc/*
 !/tools/art/NativeEvelynActivityChecks.java
 !/tools/art/NativeGameboyChecks.java
 !/tools/art/NativeGeorgeChecks.java
+!/tools/art/NativeGiantTurtleChecks.java
 !/tools/art/NativeGusActivityChecks.java
 !/tools/art/NativeGusSupportChecks.java
 !/tools/art/NativeHairChecks.java
@@ -428,6 +455,7 @@ tools/npc/*
 !/tools/art/NpcModelOwnershipChecks.java
 !/tools/art/NpcMovementCapabilityChecks.java
 !/tools/art/SamScheduleChecks.java
+!/tools/art/export_giant_turtle.py
 
 # Local design diaries; public API/runtime documentation stays available.
 /docs/npc-reset-plan.md
@@ -436,3 +464,9 @@ tools/npc/*
 
 # Reproducible model compiler dependencies.
 !/requirements-build.txt
+
+# Editable guild progress board source.
+!/assets-src/furniture/guild_monster_board/
+!/assets-src/furniture/guild_monster_board/guild_monster_board.bbmodel
+!/assets-src/furniture/guild_monster_board/guild_monster_board.png
+!/assets-src/furniture/guild_monster_board/README.md

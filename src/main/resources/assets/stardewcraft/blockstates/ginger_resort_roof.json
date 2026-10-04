@@ -1,0 +1,172 @@
+{
+  "variants": {
+    "facing=north,part=main,variant=0": {
+      "model": "stardewcraft:block/ginger_island/resort_roof_state_0",
+      "y": 0
+    },
+    "facing=north,part=extension,variant=0": {
+      "model": "stardewcraft:block/ginger_island/resort_roof_extension"
+    },
+    "facing=north,part=main,variant=1": {
+      "model": "stardewcraft:block/ginger_island/resort_roof_state_1",
+      "y": 0
+    },
+    "facing=north,part=extension,variant=1": {
+      "model": "stardewcraft:block/ginger_island/resort_roof_extension"
+    },
+    "facing=north,part=main,variant=2": {
+      "model": "stardewcraft:block/ginger_island/resort_roof_state_0",
+      "y": 0
+    },
+    "facing=north,part=extension,variant=2": {
+      "model": "stardewcraft:block/ginger_island/resort_roof_extension"
+    },
+    "facing=north,part=main,variant=3": {
+      "model": "stardewcraft:block/ginger_island/resort_roof_state_0",
+      "y": 0
+    },
+    "facing=north,part=extension,variant=3": {
+      "model": "stardewcraft:block/ginger_island/resort_roof_extension"
+    },
+    "facing=north,part=main,variant=4": {
+      "model": "stardewcraft:block/ginger_island/resort_roof_state_0",
+      "y": 0
+    },
+    "facing=north,part=extension,variant=4": {
+      "model": "stardewcraft:block/ginger_island/resort_roof_extension"
+    },
+    "facing=north,part=main,variant=5": {
+      "model": "stardewcraft:block/ginger_island/resort_roof_state_0",
+      "y": 0
+    },
+    "facing=north,part=extension,variant=5": {
+      "model": "stardewcraft:block/ginger_island/resort_roof_extension"
+    },
+    "facing=east,part=main,variant=0": {
+      "model": "stardewcraft:block/ginger_island/resort_roof_state_0",
+      "y": 90
+    },
+    "facing=east,part=extension,variant=0": {
+      "model": "stardewcraft:block/ginger_island/resort_roof_extension"
+    },
+    "facing=east,part=main,variant=1": {
+      "model": "stardewcraft:block/ginger_island/resort_roof_state_1",
+      "y": 90
+    },
+    "facing=east,part=extension,variant=1": {
+      "model": "stardewcraft:block/ginger_island/resort_roof_extension"
+    },
+    "facing=east,part=main,variant=2": {
+      "model": "stardewcraft:block/ginger_island/resort_roof_state_0",
+      "y": 90
+    },
+    "facing=east,part=extension,variant=2": {
+      "model": "stardewcraft:block/ginger_island/resort_roof_extension"
+    },
+    "facing=east,part=main,variant=3": {
+      "model": "stardewcraft:block/ginger_island/resort_roof_state_0",
+      "y": 90
+    },
+    "facing=east,part=extension,variant=3": {
+      "model": "stardewcraft:block/ginger_island/resort_roof_extension"
+    },
+    "facing=east,part=main,variant=4": {
+      "model": "stardewcraft:block/ginger_island/resort_roof_state_0",
+      "y": 90
+    },
+    "facing=east,part=extension,variant=4": {
+      "model": "stardewcraft:block/ginger_island/resort_roof_extension"
+    },
+    "facing=east,part=main,variant=5": {
+      "model": "stardewcraft:block/ginger_island/resort_roof_state_0",
+      "y": 90
+    },
+    "facing=east,part=extension,variant=5": {
+      "model": "stardewcraft:block/ginger_island/resort_roof_extension"
+    },
+    "facing=south,part=main,variant=0": {
+      "model": "stardewcraft:block/ginger_island/resort_roof_state_0",
+      "y": 180
+    },
+    "facing=south,part=extension,variant=0": {
+      "model": "stardewcraft:block/ginger_island/resort_roof_extension"
+    },
+    "facing=south,part=main,variant=1": {
+      "model": "stardewcraft:block/ginger_island/resort_roof_state_1",
+      "y": 180
+    },
+    "facing=south,part=extension,variant=1": {
+      "model": "stardewcraft:block/ginger_island/resort_roof_extension"
+    },
+    "facing=south,part=main,variant=2": {
+      "model": "stardewcraft:block/ginger_island/resort_roof_state_0",
+      "y": 180
+    },
+    "facing=south,part=extension,variant=2": {
+      "model": "stardewcraft:block/ginger_island/resort_roof_extension"
+    },
+    "facing=south,part=main,variant=3": {
+      "model": "stardewcraft:block/ginger_island/resort_roof_state_0",
+      "y": 180
+    },
+    "facing=south,part=extension,variant=3": {
+      "model": "stardewcraft:block/ginger_island/resort_roof_extension"
+    },
+    "facing=south,part=main,variant=4": {
+      "model": "stardewcraft:block/ginger_island/resort_roof_state_0",
+      "y": 180
+    },
+    "facing=south,part=extension,variant=4": {
+      "model": "stardewcraft:block/ginger_island/resort_roof_extension"
+    },
+    "facing=south,part=main,variant=5": {
+      "model": "stardewcraft:block/ginger_island/resort_roof_state_0",
+      "y": 180
+    },
+    "facing=south,part=extension,variant=5": {
+      "model": "stardewcraft:block/ginger_island/resort_roof_extension"
+    },
+    "facing=west,part=main,variant=0": {
+      "model": "stardewcraft:block/ginger_island/resort_roof_state_0",
+      "y": 270
+    },
+    "facing=west,part=extension,variant=0": {
+      "model": "stardewcraft:block/ginger_island/resort_roof_extension"
+    },
+    "facing=west,part=main,variant=1": {
+      "model": "stardewcraft:block/ginger_island/resort_roof_state_1",
+      "y": 270
+    },
+    "facing=west,part=extension,variant=1": {
+      "model": "stardewcraft:block/ginger_island/resort_roof_extension"
+    },
+    "facing=west,part=main,variant=2": {
+      "model": "stardewcraft:block/ginger_island/resort_roof_state_0",
+      "y": 270
+    },
+    "facing=west,part=extension,variant=2": {
+      "model": "stardewcraft:block/ginger_island/resort_roof_extension"
+    },
+    "facing=west,part=main,variant=3": {
+      "model": "stardewcraft:block/ginger_island/resort_roof_state_0",
+      "y": 270
+    },
+    "facing=west,part=extension,variant=3": {
+      "model": "stardewcraft:block/ginger_island/resort_roof_extension"
+    },
+    "facing=west,part=main,variant=4": {
+      "model": "stardewcraft:block/ginger_island/resort_roof_state_0",
+      "y": 270
+    },
+    "facing=west,part=extension,variant=4": {
+      "model": "stardewcraft:block/ginger_island/resort_roof_extension"
+    },
+    "facing=west,part=main,variant=5": {
+      "model": "stardewcraft:block/ginger_island/resort_roof_state_0",
+      "y": 270
+    },
+    "facing=west,part=extension,variant=5": {
+      "model": "stardewcraft:block/ginger_island/resort_roof_extension"
+    }
+  }
+}

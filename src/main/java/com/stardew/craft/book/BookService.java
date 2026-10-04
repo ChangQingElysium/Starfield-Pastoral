@@ -5,7 +5,6 @@ import com.stardew.craft.item.StardewBookItem;
 import com.stardew.craft.player.PlayerDataEventHandler;
 import com.stardew.craft.player.PlayerStardewData;
 import com.stardew.craft.player.PlayerStardewDataAPI;
-import com.stardew.craft.player.RecipeCatalogData;
 import com.stardew.craft.player.SkillType;
 import com.stardew.craft.network.payload.ReadBookVisualPayload;
 import com.stardew.craft.sound.ModSounds;
@@ -170,7 +169,8 @@ public final class BookService {
         PlayerStardewData data = PlayerStardewDataAPI.getData(player);
         int learned = 0;
         data.incrementStat(definition.statKey(), 1);
-        for (String recipeId : RecipeCatalogData.getCookingRecipeIds()) {
+        // Vanilla Object.cs only teaches the recipes of the Queen of Sauce TV show.
+        for (String recipeId : com.stardew.craft.block.tv.TVChannelData.allCookingRecipeIds()) {
             if (data.unlockRecipe(recipeId)) {
                 learned++;
             }

@@ -7,29 +7,25 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
-import software.bernie.geckolib.renderer.GeoEntityRenderer;
-import software.bernie.geckolib.util.Color;
+import com.stardew.craft.client.model.nativebb.BlockbenchEntityRenderer;
 
 @SuppressWarnings("null")
-public class JunimoGeoRenderer extends GeoEntityRenderer<JunimoEntity> {
+public class JunimoGeoRenderer extends BlockbenchEntityRenderer<JunimoEntity> {
+
+    private final JunimoBundleLayer bundle = new JunimoBundleLayer();
 
     public JunimoGeoRenderer(EntityRendererProvider.Context context) {
         super(context, new JunimoGeoModel());
         this.shadowRadius = 0.25F;
-        addRenderLayer(new JunimoTintLayer(this));
-        addRenderLayer(new JunimoBundleLayer(this));
+
     }
 
     /**
      * SDV parity: apply entity alpha (fadeIn/fadeOut) to the render color.
      */
     @Override
-    public Color getRenderColor(JunimoEntity animatable, float partialTick, int packedLight) {
-        Color base = super.getRenderColor(animatable, partialTick, packedLight);
-        float alpha = animatable.getAlpha();
-        if (alpha >= 1.0f) return base;
-        int a = Math.round(alpha * 255);
-        return Color.ofARGB(a, base.getRed(), base.getGreen(), base.getBlue());
+    public int getRenderColor(JunimoEntity animatable, float partialTick, int packedLight) {
+        return (Math.clamp(Math.round(animatable.getAlpha() * 255), 0, 255) << 24) | 0xFFFFFF;
     }
 
     /**
@@ -44,4 +40,12 @@ public class JunimoGeoRenderer extends GeoEntityRenderer<JunimoEntity> {
         }
         return super.getRenderType(animatable, texture, bufferSource, partialTick);
     }
+    @Override protected void renderExtras(JunimoEntity entity,
+            com.stardew.craft.client.model.nativebb.BlockbenchFrame frame,
+            com.mojang.blaze3d.vertex.PoseStack pose, MultiBufferSource buffers,
+            float partialTick, int light, int overlay) {
+        JunimoTintLayer.render(entity, frame, pose, buffers, light, overlay);
+        bundle.render(entity, frame, pose, buffers, light, overlay);
+    }
+
 }

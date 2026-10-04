@@ -20,6 +20,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
+import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.saveddata.SavedData;
 
 import javax.annotation.Nonnull;
@@ -110,6 +111,11 @@ public final class TeaBushManager extends SavedData {
     }
 
     public void synchronizeChunk(ServerLevel level, ChunkPos chunkPos) {
+        synchronizeChunk(level, level.getChunk(chunkPos.x, chunkPos.z));
+    }
+
+    public void synchronizeChunk(ServerLevel level, LevelChunk chunk) {
+        ChunkPos chunkPos = chunk.getPos();
         for (Map.Entry<GlobalPos, Entry> mapEntry : new java.util.ArrayList<>(bushes.entrySet())) {
             GlobalPos globalPos = mapEntry.getKey();
             if (globalPos.dimension().equals(level.dimension())
@@ -118,6 +124,29 @@ public final class TeaBushManager extends SavedData {
             }
         }
 
+        // Earlier 1.21 saves discarded the registry on load due to the wrong Pos tag type.
+        // Recover surviving bushes once, using only the minimum age evidenced by their saved stage.
+        var sections = chunk.getSections();
+        for (int sectionIndex = 0; sectionIndex < sections.length; sectionIndex++) {
+            var section = sections[sectionIndex];
+            if (!section.maybeHas(state -> state.getBlock() instanceof TeaBushBlock
+                    && state.getValue(TeaBushBlock.HALF) == DoubleBlockHalf.LOWER)) {
+                continue;
+            }
+            int sectionY = chunk.getSectionYFromSectionIndex(sectionIndex) << 4;
+            for (int y = 0; y < 16; y++) {
+                for (int z = 0; z < 16; z++) {
+                    for (int x = 0; x < 16; x++) {
+                        BlockState state = section.getBlockState(x, y, z);
+                        if (state.getBlock() instanceof TeaBushBlock
+                                && state.getValue(TeaBushBlock.HALF) == DoubleBlockHalf.LOWER) {
+                            synchronize(level, new BlockPos(chunkPos.getMinBlockX() + x, sectionY + y,
+                                    chunkPos.getMinBlockZ() + z));
+                        }
+                    }
+                }
+            }
+        }
     }
 
     public void synchronize(ServerLevel level, BlockPos lowerPos) {
@@ -218,8 +247,11 @@ public final class TeaBushManager extends SavedData {
         if (existing != null) {
             return existing;
         }
-        int plantedDay = SunroomService.isCentralTeaBush(level, lowerPos)
-                ? currentDay() - DAYS_TO_MATURE : currentDay();
+        BlockState state = level.getBlockState(lowerPos);
+        int minimumAge = state.getBlock() instanceof TeaBushBlock
+                ? Math.min(DAYS_TO_MATURE, state.getValue(TeaBushBlock.STAGE) * 10) : 0;
+        int plantedDay = currentDay() - (SunroomService.isCentralTeaBush(level, lowerPos)
+                ? DAYS_TO_MATURE : minimumAge);
         Entry created = new Entry(plantedDay, Integer.MIN_VALUE);
         bushes.put(key, created);
         setDirty();
@@ -282,13 +314,22 @@ public final class TeaBushManager extends SavedData {
     }
 
     private static GlobalPos readGlobalPos(CompoundTag tag) {
-        if (!tag.contains("Dimension", Tag.TAG_STRING) || !tag.contains("Pos", Tag.TAG_COMPOUND)) {
+        if (!tag.contains("Dimension", Tag.TAG_STRING) || !tag.contains("Pos")) {
             return null;
         }
         ResourceKey<Level> dimension = ResourceKey.create(
                 net.minecraft.core.registries.Registries.DIMENSION,
                 net.minecraft.resources.ResourceLocation.parse(tag.getString("Dimension")));
-        BlockPos pos = NbtUtils.readBlockPos(tag, "Pos").orElse(null);
+        BlockPos pos;
+        if (tag.contains("Pos", Tag.TAG_COMPOUND)) {
+            CompoundTag legacy = tag.getCompound("Pos");
+            pos = legacy.contains("X", Tag.TAG_ANY_NUMERIC)
+                    && legacy.contains("Y", Tag.TAG_ANY_NUMERIC)
+                    && legacy.contains("Z", Tag.TAG_ANY_NUMERIC)
+                    ? new BlockPos(legacy.getInt("X"), legacy.getInt("Y"), legacy.getInt("Z")) : null;
+        } else {
+            pos = NbtUtils.readBlockPos(tag, "Pos").orElse(null);
+        }
         return pos == null ? null : GlobalPos.of(dimension, pos);
     }
 

@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "stardewcraft:item/forage/chanterelle",
+    "particle": "stardewcraft:item/forage/chanterelle",
+    "layer1": "stardewcraft:item/quality/iridium_star"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "family": "stardewcraft:axe",
+  "tier": 1,
+  "output": "stardewcraft:copper_axe",
+  "price": 2000,
+  "material": "stardewcraft:copper_bar",
+  "material_count": 5,
+  "days": 2,
+  "input": "stardewcraft:axe"
+}

@@ -14,13 +14,31 @@ import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.entity.ContainerOpenersCounter;
+import net.minecraft.util.Mth;
 
 import javax.annotation.Nullable;
 
 @SuppressWarnings("null")
 public class FridgeBlockEntity extends net.minecraft.world.level.block.entity.BlockEntity implements Container, MenuProvider {
-    private static final int SLOT_COUNT = 27;
+    /** Original 1.6 mini-fridge capacity (Chest.GetActualCapacity = 36). Old 27-slot saves keep slots 0..26 as-is (sparse Slot index). */
+    private static final int SLOT_COUNT = 36;
     private final NonNullList<ItemStack> items = NonNullList.withSize(SLOT_COUNT, ItemStack.EMPTY);
+    private boolean doorOpen;
+    private float openness;
+    private float previousOpenness;
+    private final ContainerOpenersCounter openers = new ContainerOpenersCounter() {
+        @Override protected void onOpen(Level level, BlockPos pos, BlockState state) {}
+        @Override protected void onClose(Level level, BlockPos pos, BlockState state) {}
+
+        @Override protected void openerCountChanged(Level level, BlockPos pos, BlockState state, int oldCount, int count) {
+            level.blockEvent(pos, state.getBlock(), 1, count);
+        }
+
+        @Override protected boolean isOwnContainer(Player player) {
+            return player.containerMenu instanceof ChestMenu menu && menu.getContainer() == FridgeBlockEntity.this;
+        }
+    };
 
     public FridgeBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.FRIDGE.get(), pos, state);
@@ -126,10 +144,56 @@ public class FridgeBlockEntity extends net.minecraft.world.level.block.entity.Bl
 
     @Override
     public void startOpen(Player player) {
+        if (!isRemoved() && !player.isSpectator() && level != null && !level.isClientSide) {
+            openers.incrementOpeners(player, level, worldPosition, getBlockState());
+        }
     }
 
     @Override
     public void stopOpen(Player player) {
+        if (!isRemoved() && !player.isSpectator() && level != null && !level.isClientSide) {
+            openers.decrementOpeners(player, level, worldPosition, getBlockState());
+        }
+    }
+
+    public void recheckOpeners() {
+        if (!isRemoved() && level != null && !level.isClientSide) {
+            openers.recheckOpeners(level, worldPosition, getBlockState());
+        }
+    }
+
+    @Override
+    public boolean triggerEvent(int id, int value) {
+        if (id == 1) {
+            doorOpen = value > 0;
+            return true;
+        }
+        return super.triggerEvent(id, value);
+    }
+
+    public static void clientTick(Level level, BlockPos pos, BlockState state, FridgeBlockEntity fridge) {
+        fridge.previousOpenness = fridge.openness;
+        fridge.openness = Mth.clamp(fridge.openness + (fridge.doorOpen ? .1F : -.1F), 0, 1);
+    }
+
+    /** Half-second hinge motion, interpolated every frame; reversing never resets the angle. */
+    public float getDoorOpenness(float partialTick) {
+        float t = Mth.lerp(partialTick, previousOpenness, openness);
+        return t * t * (3 - 2 * t);
+    }
+
+    @Override
+    public CompoundTag getUpdateTag(net.minecraft.core.HolderLookup.Provider registries) {
+        CompoundTag tag = new CompoundTag();
+        tag.putBoolean("DoorOpen", openers.getOpenerCount() > 0);
+        return tag;
+    }
+
+    @Override
+    public void handleUpdateTag(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
+        // A newly tracking client starts at the current pose; never send the stored inventory here.
+        doorOpen = tag.getBoolean("DoorOpen");
+        previousOpenness = openness = doorOpen ? 1 : 0;
     }
 
     @Override
@@ -180,6 +244,6 @@ public class FridgeBlockEntity extends net.minecraft.world.level.block.entity.Bl
     @Nullable
     @Override
     public AbstractContainerMenu createMenu(int containerId, Inventory playerInventory, Player player) {
-        return ChestMenu.threeRows(containerId, playerInventory, this);
+        return new ChestMenu(net.minecraft.world.inventory.MenuType.GENERIC_9x4, containerId, playerInventory, this, 4);
     }
 }

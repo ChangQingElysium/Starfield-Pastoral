@@ -17,19 +17,32 @@ import java.util.List;
 /**
  * 晕倒惩罚摘要屏幕。
  * 显示倒地原因、金币损失、丢失物品列表。
- * 点击或 5 秒后自动关闭。
+ * 保持显示直到玩家主动确认，忽略刚进入界面时的操作及按键连发。
  */
 @OnlyIn(Dist.CLIENT)
 @SuppressWarnings("null")
 public class PassOutSummaryScreen extends Screen {
 
-    private static final int AUTO_CLOSE_TICKS = 100; // 5s
+    private static final int INPUT_GUARD_TICKS = 20;
 
     private final PassOutPayload payload;
     /** null = 独立模式；非 null = 链式模式（2AM 夜间结算） */
     @javax.annotation.Nullable
     private final java.util.List<net.minecraft.client.gui.screens.Screen> siblingScreens;
     private int ticksOpen;
+    private final java.util.Set<Integer> heldConfirmKeys = new java.util.HashSet<>();
+    private boolean closeRequested;
+
+    @Override
+    protected void init() {
+        // A key held through the rescue dialogue must be released before it can dismiss this screen.
+        for (int key : new int[]{org.lwjgl.glfw.GLFW.GLFW_KEY_ENTER, org.lwjgl.glfw.GLFW.GLFW_KEY_KP_ENTER,
+                org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE, org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE}) {
+            if (com.mojang.blaze3d.platform.InputConstants.isKeyDown(minecraft.getWindow().getWindow(), key)) {
+                heldConfirmKeys.add(key);
+            }
+        }
+    }
 
     /** 独立模式构造（战斗死亡/体力耗尽） */
     public PassOutSummaryScreen(PassOutPayload payload) {
@@ -51,9 +64,6 @@ public class PassOutSummaryScreen extends Screen {
     @Override
     public void tick() {
         ticksOpen++;
-        if (ticksOpen >= AUTO_CLOSE_TICKS) {
-            close();
-        }
     }
 
     @Override
@@ -104,17 +114,34 @@ public class PassOutSummaryScreen extends Screen {
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        close();
+        if (isConfirmKey(keyCode) && heldConfirmKeys.add(keyCode)) requestClose();
         return true;
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        close();
+    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
+        heldConfirmKeys.remove(keyCode);
         return true;
     }
 
-    private void close() {
+    private static boolean isConfirmKey(int key) {
+        return key == org.lwjgl.glfw.GLFW.GLFW_KEY_ENTER || key == org.lwjgl.glfw.GLFW.GLFW_KEY_KP_ENTER
+                || key == org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE || key == org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE;
+    }
+
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (button == org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT) requestClose();
+        return true;
+    }
+
+    private void requestClose() {
+        if (ticksOpen < INPUT_GUARD_TICKS || closeRequested) return;
+        closeRequested = true;
+        close();
+    }
+
+    protected void close() {
         com.stardew.craft.StardewCraft.LOGGER.info("[OVERNIGHT_CLIENT] PassOutSummaryScreen.close() chainMode={}, siblingCount={}",
             siblingScreens != null, siblingScreens != null ? siblingScreens.size() : -1);
         if (siblingScreens != null) {
@@ -126,7 +153,7 @@ public class PassOutSummaryScreen extends Screen {
 
     @Override
     public void onClose() {
-        close();
+        requestClose();
     }
 
     private Component getReasonText() {

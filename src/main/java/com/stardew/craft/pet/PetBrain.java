@@ -12,7 +12,7 @@ final class PetBrain {
     private String stateName = "Walk", queuedState;
     private com.stardew.craft.api.v1.pet.StardewPetBehavior.State state;
     private int until, nextPath;
-    private boolean sleeping;
+    private boolean sleeping, nap;
 
     PetBrain(PetEntity entity) { this.entity = entity; }
     void tick() {
@@ -21,14 +21,10 @@ final class PetBrain {
         if (entity.tickCount % 20 == 0) PetService.remember(level, entity);
         if (entity.tickCount % 40 == 0) PetService.environment(level, pet, entity);
         boolean night = com.stardew.craft.time.StardewTimeManager.get().getCurrentTime() >= 1200;
-        if (night != sleeping) {
-            entity.feedback.stop();
-            sleeping = night; parts.clear(); queuedState = null; entity.getNavigation().stop();
-            String exit = postureExit();
-            if (night && exit != null) parts.add(new Part(exit, PetBehaviors.ticks(pet.variant, exit)));
-            parts.add(new Part(night ? "sleep_enter" : "sleep_exit", PetBehaviors.ticks(pet.variant, night ? "sleep_enter" : "sleep_exit")));
-            queuedState = night ? "Sleep" : "Walk"; advance();
-        }
+        if (nap && night) nap = false;
+        // Original: a daytime nap ends with 0.001 chance per 60 Hz frame (3 frames per tick).
+        if (nap && until == 0 && parts.isEmpty() && entity.getRandom().nextDouble() < 0.003) { nap = false; setSleeping(false, pet); }
+        else if (!nap && night != sleeping) setSleeping(night, pet);
         if (until > 0) {
             if (entity.tickCount < until && (!parts.isEmpty() || queuedState != null)) return;
             if (entity.tickCount >= until) {
@@ -57,6 +53,19 @@ final class PetBrain {
             }
             if (entity.getNavigation().isDone() && !entity.clip().equals("idle")) entity.play("idle");
         }
+    }
+    void napNow() {
+        var pet = PetWorldData.get(entity.level().getServer()).find(entity.getUUID());
+        if (pet == null || sleeping) return;
+        nap = true; setSleeping(true, pet);
+    }
+    private void setSleeping(boolean night, PetRecord pet) {
+        entity.feedback.stop();
+        sleeping = night; parts.clear(); queuedState = null; entity.getNavigation().stop();
+        String exit = postureExit();
+        if (night && exit != null) parts.add(new Part(exit, PetBehaviors.ticks(pet.variant, exit)));
+        parts.add(new Part(night ? "sleep_enter" : "sleep_exit", PetBehaviors.ticks(pet.variant, night ? "sleep_enter" : "sleep_exit")));
+        queuedState = night ? "Sleep" : "Walk"; advance();
     }
     private void transition(java.util.List<com.stardew.craft.api.v1.pet.StardewPetBehavior.Choice> choices, boolean indoors) {
         String next = PetBehaviors.choose(choices, indoors, entity.getRandom());

@@ -21,7 +21,6 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import javax.annotation.Nullable;
 
 public class FishSmokerBlockEntity extends TimedProductionBlockEntity {
-    private static final int EFFECTIVE_MINUTES_PER_DAY = 1260;
     private static final int MAX_COAL_BUFFER = 64;
 
     private static final String TAG_INPUT = "input";
@@ -125,7 +124,7 @@ public class FishSmokerBlockEntity extends TimedProductionBlockEntity {
             return InsertResult.fail();
         }
         var plan = prepareProduction(
-                stack, output, recipe.minutes(),
+                stack, output, recipeMinutes(recipe),
                 player, false);
         if (plan.isEmpty()) {
             return InsertResult.fail();
@@ -189,7 +188,7 @@ public class FishSmokerBlockEntity extends TimedProductionBlockEntity {
             return stack;
         }
         var plan = prepareProduction(
-                stack, output, recipe.minutes(),
+                stack, output, recipeMinutes(recipe),
                 null, true);
         if (plan.isEmpty()) {
             return stack;

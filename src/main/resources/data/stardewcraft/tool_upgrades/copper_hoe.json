@@ -1,0 +1,10 @@
+{
+  "family": "stardewcraft:hoe",
+  "tier": 1,
+  "output": "stardewcraft:copper_hoe",
+  "price": 2000,
+  "material": "stardewcraft:copper_bar",
+  "material_count": 5,
+  "days": 2,
+  "input": "stardewcraft:hoe"
+}

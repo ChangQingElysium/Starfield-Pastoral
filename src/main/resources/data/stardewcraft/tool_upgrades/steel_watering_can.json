@@ -1,0 +1,10 @@
+{
+  "family": "stardewcraft:watering_can",
+  "tier": 2,
+  "output": "stardewcraft:steel_watering_can",
+  "price": 5000,
+  "material": "stardewcraft:iron_bar",
+  "material_count": 5,
+  "days": 2,
+  "input": "stardewcraft:copper_watering_can"
+}

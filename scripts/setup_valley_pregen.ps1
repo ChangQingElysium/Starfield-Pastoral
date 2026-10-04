@@ -4,7 +4,7 @@ param(
 
     [switch]$CleanTarget,
 
-    [int]$PregenVersion = 17
+    [int]$PregenVersion = 19
 )
 
 $ErrorActionPreference = 'Stop'
@@ -57,6 +57,7 @@ foreach ($file in $sourceFiles) {
 }
 
 $targetFiles = Get-ChildItem -Path $targetRegionDir -Filter '*.mca' -File |
+    Where-Object { -not (Test-ProtectedRegionFile $_.Name) } |
     Sort-Object Name
 
 $manifestLines = @(

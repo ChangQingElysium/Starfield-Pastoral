@@ -15,6 +15,8 @@ public final class MuseumQuestService {
 
     public static final String INTRO_EVENT_ID = "museum_archaeology_intro";
     public static final String FIRST_ARTIFACT_FLAG = "artifactFound";
+    public static final String SOMETHING_TO_DONATE_FLAG = "somethingToDonate";
+    public static final String SOMETHING_WAS_DONATED_FLAG = "somethingWasDonated";
     private static final String LOST_BOOK_ID = "stardewcraft:lost_book";
 
     private MuseumQuestService() {}
@@ -45,6 +47,22 @@ public final class MuseumQuestService {
             quests.acceptQuest("23", player);
         }
         playerData.addMailFlag(FIRST_ARTIFACT_FLAG);
+    }
+
+    /**
+     * 原版 LibraryMuseum.resetLocalState：未看事件 0 且有可捐物时加 somethingToDonate，
+     * 已有捐赠时加 somethingWasDonated（均为只增不删的邮件标记）。
+     */
+    public static void syncDonationMailFlags(ServerPlayer player) {
+        if (player == null) return;
+        PlayerStardewData playerData = PlayerDataManager.getPlayerData(player);
+        if (!EventSeenData.get(player.serverLevel()).hasSeen(player.getUUID(), INTRO_EVENT_ID)
+                && com.stardew.craft.shop.GuntherService.playerHasDonatableItem(player)) {
+            playerData.addMailFlag(SOMETHING_TO_DONATE_FLAG);
+        }
+        if (!MuseumDonationData.get(player.serverLevel()).getDonatedItems(player.getUUID()).isEmpty()) {
+            playerData.addMailFlag(SOMETHING_WAS_DONATED_FLAG);
+        }
     }
 
     public static void onDonationPlaced(ServerPlayer player) {

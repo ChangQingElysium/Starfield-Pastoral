@@ -24,7 +24,6 @@ public class ReclamationMachineBlockEntity extends TimedProductionBlockEntity {
 
     public boolean isWoodChipper() { return getBlockState().is(com.stardew.craft.block.ModBlocks.WOOD_CHIPPER.get()); }
     public long getStartedAtGameTick() { return startedAtGameTick; }
-    private static final int EFFECTIVE_MINUTES_PER_DAY = 1260;
     private static final String TAG_INPUT = "input";
     private static final String TAG_PRODUCT = "product";
     private static final String TAG_READY_AT = "readyAtAbsMinute";

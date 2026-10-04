@@ -28,7 +28,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-/** Namespaced additive fishing treasure pools. Vanilla's contextual algorithm remains the base layer. */
+/** Namespaced additions and replacements for the data-defined fishing treasure base. */
 @SuppressWarnings("null")
 public final class FishingTreasurePoolData {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
@@ -41,6 +41,15 @@ public final class FishingTreasurePoolData {
 
     public static DefinitionSnapshot<StardewFishingTreasurePoolDefinition> snapshot() {
         return catalog.definitions();
+    }
+
+    /** Replacement suppresses the base even when its roll is empty; this permits intentional removal. */
+    public static boolean replacesBase(ServerPlayer player, boolean golden) {
+        if (player == null) return false;
+        var context = StardewConditionContext.forPlayer(player);
+        return catalog.definitions().definitions().values().stream().anyMatch(pool -> pool.replaceBase()
+                && pool.accepts(golden) && pool.availableWhen().stream().allMatch(c ->
+                    StardewConditions.test(c, context).result().orElse(false)));
     }
 
     public static void appendLoot(
@@ -56,12 +65,11 @@ public final class FishingTreasurePoolData {
         if (output == null || player == null || pools.isEmpty()) return;
         int distance = Math.max(0, Math.min(5, waterDistance));
         StardewConditionContext conditionContext = StardewConditionContext.forPlayer(player);
-        StardewItemQueryContext queryContext = StardewItemQueryContext.forPlayer(
-                player, new RandomSourceAdapter(random));
+        var effects = new ArrayList<com.stardew.craft.api.v1.action.StardewAction>();
 
         for (Map.Entry<ResourceLocation, StardewFishingTreasurePoolDefinition> registered : pools.entrySet()) {
             StardewFishingTreasurePoolDefinition pool = registered.getValue();
-            if (!pool.accepts(golden) || random.nextFloat() > pool.chance()) continue;
+            if (!pool.accepts(golden) || random.nextFloat() >= pool.chance()) continue;
             boolean available = pool.availableWhen().stream().allMatch(condition ->
                     StardewConditions.test(condition, conditionContext).result().orElse(false));
             if (!available) continue;
@@ -71,20 +79,27 @@ public final class FishingTreasurePoolData {
                     .toList();
             for (int roll = 0; roll < pool.rolls() && !eligible.isEmpty(); roll++) {
                 StardewFishingTreasureEntry selected = select(eligible, random);
+                var candidateEffects = new ArrayList<com.stardew.craft.api.v1.action.StardewAction>();
+                var queryContext = new StardewItemQueryContext(player.serverLevel(), player,
+                        new RandomSourceAdapter(random), Map.of("fishing_level", (double) fishingLevel,
+                                "water_distance", (double) distance, "golden", golden ? 1d : 0d), candidateEffects::add);
                 StardewItemQueries.resolve(selected.query(), queryContext)
                         .resultOrPartial(message -> StardewCraft.LOGGER.warn(
                                 "[Fishing treasure] Pool {} failed: {}", registered.getKey(), message))
-                        .ifPresent(output::addAll);
+                        .ifPresent(stacks -> {
+                            if (!stacks.isEmpty()) { output.addAll(stacks); effects.addAll(candidateEffects); }
+                        });
             }
         }
+        com.stardew.craft.loot.LootEffects.commit(player, effects);
     }
 
     private static StardewFishingTreasureEntry select(
             List<StardewFishingTreasureEntry> entries,
             RandomSource random
     ) {
-        int total = entries.stream().mapToInt(StardewFishingTreasureEntry::weight).sum();
-        int value = random.nextInt(total);
+        long total = entries.stream().mapToLong(StardewFishingTreasureEntry::weight).sum();
+        long value = Math.floorMod(random.nextLong(), total);
         for (StardewFishingTreasureEntry entry : entries) {
             value -= entry.weight();
             if (value < 0) return entry;
@@ -136,7 +151,7 @@ public final class FishingTreasurePoolData {
         }
         catalog = new Catalog(result.snapshot());
         StardewCraft.LOGGER.info(
-                "[Fishing treasure] Applied snapshot v{} ({} additive pools)",
+                "[Fishing treasure] Applied snapshot v{} ({} pools)",
                 catalog.definitions().version(),
                 catalog.definitions().definitions().size());
     }
@@ -153,7 +168,8 @@ public final class FishingTreasurePoolData {
             diagnostics.add(DefinitionDiagnostic.error(entry.getKey(), null, "Invalid treasure pool path"));
             return;
         }
-        StardewFishingTreasurePoolDefinition.CODEC.parse(JsonOps.INSTANCE, entry.getValue())
+        try {
+            StardewFishingTreasurePoolDefinition.CODEC.parse(JsonOps.INSTANCE, entry.getValue())
                 .resultOrPartial(message -> diagnostics.add(DefinitionDiagnostic.error(entry.getKey(), id, message)))
                 .ifPresent(definition -> {
                     definitions.put(id, definition);
@@ -162,6 +178,9 @@ public final class FishingTreasurePoolData {
                                     DefinitionDiagnostic.error(entry.getKey(), id, message)))
                             .ifPresent(json -> sources.put(id, GSON.toJson(json)));
                 });
+        } catch (RuntimeException ex) {
+            diagnostics.add(DefinitionDiagnostic.error(entry.getKey(), id, ex.getMessage()));
+        }
     }
 
     private static void logDiagnostics(List<DefinitionDiagnostic> diagnostics) {

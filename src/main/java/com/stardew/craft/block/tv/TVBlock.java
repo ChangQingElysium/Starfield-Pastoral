@@ -50,6 +50,16 @@ public class TVBlock extends MapDecorStaticBlock {
         int dayOfWeek = (currentDay - 1) % 7; // 0=Mon ... 6=Sun
 
         String tomorrowWeather = WeatherManager.getTomorrowWeather(serverLevel);
+        // Game1.getWeatherModificationsForDate: an active festival tomorrow overrides the forecast.
+        if (currentDay < 28) {
+            for (var festival : com.stardew.craft.festival.FestivalRegistry.activeFestivals()) {
+                if (festival.isDate(currentSeason, currentDay + 1)) {
+                    tomorrowWeather = "Festival:" + festival.id() + ":" + festival.locationKey()
+                            + ":" + festival.startTime() + ":" + festival.endTime();
+                    break;
+                }
+            }
+        }
 
         double dailyLuck = PlayerStardewDataAPI.getDailyLuck(serverPlayer);
 

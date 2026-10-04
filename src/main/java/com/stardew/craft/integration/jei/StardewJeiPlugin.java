@@ -478,11 +478,6 @@ public class StardewJeiPlugin implements IModPlugin {
 
         List<GeodeProcessingCategory.DisplayEntry> geodeRecipes = new ArrayList<>(
                 GeodeProcessingCategory.buildAllEntries());
-        if (hasServerCatalog) {
-            geodeRecipes.addAll(serverCatalog.geodes().stream()
-                    .map(entry -> new GeodeProcessingCategory.DisplayEntry(entry.geode(), entry.output()))
-                    .toList());
-        }
         refreshRecipeTypeBySignature(recipeManager, GeodeProcessingCategory.RECIPE_TYPE,
                 publishedGeodeRecipes, geodeRecipes,
                 GeodeProcessingCategory.DisplayEntry::contentSignature);
@@ -662,16 +657,14 @@ public class StardewJeiPlugin implements IModPlugin {
         @Override
         public Object getSubtypeData(ItemStack stack, UidContext context) {
             return context == UidContext.Ingredient
-                    ? stack.getOrDefault(net.minecraft.core.component.DataComponents.BLOCK_STATE,
-                            net.minecraft.world.item.component.BlockItemStateProperties.EMPTY)
+                    ? com.stardew.craft.gingerisland.GingerIslandVariantStacks.subtypeProperties(stack)
                     : null;
         }
 
         @Override
         public String getLegacyStringSubtypeInfo(ItemStack stack, UidContext context) {
             if (context != UidContext.Ingredient) return "";
-            var state = stack.getOrDefault(net.minecraft.core.component.DataComponents.BLOCK_STATE,
-                    net.minecraft.world.item.component.BlockItemStateProperties.EMPTY);
+            var state = com.stardew.craft.gingerisland.GingerIslandVariantStacks.subtypeProperties(stack);
             return new java.util.TreeMap<>(state.properties()).toString();
         }
     }

@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "stardewcraft:item/ginger_island/ginger_dig_site_bridge_fixed",
+    "particle": "stardewcraft:block/ginger_island/bridge_0_particle"
+  }
+}

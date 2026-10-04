@@ -1,0 +1,12 @@
+{
+  "replace": false,
+  "values": [
+    "#c:eggs",
+    "stardewcraft:large_egg_white",
+    "stardewcraft:large_egg_brown",
+    "stardewcraft:duck_egg",
+    "stardewcraft:void_egg",
+    "stardewcraft:golden_egg",
+    "stardewcraft:ostrich_egg"
+  ]
+}

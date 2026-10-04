@@ -73,7 +73,9 @@ public class RiceShootItem extends Item implements IStardewItem {
             BlockState planted = getCropBlock().defaultBlockState()
                     .setValue(RiceCropBlock.HALF, DoubleBlockHalf.LOWER)
                     .setValue(RiceCropBlock.WATERLOGGED, false);
-            level.setBlock(cropPos, planted, 3);
+            if (!com.stardew.craft.farming.CropPlanting.place(level, cropPos, planted)) {
+                return InteractionResult.FAIL;
+            }
             if (level instanceof net.minecraft.server.level.ServerLevel serverLevel) {
                 RiceCropBlock.keepPaddySoilWatered(serverLevel, cropPos);
             }

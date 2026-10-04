@@ -76,6 +76,11 @@ public final class FestivalOfIceService {
     private static final AABB ENTRY_EXIT_BOUNDS = inclusiveBox(new BlockPos(-187, 95, 13), new BlockPos(-61, 61, 82)).expandTowards(0.0D, -1.0D, 0.0D);
     private static final BlockPos TRAVELING_MERCHANT_INTERACTION_POS = new BlockPos(-128, 65, 54);
     private static final BlockPos PLAYER_CONTEST_POS = new BlockPos(-110, 64, 57);
+    // 原版 Event.caughtFish (winter8)：仅 who.TilePoint.X < 79 且 Y < 43 的鱼计分。
+    // 原版主事件把所有参赛者 warp 到 tile (71,35)，对应本项目 PLAYER_CONTEST_POS(-110,57)，按 1:1 换算：
+    // tile X<79 -> blockX < -110+(79-71) = -102；tile Y<43 -> blockZ < 57+(43-35) = 65。
+    private static final int ICE_FISHING_SCORE_MAX_X_EXCLUSIVE = PLAYER_CONTEST_POS.getX() + (79 - 71);
+    private static final int ICE_FISHING_SCORE_MAX_Z_EXCLUSIVE = PLAYER_CONTEST_POS.getZ() + (43 - 35);
     private static final AABB TEMP_ROD_CLEANUP_BOUNDS = AABB.ofSize(
         new Vec3(-110.0D, 64.0D, 57.0D), 48.0D, 10.0D, 48.0D);
 
@@ -363,6 +368,10 @@ public final class FestivalOfIceService {
             return;
         }
         if (!fish || iceFishingTicksRemaining <= 0) {
+            return;
+        }
+        BlockPos catchPos = player.blockPosition();
+        if (catchPos.getX() >= ICE_FISHING_SCORE_MAX_X_EXCLUSIVE || catchPos.getZ() >= ICE_FISHING_SCORE_MAX_Z_EXCLUSIVE) {
             return;
         }
         IceFishingPlayerState state = ICE_FISHING_PLAYERS.get(player.getUUID());

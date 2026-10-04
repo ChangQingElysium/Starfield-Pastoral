@@ -230,7 +230,17 @@ public class ResourceClumpBlock extends MapDecorStaticBlock {
         }
 
         if (player != null && !player.isCreative()) {
-            Block.popResource(level, mainPos, new ItemStack(dropItem.get(), dropCount));
+            int count = dropCount;
+            // ResourceClump.destroy: Forester gives a large stump a 50% extra hardwood and a hollow log 10 instead of 8.
+            if ((this == com.stardew.craft.block.ModBlocks.LARGE_STUMP.get() || this == com.stardew.craft.block.ModBlocks.HOLLOW_LOG.get())
+                    && PlayerStardewDataAPI.hasProfession(player, com.stardew.craft.player.ProfessionType.FORESTER)) {
+                if (this == com.stardew.craft.block.ModBlocks.HOLLOW_LOG.get()) {
+                    count = 10;
+                } else if (level.getRandom().nextBoolean()) {
+                    count++;
+                }
+            }
+            Block.popResource(level, mainPos, new ItemStack(dropItem.get(), count));
             if (bonusDropItem != null && bonusDropCount > 0 && bonusDropChance > 0.0D
                     && level.getRandom().nextDouble() < bonusDropChance) {
                 Block.popResource(level, mainPos, new ItemStack(bonusDropItem.get(), bonusDropCount));

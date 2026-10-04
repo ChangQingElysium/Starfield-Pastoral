@@ -1,0 +1,60 @@
+{
+  "variants": {
+    "facing=north,part=main,lit=false": {
+      "model": "stardewcraft:block/ginger_island/island_torch_unlit",
+      "y": 0
+    },
+    "facing=north,part=extension,lit=false": {
+      "model": "stardewcraft:block/ginger_island/island_torch_unlit_extension"
+    },
+    "facing=north,part=main,lit=true": {
+      "model": "stardewcraft:block/ginger_island/island_torch_lit",
+      "y": 0
+    },
+    "facing=north,part=extension,lit=true": {
+      "model": "stardewcraft:block/ginger_island/island_torch_unlit_extension"
+    },
+    "facing=east,part=main,lit=false": {
+      "model": "stardewcraft:block/ginger_island/island_torch_unlit",
+      "y": 90
+    },
+    "facing=east,part=extension,lit=false": {
+      "model": "stardewcraft:block/ginger_island/island_torch_unlit_extension"
+    },
+    "facing=east,part=main,lit=true": {
+      "model": "stardewcraft:block/ginger_island/island_torch_lit",
+      "y": 90
+    },
+    "facing=east,part=extension,lit=true": {
+      "model": "stardewcraft:block/ginger_island/island_torch_unlit_extension"
+    },
+    "facing=south,part=main,lit=false": {
+      "model": "stardewcraft:block/ginger_island/island_torch_unlit",
+      "y": 180
+    },
+    "facing=south,part=extension,lit=false": {
+      "model": "stardewcraft:block/ginger_island/island_torch_unlit_extension"
+    },
+    "facing=south,part=main,lit=true": {
+      "model": "stardewcraft:block/ginger_island/island_torch_lit",
+      "y": 180
+    },
+    "facing=south,part=extension,lit=true": {
+      "model": "stardewcraft:block/ginger_island/island_torch_unlit_extension"
+    },
+    "facing=west,part=main,lit=false": {
+      "model": "stardewcraft:block/ginger_island/island_torch_unlit",
+      "y": 270
+    },
+    "facing=west,part=extension,lit=false": {
+      "model": "stardewcraft:block/ginger_island/island_torch_unlit_extension"
+    },
+    "facing=west,part=main,lit=true": {
+      "model": "stardewcraft:block/ginger_island/island_torch_lit",
+      "y": 270
+    },
+    "facing=west,part=extension,lit=true": {
+      "model": "stardewcraft:block/ginger_island/island_torch_unlit_extension"
+    }
+  }
+}
