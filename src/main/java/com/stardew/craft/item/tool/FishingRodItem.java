@@ -650,6 +650,11 @@ public class FishingRodItem extends net.minecraft.world.item.FishingRodItem impl
 	}
 
 	private static float castStaminaCost(ServerPlayer player, ItemStack stack) {
+		// FishingRod.cs L405: Efficient enchantment waives the cast stamina cost.
+		if (com.stardew.craft.enchantment.StardewEnchantments.has(stack,
+				com.stardew.craft.enchantment.StardewEnchantments.EFFICIENT)) {
+			return 0.0F;
+		}
 		int fishingLevel = com.stardew.craft.enchantment.StardewEnchantments
 				.effectiveFishingLevel(player, stack);
 		return Math.max(0.0F, 8.0F - fishingLevel * 0.1F);

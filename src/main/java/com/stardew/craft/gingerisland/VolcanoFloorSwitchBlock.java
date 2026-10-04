@@ -6,6 +6,8 @@ import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -41,6 +43,14 @@ public final class VolcanoFloorSwitchBlock extends Block {
         if (context.getPlayer() instanceof ServerPlayer player && !IslandContext.canModifyAt(player, context.getClickedPos()))
             return null;
         return defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite());
+    }
+
+    @Override public void setPlacedBy(Level level, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack) {
+        // BlockItem reapplies BLOCK_STATE after getStateForPlacement. A held
+        // component cannot latch a player-operated switch before anyone steps on it.
+        BlockState placed = state.setValue(PRESSED, false);
+        if (placed != state) level.setBlock(pos, placed, Block.UPDATE_CLIENTS);
+        super.setPlacedBy(level, pos, placed, placer, stack);
     }
 
     @Override public void stepOn(Level level, BlockPos pos, BlockState state, Entity entity) {

@@ -1,3 +1,7 @@
 {
-  "parent": "stardewcraft:block/ginger_island/island_broadleaf_rosette"
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "stardewcraft:item/ginger_island/ginger_island_broadleaf_rosette",
+    "particle": "stardewcraft:block/ginger_island/island_broadleaf_rosette_particle"
+  }
 }

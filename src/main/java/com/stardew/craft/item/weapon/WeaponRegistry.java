@@ -1187,7 +1187,7 @@ public class WeaponRegistry {
                 .damage(530).cooldown(20).icon(WeaponIcons.SKILL_THE_SLAMMER_2).build())
             .build());
         register(WeaponData.builder("dwarf_hammer")
-            .type(WeaponType.CLUB).level(13).damage(75, 85).speed(1).defense(2)
+            .type(WeaponType.CLUB).level(13).damage(75, 85).speed(0).defense(2)
             .knockback(1.0).precision(0).critChance(0.02).critMultiplier(3.0)
             .skill1(WeaponSkillData.builder("dwarf_hammer_rebound")
                 .nameKey("stardewcraft.weapon.skill.dwarf_hammer_rebound")
@@ -1201,7 +1201,7 @@ public class WeaponRegistry {
                 .damage(400).cooldown(22).icon(WeaponIcons.SKILL_DWARF_HAMMER_2).build())
             .build());
         register(WeaponData.builder("lead_rod")
-            .type(WeaponType.CLUB).level(4).damage(26, 36).speed(-2)
+            .type(WeaponType.CLUB).level(4).damage(18, 27).speed(-4)
             .knockback(1.5).precision(0).critChance(0.02).critMultiplier(3.0)
             .skill1(WeaponSkillData.builder("lead_rod_press")
                 .nameKey("stardewcraft.weapon.skill.lead_rod_press")

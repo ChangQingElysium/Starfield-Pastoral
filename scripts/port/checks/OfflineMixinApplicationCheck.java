@@ -52,7 +52,7 @@ public final class OfflineMixinApplicationCheck {
     private static IMixinTransformerFactory factory;
     private static final Map<String, String> runtimeReadable = new HashMap<>();
 
-    public static final class Service extends MixinServiceAbstract implements IClassProvider, IClassBytecodeProvider {
+    public static class Service extends MixinServiceAbstract implements IClassProvider, IClassBytecodeProvider {
         @Override public String getName() { return "OfflineMixinApplicationCheck"; }
         @Override public boolean isValid() { return true; }
         @Override public IClassProvider getClassProvider() { return this; }

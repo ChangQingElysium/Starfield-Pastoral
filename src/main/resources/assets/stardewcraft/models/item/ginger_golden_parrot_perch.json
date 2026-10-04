@@ -1,3 +1,7 @@
 {
-  "parent": "stardewcraft:block/ginger_island/golden_parrot_perch"
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "stardewcraft:item/ginger_island/ginger_golden_parrot_perch",
+    "particle": "stardewcraft:block/ginger_island/golden_parrot_perch_particle"
+  }
 }

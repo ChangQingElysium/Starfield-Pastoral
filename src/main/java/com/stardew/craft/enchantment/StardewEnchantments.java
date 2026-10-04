@@ -50,7 +50,8 @@ public final class StardewEnchantments {
             "sd_mob_fly",
             "sd_mob_mutant_bug",
             "sd_mob_mutant_grub",
-            "sd_mob_armored_bug"
+            "sd_mob_armored_bug",
+            "sd_mob_crab"
     );
 
     private static final Set<String> UNDEAD_MONSTER_TAGS = Set.of(

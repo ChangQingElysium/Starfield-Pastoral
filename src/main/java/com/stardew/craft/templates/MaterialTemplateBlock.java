@@ -192,7 +192,11 @@ public class MaterialTemplateBlock extends BaseEntityBlock implements TemplateBl
 
     @Override
     public boolean propagatesSkylightDown(BlockState state, BlockGetter level, BlockPos pos) {
-        return state.getValue(PROPAGATES_SKYLIGHT) || super.propagatesSkylightDown(state, level, pos);
+        // Lighting can run before this chunk is FULL. Dynamic selection shapes
+        // may query neighboring chunks, so use only the state-local geometry here.
+        return state.getValue(PROPAGATES_SKYLIGHT)
+                || (!Block.isShapeFullBlock(TemplateShapeCache.get(templateShape, state))
+                    && state.getFluidState().isEmpty());
     }
 
     @Override

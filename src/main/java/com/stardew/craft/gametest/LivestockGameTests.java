@@ -103,12 +103,24 @@ public final class LivestockGameTests {
             var chicken = (LivestockEntity) level.getEntity(nonce);
             h.assertTrue(chicken != null && chicken.isBaby() && !chicken.shouldBeSaved(), "No new-system chick projection");
             int experience = PlayerStardewDataAPI.getData(player).getSkillExperience(SkillType.FARMING);
-            withMiningDataLevel(h, () -> { LivestockService.pet(player, chicken); LivestockService.pet(player, chicken); });
+            withMiningDataLevel(h, () -> {
+                chicken.interact(player, net.minecraft.world.InteractionHand.MAIN_HAND);
+                chicken.interact(player, net.minecraft.world.InteractionHand.MAIN_HAND);
+            });
             h.assertTrue(PlayerStardewDataAPI.getData(player).getSkillExperience(SkillType.FARMING) == experience + 5, "Repeated pet duplicated experience");
+            h.assertTrue(animals.find(nonce).care().petted() && animals.find(nonce).care().friendship() == 15,
+                    "Entity interaction marked care without granting exactly one pet friendship reward");
+            var restoredCare = LivestockWorldData.load(animals.save(new CompoundTag()), level.registryAccess()).find(nonce).care();
+            h.assertTrue(restoredCare.equals(animals.find(nonce).care()), "Pet friendship or daily flag was lost on save/load");
             for (int day = 6; day <= 8; day++) {
-                if (day > 6) { fillHay(level, trough); withMiningDataLevel(h, () -> LivestockService.pet(player, chicken)); }
+                if (day > 6) { fillHay(level, trough); withMiningDataLevel(h, () -> chicken.interact(player, net.minecraft.world.InteractionHand.MAIN_HAND)); }
                 clock.setCurrentDay(day); LivestockService.onNewDay(level);
                 var settled = animals.find(nonce); int eggs = animals.eggs().size();
+                h.assertTrue(settled.care().friendship() == 15 * (day - 5) && !settled.care().petted(),
+                        "Fed and petted animal lost friendship or retained yesterday's pet flag on day " + day);
+                var row = new CompoundTag(); LivestockUiData.care(row, settled);
+                h.assertTrue(row.getInt("Friendship") == settled.care().friendship() && !row.getBoolean("Petted"),
+                        "Animal UI snapshot does not match persisted friendship and pet state");
                 LivestockService.onNewDay(level);
                 h.assertTrue(animals.find(nonce).equals(settled) && animals.eggs().size() == eggs, "Same day settled twice");
                 if (day > 6) h.assertTrue(!LivestockService.hasHay(level, trough, false), "Daily meal not consumed");

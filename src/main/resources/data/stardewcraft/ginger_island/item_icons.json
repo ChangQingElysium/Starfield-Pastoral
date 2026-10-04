@@ -1,0 +1,1089 @@
+{
+  "version": 1,
+  "items": {
+    "ginger_professor_boulder": {
+      "default": "stardewcraft:item/ginger_island/ginger_professor_boulder",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_dig_ammonite_relief": {
+      "default": "stardewcraft:item/ginger_island/ginger_dig_ammonite_relief",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_dig_fossil_fragments": {
+      "default": "stardewcraft:item/ginger_island/ginger_dig_fossil_fragments",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_field_office_fossil_display": {
+      "default": "stardewcraft:item/ginger_island/ginger_field_office_fossil_display",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_field_office_survey_board": {
+      "default": "stardewcraft:item/ginger_island/ginger_field_office_survey_board",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_professor_work_desk": {
+      "default": "stardewcraft:item/ginger_island/ginger_professor_work_desk",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_crystal_cave_brazier": {
+      "default": "stardewcraft:item/ginger_island/ginger_crystal_cave_brazier",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_crystal_cave_statue": {
+      "default": "stardewcraft:item/ginger_island/ginger_crystal_cave_statue",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_gourmand_woven_mat": {
+      "default": "stardewcraft:item/ginger_island/ginger_gourmand_woven_mat",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_pirate_cannon": {
+      "default": "stardewcraft:item/ginger_island/ginger_pirate_cannon",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_pirate_dartboard": {
+      "default": "stardewcraft:item/ginger_island/ginger_pirate_dartboard",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_pirate_round_table": {
+      "default": "stardewcraft:item/ginger_island/ginger_pirate_round_table",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_pirate_treasure_table": {
+      "default": "stardewcraft:item/ginger_island/ginger_pirate_treasure_table",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_volcano_bone_spike": {
+      "default": "stardewcraft:item/ginger_island/ginger_volcano_bone_spike",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_volcano_dragon_skull": {
+      "default": "stardewcraft:item/ginger_island/ginger_volcano_dragon_skull",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_volcano_femur_in_rock": {
+      "default": "stardewcraft:item/ginger_island/ginger_volcano_femur_in_rock",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_volcano_rib_arch": {
+      "default": "stardewcraft:item/ginger_island/ginger_volcano_rib_arch",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_volcano_dwarf_cabinet": {
+      "default": "stardewcraft:item/ginger_island/ginger_volcano_dwarf_cabinet",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_volcano_dwarf_counter": {
+      "default": "stardewcraft:item/ginger_island/ginger_volcano_dwarf_counter",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_volcano_spout_dry": {
+      "default": "stardewcraft:item/ginger_island/ginger_volcano_spout_dry",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_volcano_big_gear": {
+      "default": "stardewcraft:item/ginger_island/ginger_volcano_big_gear",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_volcano_floor_hatch": {
+      "default": "stardewcraft:item/ginger_island/ginger_volcano_floor_hatch",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_stove_fireplace": {
+      "default": "stardewcraft:item/ginger_island/original_f_1798",
+      "states": [],
+      "variants": {},
+      "artwork": "original",
+      "source_item": "(F)1798",
+      "texture_size": [
+        80,
+        80
+      ],
+      "original": {
+        "sheet": "TileSheets/furniture.png",
+        "rect": [
+          96,
+          896,
+          32,
+          80
+        ],
+        "pixel_sha256": "dc21754ba992f91a21fcd30036bf03151acef0725a04ae924d963f684f5aca97"
+      },
+      "gui_scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "source_kind": "item_menu"
+    },
+    "ginger_tropical_bed": {
+      "default": "stardewcraft:item/ginger_island/original_f_2176",
+      "states": [],
+      "variants": {},
+      "artwork": "original",
+      "source_item": "(F)2176",
+      "texture_size": [
+        64,
+        64
+      ],
+      "original": {
+        "sheet": "TileSheets/furniture.png",
+        "rect": [
+          0,
+          1088,
+          32,
+          64
+        ],
+        "pixel_sha256": "b02354c6159afa72d6e8e7ca59debe51d17b76530756fb66a131079dd63c87c3"
+      },
+      "gui_scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "source_kind": "item_menu"
+    },
+    "ginger_farm_return_obelisk": {
+      "default": "stardewcraft:item/ginger_island/ginger_farm_return_obelisk",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_farm_ruin_boarding": {
+      "default": "stardewcraft:item/ginger_island/ginger_farm_ruin_boarding",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_resort_carved_bar_counter": {
+      "default": "stardewcraft:item/ginger_island/ginger_resort_carved_bar_counter",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_resort_changing_entry": {
+      "default": "stardewcraft:item/ginger_island/ginger_resort_changing_entry",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_resort_leaf_wrapped_column": {
+      "default": "stardewcraft:item/ginger_island/ginger_resort_leaf_wrapped_column",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_resort_ruined_column": {
+      "default": "stardewcraft:item/ginger_island/ginger_resort_ruined_column",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_resort_beach_chair": {
+      "default": "stardewcraft:item/ginger_island/ginger_resort_beach_chair",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_resort_towel_green": {
+      "default": "stardewcraft:item/ginger_island/ginger_resort_towel_green",
+      "states": [
+        "0",
+        "1"
+      ],
+      "variants": {
+        "0": "stardewcraft:item/ginger_island/ginger_resort_towel_green",
+        "1": "stardewcraft:item/ginger_island/ginger_resort_towel_peach"
+      }
+    },
+    "ginger_pirate_skull_flag": {
+      "default": "stardewcraft:item/ginger_island/ginger_pirate_skull_flag",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_pirate_purple_rug": {
+      "default": "stardewcraft:item/ginger_island/ginger_pirate_purple_rug",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_qi_challenge_board": {
+      "default": "stardewcraft:item/ginger_island/ginger_qi_challenge_board",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_qi_computer_desk": {
+      "default": "stardewcraft:item/ginger_island/ginger_qi_computer_desk",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_physics_101": {
+      "default": "stardewcraft:item/ginger_island/original_f_2732",
+      "states": [],
+      "variants": {},
+      "artwork": "original",
+      "source_item": "(F)2732",
+      "texture_size": [
+        32,
+        32
+      ],
+      "original": {
+        "sheet": "TileSheets/furniture.png",
+        "rect": [
+          192,
+          1360,
+          32,
+          32
+        ],
+        "pixel_sha256": "b398fb7fc9a3d450a48d0019b6593deb3e3da538bec050a6e1a8ec189b862456"
+      },
+      "gui_scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "source_kind": "item_menu"
+    },
+    "ginger_bamboo_mat": {
+      "default": "stardewcraft:item/ginger_island/original_f_1755",
+      "states": [],
+      "variants": {},
+      "artwork": "original",
+      "source_item": "(F)1755",
+      "texture_size": [
+        32,
+        32
+      ],
+      "original": {
+        "sheet": "TileSheets/furniture.png",
+        "rect": [
+          432,
+          864,
+          32,
+          16
+        ],
+        "pixel_sha256": "2dd29bd58cc308175fdeee17598d1e122965bf4b8681233b89080aa22858fffb"
+      },
+      "gui_scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "source_kind": "item_menu"
+    },
+    "ginger_burlap_rug": {
+      "default": "stardewcraft:item/ginger_island/original_f_1742",
+      "states": [],
+      "variants": {},
+      "artwork": "original",
+      "source_item": "(F)1742",
+      "texture_size": [
+        32,
+        32
+      ],
+      "original": {
+        "sheet": "TileSheets/furniture.png",
+        "rect": [
+          224,
+          864,
+          32,
+          32
+        ],
+        "pixel_sha256": "a5b3c236a1db355985d2b02a2cdcd15f295a1765e47e5789dcd00af503e597ec"
+      },
+      "gui_scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "source_kind": "item_menu"
+    },
+    "ginger_oceanic_rug": {
+      "default": "stardewcraft:item/ginger_island/original_f_1228",
+      "states": [],
+      "variants": {},
+      "artwork": "original",
+      "source_item": "(F)1228",
+      "texture_size": [
+        48,
+        48
+      ],
+      "original": {
+        "sheet": "TileSheets/furniture.png",
+        "rect": [
+          192,
+          608,
+          48,
+          32
+        ],
+        "pixel_sha256": "55bbf9a9266539a47556ec7d3beb56c82de32e804ff1c52d4e777dd1d493fcbf"
+      },
+      "gui_scale": [
+        0.75,
+        0.75,
+        1
+      ],
+      "source_kind": "item_menu"
+    },
+    "ginger_foliage_print": {
+      "default": "stardewcraft:item/ginger_island/original_f_2419",
+      "states": [],
+      "variants": {},
+      "artwork": "original",
+      "source_item": "(F)2419",
+      "texture_size": [
+        32,
+        32
+      ],
+      "original": {
+        "sheet": "TileSheets/furniture.png",
+        "rect": [
+          304,
+          1200,
+          32,
+          32
+        ],
+        "pixel_sha256": "229b56476c549508b48602215e750729e8863727a0b6183af1f5a477e89f0694"
+      },
+      "gui_scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "source_kind": "item_menu"
+    },
+    "ginger_volcano_photo": {
+      "default": "stardewcraft:item/ginger_island/original_f_2329",
+      "states": [],
+      "variants": {},
+      "artwork": "original",
+      "source_item": "(F)2329",
+      "texture_size": [
+        32,
+        32
+      ],
+      "original": {
+        "sheet": "TileSheets/furniture.png",
+        "rect": [
+          400,
+          1152,
+          32,
+          32
+        ],
+        "pixel_sha256": "8c4083a62ea7b07bd53ce62a80981f1568dd5c198697858e9863852e6ca91502"
+      },
+      "gui_scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "source_kind": "item_menu"
+    },
+    "ginger_basic_window": {
+      "default": "stardewcraft:item/ginger_island/original_f_1614",
+      "states": [],
+      "variants": {},
+      "artwork": "original",
+      "source_item": "(F)1614",
+      "texture_size": [
+        32,
+        32
+      ],
+      "original": {
+        "sheet": "TileSheets/furniture.png",
+        "rect": [
+          224,
+          800,
+          16,
+          32
+        ],
+        "pixel_sha256": "7c0faeb7e6ae8a0224f87f695118961bb1704ba1cbf0a95b6c4bf1d7c81d89e7"
+      },
+      "gui_scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "source_kind": "item_menu"
+    },
+    "ginger_tropical_chair": {
+      "default": "stardewcraft:item/ginger_island/original_f_134",
+      "states": [],
+      "variants": {},
+      "artwork": "original",
+      "source_item": "(F)134",
+      "texture_size": [
+        32,
+        32
+      ],
+      "original": {
+        "sheet": "TileSheets/furniture.png",
+        "rect": [
+          96,
+          64,
+          16,
+          32
+        ],
+        "pixel_sha256": "573698e64e3bb946260ae0d368582616f87aa8608e552fb5288156f0bb80fdad"
+      },
+      "gui_scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "source_kind": "item_menu"
+    },
+    "ginger_tropical_tv": {
+      "default": "stardewcraft:item/ginger_island/original_f_2326",
+      "states": [],
+      "variants": {},
+      "artwork": "original",
+      "source_item": "(F)2326",
+      "texture_size": [
+        48,
+        48
+      ],
+      "original": {
+        "sheet": "TileSheets/furniture.png",
+        "rect": [
+          352,
+          1152,
+          48,
+          48
+        ],
+        "pixel_sha256": "823f389d9571eec98a679212aa3d59bb2bc089fe9511bbde026065d23d3897b2"
+      },
+      "gui_scale": [
+        0.75,
+        0.75,
+        1
+      ],
+      "source_kind": "item_menu"
+    },
+    "ginger_willy_boat": {
+      "default": "stardewcraft:item/ginger_island/ginger_willy_boat_damaged",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_resort_umbrella_coral": {
+      "default": "stardewcraft:item/ginger_island/ginger_resort_umbrella_coral",
+      "states": [
+        "0",
+        "1"
+      ],
+      "variants": {
+        "0": "stardewcraft:item/ginger_island/ginger_resort_umbrella_coral",
+        "1": "stardewcraft:item/ginger_island/ginger_resort_umbrella_mint"
+      }
+    },
+    "ginger_south_palm": {
+      "default": "stardewcraft:item/ginger_island/ginger_south_palm_ground",
+      "states": [
+        "0",
+        "1",
+        "2",
+        "3"
+      ],
+      "variants": {
+        "0": "stardewcraft:item/ginger_island/ginger_south_palm_ground",
+        "1": "stardewcraft:item/ginger_island/ginger_south_palm_cliff",
+        "2": "stardewcraft:item/ginger_island/ginger_south_palm_coconut",
+        "3": "stardewcraft:item/ginger_island/ginger_south_palm_young"
+      }
+    },
+    "ginger_dig_site_bridge": {
+      "default": "stardewcraft:item/ginger_island/ginger_dig_site_bridge_broken",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_resort_roof": {
+      "default": "stardewcraft:item/ginger_island/ginger_resort_roof_small",
+      "states": [
+        "0",
+        "1"
+      ],
+      "variants": {
+        "0": "stardewcraft:item/ginger_island/ginger_resort_roof_small",
+        "1": "stardewcraft:item/ginger_island/ginger_resort_roof_large"
+      }
+    },
+    "ginger_gem_shrine_assembly": {
+      "default": "stardewcraft:item/ginger_island/ginger_gem_shrine_unsolved",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_island_shipwreck": {
+      "default": "stardewcraft:item/ginger_island/ginger_island_shipwreck",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_birdie_hut": {
+      "default": "stardewcraft:item/ginger_island/ginger_birdie_hut",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_professor_field_tent_assembly": {
+      "default": "stardewcraft:item/ginger_island/ginger_professor_field_tent_assembly",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_banana_altar_assembly": {
+      "default": "stardewcraft:item/ginger_island/ginger_banana_altar_assembly",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_island_beach_driftwood_pile": {
+      "default": "stardewcraft:item/ginger_island/ginger_island_beach_driftwood_pile",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_island_parrot_platform": {
+      "default": "stardewcraft:item/ginger_island/ginger_island_parrot_platform",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_captain_cabin_shell": {
+      "default": "stardewcraft:item/ginger_island/ginger_captain_cabin_shell",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_mermaid_performance_rock": {
+      "default": "stardewcraft:item/ginger_island/ginger_mermaid_performance_rock",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_pirate_bar_assembly": {
+      "default": "stardewcraft:item/ginger_island/ginger_pirate_bar_assembly",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_pirate_cove_rowboat": {
+      "default": "stardewcraft:item/ginger_island/ginger_pirate_cove_rowboat",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_caldera_forge": {
+      "default": "stardewcraft:item/ginger_island/ginger_caldera_forge",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_caldera_monument": {
+      "default": "stardewcraft:item/ginger_island/ginger_caldera_monument",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_gem_pedestal": {
+      "default": "stardewcraft:item/ginger_island/original_bc_221",
+      "states": [],
+      "variants": {},
+      "artwork": "original",
+      "source_item": "(BC)221",
+      "texture_size": [
+        32,
+        32
+      ],
+      "original": {
+        "sheet": "TileSheets/Craftables.png",
+        "rect": [
+          80,
+          864,
+          16,
+          32
+        ],
+        "pixel_sha256": "b1707ff2b88adc5d7779e0cd2aa8ac5334ffe54fb9e1d8581327569e23c0e48a"
+      },
+      "gui_scale": [
+        1,
+        1,
+        1
+      ],
+      "source_kind": "item_menu"
+    },
+    "ginger_music_crystal": {
+      "default": "stardewcraft:item/ginger_island/scene_cursors2_music_crystal",
+      "states": [],
+      "variants": {},
+      "artwork": "original",
+      "source_scene": "ginger_island_music_crystal",
+      "texture_size": [
+        32,
+        32
+      ],
+      "original": {
+        "sheet": "LooseSprites/Cursors2.png",
+        "rect": [
+          240,
+          227,
+          16,
+          29
+        ],
+        "pixel_sha256": "6366e47c276e786898edd768a0ecbb111c860685b1a6d803b098905daa732dd5"
+      },
+      "gui_scale": [
+        1,
+        1,
+        1
+      ],
+      "source_kind": "scene_sprite"
+    },
+    "ginger_island_torch_unlit": {
+      "default": "stardewcraft:item/ginger_island/ginger_island_torch_unlit",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_hut_container_tall": {
+      "default": "stardewcraft:item/ginger_island/ginger_hut_container_tall",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_island_red_cooker": {
+      "default": "stardewcraft:item/ginger_island/ginger_island_red_cooker",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_farm_thatch_eave": {
+      "default": "stardewcraft:item/ginger_island/ginger_farm_thatch_eave",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_farm_thatch_ridge": {
+      "default": "stardewcraft:item/ginger_island/ginger_farm_thatch_ridge",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_farm_thatch_slope": {
+      "default": "stardewcraft:item/ginger_island/ginger_farm_thatch_slope",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_pirate_barrel_dark": {
+      "default": "stardewcraft:item/ginger_island/ginger_pirate_barrel_dark",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_volcano_canister_174": {
+      "default": "stardewcraft:item/ginger_island/ginger_volcano_canister_174",
+      "states": [
+        "0",
+        "1"
+      ],
+      "variants": {
+        "0": "stardewcraft:item/ginger_island/ginger_volcano_canister_174",
+        "1": "stardewcraft:item/ginger_island/ginger_volcano_canister_175"
+      }
+    },
+    "ginger_lifesaver": {
+      "default": "stardewcraft:item/ginger_island/original_f_2418",
+      "states": [],
+      "variants": {},
+      "artwork": "original",
+      "source_item": "(F)2418",
+      "texture_size": [
+        32,
+        32
+      ],
+      "original": {
+        "sheet": "TileSheets/furniture.png",
+        "rect": [
+          288,
+          1200,
+          16,
+          32
+        ],
+        "pixel_sha256": "e447ea2f0b3ff5b5352b620959d19c75eb02abcab171641153dd025dbd266675"
+      },
+      "gui_scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "source_kind": "item_menu"
+    },
+    "ginger_heavy_tapper": {
+      "default": "stardewcraft:item/ginger_island/original_bc_264",
+      "states": [],
+      "variants": {},
+      "artwork": "original",
+      "source_item": "(BC)264",
+      "texture_size": [
+        32,
+        32
+      ],
+      "original": {
+        "sheet": "TileSheets/Craftables.png",
+        "rect": [
+          0,
+          1056,
+          16,
+          32
+        ],
+        "pixel_sha256": "9695f996c8b958e4e22821e3169e57c403e2bb4e2e11b185c31a25fddc32da98"
+      },
+      "gui_scale": [
+        1,
+        1,
+        1
+      ],
+      "source_kind": "item_menu"
+    },
+    "ginger_parrot_perch": {
+      "default": "stardewcraft:item/ginger_island/ginger_parrot_perch",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_golden_parrot_perch": {
+      "default": "stardewcraft:item/ginger_island/ginger_golden_parrot_perch",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_volcano_parrot_perch": {
+      "default": "stardewcraft:item/ginger_island/ginger_volcano_parrot_perch",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_jungle_torch": {
+      "default": "stardewcraft:item/ginger_island/original_f_2331",
+      "states": [],
+      "variants": {},
+      "artwork": "original",
+      "source_item": "(F)2331",
+      "texture_size": [
+        32,
+        32
+      ],
+      "original": {
+        "sheet": "TileSheets/furniture.png",
+        "rect": [
+          432,
+          1152,
+          16,
+          32
+        ],
+        "pixel_sha256": "095f5d7047214746e32374ee504e8b1c80776f37b42bbf58444af0280fae61d7"
+      },
+      "gui_scale": [
+        1.0,
+        1.0,
+        1
+      ],
+      "source_kind": "item_menu"
+    },
+    "ginger_ostrich_incubator_empty": {
+      "default": "stardewcraft:item/ginger_island/original_bc_254",
+      "states": [],
+      "variants": {},
+      "artwork": "original",
+      "source_item": "(BC)254",
+      "texture_size": [
+        32,
+        32
+      ],
+      "original": {
+        "sheet": "TileSheets/Craftables.png",
+        "rect": [
+          96,
+          992,
+          16,
+          32
+        ],
+        "pixel_sha256": "21e2bba6fa5ccd5a1ac4ae1f0b27dbddc45d596c1a65137eedd658e12fc4ed21"
+      },
+      "gui_scale": [
+        1,
+        1,
+        1
+      ],
+      "source_kind": "item_menu"
+    },
+    "ginger_hopper": {
+      "default": "stardewcraft:item/ginger_island/original_bc_275",
+      "states": [],
+      "variants": {},
+      "artwork": "original",
+      "source_item": "(BC)275",
+      "texture_size": [
+        32,
+        32
+      ],
+      "original": {
+        "sheet": "TileSheets/Craftables.png",
+        "rect": [
+          48,
+          1088,
+          16,
+          32
+        ],
+        "pixel_sha256": "1d2ee698a63f6ce005570ac99d7d1aea25fb92eb4f8fe60d157db8fcb7694221"
+      },
+      "gui_scale": [
+        1,
+        1,
+        1
+      ],
+      "source_kind": "item_menu"
+    },
+    "ginger_island_bright_longleaf_assembly": {
+      "default": "stardewcraft:item/ginger_island/ginger_island_bright_longleaf_assembly",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_island_broadleaf_rosette": {
+      "default": "stardewcraft:item/ginger_island/ginger_island_broadleaf_rosette",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_island_curled_fern": {
+      "default": "stardewcraft:item/ginger_island/ginger_island_curled_fern",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_hut_grass_bedding": {
+      "default": "stardewcraft:item/ginger_island/ginger_hut_grass_bedding",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_golden_walnut_bush_rework": {
+      "default": "stardewcraft:item/ginger_island/ginger_golden_walnut_bush_rework",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_island_arrival_totem": {
+      "default": "stardewcraft:item/ginger_island/ginger_island_arrival_totem",
+      "states": [],
+      "variants": {}
+    },
+    "ginger_island_flute_block": {
+      "default": "stardewcraft:item/ginger_island/original_o_464",
+      "states": [],
+      "variants": {},
+      "artwork": "original",
+      "source_item": "(O)464",
+      "texture_size": [
+        16,
+        16
+      ],
+      "original": {
+        "sheet": "Maps/springobjects.png",
+        "rect": [
+          128,
+          304,
+          16,
+          16
+        ],
+        "pixel_sha256": "53c114823e676c44d8fff7ac0b6e7b592b1b4cba5984c81907dd6e740f9b7fa9"
+      },
+      "gui_scale": [
+        1,
+        1,
+        1
+      ],
+      "source_kind": "item_menu"
+    },
+    "ginger_volcano_magma_cap": {
+      "default": "stardewcraft:item/ginger_island/original_o_851",
+      "states": [],
+      "variants": {},
+      "artwork": "original",
+      "source_item": "(O)851",
+      "texture_size": [
+        16,
+        16
+      ],
+      "original": {
+        "sheet": "Maps/springobjects.png",
+        "rect": [
+          176,
+          560,
+          16,
+          16
+        ],
+        "pixel_sha256": "b58f95db884e92ad70b817fbaee42b1cad2bac208cf4e610b4fb2e857bd6ca9b"
+      },
+      "gui_scale": [
+        1,
+        1,
+        1
+      ],
+      "source_kind": "item_menu"
+    },
+    "ginger_island_beached_seaweed": {
+      "default": "stardewcraft:item/ginger_island/original_o_152",
+      "states": [],
+      "variants": {},
+      "artwork": "original",
+      "source_item": "(O)152",
+      "texture_size": [
+        16,
+        16
+      ],
+      "original": {
+        "sheet": "Maps/springobjects.png",
+        "rect": [
+          128,
+          96,
+          16,
+          16
+        ],
+        "pixel_sha256": "4c389515b3df6100a9e5717e14497155012411bc31b9c652da35b61ca5068b4d"
+      },
+      "gui_scale": [
+        1,
+        1,
+        1
+      ],
+      "source_kind": "item_menu"
+    },
+    "ginger_island_shell_clam": {
+      "default": "stardewcraft:item/ginger_island/original_o_372",
+      "states": [],
+      "variants": {},
+      "artwork": "original",
+      "source_item": "(O)372",
+      "texture_size": [
+        16,
+        16
+      ],
+      "original": {
+        "sheet": "Maps/springobjects.png",
+        "rect": [
+          192,
+          240,
+          16,
+          16
+        ],
+        "pixel_sha256": "81b72ee45800800b8942e05057952200baf052ef09503ecae82b41c474a4b357"
+      },
+      "gui_scale": [
+        1,
+        1,
+        1
+      ],
+      "source_kind": "item_menu"
+    },
+    "ginger_island_shell_cockle": {
+      "default": "stardewcraft:item/ginger_island/original_o_718",
+      "states": [],
+      "variants": {},
+      "artwork": "original",
+      "source_item": "(O)718",
+      "texture_size": [
+        16,
+        16
+      ],
+      "original": {
+        "sheet": "Maps/springobjects.png",
+        "rect": [
+          352,
+          464,
+          16,
+          16
+        ],
+        "pixel_sha256": "2785daaa46574264d637321a6779ae4e0e9440c78498f1689be958df52abd4d9"
+      },
+      "gui_scale": [
+        1,
+        1,
+        1
+      ],
+      "source_kind": "item_menu"
+    },
+    "ginger_squirrel_figurine": {
+      "default": "stardewcraft:item/ginger_island/original_f_2814",
+      "states": [],
+      "variants": {},
+      "artwork": "original",
+      "source_item": "(F)2814",
+      "texture_size": [
+        16,
+        16
+      ],
+      "original": {
+        "sheet": "TileSheets/furniture.png",
+        "rect": [
+          480,
+          1392,
+          16,
+          16
+        ],
+        "pixel_sha256": "4a45eefb521fc9c19ea77daa677d982d8e5e2cbb9038621b91639cc09b1c9f1f"
+      },
+      "gui_scale": [
+        0.5,
+        0.5,
+        1
+      ],
+      "source_kind": "item_menu"
+    },
+    "ginger_palm_wall_ornament_left": {
+      "default": "stardewcraft:item/ginger_island/original_f_2393",
+      "states": [
+        "0",
+        "1"
+      ],
+      "variants": {},
+      "artwork": "original",
+      "source_item": "(F)2393",
+      "texture_size": [
+        16,
+        16
+      ],
+      "original": {
+        "sheet": "TileSheets/furniture.png",
+        "rect": [
+          400,
+          1184,
+          16,
+          16
+        ],
+        "pixel_sha256": "7da539bb00d4633756b425b23cfdaecdd459740011a0482026f51c47b186034d"
+      },
+      "gui_scale": [
+        0.5,
+        0.5,
+        1
+      ],
+      "source_kind": "item_menu"
+    },
+    "ginger_palm_wall_ornament_right": {
+      "default": "stardewcraft:item/ginger_island/original_f_2393",
+      "states": [],
+      "variants": {},
+      "artwork": "original",
+      "source_item": "(F)2393",
+      "texture_size": [
+        16,
+        16
+      ],
+      "original": {
+        "sheet": "TileSheets/furniture.png",
+        "rect": [
+          400,
+          1184,
+          16,
+          16
+        ],
+        "pixel_sha256": "7da539bb00d4633756b425b23cfdaecdd459740011a0482026f51c47b186034d"
+      },
+      "gui_scale": [
+        0.5,
+        0.5,
+        1
+      ],
+      "source_kind": "item_menu"
+    }
+  }
+}

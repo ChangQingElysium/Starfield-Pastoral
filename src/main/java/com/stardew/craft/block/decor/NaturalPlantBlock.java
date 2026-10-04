@@ -2,6 +2,7 @@ package com.stardew.craft.block.decor;
 
 import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.block.ModBlocks;
+import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import com.stardew.craft.port.net.minecraft.core.component.DataComponents;
@@ -18,6 +19,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.*;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
@@ -25,6 +27,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 public class NaturalPlantBlock extends Block implements SimpleWaterloggedBlock {
     public static final IntegerProperty VARIANT = IntegerProperty.create("variant", 0, 1);
     public static final BooleanProperty IN_PLANTER = BooleanProperty.create("in_planter");
+    public static final BooleanProperty TROPICAL = BooleanProperty.create("tropical");
     public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     private final NaturalDecorKind kind;
@@ -33,14 +36,14 @@ public class NaturalPlantBlock extends Block implements SimpleWaterloggedBlock {
         super(properties);
         this.kind = kind;
         registerDefaultState(defaultBlockState().setValue(VARIANT, 0).setValue(IN_PLANTER, false)
-                .setValue(WATERLOGGED, false).setValue(FACING, Direction.NORTH));
+                .setValue(TROPICAL, false).setValue(WATERLOGGED, false).setValue(FACING, Direction.NORTH));
     }
 
     public NaturalDecorKind kind() { return kind; }
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(VARIANT, IN_PLANTER, WATERLOGGED, FACING);
+        builder.add(VARIANT, IN_PLANTER, TROPICAL, WATERLOGGED, FACING);
     }
 
     @Override
@@ -109,10 +112,32 @@ public class NaturalPlantBlock extends Block implements SimpleWaterloggedBlock {
     @Override public BlockState rotate(BlockState state, Rotation rotation) { return state.setValue(FACING, rotation.rotate(state.getValue(FACING))); }
     @Override public BlockState mirror(BlockState state, Mirror mirror) { return rotate(state, mirror.getRotation(state.getValue(FACING))); }
 
-    public static ItemStack fixedCopy(ItemStack stack, BlockState state) {
-        if (!(state.getBlock() instanceof NaturalPlantBlock block) || block.kind.variants == 1) return stack;
+    @Override
+    public ItemStack getCloneItemStack(BlockGetter level, BlockPos pos, BlockState state) {
+        return tropicalCopy(super.getCloneItemStack(level, pos, state), state);
+    }
+
+    @Override
+    public List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
+        List<ItemStack> drops = super.getDrops(state, params);
+        return state.getValue(TROPICAL) ? drops.stream().map(stack -> tropicalCopy(stack, state)).toList() : drops;
+    }
+
+    private ItemStack tropicalCopy(ItemStack stack, BlockState state) {
+        if (!state.getValue(TROPICAL) || !stack.is(asItem())) return stack;
         ItemStack copy = stack.copy();
-        PortItemData.set(copy, DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY.with(VARIANT, state));
+        PortItemData.set(copy, DataComponents.BLOCK_STATE, PortItemData.getOrDefault(copy, DataComponents.BLOCK_STATE,
+                BlockItemStateProperties.EMPTY).with(TROPICAL, state));
+        return copy;
+    }
+
+    public static ItemStack fixedCopy(ItemStack stack, BlockState state) {
+        if (!(state.getBlock() instanceof NaturalPlantBlock block)) return stack;
+        ItemStack copy = block.tropicalCopy(stack, state);
+        if (block.kind.variants == 1) return copy;
+        copy = copy.copy();
+        PortItemData.set(copy, DataComponents.BLOCK_STATE, PortItemData.getOrDefault(copy, DataComponents.BLOCK_STATE,
+                BlockItemStateProperties.EMPTY).with(VARIANT, state));
         return copy;
     }
 }

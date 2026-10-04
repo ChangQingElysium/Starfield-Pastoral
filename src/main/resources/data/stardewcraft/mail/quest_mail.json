@@ -1,0 +1,14 @@
+[
+  {
+    "id": "quest10",
+    "text": "stardewcraft.mail.quest10",
+    "background": 0,
+    "money": 500
+  },
+  {
+    "id": "quest35",
+    "text": "stardewcraft.mail.quest35",
+    "background": 0,
+    "money": 2500
+  }
+]

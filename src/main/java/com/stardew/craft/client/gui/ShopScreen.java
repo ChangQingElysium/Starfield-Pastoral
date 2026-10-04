@@ -1246,27 +1246,23 @@ public class ShopScreen extends Screen implements com.stardew.craft.port.PortScr
         if (!hasShiftDown()) {
             return 1;
         }
-        if (!hasControlDown()) {
-            return 5;
-        }
-        if (isBuyAllModifierDown()) {
-            int stock = item.stock() == Integer.MAX_VALUE ? Integer.MAX_VALUE : Math.max(1, item.stock());
-            ShopCostSnapshotPayload.Row customCost =
-                    customCosts.get(itemIndex);
-            int affordable = customCost != null
-                    ? maxAffordablePurchases(customCost)
-                    : item.price() <= 0
-                            ? Integer.MAX_VALUE
-                            : playerMoney / Math.max(
-                                    1, item.price());
-            int tradeAvailable = customCost != null
-                    ? Integer.MAX_VALUE
-                    : maxTradePurchases(item);
-            return Math.max(1, Math.min(999,
-                    Math.min(stock, Math.min(
-                            affordable, tradeAvailable))));
-        }
-        return 25;
+        // SDV ShopMenu.tryToPurchaseItem: Shift 5 / Ctrl+Shift 25 / +1 key 999, always capped by what is affordable and in stock.
+        int desired = isBuyAllModifierDown() && hasControlDown() ? 999 : hasControlDown() ? 25 : 5;
+        int stock = item.stock() == Integer.MAX_VALUE ? Integer.MAX_VALUE : Math.max(1, item.stock());
+        ShopCostSnapshotPayload.Row customCost =
+                customCosts.get(itemIndex);
+        int affordable = customCost != null
+                ? maxAffordablePurchases(customCost)
+                : item.price() <= 0
+                        ? Integer.MAX_VALUE
+                        : playerMoney / Math.max(
+                                1, item.price());
+        int tradeAvailable = customCost != null
+                ? Integer.MAX_VALUE
+                : maxTradePurchases(item);
+        return Math.max(1, Math.min(desired,
+                Math.min(stock, Math.min(
+                        affordable, tradeAvailable))));
     }
 
     private boolean isBuyAllModifierDown() {

@@ -1,3 +1,7 @@
 {
-  "parent": "stardewcraft:block/ginger_island/pirate_cove_rowboat"
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "stardewcraft:item/ginger_island/ginger_pirate_cove_rowboat",
+    "particle": "stardewcraft:block/ginger_island/pirate_cove_rowboat_particle"
+  }
 }

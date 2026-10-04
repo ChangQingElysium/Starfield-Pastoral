@@ -14,6 +14,11 @@ public final class StardewQuestEvents {
         if (qm != null) qm.onMonsterSlain(player, monsterType);
     }
 
+    public static void fireMonsterSlain(ServerPlayer player, java.util.Collection<String> monsterTags) {
+        QuestManager qm = QuestManager.of(player);
+        if (qm != null) qm.onMonsterSlain(player, monsterTags);
+    }
+
     public static void fireFishCaught(ServerPlayer player, String itemId, int count) {
         QuestManager qm = QuestManager.of(player);
         if (qm != null) qm.onFishCaught(player, itemId, count);

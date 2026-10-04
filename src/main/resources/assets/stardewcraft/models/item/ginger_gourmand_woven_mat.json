@@ -1,3 +1,7 @@
 {
-  "parent": "stardewcraft:block/ginger_island/gourmand_woven_mat"
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "stardewcraft:item/ginger_island/ginger_gourmand_woven_mat",
+    "particle": "stardewcraft:block/ginger_island/gourmand_woven_mat_particle"
+  }
 }

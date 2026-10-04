@@ -226,7 +226,7 @@ public final class TrinketEffectHandler {
         state.putInt(TAG_QUIVER_TIMER, 0);
 
         ServerLevel level = player.serverLevel();
-        Optional<LivingEntity> target = findClosestMonster(player, MAGIC_QUIVER_RANGE);
+        Optional<LivingEntity> target = findClosestMonster(player, MAGIC_QUIVER_RANGE, candidate -> !isTruffleCrab(candidate));
         if (target.isEmpty()) {
             return;
         }
@@ -407,8 +407,17 @@ public final class TrinketEffectHandler {
     }
 
     private static Optional<LivingEntity> findClosestMonster(ServerPlayer player, double range) {
+        return findClosestMonster(player, range, target -> true);
+    }
+
+    private static Optional<LivingEntity> findClosestMonster(
+            ServerPlayer player,
+            double range,
+            java.util.function.Predicate<LivingEntity> filter
+    ) {
         AABB area = player.getBoundingBox().inflate(range);
-        return player.level().getEntitiesOfClass(LivingEntity.class, area, target -> isTargetableMonster(player, target))
+        return player.level().getEntitiesOfClass(LivingEntity.class, area,
+                        target -> isTargetableMonster(player, target) && filter.test(target))
             .stream()
             .min(Comparator.comparingDouble(player::distanceToSqr));
     }
@@ -420,8 +429,16 @@ public final class TrinketEffectHandler {
             && target instanceof Enemy;
     }
 
+    /** Source Magic Quiver IgnoreMonsters / Hungry Frog skip list: Truffle Crab. */
+    private static boolean isTruffleCrab(LivingEntity target) {
+        return target instanceof com.stardew.craft.entity.monster.RockCrabEntity crab
+                && "truffle_crab".equals(crab.variant());
+    }
+
     private static boolean canFrogEat(LivingEntity target) {
-        return target instanceof Enemy
+        return !isTruffleCrab(target)
+            && !target.getTags().contains("sd_mob_prismatic_slime")
+            && target instanceof Enemy
             && !(target instanceof ServerPlayer)
             && !(target instanceof EnderDragon)
             && !(target instanceof WitherBoss);

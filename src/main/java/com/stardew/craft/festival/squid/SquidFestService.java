@@ -222,6 +222,7 @@ public final class SquidFestService {
                     rewards.add(stackByPath("triple_shot_espresso", 3));
                 }
                 case "13_3" -> {
+                    rewards.add(new ItemStack(ModItems.SQUID_HAT.get()));
                     addCrabbingBookOrFallback(rewards, alreadyGotCrabbingBook);
                 }
                 default -> {

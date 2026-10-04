@@ -1479,6 +1479,26 @@
       }
     ]
   },
+  "music_lava_mine": {
+    "sounds": [
+      {
+        "name": "stardewcraft:music/near_the_planet_core",
+        "stream": false
+      },
+      {
+        "name": "stardewcraft:music/of_dwarves",
+        "stream": false
+      },
+      {
+        "name": "stardewcraft:music/overcast",
+        "stream": false
+      },
+      {
+        "name": "stardewcraft:music/tribal",
+        "stream": false
+      }
+    ]
+  },
   "music_saloon": {
     "sounds": [
       {

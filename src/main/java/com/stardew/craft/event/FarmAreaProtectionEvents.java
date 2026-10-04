@@ -467,6 +467,11 @@ public class FarmAreaProtectionEvents {
             net.minecraft.world.level.block.state.BlockState replacedState
     ) {
         if(com.stardew.craft.building.runtime.BuildingProtection.protects(level,pos))return false;
+        // Desert.isTilePlaceable: nothing may be placed in the desert merchant's area.
+        if (level.dimension() == ModDimensions.STARDEW_VALLEY
+                && com.stardew.craft.shop.CamelMerchantEvents.isMerchantZone(pos)) {
+            return false;
+        }
         if (com.stardew.craft.greenhouse.GreenhouseManager
                 .isInGreenhouseExterior(level, pos)) {
             return false;

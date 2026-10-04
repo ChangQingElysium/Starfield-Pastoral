@@ -7,6 +7,46 @@ from compile_native_npc import compile_model
 ROOT = Path(__file__).resolve().parents[2]
 
 class NativeCompilerTest(unittest.TestCase):
+    def test_seated_gil_keeps_its_single_surface_waist_and_rigid_rocking(self):
+        from unittest.mock import patch
+        base=ROOT/'assets-src/npc/gil'
+        model=json.loads((base/'gil.bbmodel').read_text())
+        profile=json.loads((base/'motion.json').read_text())
+        compiled,png=compile_model(model,profile,'gil',required_clips=profile['requiredClips'])
+        with patch('compile_native_npc.skin_joints',lambda bones,cubes,quads,hip_skin=0:quads):
+            authored,original_png=compile_model(model,profile,'gil',required_clips=profile['requiredClips'])
+        self.assertEqual(original_png,png)
+        for field in ('bones','clips','profile'):self.assertEqual(authored[field],compiled[field])
+        surfaces=[q for q in compiled['quads'] if q.get('skin')]
+        self.assertTrue(surfaces)
+        self.assertEqual({'body_shirt'},{q['sourcePart'] for q in surfaces})
+        self.assertEqual({('person','body')},{(compiled['bones'][q['skin']['upper']]['name'],
+                                             compiled['bones'][q['skin']['lower']]['name']) for q in surfaces})
+        self.assertTrue(any(0<w<1 for q in surfaces for w in q['skin']['weights']))
+        self.assertEqual({'root'},{compiled['bones'][t['bone']]['name']
+                                 for clip in compiled['clips'].values() for t in clip['tracks']})
+
+    def test_gunther_pants_remain_sewn_to_pelvis(self):
+        base=ROOT/'assets-src/npc/gunther'
+        model=json.loads((base/'gunther.bbmodel').read_text())
+        profile=json.loads((base/'motion.json').read_text())
+        compiled,png=compile_model(model,profile,'gunther')
+        import base64
+        self.assertEqual(base64.b64decode(model['textures'][0]['source'].split(',',1)[1]),png)
+        for side in ('left','right'):
+            leg=next(i for i,b in enumerate(compiled['bones']) if b['name']=='leg_'+side)
+            rows=[q for q in compiled['quads'] if q['bone']==leg
+                  and min(v[1] for v in q['vertices'])>10.5]
+            self.assertGreater(len(rows),8)
+            for q in rows:
+                self.assertEqual('root',compiled['bones'][q['skin']['upper']]['name'])
+                self.assertEqual(leg,q['skin']['lower'])
+                for v,w in zip(q['vertices'],q['skin']['weights']):
+                    if v[1]>=12:self.assertEqual(0,w)
+        invalid=copy.deepcopy(profile);invalid['hipSkinHeight']=float('nan')
+        with self.assertRaisesRegex(ValueError,'hip skin height'):
+            compile_model(model,invalid,'gunther')
+
     def test_evelyn_daily_sources_preserve_approved_model_and_closed_eyes(self):
         base=ROOT/'assets-src/npc/evelyn'
         original=json.loads((base/'evelyn.bbmodel').read_text())
@@ -88,7 +128,7 @@ class NativeCompilerTest(unittest.TestCase):
 
     def test_joint_surface_keeps_animation_texture_and_rigid_parts(self):
         from unittest.mock import patch
-        with patch('compile_native_npc.skin_joints', lambda bones, cubes, quads: quads):
+        with patch('compile_native_npc.skin_joints', lambda bones, cubes, quads, hip_skin=0: quads):
             rigid, original_png = compile_model(self.model, self.profile)
         smooth, png = compile_model(self.model, self.profile)
         self.assertEqual(original_png, png)

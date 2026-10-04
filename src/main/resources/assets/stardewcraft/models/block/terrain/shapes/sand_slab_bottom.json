@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/slab",
+  "textures": {
+    "side": "stardewcraft:block/terrain/sand/spring/sand",
+    "top": "stardewcraft:block/terrain/sand/spring/sand",
+    "bottom": "stardewcraft:block/terrain/sand/spring/sand",
+    "particle": "stardewcraft:block/terrain/sand/spring/sand"
+  }
+}

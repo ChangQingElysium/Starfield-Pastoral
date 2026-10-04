@@ -9,6 +9,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import com.stardew.craft.port.net.minecraft.world.ItemInteractionResult;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -48,16 +49,32 @@ public final class OstrichIncubatorBlock extends IncubatorBlock {
 
     @Override public BlockState getStateForPlacement(BlockPlaceContext context) {
         BlockPos pos = context.getClickedPos();
-        if (context.getLevel().isOutsideBuildHeight(pos.above())
-                || !context.getLevel().getFluidState(pos.above()).isEmpty()) return null;
+        var level = context.getLevel();
+        for (BlockPos cell : new BlockPos[]{pos, pos.above()}) {
+            if (level.isOutsideBuildHeight(cell) || !level.getWorldBorder().isWithinBounds(cell)
+                    || !level.getFluidState(cell).isEmpty()
+                    || !level.getBlockState(cell).canBeReplaced(context)
+                    || !level.isUnobstructed(defaultBlockState(), cell, CollisionContext.empty())) return null;
+        }
         if (context.getPlayer() instanceof ServerPlayer player) {
-            var home = FarmFeed.home(player.serverLevel(), pos);
-            if (home == null || !home.family().equals(LivestockSpecies.OSTRICH.family())
-                    || !BuildingService.canManage(player, home)
-                    || !IslandContext.canModifyAt(player, pos)
+            if (!IslandContext.canModifyAt(player, pos)
                     || !IslandContext.canModifyAt(player, pos.above())) return null;
+            // Creative workshop placement does not grant production or newborn ownership.
+            if (!player.isCreative()) {
+                var home = FarmFeed.home(player.serverLevel(), pos);
+                if (home == null || !home.family().equals(LivestockSpecies.OSTRICH.family())
+                        || !BuildingService.canManage(player, home)) return null;
+            }
         }
         return super.getStateForPlacement(context);
+    }
+
+    @Override public void setPlacedBy(Level level, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack) {
+        // BlockItem applies held state components after getStateForPlacement.
+        // Normalize only this placement; real incubation updates remain unrestricted.
+        BlockState selected = state.setValue(PART, Part.MAIN).setValue(WORKING, false).setValue(LOADED, false);
+        if (selected != state) level.setBlock(pos, selected, Block.UPDATE_CLIENTS);
+        super.setPlacedBy(level, pos, selected, placer, stack);
     }
 
     private boolean canUse(Player player, BlockPos pos, BlockState state) {

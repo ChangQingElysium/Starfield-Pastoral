@@ -127,12 +127,23 @@ public class StardewTrinketItem extends Item implements IStardewItem {
             return ItemStack.EMPTY;
         }
         ItemStack output = input.copyWithCount(1);
+        long totalMoneyEarned = player == null ? 0L : PlayerDataManager.getPlayerData(player).getTotalMoneyEarned();
+        // 原版 TrinketEffect.GenerateRandomStats：鹦鹉蛋 maxLevel<=1 且等级不变时返回 false，铁砧拒绝且不扣铱锭
+        int previousLevel = 0;
+        if (output.is(ModItems.PARROT_EGG.get())) {
+            ensureGenerated(output, totalMoneyEarned, random);
+            previousLevel = getCustomDataCopy(output).getInt(TAG_GENERAL_STAT);
+        }
         CompoundTag tag = getCustomDataCopy(output);
         tag.putInt(TAG_SEED, random.nextInt(9_999_999));
         tag.putBoolean(TAG_GENERATED, false);
         setCustomData(output, tag);
-        long totalMoneyEarned = player == null ? 0L : PlayerDataManager.getPlayerData(player).getTotalMoneyEarned();
         ensureGenerated(output, totalMoneyEarned, random);
+        if (output.is(ModItems.PARROT_EGG.get())
+                && Math.min(4, (int) (1 + Math.max(0L, totalMoneyEarned) / 750_000L)) <= 1
+                && getCustomDataCopy(output).getInt(TAG_GENERAL_STAT) == previousLevel) {
+            return ItemStack.EMPTY;
+        }
         return output;
     }
 

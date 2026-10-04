@@ -225,7 +225,7 @@ public class CookingPotScreen extends AbstractContainerScreen<CookingPotMenu> im
                     default -> buff.type().name().toLowerCase(Locale.ROOT);
                 };
                 int seconds = buff.durationTicks() / 20;
-                addDetail(Component.translatable("stardewcraft.tooltip.buff." + suffix, buff.amount()).copy().append("  " + seconds / 60 + ":" + String.format(Locale.ROOT, "%02d", seconds % 60)), CookingArt.GREEN);
+                addDetail(Component.translatable("stardewcraft.tooltip.buff." + suffix, com.stardew.craft.item.cooking.CookingDishItem.displayAmountFor(buff)).copy().append("  " + seconds / 60 + ":" + String.format(Locale.ROOT, "%02d", seconds % 60)), CookingArt.GREEN);
             }
         }
     }

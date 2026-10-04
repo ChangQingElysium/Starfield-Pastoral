@@ -60,7 +60,9 @@ public class StrawberrySeedItem extends Item implements IStardewItem {
         }
 
         if (!level.isClientSide) {
-            level.setBlock(abovePos, ModBlocks.STRAWBERRY_CROP.get().defaultBlockState(), 3);
+            if (!com.stardew.craft.farming.CropPlanting.place(level, abovePos, ModBlocks.STRAWBERRY_CROP.get().defaultBlockState())) {
+                return InteractionResult.FAIL;
+            }
             level.playSound(null, abovePos,
                     net.minecraft.sounds.SoundEvents.HOE_TILL,
                     net.minecraft.sounds.SoundSource.BLOCKS,

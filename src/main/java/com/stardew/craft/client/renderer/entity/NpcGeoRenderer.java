@@ -28,6 +28,11 @@ public class NpcGeoRenderer extends BlockbenchEntityRenderer<StardewNpcEntity> {
     }
 
     @Override
+    protected String npcAnimationId(StardewNpcEntity entity) {
+        return com.stardew.craft.client.npcnative.NativeNpcAssets.legacyId(entity.getNpcId());
+    }
+
+    @Override
     public boolean shouldRender(StardewNpcEntity entity, Frustum camera, double camX, double camY, double camZ) {
         String npcId = entity.getNpcId();
         if (isHiddenForLocalPlayer(npcId)) {

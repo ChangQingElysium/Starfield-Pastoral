@@ -24,7 +24,11 @@ public class EventActorGeoRenderer extends EntityRenderer<EventActorEntity> {
 
     public EventActorGeoRenderer(EntityRendererProvider.Context context) {
         super(context);
-        legacy=new BlockbenchEntityRenderer<>(context,new EventActorGeoModel());
+        legacy=new BlockbenchEntityRenderer<>(context,new EventActorGeoModel()) {
+            @Override protected String npcAnimationId(EventActorEntity entity) {
+                return NativeNpcAssets.legacyId(entity.getNpcId());
+            }
+        };
         this.context = context;
         nativeRenderers = new java.util.HashMap<>();
         this.shadowRadius = 0.35F;

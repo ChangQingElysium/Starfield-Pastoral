@@ -1,3 +1,7 @@
 {
-  "parent": "stardewcraft:block/ginger_island/caldera_forge"
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "stardewcraft:item/ginger_island/ginger_caldera_forge",
+    "particle": "stardewcraft:block/ginger_island/caldera_forge_particle"
+  }
 }

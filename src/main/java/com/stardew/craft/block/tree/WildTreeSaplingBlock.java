@@ -29,6 +29,55 @@ public class WildTreeSaplingBlock extends Block {
 		this.stage = stage;
 	}
 
+	// The growth entry is removed with the block before drops are rolled, so remember it at destroy time.
+	private static long destroyedPos = Long.MIN_VALUE;
+	private static int destroyedGrowthStage = -1;
+
+	@SuppressWarnings("null")
+	@Override
+	public void playerWillDestroy(Level level, BlockPos pos, BlockState state, net.minecraft.world.entity.player.Player player) {
+		if (level instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+			destroyedPos = pos.asLong();
+			destroyedGrowthStage = TreeGrowthManager.get(serverLevel).getGrowthStage(serverLevel, pos);
+		}
+		super.playerWillDestroy(level, pos, state, player);
+	}
+
+	/**
+	 * Tree.performSeedDestroy / performSproutDestroy: only a growth-stage 0 seed returns its seed, and only
+	 * when the player has foraging level 1+; stage 1-2 sprouts return nothing, but an axe may chop out one wood
+	 * with a foraging-level/10 chance.
+	 */
+	@SuppressWarnings("null")
+	@Override
+	public java.util.List<net.minecraft.world.item.ItemStack> getDrops(BlockState state,
+			net.minecraft.world.level.storage.loot.LootParams.Builder params) {
+		java.util.List<net.minecraft.world.item.ItemStack> drops = new java.util.ArrayList<>(super.getDrops(state, params));
+		var origin = params.getOptionalParameter(net.minecraft.world.level.storage.loot.parameters.LootContextParams.ORIGIN);
+		var tool = params.getOptionalParameter(net.minecraft.world.level.storage.loot.parameters.LootContextParams.TOOL);
+		var entity = params.getOptionalParameter(net.minecraft.world.level.storage.loot.parameters.LootContextParams.THIS_ENTITY);
+		if (stage != 0 || tool == null || !(entity instanceof net.minecraft.server.level.ServerPlayer player) || origin == null) {
+			return drops;
+		}
+		int growth = destroyedPos == BlockPos.containing(origin).asLong() ? destroyedGrowthStage : 0;
+		int foraging = com.stardew.craft.player.PlayerStardewDataAPI.getSkillLevel(player, com.stardew.craft.player.SkillType.FORAGING);
+		boolean axe = tool.is(net.minecraft.tags.ItemTags.AXES);
+		if (growth == 0) {
+			if (foraging >= 1 && (axe || tool.is(net.minecraft.tags.ItemTags.HOES) || tool.is(net.minecraft.tags.ItemTags.PICKAXES))) {
+				var seed = com.stardew.craft.manager.WildTreeSeedManager.getSeedItem(def);
+				if (seed != null) {
+					drops.add(new net.minecraft.world.item.ItemStack(seed));
+				}
+			}
+		} else if (axe && player.getRandom().nextDouble() < foraging / 10.0) {
+			var wood = com.stardew.craft.tree.prefab.PrefabTrees.logItem(def);
+			if (wood != null) {
+				drops.add(new net.minecraft.world.item.ItemStack(wood));
+			}
+		}
+		return drops;
+	}
+
 	public WildTrees.Def getDef() {
 		return def;
 	}

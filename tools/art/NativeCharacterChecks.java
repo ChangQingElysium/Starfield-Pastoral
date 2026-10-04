@@ -63,6 +63,30 @@ public final class NativeCharacterChecks {
             }
         }
     }
+    static void guntherEyelids(NativeNpcModel m) {
+        var p=new NativeNpcPose(m);
+        for(double time:new double[]{-1,0,.065,.09,.23}) {
+            p.reset();p.apply("animation.gunther.idle",0);
+            if(time>=0)p.apply("animation.gunther.blink",time);
+            var inverse=new org.joml.Matrix4f(p.boneMatrix("head")).invert();
+            for(String side:List.of("left","right")) {
+                var mask=m.quads().stream().filter(q->q.sourcePart().equals("mask_"+side)).findFirst().orElseThrow();
+                var transform=new org.joml.Matrix4f(inverse).mul(p.matrices()[mask.bone()]);
+                var lo=new Vector3f(Float.POSITIVE_INFINITY);var hi=new Vector3f(Float.NEGATIVE_INFINITY);
+                for(var v:mask.vertices()) {var point=transform.transformPosition(new Vector3f(v[0],v[1],v[2]));lo.min(point);hi.max(point);}
+                boolean closed=time==.065 || time==.09;
+                for(var q:m.quads())if(q.bone()==bone(m,"eye_"+side))for(var v:q.vertices()) {
+                    var eye=new org.joml.Matrix4f(inverse).mul(p.matrices()[q.bone()]).transformPosition(new Vector3f(v[0],v[1],v[2]));
+                    if(closed) {
+                        if(hi.z>=eye.z || eye.x<lo.x-.001 || eye.x>hi.x+.001 || eye.y<lo.y-.001 || eye.y>hi.y+.001)
+                            throw new AssertionError("Gunther closed eyelid leaves eye exposed");
+                    } else if(lo.z<=eye.z)throw new AssertionError("Gunther open eyelid covers eye");
+                }
+            }
+        }
+        for(var q:m.quads())if(q.sourcePart().startsWith("glasses_") && !q.translucent())
+            throw new AssertionError("Gunther glasses lost their translucent pass");
+    }
     static Vector3f handPoint(NativeNpcModel m) {
         int arm=bone(m,probeArm);
         float minX=Float.POSITIVE_INFINITY,maxX=Float.NEGATIVE_INFINITY;
@@ -168,6 +192,7 @@ public final class NativeCharacterChecks {
         if(setting("armScaleLeft",1)<setting("armScaleRight",1)) probeArm="arm_right";
         var p=new NativeNpcPose(m);var rig=m.profile().attentionRig();
         if(ID.equals("marlon"))marlonEyelid(m);
+        if(ID.equals("gunther"))guntherEyelids(m);
         int r=bone(m,"leg_right"),l=bone(m,"leg_left"),body=bone(m,"body"),hand=bone(m,probeArm);
         near(m.bones().get(r).origin()[1],rig.hipHeight(),1e-6,"measured hip");
         p.reset();near(sole(m,p,r),0,1e-6,"inflated sole baseline");

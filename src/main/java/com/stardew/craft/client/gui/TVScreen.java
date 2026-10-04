@@ -248,7 +248,8 @@ public class TVScreen extends Screen implements com.stardew.craft.port.PortScree
             bigTV = (block == ModBlocks.TV_2.get());
         }
         TVScreenOverlayRenderer.setActiveTV(tvPos, bigTV);
-        TVScreenOverlayRenderer.setChannel(channel, data.tomorrowWeather(), data.dailyLuck());
+        String overlayWeather = data.tomorrowWeather().startsWith("Festival") ? "Festival" : data.tomorrowWeather();
+        TVScreenOverlayRenderer.setChannel(channel, overlayWeather, data.dailyLuck());
 
         // Re-set this screen as the active one (coming back from query dialog)
         Minecraft.getInstance().setScreen(this);
@@ -275,12 +276,33 @@ public class TVScreen extends Screen implements com.stardew.craft.port.PortScree
     private Component getWeatherForecast() {
         String weather = data.tomorrowWeather();
         Random rand = new Random();
+        if (weather.startsWith("Festival:")) {
+            // TV.getWeatherForecast("Festival"): "Festival:<legacyId>:<Town|Beach|Forest>:<start>:<end>"
+            String[] parts = weather.split(":");
+            if (parts.length == 5) {
+                String location = switch (parts[2]) {
+                    case "Town" -> I18n.get("stardewcraft.tv.weather.festival_town");
+                    case "Beach" -> I18n.get("stardewcraft.tv.weather.festival_beach");
+                    case "Forest" -> I18n.get("stardewcraft.tv.weather.festival_forest");
+                    default -> "";
+                };
+                try {
+                    return Component.translatable("stardewcraft.tv.weather.festival",
+                            I18n.get("stardewcraft.festival.calendar." + parts[1].toLowerCase(Locale.ROOT)), location,
+                            formatStardewTime(Integer.parseInt(parts[3])), formatStardewTime(Integer.parseInt(parts[4])));
+                } catch (NumberFormatException ignored) {
+                    // fall through to the clear-sky text
+                }
+            }
+            weather = "Sun";
+        }
         return switch (weather) {
             case "Snow" -> rand.nextBoolean()
                     ? Component.translatable("stardewcraft.tv.weather.snow_1")
                     : Component.translatable("stardewcraft.tv.weather.snow_2");
             case "Rain" -> Component.translatable("stardewcraft.tv.weather.rain");
             case "Storm" -> Component.translatable("stardewcraft.tv.weather.storm");
+            case "GreenRain" -> Component.translatable("stardewcraft.tv.weather.green_rain");
             case "WindSpring" -> Component.translatable("stardewcraft.tv.weather.wind_spring");
             case "WindFall" -> Component.translatable("stardewcraft.tv.weather.wind_fall");
             default -> rand.nextBoolean()
@@ -291,26 +313,26 @@ public class TVScreen extends Screen implements com.stardew.craft.port.PortScree
 
     private Component getFortuneForecast() {
         double luck = data.dailyLuck();
-        // Original TV.cs: DailyLuck == 0.0 has its own special text (13201), overrides all
+        // TV.getFortuneForecast. The project's luck is per player, so the original team
+        // sharedDailyLuck extremes (-0.12 / +0.12, set by spirit offerings) are read from it.
+        final double eps = 1.0E-9;
         if (luck == 0.0) {
-            return Component.translatable("stardewcraft.tv.fortune.zero");
+            return Component.translatable("stardewcraft.tv.fortune.neutral_3"); // 13201
+        } else if (luck <= -0.12 + eps) {
+            return Component.translatable("stardewcraft.tv.fortune.worst"); // 13191
         } else if (luck < -0.07) {
-            return Component.translatable("stardewcraft.tv.fortune.bad_2");
+            return Component.translatable("stardewcraft.tv.fortune.bad_2"); // 13192
         } else if (luck < -0.02) {
-            return Component.translatable("stardewcraft.tv.fortune.bad_1");
-        } else if (luck < 0.02) {
-            // Random among 3 neutral variants — matches original TV.cs
-            double d = new Random().nextDouble();
-            if (d < 0.33) return Component.translatable("stardewcraft.tv.fortune.neutral_1");
-            else if (d < 0.66) return Component.translatable("stardewcraft.tv.fortune.neutral_2");
-            else return Component.translatable("stardewcraft.tv.fortune.neutral_3");
-        } else if (luck < 0.07) {
-            return Component.translatable("stardewcraft.tv.fortune.good_1");
-        } else if (luck >= 0.07) {
-            return Component.translatable("stardewcraft.tv.fortune.good_2");
-        } else {
-            return Component.translatable("stardewcraft.tv.fortune.best");
+            return Component.translatable(new Random().nextBoolean()
+                    ? "stardewcraft.tv.fortune.bad_1" : "stardewcraft.tv.fortune.neutral_1"); // 13193 / 13195
+        } else if (luck >= 0.12 - eps) {
+            return Component.translatable("stardewcraft.tv.fortune.good_2"); // 13197
+        } else if (luck > 0.07) {
+            return Component.translatable("stardewcraft.tv.fortune.best"); // 13198
+        } else if (luck > 0.02) {
+            return Component.translatable("stardewcraft.tv.fortune.good_1"); // 13199
         }
+        return Component.translatable("stardewcraft.tv.fortune.neutral_2"); // 13200
     }
 
     // ==================== Proceed to Next Scene ====================

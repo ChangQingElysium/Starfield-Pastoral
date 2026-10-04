@@ -93,7 +93,7 @@ public class StardewPlayerHud {
                 ClientPlayerDataCache.isExhausted(), ClientPlayerDataCache.getHealth(),
                 ClientPlayerDataCache.getMaxHealth(), true, partialTick);
 
-        if (ClientPlayerDataCache.isExhausted()) {
+        if (ClientPlayerDataCache.isExhausted() && !Config.USE_LEGACY_PLAYER_BARS.get()) {
             int mouseX = (int) (mc.mouseHandler.xpos() * graphics.guiWidth() / mc.getWindow().getWidth());
             int mouseY = (int) (mc.mouseHandler.ypos() * graphics.guiHeight() / mc.getWindow().getHeight());
             double localX = (mouseX - placement.x()) / placement.scale();
@@ -170,8 +170,13 @@ public class StardewPlayerHud {
     }
 
     public static int baseWidth() {
-        // Include the rightmost one-pixel numeral shadow in the draggable bounds.
-        return 189 + 2 * fieldWidth(ClientPlayerDataCache.getMaxHealth(), ClientPlayerDataCache.getMaxEnergy());
+        return Config.USE_LEGACY_PLAYER_BARS.get() ? LegacyPlayerVitalsHud.WIDTH
+                : 189 + 2 * fieldWidth(ClientPlayerDataCache.getMaxHealth(), ClientPlayerDataCache.getMaxEnergy());
+    }
+
+    public static int baseHeight() {
+        return Config.USE_LEGACY_PLAYER_BARS.get() ? LegacyPlayerVitalsHud.HEIGHT
+                : Config.HudElement.PLAYER_BARS.baseHeight();
     }
 
     static int fieldWidth(int maxHealth, int maxEnergy) {
@@ -193,6 +198,12 @@ public class StardewPlayerHud {
     private static void renderAt(GuiGraphics graphics, int x, int y, float scale, float energy,
                                  int maxEnergy, boolean exhausted, int health, int maxHealth,
                                  boolean animate, float partialTick) {
+        if (Config.USE_LEGACY_PLAYER_BARS.get()) {
+            LegacyPlayerVitalsHud.renderAt(graphics, x, y, scale, energy, maxEnergy, exhausted,
+                    health, maxHealth, animate && healthShakeTicks > 0, animate && energyShakeTicks > 0,
+                    animate ? animationTick + partialTick : 0.0F);
+            return;
+        }
         graphics.pose().pushPose();
         graphics.pose().translate(x, y, 0.0F);
         graphics.pose().scale(scale, scale, 1.0F);
@@ -256,8 +267,8 @@ public class StardewPlayerHud {
     }
 
     private static void renderFraction(GuiGraphics graphics, String current, String maximum, int x, int field) {
-        renderNumber(graphics, current, x + field - numberWidth(current), 0, CURRENT_COLOR);
         graphics.fill(x, 6, x + field, 7, SEPARATOR_COLOR);
+        renderNumber(graphics, current, x + field - numberWidth(current), 0, CURRENT_COLOR);
         renderNumber(graphics, maximum, x + field - numberWidth(maximum), 8, MAX_COLOR);
     }
 
@@ -268,24 +279,25 @@ public class StardewPlayerHud {
     }
 
     private static void renderNumber(GuiGraphics graphics, String text, int x, int y, int rgb) {
-        int shadow = ((rgb >> 16 & 255) / 4 << 16) | ((rgb >> 8 & 255) / 4 << 8) | ((rgb & 255) / 4);
+        graphics.setColor((rgb >> 16 & 255) / 1020.0F, (rgb >> 8 & 255) / 1020.0F,
+                (rgb & 255) / 1020.0F, 1.0F);
+        renderNumberGlyphs(graphics, text, x + 1, y + 1);
+        graphics.setColor((rgb >> 16 & 255) / 255.0F, (rgb >> 8 & 255) / 255.0F,
+                (rgb & 255) / 255.0F, 1.0F);
+        renderNumberGlyphs(graphics, text, x, y);
+        graphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
+    }
+
+    private static void renderNumberGlyphs(GuiGraphics graphics, String text, int x, int y) {
         for (int i = 0; i < text.length(); i++) {
             char ch = text.charAt(i);
             int glyph = ch == '.' ? 10 : ch == '-' ? 11 : ch - '0';
             int width = ch == '.' ? 1 : 3;
             if (glyph >= 0 && glyph < 12) {
-                renderDigit(graphics, glyph, width, x + 1, y + 1, shadow);
-                renderDigit(graphics, glyph, width, x, y, rgb);
+                graphics.blit(DIGITS, x, y, glyph * 4, 0, width, 5, 48, 8);
             }
             x += width + 1;
         }
-        graphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
-    }
-
-    private static void renderDigit(GuiGraphics graphics, int glyph, int width, int x, int y, int rgb) {
-        graphics.setColor((rgb >> 16 & 255) / 255.0F, (rgb >> 8 & 255) / 255.0F,
-                (rgb & 255) / 255.0F, 1.0F);
-        graphics.blit(DIGITS, x, y, glyph * 4, 0, width, 5, 48, 8);
     }
 
     private static void renderDrops(GuiGraphics graphics, ResourceLocation texture, int x, int burstTick,

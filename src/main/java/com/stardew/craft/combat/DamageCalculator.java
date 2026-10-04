@@ -92,8 +92,16 @@ public final class DamageCalculator {
             );
         }
 
+        // Dragon Tooth Attack: Stardew's Attack buff adds 3 per level after the crit roll.
+        addPreDefenseIfNonZero(
+                request,
+                "dragontooth_attack",
+                WeaponForgeCombatRules.dragonToothLevel(weapon, "attack") * 3.0f
+        );
+
         float criticalChance = calculateCriticalChance(
                 weaponStats,
+                weapon,
                 weaponId,
                 attacker,
                 target,
@@ -149,6 +157,7 @@ public final class DamageCalculator {
 
     private static float calculateCriticalChance(
             WeaponStats weaponStats,
+            ItemStack weapon,
             String weaponId,
             Player attacker,
             LivingEntity target,
@@ -160,9 +169,10 @@ public final class DamageCalculator {
         float criticalChance = StardewWeaponCriticalRules.intrinsicChance(
                 weaponStats
         );
-        if (equipmentStats != null) {
-            criticalChance *= 1.0f + equipmentStats.getCritChance();
-        }
+        // Stardew's CriticalChanceMultiplier sums ring and Dragon Tooth Crit bonuses.
+        float criticalChanceMultiplier = equipmentStats != null ? equipmentStats.getCritChance() : 0.0f;
+        criticalChanceMultiplier += 0.02f * WeaponForgeCombatRules.dragonToothLevel(weapon, "crit");
+        criticalChance *= 1.0f + criticalChanceMultiplier;
         if (attacker.hasEffect(ModMobEffects.STATUE_OF_BLESSINGS_5.get())) {
             criticalChance += 0.1f;
         }

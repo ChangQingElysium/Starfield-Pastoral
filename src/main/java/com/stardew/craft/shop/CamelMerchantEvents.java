@@ -48,7 +48,18 @@ public final class CamelMerchantEvents {
     /** 重复实体清理 / 位置矫正的检测半径（方块）。 */
     private static final double SCAN_RADIUS = 6.0;
 
+    /**
+     * 商人区域（Desert.cs 33,20 起 13x5 格禁放、13x6 格清理）。该比例由商人精灵位置 tile(41,22) 与骆驼实体
+     * 位置推断，属近似换算，而非逐格对应。
+     */
+    private static final int ZONE_MIN_DX = -13;
+    private static final int ZONE_MAX_DX = 7;
+    private static final int ZONE_MIN_DZ = -4;
+    private static final int ZONE_MAX_DZ = 4;
+    private static final int ZONE_CLEAN_MAX_DZ = 5;
+
     private static int tickCounter = 0;
+    private static int lastCleanDay = Integer.MIN_VALUE;
 
     private CamelMerchantEvents() {}
 
@@ -64,6 +75,32 @@ public final class CamelMerchantEvents {
 
         loadSpawnChunk(level);
         ensureSingleEntity(level);
+        dailyZoneCleanup(level);
+    }
+
+    /** Desert.IsTravelingDesertMerchantHere：冬季 15-17 日商人不在。 */
+    public static boolean isMerchantHere() {
+        var time = com.stardew.craft.time.StardewTimeManager.get();
+        return !(time.getCurrentSeason() == 3 && time.getCurrentDay() >= 15 && time.getCurrentDay() <= 17);
+    }
+
+    /** Desert.isTilePlaceable：商人区域禁止放置。 */
+    public static boolean isMerchantZone(BlockPos pos) {
+        int dx = pos.getX() - POS.getX();
+        int dz = pos.getZ() - POS.getZ();
+        return dx >= ZONE_MIN_DX && dx <= ZONE_MAX_DX && dz >= ZONE_MIN_DZ && dz <= ZONE_MAX_DZ;
+    }
+
+    /** Desert.DayUpdate：每天清除商人区域内遗留的掉落物。 */
+    private static void dailyZoneCleanup(ServerLevel level) {
+        int day = com.stardew.craft.time.StardewTimeManager.get().getAbsoluteDay();
+        if (day == lastCleanDay) return;
+        lastCleanDay = day;
+        AABB zone = new AABB(POS.getX() + ZONE_MIN_DX, POS.getY() - 4, POS.getZ() + ZONE_MIN_DZ,
+                POS.getX() + ZONE_MAX_DX + 1, POS.getY() + 16, POS.getZ() + ZONE_CLEAN_MAX_DZ + 1);
+        for (var item : level.getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class, zone)) {
+            item.discard();
+        }
     }
 
     private static void loadSpawnChunk(ServerLevel level) {
@@ -75,6 +112,17 @@ public final class CamelMerchantEvents {
 
     private static void ensureSingleEntity(ServerLevel level) {
         CamelMerchantManager mgr = CamelMerchantManager.get(level);
+
+        // 冬季 15-17 日商人不在：移除实体，不重建。
+        if (!isMerchantHere()) {
+            for (CamelMerchantEntity e : level.getEntitiesOfClass(
+                    CamelMerchantEntity.class, new AABB(POS).inflate(SCAN_RADIUS),
+                    e -> e.getTags().contains(MARKER_TAG))) {
+                e.discard();
+            }
+            mgr.clear();
+            return;
+        }
 
         // 0. 清理旧存档遗留的占位实体（任何带 MARKER_TAG 但不是 CamelMerchantEntity 的实体，
         //    例如此前用 Villager 实现时留下的村民）。
@@ -191,6 +239,7 @@ public final class CamelMerchantEvents {
         event.setCanceled(true);
         event.setCancellationResult(net.minecraft.world.InteractionResult.SUCCESS);
 
+        if (!isMerchantHere()) return;
         openDesertTradeShop(player);
     }
 

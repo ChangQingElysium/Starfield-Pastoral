@@ -125,7 +125,15 @@ public final class NativeSamRenderer<T extends Mob> extends EntityRenderer<T> {
                 Mth.lerp(partialTick,entity.zo,entity.getZ()),
                 walking && entity.onGround() && !entity.isInWaterOrBubble() && !entity.isPassenger() && entity.isAlive());
         boolean wheelchair="george".equals(npcId);
-        if (!wheelchair) pose.blend("animation."+npcId+".walk",walk.phase(),walk.weight());
+        if (!wheelchair && walk.weight()>0) {
+            String walkClip=NativeActorAnimation.resolve(model,npcId,"walk");
+            if(walkClip!=null)pose.blend(walkClip,walk.phase(),walk.weight());
+            else if(missingActorClips.add("walk")) {
+                com.stardew.craft.StardewCraft.LOGGER.warn(
+                        "Missing native NPC walk animation for {}; keeping its current model and idle",
+                        npcId);
+            }
+        }
         double chairTurn=0,chairAttentionWeight=0;
         boolean chairPreparing=false;
         NpcAttentionMotion.Sample chairAttention=null;

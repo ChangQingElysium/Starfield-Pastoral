@@ -288,10 +288,13 @@ public class AutoGrabberBlockEntity extends BlockEntity implements UtilityAutoma
             return;
         }
         SimpleContainer container = new SimpleContainer(items.toArray(new ItemStack[0]));
-        Containers.dropContents(level, pos, container);
-        clearContent();
+        // Detach storage before spawning drops. Removal must never refresh FULL and
+        // write the dying block back into the world, or settle the same contents twice.
+        for (int i = 0; i < items.size(); i++) {
+            items.set(i, ItemStack.EMPTY);
+        }
         setChanged();
-        syncToClient();
+        Containers.dropContents(level, pos, container);
     }
 
     @Override
@@ -335,11 +338,14 @@ public class AutoGrabberBlockEntity extends BlockEntity implements UtilityAutoma
 
     private void syncToClient() {
         Level currentLevel = level;
-        if (currentLevel == null || currentLevel.isClientSide) {
+        if (currentLevel == null || currentLevel.isClientSide || isRemoved()) {
             return;
         }
 
-        BlockState state = getBlockState();
+        BlockState state = currentLevel.getBlockState(worldPosition);
+        if (currentLevel.getBlockEntity(worldPosition) != this || !state.is(getBlockState().getBlock())) {
+            return;
+        }
         if (state.getBlock() instanceof AutoGrabberBlock autoGrabber && state.hasProperty(AutoGrabberBlock.FULL)) {
             boolean fullNow = hasAnyItem();
             if (state.getValue(AutoGrabberBlock.FULL) != fullNow) {

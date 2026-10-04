@@ -35,6 +35,7 @@ public final class FishingSession {
 	private int ticksUntilTimeout;
 	private ItemStack plannedCatch;
 	private int difficulty;
+	private int minigameDifficulty = -1;
 	private int motionTypeId;
 	private boolean skipMinigame;
 	private int hookEntityId;
@@ -100,6 +101,15 @@ public final class FishingSession {
 
 	public int difficulty() {
 		return difficulty;
+	}
+
+	/** Difficulty actually sent to the minigame (after Blessing of the Waters / first-catch adjustments). */
+	public int minigameDifficulty() {
+		return minigameDifficulty >= 0 ? minigameDifficulty : difficulty;
+	}
+
+	public void setMinigameDifficulty(int value) {
+		minigameDifficulty = value;
 	}
 
 	public int motionTypeId() {
@@ -351,17 +361,20 @@ public final class FishingSession {
 			treasureLoot = List.of();
 			return;
 		}
-		int fishingLevel = StardewEnchantments.effectiveFishingLevel(player, rod);
-		
+		// FishingRod.cs L927: treasure is only possible once the player has caught at least 2 distinct fish.
+		if (PlayerDataManager.getPlayerData(player).getDistinctFishCaughtCount() <= 1) {
+			hasTreasure = false;
+			goldenTreasure = false;
+			treasureLoot = List.of();
+			return;
+		}
+
 		// 基础概率 15%
 		double treasureChance = BASE_TREASURE_CHANCE;
 
 		// 幸运Buff（SV: LuckLevel*0.005）
 		int luckBuff = com.stardew.craft.player.PlayerStardewDataAPI.getLuckBuffLevel(player);
 		treasureChance += luckBuff * 0.005;
-
-		// 钓鱼等级加成：每级 +0.5%
-		treasureChance += fishingLevel * 0.005;
 
 		// 幸运加成：dailyLuck/2
 		double dailyLuck = com.stardew.craft.player.PlayerStardewDataAPI.getDailyLuck(player);

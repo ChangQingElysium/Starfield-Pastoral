@@ -184,6 +184,14 @@ public final class ModBlockEntities {
 	public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<WaterLanternBlockEntity>> WATER_LANTERN =
 			BLOCK_ENTITIES.register("water_lantern", () -> BlockEntityType.Builder.of(WaterLanternBlockEntity::new, ModBlocks.WATER_LANTERN.get()).build(null));
 
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<WillyBoatBlockEntity>> WILLY_BOAT =
+            BLOCK_ENTITIES.register("willy_boat", () -> BlockEntityType.Builder.of(WillyBoatBlockEntity::new,
+                    com.stardew.craft.gingerisland.GingerIslandBlocks.get("ginger_willy_boat")).build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<GingerIslandGemPedestalBlockEntity>> GINGER_GEM_PEDESTAL =
+            BLOCK_ENTITIES.register("ginger_gem_pedestal", () -> BlockEntityType.Builder.of(GingerIslandGemPedestalBlockEntity::new,
+                    com.stardew.craft.gingerisland.GingerIslandBlocks.get("ginger_gem_pedestal")).build(null));
+
 	public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<PlaygroundBlockEntity>> PLAYGROUND =
             BLOCK_ENTITIES.register("playground", () -> BlockEntityType.Builder.of(PlaygroundBlockEntity::new,
                     ModBlocks.PLAYGROUND_SLIDE.get(), ModBlocks.CLIMBING_FRAME.get(), ModBlocks.BIRD_SPRING_RIDER.get()).build(null));

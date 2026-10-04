@@ -379,50 +379,125 @@
     {
       "weight": 891,
       "query": {
-        "type": "stardewcraft:item",
+        "type": "stardewcraft:conditional",
         "data": {
-          "item": "stardewcraft:gold_ore",
-          "count": 1
+          "query": {
+            "type": "stardewcraft:item",
+            "data": {
+              "item": "stardewcraft:gold_ore",
+              "count": 1
+            }
+          },
+          "otherwise": {
+            "type": "stardewcraft:item",
+            "data": {
+              "item": "stardewcraft:iron_ore",
+              "count": 1
+            }
+          },
+          "minimum": {
+            "deepest_mine_level": 76
+          }
         }
       }
     },
     {
       "weight": 891,
       "query": {
-        "type": "stardewcraft:item",
+        "type": "stardewcraft:conditional",
         "data": {
-          "item": "stardewcraft:gold_ore",
-          "count": 3
+          "query": {
+            "type": "stardewcraft:item",
+            "data": {
+              "item": "stardewcraft:gold_ore",
+              "count": 3
+            }
+          },
+          "otherwise": {
+            "type": "stardewcraft:item",
+            "data": {
+              "item": "stardewcraft:iron_ore",
+              "count": 3
+            }
+          },
+          "minimum": {
+            "deepest_mine_level": 76
+          }
         }
       }
     },
     {
       "weight": 891,
       "query": {
-        "type": "stardewcraft:item",
+        "type": "stardewcraft:conditional",
         "data": {
-          "item": "stardewcraft:gold_ore",
-          "count": 5
+          "query": {
+            "type": "stardewcraft:item",
+            "data": {
+              "item": "stardewcraft:gold_ore",
+              "count": 5
+            }
+          },
+          "otherwise": {
+            "type": "stardewcraft:item",
+            "data": {
+              "item": "stardewcraft:iron_ore",
+              "count": 5
+            }
+          },
+          "minimum": {
+            "deepest_mine_level": 76
+          }
         }
       }
     },
     {
       "weight": 297,
       "query": {
-        "type": "stardewcraft:item",
+        "type": "stardewcraft:conditional",
         "data": {
-          "item": "stardewcraft:gold_ore",
-          "count": 10
+          "query": {
+            "type": "stardewcraft:item",
+            "data": {
+              "item": "stardewcraft:gold_ore",
+              "count": 10
+            }
+          },
+          "otherwise": {
+            "type": "stardewcraft:item",
+            "data": {
+              "item": "stardewcraft:iron_ore",
+              "count": 10
+            }
+          },
+          "minimum": {
+            "deepest_mine_level": 76
+          }
         }
       }
     },
     {
       "weight": 30,
       "query": {
-        "type": "stardewcraft:item",
+        "type": "stardewcraft:conditional",
         "data": {
-          "item": "stardewcraft:gold_ore",
-          "count": 20
+          "query": {
+            "type": "stardewcraft:item",
+            "data": {
+              "item": "stardewcraft:gold_ore",
+              "count": 20
+            }
+          },
+          "otherwise": {
+            "type": "stardewcraft:item",
+            "data": {
+              "item": "stardewcraft:iron_ore",
+              "count": 20
+            }
+          },
+          "minimum": {
+            "deepest_mine_level": 76
+          }
         }
       }
     }

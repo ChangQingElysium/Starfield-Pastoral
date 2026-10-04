@@ -1,3 +1,7 @@
 {
-  "parent": "stardewcraft:block/ginger_island/hut_container_tall"
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "stardewcraft:item/ginger_island/ginger_hut_container_tall",
+    "particle": "stardewcraft:block/ginger_island/hut_container_tall_particle"
+  }
 }

@@ -86,7 +86,7 @@ public class FruitTreeBlockEntity extends BlockEntity implements AnimatedModel {
             return;
         }
         if (fruitCount > 0) {
-            Block.popResource(level, pos, new ItemStack(Items.COAL, fruitCount));
+            Block.popResource(level, pos, new ItemStack(com.stardew.craft.item.ModItems.COAL.get(), fruitCount));
             fruitCount = 0;
         }
         lightningDays = 4;

@@ -3,6 +3,7 @@ package com.stardew.craft.greenhouse;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.api.v1.farm.StardewFarmInitializationSteps;
 import com.stardew.craft.block.ModBlocks;
+import com.stardew.craft.block.crop.StardewCropBlock;
 import com.stardew.craft.building.runtime.BuildingBounds;
 import com.stardew.craft.building.runtime.BuildingProtection;
 import com.stardew.craft.building.runtime.BuildingRecord;
@@ -20,8 +21,11 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FarmBlock;
+import net.minecraft.world.level.block.LightBlock;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 
 import java.util.UUID;
 
@@ -364,7 +368,39 @@ public final class GreenhouseBuildings {
                 }
             }
         });
+        migrateInteriorLighting(level, origin);
         return changed[0];
+    }
+
+    /** Move only the historical level-15 lights that occupy authored crop upper cells. */
+    public static int migrateInteriorLighting(ServerLevel level, BlockPos origin) {
+        var cache = GreenhouseInteriorCache.get();
+        var oldLight = Blocks.LIGHT.defaultBlockState()
+                .setValue(LightBlock.LEVEL, 15);
+        int[] moved = {0};
+        BuildingProtection.internal(() -> {
+            for (int z = 0; z < 20; z++) for (int x = 0; x < 19; x++) {
+                if (!cache.isPlantingBed(x, z)) continue;
+                BlockPos oldPos = origin.offset(x, 2, z);
+                if (!level.getBlockState(oldPos).equals(oldLight)) continue;
+                // Keep player blocks/containers above the bed. Remaining lights still illuminate it.
+                if (level.getBlockState(oldPos.above()).isAir())
+                    level.setBlock(oldPos.above(), oldLight, Block.UPDATE_ALL);
+                level.setBlock(oldPos, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
+                var root = level.getBlockState(oldPos.below());
+                if (root.getBlock() instanceof StardewCropBlock
+                        && root.hasProperty(BlockStateProperties.DOUBLE_BLOCK_HALF)
+                        && root.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF)
+                            == DoubleBlockHalf.LOWER
+                        && root.canSurvive(level, oldPos.below())) {
+                    level.setBlock(oldPos, root.setValue(
+                            BlockStateProperties.DOUBLE_BLOCK_HALF,
+                            DoubleBlockHalf.UPPER), Block.UPDATE_ALL);
+                }
+                moved[0]++;
+            }
+        });
+        return moved[0];
     }
 
     private static BlockState upgradedSoil(BlockState state) {

@@ -222,7 +222,7 @@ public class TreeGrowthManager extends SavedData {
 		if (growthStage >= MATURE_GROWTH_STAGE) {
 			return !canMature(level, pos, def);
 		}
-		if (!canGrowInSeason(def, fertilizedSaplings.contains(globalPos), currentSeason())) {
+		if (!canGrowInSeason(level, pos, def, fertilizedSaplings.contains(globalPos), currentSeason())) {
 			return true;
 		}
 		return growthStage >= getMaxGrowthStageHere(level, pos);
@@ -261,7 +261,7 @@ public class TreeGrowthManager extends SavedData {
 			return;
 		}
 
-		if (!canGrowInSeason(def, fertilized, season)) {
+		if (!canGrowInSeason(level, pos, def, fertilized, season)) {
 			return;
 		}
 
@@ -300,8 +300,10 @@ public class TreeGrowthManager extends SavedData {
 		}
 	}
 
-	private static boolean canGrowInSeason(@Nonnull WildTrees.Def def, boolean fertilized, int season) {
-		return season != SEASON_WINTER || fertilized || def.growsInWinter();
+	private static boolean canGrowInSeason(@Nonnull ServerLevel level, @Nonnull BlockPos pos, @Nonnull WildTrees.Def def, boolean fertilized, int season) {
+		// Tree.IsInSeason: winter growth also works where SeedsIgnoreSeasonsHere() (greenhouse).
+		return season != SEASON_WINTER || fertilized || def.growsInWinter()
+				|| com.stardew.craft.greenhouse.GreenhouseManager.isInGreenhouseInterior(level, pos);
 	}
 
 	private static int getMaxGrowthStageHere(@Nonnull ServerLevel level, @Nonnull BlockPos pos) {

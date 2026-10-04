@@ -1,6 +1,5 @@
 package com.stardew.craft.integration.jei;
 
-import com.stardew.craft.port.PortItemData;
 import com.stardew.craft.StardewCraft;
 import com.stardew.craft.core.ModTags;
 import com.stardew.craft.fishing.data.FishingDataManager;
@@ -633,8 +632,7 @@ public class StardewJeiPlugin implements IModPlugin {
         @Override
         public String apply(ItemStack stack, UidContext context) {
             if (context != UidContext.Ingredient) return "";
-            var state = PortItemData.getOrDefault(stack, com.stardew.craft.port.net.minecraft.core.component.DataComponents.BLOCK_STATE,
-                    com.stardew.craft.port.net.minecraft.world.item.component.BlockItemStateProperties.EMPTY);
+            var state = com.stardew.craft.gingerisland.GingerIslandVariantStacks.subtypeProperties(stack);
             return new java.util.TreeMap<>(state.properties()).toString();
         }
     }

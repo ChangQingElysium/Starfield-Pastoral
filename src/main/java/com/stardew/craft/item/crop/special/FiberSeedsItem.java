@@ -42,7 +42,9 @@ public class FiberSeedsItem extends Item implements IStardewItem {
         }
 
         if (!level.isClientSide) {
-            level.setBlock(lowerPos, ModBlocks.FIBER_CROP.get().defaultBlockState(), 3);
+            if (!com.stardew.craft.farming.CropPlanting.place(level, lowerPos, ModBlocks.FIBER_CROP.get().defaultBlockState())) {
+                return InteractionResult.FAIL;
+            }
             level.playSound(null, lowerPos,
                 net.minecraft.sounds.SoundEvents.HOE_TILL,
                 net.minecraft.sounds.SoundSource.BLOCKS,

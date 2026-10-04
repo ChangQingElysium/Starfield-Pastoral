@@ -2,6 +2,7 @@ package com.stardew.craft.shop;
 
 import com.stardew.craft.network.ItemPickupHudPacket;
 import com.stardew.craft.network.payload.GeodeCrackResultPayload;
+import com.stardew.craft.player.PlayerDataManager;
 import com.stardew.craft.player.PlayerStardewDataAPI;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -44,8 +45,12 @@ public class GeodeLootService {
 
         // Query failures must not consume an addon item or charge the player.
         var effects = new ArrayList<com.stardew.craft.api.v1.action.StardewAction>();
-        ItemStack treasure = getTreasureFromGeode(geodeType, player, new Random(), effects::add);
+        // GeodeMenu increments GeodesCracked before the treasure is rolled, so the roll sees the post-increment value.
+        int crackedAfter = crackedCount(player) + 1;
+        ItemStack treasure = getTreasureFromGeode(geodeType, player, seededRandom(geodeType, player, crackedAfter),
+                effects::add, Map.of(STAT_GEODES_CRACKED_KEY, (double) crackedAfter));
         if (treasure.isEmpty()) return;
+        PlayerDataManager.getPlayerData(player).incrementStat(STAT_GEODES_CRACKED, 1);
 
         // Deduct cost (SDV: Game1.player.Money -= 25)
         PlayerStardewDataAPI.removeMoney(player, GEODE_COST);
@@ -103,21 +108,46 @@ public class GeodeLootService {
      * SDV Utility.getTreasureFromGeode() parity.
      */
     private static ItemStack getTreasureFromGeode(String geodeType, ServerPlayer player) {
-        return getTreasureFromGeode(geodeType, player, new Random());
-    }
-
-    private static ItemStack getTreasureFromGeode(String geodeType, ServerPlayer player, Random r) {
-        return getTreasureFromGeode(geodeType, player, r, action -> {});
+        // Geode Crusher: Utility.getTreasureFromGeode without a GeodesCracked increment.
+        return getTreasureFromGeode(geodeType, player, seededRandom(geodeType, player, crackedCount(player)),
+                action -> {}, Map.of());
     }
 
     private static ItemStack getTreasureFromGeode(String geodeType, ServerPlayer player, Random r,
-            java.util.function.Consumer<com.stardew.craft.api.v1.action.StardewAction> effects) {
-        // SDV: prewarm random (mimics seed-based RNG warm-up)
-        int prewarm = r.nextInt(9) + 1;
-        for (int i = 0; i < prewarm; i++) r.nextDouble();
+            java.util.function.Consumer<com.stardew.craft.api.v1.action.StardewAction> effects,
+            Map<String, Double> parameters) {
+        // SDV: two prewarm rounds of r.Next(1, 10) draws on the seeded generator.
+        for (int round = 0; round < 2; round++) {
+            int prewarm = r.nextInt(9) + 1;
+            for (int i = 0; i < prewarm; i++) r.nextDouble();
+        }
 
         ResourceLocation id = ResourceLocation.tryParse(geodeType);
-        return id == null ? ItemStack.EMPTY : GeodeDropData.roll(id, player, r, effects).orElse(ItemStack.EMPTY);
+        return id == null ? ItemStack.EMPTY : GeodeDropData.roll(id, player, r, effects, parameters).orElse(ItemStack.EMPTY);
+    }
+
+    private static final String STAT_GEODES_CRACKED = "GeodesCracked";
+    private static final String STAT_GEODES_CRACKED_KEY = "stat:" + STAT_GEODES_CRACKED;
+    private static final String STAT_MYSTERY_BOXES_OPENED = "MysteryBoxesOpened";
+
+    private static int crackedCount(ServerPlayer player) {
+        return player == null ? 0 : PlayerDataManager.getPlayerData(player).getStat(STAT_GEODES_CRACKED);
+    }
+
+    /**
+     * Utility.getTreasureFromGeode seeds its generator from the cracked-geode counter (the mystery box counter for
+     * mystery boxes), the world and the player, so the result is reproducible across save and reload.
+     */
+    private static Random seededRandom(String geodeType, ServerPlayer player, int geodesCracked) {
+        long counter = geodeType.contains("mystery_box") && player != null
+                ? PlayerDataManager.getPlayerData(player).getStat(STAT_MYSTERY_BOXES_OPENED)
+                : geodesCracked;
+        long worldHalf = player == null ? 0L : player.serverLevel().getSeed() / 2L;
+        long playerHalf = player == null ? 0L : player.getUUID().getLeastSignificantBits() / 2L;
+        long seed = counter * 0x9E3779B97F4A7C15L;
+        seed = (seed ^ (seed >>> 31)) + worldHalf * 0xBF58476D1CE4E5B9L;
+        seed = (seed ^ (seed >>> 29)) + playerHalf * 0x94D049BB133111EBL;
+        return new Random(seed ^ (seed >>> 32));
     }
 
     public static boolean isGeodeCrusherInput(ItemStack stack) {

@@ -12,11 +12,9 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -107,16 +105,7 @@ public class KegBlockEntityRenderer implements BlockEntityRenderer<KegBlockEntit
 		float scale = innerW;
 		poseStack.scale(scale, scale, 0.001f);
 
-		Minecraft.getInstance().getItemRenderer().renderStatic(
-			product,
-			ItemDisplayContext.GUI,
-			packedLight,
-			OverlayTexture.NO_OVERLAY,
-			poseStack,
-			buffer,
-			be.getLevel(),
-			0
-		);
+		BubbleItemRenderer.render(product, packedLight, poseStack, buffer, be.getLevel());
 		poseStack.popPose();
 
 		BubbleItemCountRenderer.renderCount(poseStack, buffer, packedLight, product, x0 + (3 * PX), y1 - (3 * PX), PX);

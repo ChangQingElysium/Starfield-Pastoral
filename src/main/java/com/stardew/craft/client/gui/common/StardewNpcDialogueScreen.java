@@ -476,21 +476,29 @@ public class StardewNpcDialogueScreen extends Screen implements StardewCollectiv
                 chunk = chunk.substring(1);
             }
 
-            // Extract ALL portrait emotion codes (not just one)
+            // Dialogue.checkEmotions: one emotion per page, priority $h > $s > $u > $l > $a,
+            // otherwise the first numeric $N. Every emotion marker is stripped from the text.
             int portraitIndex = 0;
-            // Named emotion codes
-            if (chunk.contains("$h")) { portraitIndex = 1; chunk = chunk.replace("$h", ""); }
-            if (chunk.contains("$s")) { portraitIndex = 2; chunk = chunk.replace("$s", ""); }
-            if (chunk.contains("$u")) { portraitIndex = 3; chunk = chunk.replace("$u", ""); }
-            if (chunk.contains("$l")) { portraitIndex = 4; chunk = chunk.replace("$l", ""); }
-            if (chunk.contains("$a")) { portraitIndex = 5; chunk = chunk.replace("$a", ""); }
+            boolean namedChosen = false;
+            String[] namedEmotions = {"$h", "$s", "$u", "$l", "$a"};
+            for (int e = 0; e < namedEmotions.length; e++) {
+                if (chunk.contains(namedEmotions[e])) {
+                    if (!namedChosen) {
+                        portraitIndex = e + 1;
+                        namedChosen = true;
+                    }
+                    chunk = chunk.replace(namedEmotions[e], "");
+                }
+            }
             // Numeric emotion codes: $8, $12, etc. — strip ALL occurrences
             Matcher m = NUMERIC_EMOTION.matcher(chunk);
             if (m.find()) {
-                try {
-                    portraitIndex = Integer.parseInt(m.group(1));
-                } catch (NumberFormatException ignored) {
-                    portraitIndex = 0;
+                if (!namedChosen) {
+                    try {
+                        portraitIndex = Integer.parseInt(m.group(1));
+                    } catch (NumberFormatException ignored) {
+                        portraitIndex = 0;
+                    }
                 }
                 chunk = NUMERIC_EMOTION.matcher(chunk).replaceAll("");
             }

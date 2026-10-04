@@ -75,7 +75,9 @@ public class WildSeedsItem extends Item implements IStardewItem {
             Block cropBlock = getCropBlock();
             if (cropBlock == null) return InteractionResult.FAIL;
 
-            level.setBlock(abovePos, cropBlock.defaultBlockState(), 3);
+            if (!com.stardew.craft.farming.CropPlanting.place(level, abovePos, cropBlock.defaultBlockState())) {
+                return InteractionResult.FAIL;
+            }
             level.playSound(null, abovePos, SoundEvents.HOE_TILL, SoundSource.BLOCKS, 1.0F, 1.0F);
             context.getItemInHand().shrink(1);
         }

@@ -150,11 +150,8 @@ public class PastureGrassBlock extends BushBlock {
             chance *= 0.33;
         }
 
-        int count = random.nextDouble() < chance ? 1 : 0;
-        if (count > 0 && random.nextDouble() < 0.10) {
-            count++;
-        }
-        return count;
+        // Grass.TryDropItemsOnCut: a single hay on success (blue grass doubles it above); no bonus roll.
+        return random.nextDouble() < chance ? 1 : 0;
     }
 
     @SuppressWarnings("null")

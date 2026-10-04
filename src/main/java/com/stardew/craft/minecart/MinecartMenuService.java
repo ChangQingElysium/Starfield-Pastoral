@@ -62,6 +62,20 @@ public final class MinecartMenuService {
         return null;
     }
 
+    /**
+     * Data/Minecarts.json: the Mines destination needs mail landslideDone, which Mountain.DayUpdate
+     * grants once DaysPlayed >= 5 (the project has no landslide event, so the day count is the source).
+     */
+    private static boolean destinationUnlocked(Destination d, PlayerStardewData data) {
+        if (d.gatingFlag != null && !data.hasMailFlag(d.gatingFlag)) return false;
+        if (d == MINES) {
+            var clock = com.stardew.craft.time.StardewTimeManager.get();
+            int daysPlayed = (clock.getCurrentYear() - 1) * 112 + clock.getCurrentSeason() * 28 + clock.getCurrentDay();
+            return daysPlayed >= 5;
+        }
+        return true;
+    }
+
     /** 服务端：打开菜单（已在 MinecartStationEntity.interact 里先做了 ccBoilerRoom 校验）。 */
     public static void openFor(ServerPlayer player, String currentStationId) {
         PlayerStardewData data = PlayerDataManager.getPlayerData(player);
@@ -71,7 +85,7 @@ public final class MinecartMenuService {
         List<String> available = new ArrayList<>();
         for (Destination d : ALL) {
             if (Objects.equals(d.id, currentStationId)) continue; // 排除当前站
-            if (d.gatingFlag != null && !data.hasMailFlag(d.gatingFlag)) continue;
+            if (!destinationUnlocked(d, data)) continue;
             available.add(d.id);
         }
 
@@ -89,7 +103,7 @@ public final class MinecartMenuService {
         Destination dest = byId(chosenId);
         if (dest == null) return;
         if (Objects.equals(dest.id, currentStationId)) return; // 不能选当前站
-        if (dest.gatingFlag != null && !data.hasMailFlag(dest.gatingFlag)) return;
+        if (!destinationUnlocked(dest, data)) return;
 
         ServerLevel target = player.server.getLevel(dest.dimension);
         if (target == null) return;

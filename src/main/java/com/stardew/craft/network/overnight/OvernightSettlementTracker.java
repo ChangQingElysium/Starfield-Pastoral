@@ -1,7 +1,10 @@
 package com.stardew.craft.network.overnight;
 
 import com.stardew.craft.port.PortItemStacks;
-import com.stardew.craft.api.v1.item.StardewItemDataApi;
+import com.stardew.craft.data.VanillaObjectCatalog;
+import com.stardew.craft.item.artisan.PreserveType;
+import com.stardew.craft.item.artisan.PreservesItem;
+import com.stardew.craft.item.artisan.SmokedFishItem;
 import com.stardew.craft.time.StardewTimeManager;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -14,7 +17,6 @@ import net.minecraft.world.level.saveddata.SavedData;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -206,26 +208,37 @@ public final class OvernightSettlementTracker extends SavedData {
         return time == null ? 1 : time.getAbsoluteDay();
     }
 
+    /** SDV ShippingMenu.getCategoryIndexForObject: 0 farming, 1 foraging, 2 fishing, 3 mining, 4 other. */
     private static int classifyCategory(ItemStack stack) {
-        String typeKey = StardewItemDataApi.getTypeKey(stack);
-        if (typeKey.isBlank()) {
-            return 4;
+        VanillaObjectCatalog.Entry entry = VanillaObjectCatalog.resolve(stack);
+        if (entry != null) {
+            switch (entry.key()) {
+                case "396", "406", "296", "402", "418", "414", "410" -> {
+                    return 1;
+                }
+                default -> {
+                }
+            }
         }
-
-        String key = typeKey.toLowerCase(Locale.ROOT);
-        if (key.contains("fish")) {
+        if (stack.getItem() instanceof SmokedFishItem) {
             return 2;
         }
-        if (key.contains("mining") || key.contains("ore") || key.contains("gem") || key.contains("bar") || key.contains("mineral")) {
-            return 3;
+        if (stack.getItem() instanceof PreservesItem preserves) {
+            PreserveType type = preserves.getPreserveType();
+            if (type == PreserveType.ROE || type == PreserveType.AGED_ROE || type == PreserveType.CAVIAR) {
+                return 2;
+            }
         }
-        if (key.contains("forage") || key.contains("foraging")) {
-            return 1;
+        if (entry == null) {
+            return 4;
         }
-        if (key.contains("crop") || key.contains("animal_product") || key.contains("artisan") || key.contains("syrup")) {
-            return 0;
-        }
-        return 4;
+        return switch (entry.category()) {
+            case -80, -79, -75, -26, -14, -6, -5 -> 0;
+            case -21, -20, -4 -> 2;
+            case -81, -27, -23 -> 1;
+            case -15, -12, -2 -> 3;
+            default -> 4;
+        };
     }
 
     private record PendingShippedItem(OvernightSettlementPayload.ShippedItem item, int availableDay) {

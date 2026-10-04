@@ -1,3 +1,7 @@
 {
-  "parent": "stardewcraft:block/ginger_island/volcano_floor_hatch"
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "stardewcraft:item/ginger_island/ginger_volcano_floor_hatch",
+    "particle": "stardewcraft:block/ginger_island/volcano_floor_hatch_particle"
+  }
 }

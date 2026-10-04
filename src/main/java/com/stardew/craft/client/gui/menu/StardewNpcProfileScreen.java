@@ -151,6 +151,7 @@ public final class StardewNpcProfileScreen extends Screen implements com.stardew
         String name = NpcDisplayNames.translated(entry.npcId());
         drawCentered(graphics, Component.literal(name), leftX + leftW / 2, panelY + mapping.ui(288), 0xFF7B3F21);
         drawHearts(graphics, entry, leftX + leftW / 2, panelY + mapping.ui(344));
+        drawBirthday(graphics, entry, leftX + leftW / 2, panelY + mapping.ui(408));
 
         if (socialEntries.size() > 1) {
             CommonGuiTextures.drawBackArrow(graphics, sceneX - mapping.ui(64), sceneY + sceneH / 2,
@@ -165,9 +166,58 @@ public final class StardewNpcProfileScreen extends Screen implements com.stardew
         int step = mapping.ui(32);
         int x = centerX - count * step / 2;
         int full = Mth.clamp(entry.points() / 250, 0, count);
+        // ProfileMenu.drawNPCSlotHeart: datable characters show hearts 9-10 locked (black tint).
+        boolean datable = StardewGameMenuScreen.isDatableNpc(entry.npcId());
         for (int i = 0; i < count; i++) {
-            CommonGuiTextures.drawSocialHeartTint(
-                    graphics, x + i * step, y, i < full, mapping.s4(), 1, 1, 1, 1);
+            boolean locked = datable && i >= 8;
+            if (locked) {
+                CommonGuiTextures.drawSocialHeartTint(
+                        graphics, x + i * step, y, true, mapping.s4(), 0.0F, 0.0F, 0.0F, 0.35F);
+            } else {
+                CommonGuiTextures.drawSocialHeartTint(
+                        graphics, x + i * step, y, i < full, mapping.s4(), 1, 1, 1, 1);
+            }
+        }
+    }
+
+    /** ProfileMenu: "Birthday" heading and "season day" line under the hearts. */
+    private void drawBirthday(GuiGraphics graphics, NpcFriendshipClientCache.Entry entry, int centerX, int y) {
+        String[] birthday = birthdayOf(entry.npcId());
+        if (birthday == null) {
+            return;
+        }
+        drawCentered(graphics, Component.translatable("stardewcraft.gui.profile.birthday"),
+                centerX, y, 0xFF7B3F21);
+        drawCentered(graphics, Component.translatable("stardewcraft.gui.profile.birthday_order",
+                        birthday[1], Component.translatable("stardewcraft.season." + birthday[0])),
+                centerX, y + mapping.ui(48), 0xFF4A2A18);
+    }
+
+    /** @return {season, day} from the npc_birthdays data, or null when the NPC has none. */
+    private static String[] birthdayOf(String npcId) {
+        try {
+            com.google.gson.JsonObject root =
+                    com.stardew.craft.npc.data.NpcDataRegistry.clientEvents().get("npc_birthdays");
+            if (root == null || !root.has("birthdays")) {
+                return null;
+            }
+            com.google.gson.JsonObject all = root.getAsJsonObject("birthdays");
+            com.google.gson.JsonElement element = all.get(normalize(npcId));
+            if (element == null || !element.isJsonObject()) {
+                return null;
+            }
+            com.google.gson.JsonObject data = element.getAsJsonObject();
+            if (!data.has("season") || !data.has("day")) {
+                return null;
+            }
+            String season = data.get("season").getAsString().toLowerCase(Locale.ROOT);
+            int day = data.get("day").getAsInt();
+            if (!Set.of("spring", "summer", "fall", "winter").contains(season) || day < 1 || day > 28) {
+                return null;
+            }
+            return new String[]{season, String.valueOf(day)};
+        } catch (RuntimeException ignored) {
+            return null;
         }
     }
 

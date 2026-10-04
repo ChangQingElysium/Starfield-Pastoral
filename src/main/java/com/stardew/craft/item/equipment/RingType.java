@@ -12,7 +12,7 @@ public enum RingType {
     GLOW_RING(517, 200, false),
 
     // ── 磁力型 ──
-    SMALL_MAGNET_RING(518, 200, false),
+    SMALL_MAGNET_RING(518, 100, false),
     MAGNET_RING(519, 200, false),
 
     // ── 特殊效果型 ──
@@ -48,7 +48,7 @@ public enum RingType {
     GLOWSTONE_RING(888, 200, false),
 
     // ── 结婚戒指 (801) — 纯装饰道具，无实际效果 ──
-    WEDDING_RING(801, 50, false);
+    WEDDING_RING(801, 2000, false);
 
     private final int sdvId;
     private final int sellPrice;
@@ -73,11 +73,11 @@ public enum RingType {
             // 光源型 — 提供动态光源 (SDV: Small Glow=5, Glow=10)
             case SMALL_GLOW_RING -> b.lightLevel(5);
             case GLOW_RING -> b.lightLevel(10);
-            // 磁力型，数值直接表示 MC 吸附半径（格）。
+            // 磁力型，数值直接表示 MC 吸附总半径（格）。原版基础半径 128px=2 格：小磁力 +64px=3 格，磁力/荧光石/金刚 +128px=4 格。
             case SMALL_MAGNET_RING -> b.magneticRadius(3);
-            case MAGNET_RING -> b.magneticRadius(6);
+            case MAGNET_RING -> b.magneticRadius(4);
             case IRIDIUM_BAND -> {
-                b.magneticRadius(6);
+                b.magneticRadius(4);
                 b.lightLevel(10);
                 b.attackMultiplier(0.1f);
             }
@@ -91,7 +91,7 @@ public enum RingType {
             case CRABSHELL_RING -> b.defense(5);
             case LUCKY_RING -> b.luck(1);
             case IMMUNITY_BAND -> b.immunity(4);
-            case GLOWSTONE_RING -> { b.magneticRadius(6); b.lightLevel(10); }
+            case GLOWSTONE_RING -> { b.magneticRadius(4); b.lightLevel(10); }
             // 特殊效果标记
             case SLIME_CHARMER_RING -> b.slimeCharmer(true);
             case RING_OF_YOBA -> b.yobaProtection(true);

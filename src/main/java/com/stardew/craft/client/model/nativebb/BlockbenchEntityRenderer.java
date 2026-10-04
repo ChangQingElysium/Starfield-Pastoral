@@ -22,6 +22,8 @@ public class BlockbenchEntityRenderer<T extends Entity & AnimatedModel> extends 
     @Override public ResourceLocation getTextureLocation(T entity) {return model.getTextureResource(entity);}
     public RenderType getRenderType(T entity,ResourceLocation texture,MultiBufferSource buffers,float partialTick) {return RenderType.entityCutoutNoCull(texture);}
     public int getRenderColor(T entity,float partialTick,int light) {return 0xFFFFFFFF;}
+    /** Only NPC renderers opt into missing-action idle fallback; other model contracts stay strict. */
+    protected String npcAnimationId(T entity) {return null;}
     protected void renderExtras(T entity,BlockbenchFrame frame,PoseStack stack,MultiBufferSource buffers,float partialTick,int light,int overlay) {}
     @Override public void render(T entity,float yaw,float partialTick,PoseStack stack,MultiBufferSource buffers,int light) {
         if(!entity.isInvisible()) {
@@ -30,7 +32,11 @@ public class BlockbenchEntityRenderer<T extends Entity & AnimatedModel> extends 
             var velocity=entity.getDeltaMovement();
             boolean moving=(Math.abs(velocity.x)+Math.abs(velocity.z))/2>=.015
                     && entity instanceof LivingEntity living && living.walkAnimation.speed(partialTick)!=0;
-            var pose=player.sample(entity.modelAnimation(moving,partialTick),(entity.tickCount+partialTick)/20.0,entity.modelTransitionTicks());
+            var request=entity.modelAnimation(moving,partialTick);
+            String npcId=npcAnimationId(entity);
+            double now=(entity.tickCount+partialTick)/20.0;
+            var pose=npcId==null ? player.sample(request,now,entity.modelTransitionTicks())
+                    : player.sampleNpc(npcId,request,now,entity.modelTransitionTicks());
             model.pose(entity,pose,partialTick);var frame=new BlockbenchFrame(asset,pose);
             stack.pushPose();
             float bodyYaw=entity instanceof LivingEntity living

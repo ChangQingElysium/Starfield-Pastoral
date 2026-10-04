@@ -40,6 +40,10 @@ class GameTestRunVerifierTest(unittest.TestCase):
         self.assertTrue(verify(PASS + "\nBUILD FAILED", 0))
         self.assertTrue(verify(PASS + "\nFailed to load datapacks", 0))
 
+    def test_missing_loot_tables_cannot_hide_behind_passed_tests(self):
+        self.assertIn("loot-table parse failure in log", verify(PASS +
+                      "\nCouldn't parse element loot_tables:stardewcraft:blocks/ginger_island_sand_starfish", 0))
+
 
 if __name__ == "__main__":
     unittest.main()

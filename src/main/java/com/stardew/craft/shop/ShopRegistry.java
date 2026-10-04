@@ -389,6 +389,8 @@ public final class ShopRegistry {
         // 设计：daily seed 决定当天的 styleId（固定，不因已解锁而轮换），stock=1 per-player-per-day。
         // ShopStockTracker 记录购买；已购 → stock=0 → UI 灰显 + ShopPurchasePayload 拒绝。
         // 已拥有的款式（/wallpaper unlock all 调出来的）直接不上架（SDV 也不会在已拥有时显示）。
+        // SDV: RandomWallpaper / RandomFlooring set IgnoreShopPriceModifiers, so no member markup applies.
+        java.util.Set<String> noMarkupItemIds = new java.util.HashSet<>();
         if ("JojaMart".equals(shopId)) {
             int dayKey = time.getAbsoluteDay();
             java.util.Random rng = new java.util.Random(dayKey * 2654435761L ^ 0xC0FFEEL);
@@ -397,6 +399,7 @@ public final class ShopRegistry {
             // Wallpaper
             if (!data.isDecorationUnlocked(com.stardew.craft.deco.DecorationType.WALLPAPER, String.valueOf(wpId))) {
                 String wpItemId = "wallpaper:" + wpId;
+                noMarkupItemIds.add(wpItemId);
                 int wpRemaining = ShopStockTracker.getRemaining(playerId, shopId, wpItemId, 1);
                 result.add(new ShopItemEntry(wpItemId, "", "", 250, wpRemaining,
                     null, 0, Set.of(), 1, 0, null, -1, 0, 1));
@@ -404,6 +407,7 @@ public final class ShopRegistry {
             // Flooring
             if (!data.isDecorationUnlocked(com.stardew.craft.deco.DecorationType.FLOORING, String.valueOf(flId))) {
                 String flItemId = "flooring:" + flId;
+                noMarkupItemIds.add(flItemId);
                 int flRemaining = ShopStockTracker.getRemaining(playerId, shopId, flItemId, 1);
                 result.add(new ShopItemEntry(flItemId, "", "", 250, flRemaining,
                     null, 0, Set.of(), 1, 0, null, -1, 0, 1));
@@ -415,7 +419,9 @@ public final class ShopRegistry {
             && !com.stardew.craft.communitycenter.state.CCStoryFlags.isJojaMember(player)) {
             List<ShopItemEntry> marked = new ArrayList<>(result.size());
             for (ShopItemEntry e : result) {
-                int markedPrice = (int) Math.round(e.price() * 1.25);
+                int markedPrice = noMarkupItemIds.contains(e.itemId())
+                    ? e.price()
+                    : (int) (e.price() * 1.25);
                 marked.add(new ShopItemEntry(
                     e.itemId(), e.displayName(), e.description(),
                     markedPrice, e.stock(), e.tradeItemId(), e.tradeItemCount(),
@@ -427,6 +433,27 @@ public final class ShopRegistry {
             return marked;
         }
         return result;
+    }
+
+    /** SDV Utility.hasFinishedJojaRoute: every area done via CC or Joja, with at least one Joja area or JojaMember. */
+    private static boolean isJojaRouteComplete(net.minecraft.server.level.ServerPlayer player) {
+        com.stardew.craft.player.PlayerStardewData data =
+                com.stardew.craft.player.PlayerDataManager.getPlayerData(player);
+        String[][] areas = {
+                {"jojaVault", "ccVault"},
+                {"jojaPantry", "ccPantry"},
+                {"jojaBoilerRoom", "ccBoilerRoom"},
+                {"jojaCraftsRoom", "ccCraftsRoom"},
+                {"jojaFishTank", "ccFishTank"}};
+        boolean foundJoja = false;
+        for (String[] area : areas) {
+            if (data.hasMailFlag(area[0])) {
+                foundJoja = true;
+            } else if (!data.hasMailFlag(area[1])) {
+                return false;
+            }
+        }
+        return foundJoja || data.hasMailFlag(com.stardew.craft.communitycenter.state.CCStoryFlags.JOJA_MEMBER);
     }
 
     private static ShopItemEntry withRemainingStock(
@@ -601,7 +628,8 @@ public final class ShopRegistry {
                 && rollTravelingCartChance(absoluteDay, "cart_jojaCatalogue", 0.1)) {
             addTravelingCartEntry(result, playerId, avoidRepeat, "stardewcraft:joja_catalogue", 30000, 1, false, includeSoldOut);
         }
-        if (isCommunityCenterComplete
+        // SDV: ANY IS_COMMUNITY_CENTER_COMPLETE / IS_JOJA_MART_COMPLETE
+        if ((isCommunityCenterComplete || isJojaRouteComplete(player))
                 && travelingCartItemExists("stardewcraft:junimo_catalogue")
                 && rollTravelingCartChance(absoluteDay, "cart_junimoCatalogue", 0.1)) {
             addTravelingCartEntry(result, playerId, avoidRepeat, "stardewcraft:junimo_catalogue", 70000, 1, false, includeSoldOut);

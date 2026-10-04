@@ -37,6 +37,11 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew build check --no-daemon --console=plain
 
+      - name: Verify stack-count Mixin mappings and packaged refmap
+        run: |
+          ./gradlew printCompileClasspath --no-daemon --console=plain
+          bash scripts/port/test_gui_stack_count_mixin_1201.sh --check-install-jar
+
       - name: Test compatibility verifiers
         run: python3 -m unittest discover -s compatibility -p 'test_*.py'
 

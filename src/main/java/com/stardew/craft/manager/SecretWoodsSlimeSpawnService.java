@@ -64,7 +64,12 @@ public final class SecretWoodsSlimeSpawnService {
                 continue;
             }
 
-            int mineFloor = random.nextInt(41);
+            // Woods.resetSharedState: spring/summer level 0, fall 0 or 40, winter 40.
+            int mineFloor = switch (com.stardew.craft.time.StardewTimeManager.get().getCurrentSeason()) {
+                case 2 -> random.nextBoolean() ? 0 : 40;
+                case 3 -> 40;
+                default -> 0;
+            };
             Vec3 spawnPos = new Vec3(pos.getX() + 0.5D, pos.getY(), pos.getZ() + 0.5D);
             Mob mob = MineMonsterSpawnHandler.spawnConfiguredMonster(
                     level,

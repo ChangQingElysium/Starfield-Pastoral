@@ -25,7 +25,8 @@ public final class StardewHudLayout {
 
     public static Placement current(Config.HudElement element, int screenWidth, int screenHeight) {
         int baseWidth = element == Config.HudElement.PLAYER_BARS ? StardewPlayerHud.baseWidth() : element.baseWidth();
-        return current(element, screenWidth, screenHeight, baseWidth, element.baseHeight());
+        int baseHeight = element == Config.HudElement.PLAYER_BARS ? StardewPlayerHud.baseHeight() : element.baseHeight();
+        return current(element, screenWidth, screenHeight, baseWidth, baseHeight);
     }
 
     public static Placement current(Config.HudElement element, int screenWidth, int screenHeight,

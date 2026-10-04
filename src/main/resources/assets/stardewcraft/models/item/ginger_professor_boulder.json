@@ -1,3 +1,7 @@
 {
-  "parent": "stardewcraft:block/ginger_island/professor_boulder"
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "stardewcraft:item/ginger_island/ginger_professor_boulder",
+    "particle": "stardewcraft:block/ginger_island/professor_boulder_particle"
+  }
 }

@@ -42,5 +42,10 @@
     "minecraft:dirt": "stardewcraft:dirt",
     "minecraft:farmland": "stardewcraft:farmland"
   },
-  "verification": "native NBT and packaged schematic round-trips; idempotent soil palette-only normalization preserves indices, properties and all non-palette NBT"
+  "verification": "native NBT and packaged schematic round-trips; idempotent soil palette-only normalization preserves indices, properties and all non-palette NBT",
+  "bed_lighting": {
+    "cleared_crop_upper_cells": 120,
+    "retained_lighting_from_y": 3,
+    "crop_clearance": 2
+  }
 }

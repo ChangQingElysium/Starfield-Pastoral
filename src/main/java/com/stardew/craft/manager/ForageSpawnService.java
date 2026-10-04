@@ -40,7 +40,7 @@ import java.util.function.Supplier;
  *   <li>Each forage entry has a season filter and a chance</li>
  *   <li>Random position within zone bounds; SDV uses 11 attempts, this map uses 30 for denser MC terrain</li>
  *   <li>Must be on top of a natural spawnable surface (public areas) or sand (Beach/Desert)</li>
- *   <li>Must be outdoors (sky visible) for non-beach zones</li>
+ *   <li>Natural ground may be shaded by forest leaves; the heightmap excludes roofs and solid structures</li>
  * </ul>
  */
 @SuppressWarnings("null")
@@ -98,94 +98,242 @@ public final class ForageSpawnService {
         StardewCraft.LOGGER.info("[ForageSpawn] onNewDay called, season={}", season);
 
         int totalSpawned = 0;
-        for (ForageZone zone : runtimeZones(level)) {
-            // Filter entries for current season
-            List<ForageEntry> possibleForage = new ArrayList<>();
-            for (ForageEntry entry : zone.entries) {
-                if (entry.matchesSeason(season)) {
-                    possibleForage.add(entry);
-                }
+        List<ForageZone> zones = runtimeZones(level);
+        for (ForageZone zone : zones) {
+            if (zone.name.endsWith(":forest") && season == SPRING) {
+                spawnSpringOnionClusters(level, random, zone);
+            } else if (zone.name.endsWith(":beach")) {
+                spawnBeachTidePools(level, random, zone, season);
             }
-            if (possibleForage.isEmpty()) {
-                StardewCraft.LOGGER.info("[ForageSpawn] {} zone: no forage entries for season {}", zone.name, season);
-                continue;
-            }
-
-            // Count existing forage blocks in zone (lightweight heightmap-based scan)
-            int existingCount = countForageInZone(level, zone);
-            if (existingCount >= zone.maxSpawnedAtOnce) {
-                StardewCraft.LOGGER.info("[ForageSpawn] {} zone: already at max ({}/{})",
-                        zone.name, existingCount, zone.maxSpawnedAtOnce);
-                continue;
-            }
-
-            // Determine number to spawn (SDV: random between min and max inclusive)
-            int numberToSpawn = zone.minDailySpawn + random.nextInt(
-                    zone.maxDailySpawn - zone.minDailySpawn + 1);
-            numberToSpawn = Math.min(numberToSpawn, zone.maxSpawnedAtOnce - existingCount);
-
-            StardewCraft.LOGGER.info("[ForageSpawn] {} zone: existing={}, toSpawn={}, possibleEntries={}",
-                    zone.name, existingCount, numberToSpawn, possibleForage.size());
-
-            int spawned = 0;
-            for (int i = 0; i < numberToSpawn; i++) {
-                // SDV: up to 30 attempts per spawn (raised from 11 to compensate for
-                // densely decorated terrain with grass/flowers occupying positions)
-                for (int attempt = 0; attempt < 30; attempt++) {
-                    // Pick random rect (with weight for beach second rect)
-                    ZoneRect rect = pickRandomRect(zone, random);
-
-                    // Random position within rect
-                    int x = rect.minX + random.nextInt(rect.maxX - rect.minX + 1);
-                    int z = rect.minZ + random.nextInt(rect.maxZ - rect.minZ + 1);
-
-                    // Skip if chunk not loaded
-                    if (!level.hasChunk(x >> 4, z >> 4)) continue;
-
-                    // Use heightmap that ignores leaves to find surface quickly
-                    int surfaceY = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) - 1;
-                    BlockPos surfacePos = new BlockPos(x, surfaceY, z);
-
-                    // If the heightmap surface is a replaceable plant (weeds, flowers, etc.),
-                    // look below it for the real solid ground (e.g. grass_block).
-                    BlockState surfaceState = level.getBlockState(surfacePos);
-                    if (isReplaceablePlant(surfaceState)) {
-                        surfacePos = surfacePos.below();
-                        surfaceState = level.getBlockState(surfacePos);
-                    }
-                    if (!rect.containsSurfaceY(surfacePos.getY())) continue;
-                    BlockPos placePos = surfacePos.above();
-                    if (!insidePreciseRegion(level, zone, surfacePos)) {
-                        continue;
-                    }
-
-                    // Validate surface block
-                    if (surfaceState.isAir() || surfaceState.getFluidState().isSource()) continue;
-
-                    // Check placement conditions
-                    if (!canPlaceForage(level, surfacePos, placePos, zone.surface)) continue;
-
-                    // Pick a random forage entry and apply chance
-                    ForageEntry chosen = possibleForage.get(random.nextInt(possibleForage.size()));
-                    if (random.nextDouble() > chosen.chance) continue;
-
-                    // Remove any replaceable plant at the placement position before placing forage
-                    BlockState existing = level.getBlockState(placePos);
-                    if (!existing.isAir() && isReplaceablePlant(existing)) {
-                        level.destroyBlock(placePos, false);
-                    }
-
-                    // Place the block
-                    level.setBlock(placePos, chosen.block.get().defaultBlockState(), Block.UPDATE_ALL);
-                    spawned++;
-                    break; // success, move to next spawn slot
-                }
-            }
-
-            totalSpawned += spawned;
-            StardewCraft.LOGGER.info("[ForageSpawn] {} zone: spawned {} forage blocks", zone.name, spawned);
+        }
+        ForageInitData data = forageInitData(level);
+        int absoluteDay = com.stardew.craft.time.StardewTimeManager.get().getAbsoluteDay();
+        for (ForageZone zone : zones) {
+            totalSpawned += spawnZoneOnce(level, zone, season, absoluteDay, data, random);
         }
         StardewCraft.LOGGER.info("[ForageSpawn] Day complete: total spawned = {}", totalSpawned);
+    }
+
+    /** Finish an unloaded zone's current day when a player reaches it, without replaying missed days. */
+    public static void ensureZoneSpawned(ServerLevel level, net.minecraft.resources.ResourceLocation zoneId, int season) {
+        ForageInitData data = forageInitData(level);
+        int absoluteDay = com.stardew.craft.time.StardewTimeManager.get().getAbsoluteDay();
+        if (data.wasSpawned(zoneId.toString(), absoluteDay)) return;
+        for (ForageZone zone : runtimeZones(level)) {
+            if (zone.name.equals(zoneId.toString())) {
+                spawnZoneOnce(level, zone, season, absoluteDay, data, level.getRandom());
+                return;
+            }
+        }
+    }
+
+    private static int spawnZoneOnce(ServerLevel level, ForageZone zone, int season, int absoluteDay,
+                                     ForageInitData data, RandomSource random) {
+        if (data.wasSpawned(zone.name, absoluteDay) || !hasLoadedChunks(level, zone)) return 0;
+        int spawned = spawnZone(level, zone, season, random);
+        data.markSpawned(zone.name, absoluteDay);
+        return spawned;
+    }
+
+    private static boolean hasLoadedChunks(ServerLevel level, ForageZone zone) {
+        for (ZoneRect rect : zone.rects) {
+            for (int x = rect.minX >> 4; x <= rect.maxX >> 4; x++) {
+                for (int z = rect.minZ >> 4; z <= rect.maxZ >> 4; z++) {
+                    if (level.hasChunk(x, z)) return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private static int spawnZone(ServerLevel level, ForageZone zone, int season, RandomSource random) {
+        // Filter entries for current season
+        List<ForageEntry> possibleForage = new ArrayList<>();
+        for (ForageEntry entry : zone.entries) {
+            if (entry.matchesSeason(season)) {
+                possibleForage.add(entry);
+            }
+        }
+        if (possibleForage.isEmpty()) {
+            StardewCraft.LOGGER.info("[ForageSpawn] {} zone: no forage entries for season {}", zone.name, season);
+            return 0;
+        }
+
+        // Count existing forage blocks in zone (lightweight heightmap-based scan)
+        int existingCount = countForageInZone(level, zone);
+        if (existingCount >= zone.maxSpawnedAtOnce) {
+            StardewCraft.LOGGER.info("[ForageSpawn] {} zone: already at max ({}/{})",
+                    zone.name, existingCount, zone.maxSpawnedAtOnce);
+            return 0;
+        }
+
+        // Determine number to spawn (SDV: random between min and max inclusive)
+        int numberToSpawn = zone.minDailySpawn + random.nextInt(
+                zone.maxDailySpawn - zone.minDailySpawn + 1);
+        numberToSpawn = Math.min(numberToSpawn, zone.maxSpawnedAtOnce - existingCount);
+
+        StardewCraft.LOGGER.info("[ForageSpawn] {} zone: existing={}, toSpawn={}, possibleEntries={}",
+                zone.name, existingCount, numberToSpawn, possibleForage.size());
+
+        int spawned = 0;
+        for (int i = 0; i < numberToSpawn; i++) {
+            // SDV: up to 30 attempts per spawn (raised from 11 to compensate for
+            // densely decorated terrain with grass/flowers occupying positions)
+            for (int attempt = 0; attempt < 30; attempt++) {
+                // Pick random rect (with weight for beach second rect)
+                ZoneRect rect = pickRandomRect(zone, random);
+
+                // Random position within rect
+                int x = rect.minX + random.nextInt(rect.maxX - rect.minX + 1);
+                int z = rect.minZ + random.nextInt(rect.maxZ - rect.minZ + 1);
+
+                // Skip if chunk not loaded
+                if (!level.hasChunk(x >> 4, z >> 4)) continue;
+
+                // Use heightmap that ignores leaves to find surface quickly
+                int surfaceY = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) - 1;
+                BlockPos surfacePos = new BlockPos(x, surfaceY, z);
+
+                // If the heightmap surface is a replaceable plant (weeds, flowers, etc.),
+                // look below it for the real solid ground (e.g. grass_block).
+                BlockState surfaceState = level.getBlockState(surfacePos);
+                if (isReplaceablePlant(surfaceState)) {
+                    surfacePos = surfacePos.below();
+                    surfaceState = level.getBlockState(surfacePos);
+                }
+                if (!rect.containsSurfaceY(surfacePos.getY())) continue;
+                BlockPos placePos = surfacePos.above();
+                if (!insidePreciseRegion(level, zone, surfacePos)) {
+                    continue;
+                }
+
+                // Validate surface block
+                if (surfaceState.isAir() || surfaceState.getFluidState().isSource()) continue;
+
+                // Check placement conditions
+                if (!canPlaceForage(level, surfacePos, placePos, zone.surface)) continue;
+
+                // Pick a random forage entry and apply chance
+                ForageEntry chosen = possibleForage.get(random.nextInt(possibleForage.size()));
+                if (random.nextDouble() > chosen.chance) continue;
+
+                // Remove any replaceable plant at the placement position before placing forage
+                BlockState existing = level.getBlockState(placePos);
+                if (!existing.isAir() && isReplaceablePlant(existing)) {
+                    level.destroyBlock(placePos, false);
+                }
+
+                // Place the block
+                level.setBlock(placePos, chosen.block.get().defaultBlockState(), Block.UPDATE_ALL);
+                spawned++;
+                break; // success, move to next spawn slot
+            }
+        }
+
+        StardewCraft.LOGGER.info("[ForageSpawn] {} zone: spawned {} forage blocks", zone.name, spawned);
+        return spawned;
+    }
+
+    // ======================== Forest spring onions / beach tide pools ========================
+
+    /** Forest.DayUpdate: in spring, 7 clusters of up to 16 open tiles, each tile kept with 1 - 0.15 * distance. */
+    private static void spawnSpringOnionClusters(ServerLevel level, RandomSource random, ForageZone zone) {
+        for (int cluster = 0; cluster < 7; cluster++) {
+            ZoneRect rect = pickRandomRect(zone, random);
+            int originX = rect.minX + random.nextInt(rect.maxX - rect.minX + 1);
+            int originZ = rect.minZ + random.nextInt(rect.maxZ - rect.minZ + 1);
+            java.util.ArrayDeque<int[]> queue = new java.util.ArrayDeque<>();
+            java.util.Set<Long> seen = new java.util.HashSet<>();
+            List<BlockPos> open = new ArrayList<>();
+            List<int[]> openColumns = new ArrayList<>();
+            queue.add(new int[]{originX, originZ});
+            seen.add(BlockPos.asLong(originX, 0, originZ));
+            while (!queue.isEmpty() && open.size() < 16) {
+                int[] column = queue.poll();
+                BlockPos place = forageSite(level, zone, rect, column[0], column[1], SurfaceType.NATURAL);
+                if (place == null) {
+                    continue;
+                }
+                open.add(place);
+                openColumns.add(column);
+                for (int[] offset : new int[][]{{1, 0}, {-1, 0}, {0, 1}, {0, -1}}) {
+                    int nx = column[0] + offset[0];
+                    int nz = column[1] + offset[1];
+                    if (nx < rect.minX || nx > rect.maxX || nz < rect.minZ || nz > rect.maxZ
+                            || !seen.add(BlockPos.asLong(nx, 0, nz))) {
+                        continue;
+                    }
+                    queue.add(new int[]{nx, nz});
+                }
+            }
+            for (int i = 0; i < open.size(); i++) {
+                int[] column = openColumns.get(i);
+                double distance = Math.hypot(column[0] - originX, column[1] - originZ);
+                if (random.nextDouble() < 1.0 - distance * 0.15) {
+                    BlockPos place = open.get(i);
+                    BlockState existing = level.getBlockState(place);
+                    if (!existing.isAir() && isReplaceablePlant(existing)) {
+                        level.destroyBlock(place, false);
+                    }
+                    level.setBlock(place, ModBlocks.FORAGE_SPRING_ONION.get().defaultBlockState(), Block.UPDATE_ALL);
+                }
+            }
+        }
+    }
+
+    /**
+     * Beach.DayUpdate tide pools: coral (80%) or sea urchin (20%) with chance 1, 1/2, 1/4...; in summer on
+     * the 12th-14th a further 1.5, 1.5/1.1, ... chain. The project has no tide-pool rectangle, so the whole beach zone is used.
+     */
+    private static void spawnBeachTidePools(ServerLevel level, RandomSource random, ForageZone zone, int season) {
+        double chance = 1.0;
+        while (random.nextDouble() < chance) {
+            placeTidePoolItem(level, random, zone);
+            chance /= 2.0;
+        }
+        int day = com.stardew.craft.time.StardewTimeManager.get().getCurrentDay();
+        if (season == SUMMER && day >= 12 && day <= 14) {
+            chance = 1.5;
+            while (random.nextDouble() < chance) {
+                placeTidePoolItem(level, random, zone);
+                chance /= 1.1;
+            }
+        }
+    }
+
+    private static void placeTidePoolItem(ServerLevel level, RandomSource random, ForageZone zone) {
+        Block block = random.nextDouble() < 0.2 ? ModBlocks.FORAGE_SEA_URCHIN.get() : ModBlocks.FORAGE_CORAL.get();
+        for (int attempt = 0; attempt < 30; attempt++) {
+            ZoneRect rect = pickRandomRect(zone, random);
+            int x = rect.minX + random.nextInt(rect.maxX - rect.minX + 1);
+            int z = rect.minZ + random.nextInt(rect.maxZ - rect.minZ + 1);
+            BlockPos place = forageSite(level, zone, rect, x, z, SurfaceType.SAND);
+            if (place == null) {
+                continue;
+            }
+            BlockState existing = level.getBlockState(place);
+            if (!existing.isAir() && isReplaceablePlant(existing)) {
+                level.destroyBlock(place, false);
+            }
+            level.setBlock(place, block.defaultBlockState(), Block.UPDATE_ALL);
+            return;
+        }
+    }
+
+    /** Placement position for forage in this column, or null when the column is not a valid site. */
+    private static BlockPos forageSite(ServerLevel level, ForageZone zone, ZoneRect rect, int x, int z, SurfaceType surface) {
+        if (!level.hasChunk(x >> 4, z >> 4)) return null;
+        int surfaceY = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) - 1;
+        BlockPos surfacePos = new BlockPos(x, surfaceY, z);
+        BlockState surfaceState = level.getBlockState(surfacePos);
+        if (isReplaceablePlant(surfaceState)) {
+            surfacePos = surfacePos.below();
+            surfaceState = level.getBlockState(surfacePos);
+        }
+        if (!rect.containsSurfaceY(surfacePos.getY()) || !insidePreciseRegion(level, zone, surfacePos)) return null;
+        if (surfaceState.isAir() || surfaceState.getFluidState().isSource()) return null;
+        BlockPos placePos = surfacePos.above();
+        return canPlaceForage(level, surfacePos, placePos, surface) ? placePos : null;
     }
 
     // ======================== Helpers ========================
@@ -257,11 +405,15 @@ public final class ForageSpawnService {
         BlockState surfaceState = level.getBlockState(surfacePos);
         BlockState placeState = level.getBlockState(placePos);
 
+        // Fluids are replaceable block states, but they are never replaceable forage sites.
+        if (!placeState.getFluidState().isEmpty()) return false;
+
         // Must be air or a replaceable plant (grass, flowers, ferns) at placement position
         if (!placeState.isAir() && !isReplaceablePlant(placeState)) return false;
 
-        // Must see sky (outdoors check)
-        if (!level.canSeeSky(placePos)) return false;
+        // Forest ground is spawnable under leaf canopies. Solid roofs are rejected by the heightmap
+        // and natural-surface check at forageSite; beaches retain their open-sand requirement.
+        if (surface == SurfaceType.SAND && !level.canSeeSky(placePos)) return false;
 
         return switch (surface) {
             // SDV uses the map's Back-layer "Spawnable" property, not only grass.
@@ -284,6 +436,7 @@ public final class ForageSpawnService {
      * Includes short grass, tall grass, flowers, ferns, and double-tall plants.
      */
     private static boolean isReplaceablePlant(BlockState state) {
+        if (!state.getFluidState().isEmpty()) return false;
         Block block = state.getBlock();
         if (block instanceof ForageBlock) return false;
         // Our mod's wild weeds (杂草)
@@ -345,7 +498,11 @@ public final class ForageSpawnService {
         int count = 0;
         for (int y = surfaceY - 1; y <= surfaceY + 3; y++) {
             BlockPos pos = new BlockPos(x, y, z);
-            if (level.getBlockState(pos).getBlock() instanceof ForageBlock) {
+            Block block = level.getBlockState(pos).getBlock();
+            // Spring-onion clusters and tide-pool items are ordinary objects in the original,
+            // not spawned forage, so they never count against MaxSpawnedForageAtOnce.
+            if (block instanceof ForageBlock && block != ModBlocks.FORAGE_SPRING_ONION.get()
+                    && block != ModBlocks.FORAGE_CORAL.get() && block != ModBlocks.FORAGE_SEA_URCHIN.get()) {
                 count++;
             }
         }
@@ -361,8 +518,7 @@ public final class ForageSpawnService {
     public static void ensureInitialSpawn(ServerLevel level, int season) {
         if (!level.dimension().equals(com.stardew.craft.core.ModDimensions.STARDEW_VALLEY)) return;
 
-        ForageInitData data = level.getDataStorage().computeIfAbsent(
-                com.stardew.craft.port.PortSavedData.loader(ForageInitData.factory()), com.stardew.craft.port.PortSavedData.constructor(ForageInitData.factory()), INIT_DATA_ID);
+        ForageInitData data = forageInitData(level);
         if (data.isInitialized()) return;
 
         StardewCraft.LOGGER.info("[ForageSpawn] Running first-day initial forage spawn (season={})", season);
@@ -372,11 +528,14 @@ public final class ForageSpawnService {
 
     public static class ForageInitData extends SavedData {
         private boolean initialized;
+        private final java.util.Map<String, Integer> lastSpawnedDays = new java.util.HashMap<>();
 
         public ForageInitData() {}
 
         private ForageInitData(CompoundTag tag) {
             this.initialized = tag.getBoolean("Initialized");
+            CompoundTag days = tag.getCompound("LastSpawnedDays");
+            for (String zone : days.getAllKeys()) lastSpawnedDays.put(zone, days.getInt(zone));
         }
 
         public boolean isInitialized() { return initialized; }
@@ -386,16 +545,32 @@ public final class ForageSpawnService {
             setDirty();
         }
 
+        public boolean wasSpawned(String zone, int absoluteDay) {
+            return lastSpawnedDays.getOrDefault(zone, Integer.MIN_VALUE) == absoluteDay;
+        }
+
+        public void markSpawned(String zone, int absoluteDay) {
+            lastSpawnedDays.put(zone, absoluteDay);
+            setDirty();
+        }
+
         @Override
         @Nonnull
         public CompoundTag save(@Nonnull CompoundTag tag) { net.minecraft.core.HolderLookup.Provider registries = com.stardew.craft.port.PortRegistries.lookup();
             tag.putBoolean("Initialized", initialized);
+            CompoundTag days = new CompoundTag();
+            lastSpawnedDays.forEach(days::putInt);
+            tag.put("LastSpawnedDays", days);
             return tag;
         }
 
         public static com.stardew.craft.port.PortSavedData.Factory<ForageInitData> factory() {
             return new com.stardew.craft.port.PortSavedData.Factory<>(ForageInitData::new, (tag, provider) -> new ForageInitData(tag));
         }
+    }
+
+    private static ForageInitData forageInitData(ServerLevel level) {
+        return level.getDataStorage().computeIfAbsent(com.stardew.craft.port.PortSavedData.loader(ForageInitData.factory()), com.stardew.craft.port.PortSavedData.constructor(ForageInitData.factory()), INIT_DATA_ID);
     }
 
     // ======================== Forest Farm Forage ========================

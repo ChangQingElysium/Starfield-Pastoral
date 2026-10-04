@@ -27,7 +27,7 @@ import net.minecraft.world.phys.AABB;
  * <li>{@code clearSpaceForStructure} fills the two layers below the structure block with stone, 1.20.1 with the flat
  * preset layers;</li>
  * <li>every test is encased in barrier walls plus a barrier ceiling one block above the structure
- * ({@code skyAccess = false}, the default, which no StardewCraft test overrides);</li>
+ * ({@code skyAccess = false}, the default); ported sky-access tests open only that ceiling;</li>
  * <li>all chunks the structure intersects are force-loaded (1.20.1 a fixed 5x5 chunk area from the corner).</li>
  * </ul>
  */

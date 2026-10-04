@@ -1,0 +1,33 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "stardewcraft:item/ginger_island/ginger_south_palm_ground",
+    "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "stardewcraft:ginger_island_variant": 0.0
+      },
+      "model": "stardewcraft:item/ginger_island/ginger_south_palm_0"
+    },
+    {
+      "predicate": {
+        "stardewcraft:ginger_island_variant": 0.3333333333333333
+      },
+      "model": "stardewcraft:item/ginger_island/ginger_south_palm_1"
+    },
+    {
+      "predicate": {
+        "stardewcraft:ginger_island_variant": 0.6666666666666666
+      },
+      "model": "stardewcraft:item/ginger_island/ginger_south_palm_2"
+    },
+    {
+      "predicate": {
+        "stardewcraft:ginger_island_variant": 1.0
+      },
+      "model": "stardewcraft:item/ginger_island/ginger_south_palm_3"
+    }
+  ]
+}

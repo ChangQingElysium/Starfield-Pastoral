@@ -69,6 +69,42 @@ def normalize_packaged_soil(intake, resource_dir):
     return changed
 
 
+def repair_packaged_crop_space(intake, resource_dir):
+    """Lift the original bed lights above the two cells reserved for crop halves."""
+    path = resource_dir / 'structures' / 'greenhouse' / 'green_house_interior.schem'
+    schematic = intake.Schematic(path)
+    root = intake.read_nbt(path)
+    data = intake.value(root, 'Schematic', root)
+    blocks = intake.value(data, 'Blocks')
+    w, _, length = schematic.size
+    air = next(index for index, state in schematic.palette.items() if state == 'minecraft:air')
+    ids = list(schematic.ids)
+    moved = 0
+    for (x, y, z), state in schematic.entries():
+        if y != 0 or state.partition('[')[0] != 'stardewcraft:dirt':
+            continue
+        old = 2 * length * w + z * w + x
+        new = 3 * length * w + z * w + x
+        if schematic.palette[ids[old]] != 'minecraft:light[level=15,waterlogged=false]':
+            continue
+        if ids[new] not in (air, ids[old]):
+            raise ValueError(f'{path}: lighting destination obstructed at {(x, 3, z)}')
+        ids[new], ids[old] = ids[old], air
+        moved += 1
+    if moved:
+        encoded = bytearray()
+        for number in ids:
+            while number >= 128:
+                encoded.append((number & 127) | 128)
+                number >>= 7
+            encoded.append(number)
+        blocks['Data'] = (7, bytes(encoded))
+        intake.write_nbt(path, root)
+        if intake.read_nbt(path) != root:
+            raise ValueError(f'{path}: lighting NBT round-trip failed')
+    return moved
+
+
 def load_intake(script_dir):
     path = script_dir / 'import_farm_building_prefabs.py'
     spec = importlib.util.spec_from_file_location('farm_building_intake', path)
@@ -140,10 +176,15 @@ def main():
                         default=Path('scripts/data/greenhouse_prefab_report.json'))
     parser.add_argument('--normalize-packaged-soil', action='store_true',
                         help='Normalize only tracked template palettes; do not read source-dir')
+    parser.add_argument('--repair-packaged-crop-space', action='store_true',
+                        help='Lift only packaged interior bed lights; do not read source-dir')
     args = parser.parse_args()
 
     script_dir = Path(__file__).resolve().parent
     intake = load_intake(script_dir)
+    if args.repair_packaged_crop_space:
+        print(f'Relocated {repair_packaged_crop_space(intake, args.resource_dir)} greenhouse bed lights')
+        return
     if args.normalize_packaged_soil:
         print(json.dumps(normalize_packaged_soil(intake, args.resource_dir),
                          ensure_ascii=False, indent=2))
@@ -198,6 +239,7 @@ def main():
         packaged_schematics / 'green_house_interior.schem',
         {})
     normalize_packaged_soil(intake, args.resource_dir)
+    moved_lights = repair_packaged_crop_space(intake, args.resource_dir)
 
     report = {
         'built': {'size': list(built.size), 'manager': manager,
@@ -211,6 +253,7 @@ def main():
             'minecraft:dirt': 'stardewcraft:dirt',
         },
         'soil_replacements': SOIL_REPLACEMENTS,
+        'bed_lighting': {'moved_up_one_block': moved_lights, 'crop_clearance': 2},
         'verification': ('native NBT and packaged schematic round-trips; '
                          'idempotent soil palette-only normalization preserves '
                          'indices, properties and all non-palette NBT'),

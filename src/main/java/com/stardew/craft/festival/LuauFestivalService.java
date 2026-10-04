@@ -131,6 +131,8 @@ public final class LuauFestivalService {
     private static final Set<UUID> MAIN_EVENT_CUTSCENE_DONE = new HashSet<>();
     private static boolean mainEventActive;
     private static int mainEventReaction = 2;
+    /** 原版 governorTaste 逐件投入物累计的 Town 居民好感变化（对每位参与者各生效一次）。 */
+    private static int mainEventFriendshipDelta;
     private static Integer frozenMinute;
 
     private LuauFestivalService() {
@@ -599,7 +601,8 @@ public final class LuauFestivalService {
         ItemStack ingredient = held.copy();
         ingredient.setCount(1);
         LUAU_INGREDIENTS.put(player.getUUID(), ingredient);
-        if (!player.getAbilities().instabuild) {
+        // 原版 addItemToLuauSoup：幸运紫短裤投入后仍还给玩家，其余物品消耗 1 个
+        if (!player.getAbilities().instabuild && !isMayorShorts(held)) {
             held.shrink(1);
         }
         player.level().playSound(null, player.blockPosition(), SoundEvents.GENERIC_SPLASH, SoundSource.PLAYERS, 0.8F, 1.0F);
@@ -621,8 +624,16 @@ public final class LuauFestivalService {
         if (isMayorShorts(stack) || isSap(stack)) {
             return true;
         }
+        // 原版 Utility.highlightLuauSoupItems：edibility == -300 或 Category -7（料理）不可投入，仅紫短裤例外
+        if (stack.getItem() instanceof com.stardew.craft.item.cooking.CookingDishItem
+                || StardewItemDataApi.isCategory(stack, COOKING_CATEGORY)) {
+            return false;
+        }
         return StardewItemDataApi.resolve(stack).map(data -> data.edibility() > -300).orElse(false);
     }
+
+    private static final net.minecraft.resources.ResourceLocation COOKING_CATEGORY =
+            new net.minecraft.resources.ResourceLocation("stardewcraft", "cooking");
 
     private static boolean isMayorShorts(ItemStack stack) {
         return stack.is(ModItems.LUCKY_PURPLE_SHORTS.get());
@@ -727,10 +738,13 @@ public final class LuauFestivalService {
 
     private static int calculateGovernorReaction(ServerLevel level) {
         int likeLevel = 5;
+        int friendshipDelta = 0;
         for (ItemStack ingredient : LUAU_INGREDIENTS.values()) {
             int itemLevel = 5;
             if (isMayorShorts(ingredient)) {
-                return 6;
+                // 原版遇到紫短裤直接 break：此前逐件累计的好感变化保留
+                likeLevel = 6;
+                break;
             }
             var metadata = StardewItemDataApi.resolve(ingredient).orElse(null);
             if (metadata != null) {
@@ -739,15 +753,19 @@ public final class LuauFestivalService {
                 int edibility = metadata.edibility();
                 if ((quality >= 2 && price >= 160) || (quality == 1 && price >= 300 && edibility > 10)) {
                     itemLevel = 4;
+                    friendshipDelta += 120;
                 } else if (edibility >= 20 || price >= 100 || (price >= 70 && quality >= 1)) {
                     itemLevel = 3;
+                    friendshipDelta += 60;
                 } else if ((price > 20 && edibility >= 10) || (price >= 40 && edibility >= 5)) {
                     itemLevel = 2;
                 } else if (edibility >= 0) {
                     itemLevel = 1;
+                    friendshipDelta -= 50;
                 }
                 if (edibility > -300 && edibility < 0) {
                     itemLevel = 0;
+                    friendshipDelta -= 100;
                 }
             }
             if (itemLevel < likeLevel) {
@@ -757,6 +775,7 @@ public final class LuauFestivalService {
         if (likeLevel != 6 && LUAU_INGREDIENTS.size() < onlineParticipants(level).size()) {
             likeLevel = 5;
         }
+        mainEventFriendshipDelta = friendshipDelta;
         return likeLevel;
     }
 
@@ -835,7 +854,7 @@ public final class LuauFestivalService {
     private static void finishFestival(ServerLevel level) {
         List<ServerPlayer> participants = onlineParticipants(level);
         setSessionPhase(level, FestivalSessionPhase.ENDING);
-        applyFriendshipEffects(level, participants, mainEventReaction);
+        applyFriendshipEffects(level, participants, mainEventFriendshipDelta);
         jumpToFestivalEndTime(level, participants);
         for (ServerPlayer participant : participants) {
             participant.getPersistentData().putBoolean(TAG_PARTICIPATING, false);
@@ -871,25 +890,31 @@ public final class LuauFestivalService {
         }
     }
 
-    private static void applyFriendshipEffects(ServerLevel level, List<ServerPlayer> participants, int reaction) {
-        int delta = switch (reaction) {
-            case 4 -> 120;
-            case 3 -> 60;
-            case 1 -> -50;
-            case 0 -> -100;
-            default -> 0;
-        };
+    /** HomeRegion == "Town" 的可社交居民（Data/Characters；Marlon 不可社交、Kent 未实装，不在内）。 */
+    private static final Set<String> TOWN_REGION_NPCS = Set.of(
+        "abigail", "caroline", "clint", "demetrius", "willy", "elliott", "emily",
+        "evelyn", "george", "gus", "haley", "harvey", "jas", "jodi", "alex",
+        "leah", "lewis", "linus", "marnie", "maru", "pam", "penny", "pierre",
+        "robin", "sam", "sebastian", "shane", "vincent"
+    );
+
+    private static void applyFriendshipEffects(ServerLevel level, List<ServerPlayer> participants, int delta) {
         if (level == null || participants.isEmpty() || delta == 0) {
             return;
         }
         NpcFriendshipDataManager friendshipManager = NpcFriendshipDataManager.get(level);
         List<String> npcIds = NpcDataRegistry.tastes().keySet().stream()
+            .filter(TOWN_REGION_NPCS::contains)
             .filter(NpcSocialRules::canSocialize)
             .sorted()
             .toList();
         for (ServerPlayer participant : participants) {
             for (String npcId : npcIds) {
-                NpcFriendshipDataManager.FriendshipState state = friendshipManager.getOrCreate(participant.getUUID(), npcId);
+                // 原版仅影响玩家已有好感记录（已认识）的 Town 居民
+                NpcFriendshipDataManager.FriendshipState state = friendshipManager.get(participant.getUUID(), npcId);
+                if (state == null) {
+                    continue;
+                }
                 state.addPoints(delta, NpcInteractionService.getMaxFriendshipPointsFor(npcId));
                 NpcFriendshipRewardService.applyEligibleRewards(participant, npcId, state.points());
             }
@@ -918,6 +943,7 @@ public final class LuauFestivalService {
         MAIN_EVENT_CUTSCENE_DONE.clear();
         mainEventActive = false;
         mainEventReaction = 2;
+        mainEventFriendshipDelta = 0;
         stopTimeFreeze();
     }
 

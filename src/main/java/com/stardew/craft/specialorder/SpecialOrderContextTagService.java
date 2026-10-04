@@ -63,8 +63,9 @@ public final class SpecialOrderContextTagService {
             case "season_summer" -> season == 1;
             case "season_fall" -> season == 2;
             case "season_winter" -> season == 3;
-            case "event_992559" -> true;
-            default -> normalized.startsWith("mail_") && mailFlags.contains(normalized.substring("mail_".length()));
+            // event_<id>: the player has seen that event; the manager injects "event_<id>" entries into mailFlags.
+            default -> normalized.startsWith("mail_") && mailFlags.contains(normalized.substring("mail_".length()))
+                    || normalized.startsWith("event_") && mailFlags.contains(normalized);
         };
         return negated != result;
     }

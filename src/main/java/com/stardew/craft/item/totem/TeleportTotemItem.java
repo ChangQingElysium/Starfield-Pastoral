@@ -5,6 +5,7 @@ import com.stardew.craft.block.utility.totem.TotemPoleBlock;
 import com.stardew.craft.block.utility.totem.TotemType;
 import com.stardew.craft.blockentity.TotemPoleBlockEntity;
 import com.stardew.craft.core.ModDimensions;
+import com.stardew.craft.gingerisland.GingerIslandArrivalService;
 import com.stardew.craft.item.IStardewItem;
 import com.stardew.craft.sound.ModSounds;
 import com.stardew.craft.totem.TotemPoleTracker;
@@ -36,7 +37,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 /**
- * 传送图腾（消耗品）— Farm / Mountain / Beach / Desert 四种。
+ * 传送图腾（消耗品）— Farm / Mountain / Beach / Desert / Island。
  * 严格复刻 SDV Object.performUseAction + totemWarp + totemWarpForReal。
  */
 @SuppressWarnings("null")
@@ -61,6 +62,10 @@ public class TeleportTotemItem extends Item implements IStardewItem {
     public boolean performFreeWarp(ServerPlayer player) {
         if (player == null || !player.isAlive()) {
             return false;
+        }
+        if (totemType == TotemType.ISLAND) {
+            return GingerIslandArrivalService.prepare(player,
+                    destination -> performWarp(player, new ItemStack(this), false, destination));
         }
         if (totemType == TotemType.FARM
                 && com.stardew.craft.farm.FarmInstanceRegistry.get().getFarmForPlayer(player.getUUID()) == null) {
@@ -113,6 +118,8 @@ public class TeleportTotemItem extends Item implements IStardewItem {
     @Override
     @Nonnull
     public InteractionResult useOn(@Nonnull UseOnContext context) {
+        // Island travel always resolves the player's own farm, never a visitor's global pole binding.
+        if (totemType == TotemType.ISLAND) return InteractionResult.PASS;
         Level level = context.getLevel();
         BlockPos pos = context.getClickedPos();
         BlockState state = level.getBlockState(pos);
@@ -190,6 +197,14 @@ public class TeleportTotemItem extends Item implements IStardewItem {
         }
 
         if (player instanceof ServerPlayer sp) {
+            if (totemType == TotemType.ISLAND) {
+                boolean preparing = GingerIslandArrivalService.prepare(sp, destination -> {
+                    if (sp.getItemInHand(hand) == stack && !stack.isEmpty()) {
+                        performWarp(sp, stack, !sp.isCreative(), destination);
+                    }
+                });
+                return preparing ? InteractionResultHolder.consume(stack) : InteractionResultHolder.fail(stack);
+            }
             performWarp(sp, stack, !player.isCreative());
         }
 
@@ -197,6 +212,16 @@ public class TeleportTotemItem extends Item implements IStardewItem {
     }
 
     private void performWarp(ServerPlayer player, ItemStack stack, boolean consumeStack) {
+        performWarp(player, stack, consumeStack, null);
+    }
+
+    private void performWarp(ServerPlayer player, ItemStack stack, boolean consumeStack,
+                             @Nullable GingerIslandArrivalService.Destination islandDestination) {
+        if (totemType == TotemType.ISLAND && (islandDestination == null
+                || !GingerIslandArrivalService.isUsable(player, islandDestination))) {
+            GingerIslandArrivalService.unavailable(player);
+            return;
+        }
         Level level = player.level();
         level.playSound(null, player.blockPosition(), ModSounds.WARRIOR.get(), SoundSource.PLAYERS, 1.0f, 1.0f);
 
@@ -223,13 +248,22 @@ public class TeleportTotemItem extends Item implements IStardewItem {
             }
         }
 
-        if (consumeStack) {
+        if (consumeStack && totemType != TotemType.ISLAND) {
             stack.shrink(1);
         }
 
         level.playSound(null, player.blockPosition(), ModSounds.WAND.get(), SoundSource.PLAYERS, 1.0f, 1.0f);
         player.closeContainer();
         player.stopUsingItem();
+
+        if (islandDestination != null) {
+            // Object.performUseAction faces south before flip:false preserves that direction.
+            ModTeleport.to(player, islandDestination.level(player.server), islandDestination.feet(), 0.0F, 0.0F);
+            player.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
+            player.fallDistance = 0.0F;
+            if (consumeStack) stack.shrink(1);
+            return;
+        }
 
         ServerLevel stardewLevel = player.server.getLevel(ModDimensions.STARDEW_VALLEY);
         if (stardewLevel != null) {
@@ -351,9 +385,10 @@ public class TeleportTotemItem extends Item implements IStardewItem {
         }
         return switch (totemType) {
             case FARM -> player.blockPosition();
-            case MOUNTAIN -> new BlockPos(75, 81, -104);
+            case MOUNTAIN -> com.stardew.craft.totem.SystemTotemManager.MOUNTAIN_POLE_POS.south();
             case BEACH -> new BlockPos(44, 60, 94);
             case DESERT -> new BlockPos(-203, 64, -157);
+            case ISLAND -> throw new IllegalStateException("Island travel requires a constructed farm instance");
         };
     }
 

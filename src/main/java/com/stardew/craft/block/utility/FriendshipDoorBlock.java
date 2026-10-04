@@ -93,9 +93,16 @@ public class FriendshipDoorBlock extends DoorBlock implements EntityBlock, PortB
         }
 
         NpcFriendshipDataManager friendship = NpcFriendshipDataManager.get(serverPlayer.serverLevel());
+        var playerData = com.stardew.craft.player.PlayerDataManager.getPlayerData(serverPlayer);
         for (String npcId : door.getNpcIds()) {
+            // GameLocation.performAction "Door": once opened, mail doorUnlock<NPC> keeps it open for good.
+            String mailKey = "doorUnlock" + (npcId.isEmpty() ? npcId : Character.toUpperCase(npcId.charAt(0)) + npcId.substring(1));
             int points = friendship.getPointsForNpc(serverPlayer.getUUID(), npcId);
             if (points >= door.getRequiredPoints()) {
+                playerData.addMailFlag(mailKey);
+                return true;
+            }
+            if (playerData.hasMailFlag(mailKey)) {
                 return true;
             }
         }

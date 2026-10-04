@@ -1,3 +1,16 @@
 {
-  "parent": "stardewcraft:block/ginger_island/basic_window"
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "stardewcraft:item/ginger_island/original_f_1614",
+    "particle": "stardewcraft:block/ginger_island/basic_window_particle"
+  },
+  "display": {
+    "gui": {
+      "scale": [
+        1.0,
+        1.0,
+        1
+      ]
+    }
+  }
 }

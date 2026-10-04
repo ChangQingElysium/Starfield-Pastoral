@@ -54,7 +54,9 @@ public class RareSeedItem extends Item implements IStardewItem {
                 return InteractionResult.FAIL;
             }
 
-            level.setBlock(lowerPos, ModBlocks.SWEET_GEM_BERRY_CROP.get().defaultBlockState(), 3);
+            if (!com.stardew.craft.farming.CropPlanting.place(level, lowerPos, ModBlocks.SWEET_GEM_BERRY_CROP.get().defaultBlockState())) {
+                return InteractionResult.FAIL;
+            }
             level.playSound(null, lowerPos, SoundEvents.HOE_TILL, SoundSource.BLOCKS, 1.0F, 1.0F);
             context.getItemInHand().shrink(1);
         }

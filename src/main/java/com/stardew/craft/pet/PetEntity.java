@@ -29,7 +29,8 @@ public final class PetEntity extends PathfinderMob {
     public PetEntity(EntityType<? extends PetEntity> type, Level level) {
         super(type, level); setPersistenceRequired(); setInvulnerable(true);
         moveControl = new MoveControl(this) {
-            @Override public void tick() {
+            void napNow() { brain.napNow(); }
+    @Override public void tick() {
                 desired = Vec3.ZERO;
                 if (operation != Operation.MOVE_TO || !movingClip()) return;
                 operation = Operation.WAIT;
@@ -103,6 +104,7 @@ public final class PetEntity extends PathfinderMob {
         if (verticalCollision) setDeltaMovement(desired.x, 0, desired.z);
         calculateEntityAnimation(false);
     }
+    void napNow() { brain.napNow(); }
     @Override public void tick() { super.tick(); if (level() instanceof ServerLevel) { brain.tick(); if (!isRemoved()) feedback.tick(); } }
     @Override public void remove(RemovalReason reason) {
         if (level() instanceof ServerLevel server) PetService.remember(server, this);

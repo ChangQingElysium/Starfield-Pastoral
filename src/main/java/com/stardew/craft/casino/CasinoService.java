@@ -94,7 +94,7 @@ public final class CasinoService {
     }
 
     public static void openSlots(ServerPlayer player) {
-        SlotSession session = new SlotSession(nextSessionId(), new Random(seed(player, "slots")));
+        SlotSession session = new SlotSession(nextSessionId(), new Random());
         // The original minigame rolls once while opening, so the cabinet doesn't
         // start with three blank reels and the first paid spin uses the next roll.
         rollSlots(player, session);
@@ -106,7 +106,8 @@ public final class CasinoService {
         CasinoSession session = SESSIONS.remove(player.getUUID());
         if (session instanceof SlotSession slots && slots.awaitingCollection) {
             PlayerStardewData data = PlayerDataManager.getPlayerData(player);
-            data.addClubCoins(slots.bet * slots.payoutMultiplier);
+            // Original Slots.forceQuit refunds the current bet while spinning instead of paying out.
+            data.addClubCoins(slots.bet);
         }
     }
 

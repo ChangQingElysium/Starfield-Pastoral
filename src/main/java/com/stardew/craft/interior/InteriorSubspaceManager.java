@@ -1243,7 +1243,7 @@ public final class InteriorSubspaceManager {
 
     /** A separate soil upgrade must never trigger a layout/schematic replay in an old save. */
     private static void migrateGreenhouseSoil(ServerLevel level, InteriorSubspaceSavedData data) {
-        if (data.greenhouseSoilVersion >= 1) return;
+        if (data.greenhouseSoilVersion >= 2) return;
         com.stardew.craft.greenhouse.GreenhouseBuildings.migrateInteriorSoil(
                 level, GREENHOUSE_INTERIOR_ORIGIN);
         PlayerInteriorAllocator allocator = PlayerInteriorAllocator.get(level);
@@ -1251,7 +1251,7 @@ public final class InteriorSubspaceManager {
             com.stardew.craft.greenhouse.GreenhouseBuildings.migrateInteriorSoil(
                     level, allocator.getGreenhouseOrigin(owner));
         }
-        data.greenhouseSoilVersion = 1;
+        data.greenhouseSoilVersion = 2;
         data.setDirty();
     }
 

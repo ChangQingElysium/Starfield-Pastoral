@@ -21,6 +21,13 @@ public final class ModItemProperties {
 
 	@SuppressWarnings("null")
 	public static void register() {
+        for (var asset : com.stardew.craft.gingerisland.GingerIslandAssets.blocks()) {
+            var item = com.stardew.craft.gingerisland.GingerIslandBlocks.get(asset.id()).asItem();
+            if (!com.stardew.craft.gingerisland.GingerIslandVariantStacks.supports(item)) continue;
+            ItemProperties.register(item, new ResourceLocation(StardewCraft.MODID,
+                    com.stardew.craft.gingerisland.GingerIslandVariantStacks.MODEL_PROPERTY),
+                    (stack, level, entity, seed) -> com.stardew.craft.gingerisland.GingerIslandVariantStacks.modelValue(stack));
+        }
         ItemProperties.register(ModItems.MINE_CHEST.get(), new ResourceLocation(StardewCraft.MODID, "mine_chest_special"),
                 (stack, level, entity, seed) -> Boolean.TRUE.equals(PortItemData.getOrDefault(stack, com.stardew.craft.port.net.minecraft.core.component.DataComponents.BLOCK_STATE,
                         com.stardew.craft.port.net.minecraft.world.item.component.BlockItemStateProperties.EMPTY).get(com.stardew.craft.block.mine.MineChestBlock.SPECIAL)) ? 1 : 0);

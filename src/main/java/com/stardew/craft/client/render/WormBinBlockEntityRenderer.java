@@ -23,9 +23,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 
 import com.stardew.craft.port.PortVertex;
@@ -104,16 +102,7 @@ public class WormBinBlockEntityRenderer implements BlockEntityRenderer<WormBinBl
         float scale = innerW;
         poseStack.scale(scale, scale, 0.001f);
 
-        Minecraft.getInstance().getItemRenderer().renderStatic(
-            product,
-            ItemDisplayContext.GUI,
-            packedLight,
-            OverlayTexture.NO_OVERLAY,
-            poseStack,
-            buffer,
-            be.getLevel(),
-            0
-        );
+        BubbleItemRenderer.render(product, packedLight, poseStack, buffer, be.getLevel());
         poseStack.popPose();
 
         int bubbleCount = product.getCount();

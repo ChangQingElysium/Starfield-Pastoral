@@ -121,6 +121,17 @@ replay_pid*.log
 
 scripts/*
 !scripts/import_block_model.py
+!scripts/register_ginger_island_assets.py
+!scripts/ginger_island_placement.py
+!scripts/audit_ginger_island_bindings.py
+!scripts/check_ginger_island_assets.py
+!scripts/ginger_island_catalog.py
+!scripts/ginger_island_names.py
+!scripts/ginger_island_item_icons.py
+!scripts/audit_ginger_island_item_bounds.py
+!scripts/read_ginger_island_reference_world.py
+!scripts/study_ginger_island_terrain_reference.py
+!scripts/render_ginger_island_reference_world.py
 !scripts/import_farm_building_prefabs.py
 !scripts/import_greenhouse_prefabs.py
 !scripts/import_standard_farm.py
@@ -274,6 +285,10 @@ tools/npc/*
 /assets-src/**
 !/assets-src/npc/
 !/assets-src/npc/models.json
+!/assets-src/npc/gunther/
+!/assets-src/npc/gunther/gunther.bbmodel
+!/assets-src/npc/gunther/motion.json
+!/assets-src/npc/gunther/animation.md
 !/assets-src/npc/abigail/
 !/assets-src/npc/abigail/abigail.bbmodel
 !/assets-src/npc/abigail/motion.json
@@ -427,6 +442,7 @@ tools/npc/*
 !/tools/art/NativeEvelynActivityChecks.java
 !/tools/art/NativeGameboyChecks.java
 !/tools/art/NativeGeorgeChecks.java
+!/tools/art/NativeGiantTurtleChecks.java
 !/tools/art/NativeGusActivityChecks.java
 !/tools/art/NativeGusSupportChecks.java
 !/tools/art/NativeHairChecks.java
@@ -438,11 +454,17 @@ tools/npc/*
 !/tools/art/NpcModelOwnershipChecks.java
 !/tools/art/NpcMovementCapabilityChecks.java
 !/tools/art/SamScheduleChecks.java
+!/tools/art/export_giant_turtle.py
 
 # Local design diaries; public API/runtime documentation stays available.
 /docs/npc-reset-plan.md
 /docs/npc-system-audit-2026-09-10.md
 /docs/building-animal-addon-support-audit.md
+
+# Local reference-world research; not portable build or runtime inputs.
+/scripts/read_ginger_island_reference_world.py
+/scripts/render_ginger_island_reference_world.py
+/scripts/study_ginger_island_terrain_reference.py
 
 # Reproducible model compiler dependencies.
 !/requirements-build.txt

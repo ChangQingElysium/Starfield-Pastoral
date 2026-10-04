@@ -33,6 +33,9 @@ public class TerrainStairBlock extends com.stardew.craft.port.PortStairBlock imp
             super.createBlockStateDefinition(builder); builder.add(TerrainVariants.DIRT);
         }
     }
+    public static final class Sand extends TerrainStairBlock {
+        public Sand(Properties properties) { super(Kind.SAND, properties); }
+    }
     public static final class Cliff extends TerrainStairBlock {
         public Cliff(Properties properties) { super(Kind.CLIFF, properties); }
         @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {

@@ -1,3 +1,23 @@
 {
-  "parent": "stardewcraft:block/ginger_island/north_cliff_outer_corner"
+  "parent": "stardewcraft:block/ginger_island/north_cliff_outer_corner",
+  "overrides": [
+    {
+      "predicate": {
+        "stardewcraft:ginger_island_variant": 0.0
+      },
+      "model": "stardewcraft:block/ginger_island/north_cliff_outer_corner"
+    },
+    {
+      "predicate": {
+        "stardewcraft:ginger_island_variant": 0.5
+      },
+      "model": "stardewcraft:block/ginger_island/north_cliff_outer_corner_1"
+    },
+    {
+      "predicate": {
+        "stardewcraft:ginger_island_variant": 1.0
+      },
+      "model": "stardewcraft:block/ginger_island/north_cliff_outer_corner_2"
+    }
+  ]
 }

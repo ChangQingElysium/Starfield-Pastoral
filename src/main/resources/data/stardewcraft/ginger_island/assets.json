@@ -5,19 +5,22 @@
       "id": "ginger_parrot_perch",
       "model": "stardewcraft:block/ginger_island/parrot_perch",
       "kind": "decor",
-      "type": "building"
+      "type": "building",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_banana_altar_assembly",
       "model": "stardewcraft:block/ginger_island/banana_altar_assembly",
       "kind": "decor",
-      "type": "building"
+      "type": "building",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_island_torch_unlit",
       "model": "stardewcraft:block/ginger_island/island_torch_unlit",
       "kind": "altar_torch",
-      "type": "furniture"
+      "type": "furniture",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_gem_pedestal",
@@ -32,7 +35,9 @@
         "emerald": "stardewcraft:block/ginger_island/gem_pedestal_emerald",
         "ruby": "stardewcraft:block/ginger_island/gem_pedestal_ruby",
         "topaz": "stardewcraft:block/ginger_island/gem_pedestal_topaz"
-      }
+      },
+      "state_role": "interaction",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_gem_shrine_assembly",
@@ -43,7 +48,9 @@
       "state_models": {
         "false": "stardewcraft:block/ginger_island/gem_shrine_assembly",
         "true": "stardewcraft:block/ginger_island/gem_shrine_solved"
-      }
+      },
+      "state_role": "progress",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_marker_north",
@@ -56,55 +63,65 @@
         "1": "stardewcraft:block/ginger_island/marker_east",
         "2": "stardewcraft:block/ginger_island/marker_south",
         "3": "stardewcraft:block/ginger_island/marker_west"
-      }
+      },
+      "state_role": "appearance",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_hut_container_small",
       "model": "stardewcraft:block/ginger_island/hut_container_small",
       "kind": "decor",
-      "type": "furniture"
+      "type": "furniture",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_hut_container_tall",
       "model": "stardewcraft:block/ginger_island/hut_container_tall",
       "kind": "decor",
-      "type": "furniture"
+      "type": "furniture",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_hut_grass_bedding",
       "model": "stardewcraft:block/ginger_island/hut_grass_bedding",
       "kind": "decor",
-      "type": "furniture"
+      "type": "furniture",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_golden_walnut_bush_rework",
       "model": "stardewcraft:block/ginger_island/golden_walnut_bush_rework",
       "kind": "decor",
-      "type": "natural_grass"
+      "type": "natural_grass",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_slingshot_walnut_target",
       "model": "stardewcraft:block/ginger_island/slingshot_walnut_target",
       "kind": "decor",
-      "type": "building"
+      "type": "building",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_professor_boulder",
       "model": "stardewcraft:block/ginger_island/professor_boulder",
       "kind": "decor",
-      "type": "natural_rock"
+      "type": "natural_rock",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_dig_ammonite_relief",
       "model": "stardewcraft:block/ginger_island/dig_ammonite_relief",
       "kind": "decor",
-      "type": "natural_rock"
+      "type": "natural_rock",
+      "placement_mode": "wall"
     },
     {
       "id": "ginger_dig_fossil_fragments",
       "model": "stardewcraft:block/ginger_island/dig_fossil_fragments",
       "kind": "decor",
-      "type": "natural_rock"
+      "type": "natural_rock",
+      "placement_mode": "wall"
     },
     {
       "id": "ginger_field_office_fossil_backing",
@@ -116,7 +133,9 @@
         "0": "stardewcraft:block/ginger_island/field_office_fossil_backing_state_0",
         "1": "stardewcraft:block/ginger_island/field_office_fossil_backing_state_1",
         "2": "stardewcraft:block/ginger_island/field_office_fossil_backing_state_2"
-      }
+      },
+      "state_role": "progress",
+      "placement_mode": "wall"
     },
     {
       "id": "ginger_field_office_fossil_display",
@@ -128,43 +147,51 @@
         "0": "stardewcraft:block/ginger_island/field_office_fossil_display_state_0",
         "1": "stardewcraft:block/ginger_island/field_office_fossil_display_state_1",
         "2": "stardewcraft:block/ginger_island/field_office_fossil_display_state_2"
-      }
+      },
+      "state_role": "progress",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_field_office_radio",
       "model": "stardewcraft:block/ginger_island/field_office_radio",
       "kind": "decor",
-      "type": "furniture"
+      "type": "furniture",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_field_office_survey_board",
       "model": "stardewcraft:block/ginger_island/field_office_survey_board",
       "kind": "decor",
-      "type": "furniture"
+      "type": "furniture",
+      "placement_mode": "wall"
     },
     {
       "id": "ginger_field_office_canvas_floor",
       "model": "stardewcraft:block/ginger_island/field_office_canvas_floor",
       "kind": "decor",
-      "type": "building"
+      "type": "building",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_professor_work_desk",
       "model": "stardewcraft:block/ginger_island/professor_work_desk",
       "kind": "decor",
-      "type": "furniture"
+      "type": "furniture",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_professor_field_tent_assembly",
       "model": "stardewcraft:block/ginger_island/professor_field_tent_assembly",
       "kind": "decor",
-      "type": "building"
+      "type": "building",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_golden_parrot_perch",
       "model": "stardewcraft:block/ginger_island/golden_parrot_perch",
       "kind": "decor",
-      "type": "building"
+      "type": "building",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_north_cliff_block",
@@ -176,7 +203,9 @@
         "0": "stardewcraft:block/ginger_island/north_cliff_block",
         "1": "stardewcraft:block/ginger_island/north_cliff_block_1",
         "2": "stardewcraft:block/ginger_island/north_cliff_block_2"
-      }
+      },
+      "state_role": "appearance",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_north_cliff_inner_corner",
@@ -188,7 +217,9 @@
         "0": "stardewcraft:block/ginger_island/north_cliff_inner_corner",
         "1": "stardewcraft:block/ginger_island/north_cliff_inner_corner_1",
         "2": "stardewcraft:block/ginger_island/north_cliff_inner_corner_2"
-      }
+      },
+      "state_role": "appearance",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_north_cliff_outer_corner",
@@ -200,7 +231,9 @@
         "0": "stardewcraft:block/ginger_island/north_cliff_outer_corner",
         "1": "stardewcraft:block/ginger_island/north_cliff_outer_corner_1",
         "2": "stardewcraft:block/ginger_island/north_cliff_outer_corner_2"
-      }
+      },
+      "state_role": "appearance",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_north_cliff_slab",
@@ -212,7 +245,9 @@
         "0": "stardewcraft:block/ginger_island/north_cliff_slab",
         "1": "stardewcraft:block/ginger_island/north_cliff_slab_1",
         "2": "stardewcraft:block/ginger_island/north_cliff_slab_2"
-      }
+      },
+      "state_role": "appearance",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_north_cliff_stairs",
@@ -224,91 +259,107 @@
         "0": "stardewcraft:block/ginger_island/north_cliff_stairs",
         "1": "stardewcraft:block/ginger_island/north_cliff_stairs_1",
         "2": "stardewcraft:block/ginger_island/north_cliff_stairs_2"
-      }
+      },
+      "state_role": "appearance",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_island_red_cooker",
       "model": "stardewcraft:block/ginger_island/island_red_cooker",
       "kind": "kitchen",
-      "type": "utility"
+      "type": "utility",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_stove_fireplace",
       "model": "stardewcraft:block/ginger_island/stove_fireplace",
       "kind": "fireplace",
-      "type": "furniture"
+      "type": "furniture",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_tropical_bed",
       "model": "stardewcraft:block/ginger_island/tropical_bed",
       "kind": "bed",
-      "type": "furniture"
+      "type": "furniture",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_farm_return_obelisk",
       "model": "stardewcraft:block/ginger_island/farm_return_obelisk",
       "kind": "decor",
-      "type": "building"
+      "type": "building",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_island_beach_broken_timber",
       "model": "stardewcraft:block/ginger_island/island_beach_broken_timber",
       "kind": "decor",
-      "type": "building"
+      "type": "building",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_island_beach_driftwood_pile",
       "model": "stardewcraft:block/ginger_island/island_beach_driftwood_pile",
       "kind": "decor",
-      "type": "building"
+      "type": "building",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_farm_ruin_boarding",
       "model": "stardewcraft:block/ginger_island/farm_ruin_boarding",
       "kind": "decor",
-      "type": "building"
+      "type": "building",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_farm_thatch_corner",
       "model": "stardewcraft:block/ginger_island/farm_thatch_corner",
       "kind": "decor",
-      "type": "building"
+      "type": "building",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_farm_thatch_eave",
       "model": "stardewcraft:block/ginger_island/farm_thatch_eave",
       "kind": "decor",
-      "type": "building"
+      "type": "building",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_farm_thatch_ridge",
       "model": "stardewcraft:block/ginger_island/farm_thatch_ridge",
       "kind": "decor",
-      "type": "building"
+      "type": "building",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_farm_thatch_slope",
       "model": "stardewcraft:block/ginger_island/farm_thatch_slope",
       "kind": "decor",
-      "type": "building"
+      "type": "building",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_island_parrot_platform",
       "model": "stardewcraft:block/ginger_island/island_parrot_platform",
       "kind": "decor",
-      "type": "building"
+      "type": "building",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_birdie_hut",
       "model": "stardewcraft:block/ginger_island/birdie_hut",
       "kind": "decor",
-      "type": "building"
+      "type": "building",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_buried_pebble_ring",
       "model": "stardewcraft:block/ginger_island/buried_pebble_ring",
       "kind": "decor",
-      "type": "natural_rock"
+      "type": "natural_rock",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_buried_round_stone_a",
@@ -319,7 +370,9 @@
       "state_models": {
         "0": "stardewcraft:block/ginger_island/buried_round_stone_a",
         "1": "stardewcraft:block/ginger_island/buried_round_stone_b"
-      }
+      },
+      "state_role": "appearance",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_island_hint_white_flowers",
@@ -330,25 +383,31 @@
       "state_models": {
         "0": "stardewcraft:block/ginger_island/island_hint_white_flowers",
         "1": "stardewcraft:block/ginger_island/island_hint_yellow_flowers"
-      }
+      },
+      "passable": true,
+      "state_role": "appearance",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_island_sand_arc",
       "model": "stardewcraft:block/ginger_island/island_sand_arc",
       "kind": "decor",
-      "type": "natural_ground"
+      "type": "natural_ground",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_island_sand_cross",
       "model": "stardewcraft:block/ginger_island/island_sand_cross",
       "kind": "decor",
-      "type": "natural_ground"
+      "type": "natural_ground",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_island_sand_dots",
       "model": "stardewcraft:block/ginger_island/island_sand_dots",
       "kind": "decor",
-      "type": "natural_ground"
+      "type": "natural_ground",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_island_starfish_gold",
@@ -359,20 +418,25 @@
       "state_models": {
         "0": "stardewcraft:block/ginger_island/island_starfish_gold",
         "1": "stardewcraft:block/ginger_island/island_starfish_lilac",
-        "2": "stardewcraft:block/ginger_island/island_starfish_mint"
-      }
+        "2": "stardewcraft:block/ginger_island/island_starfish_mint",
+        "3": "stardewcraft:block/ginger_island/island_sand_starfish"
+      },
+      "state_role": "appearance",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_captain_cabin_shell",
       "model": "stardewcraft:block/ginger_island/captain_cabin_shell",
       "kind": "decor",
-      "type": "building"
+      "type": "building",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_crystal_cave_brazier",
       "model": "stardewcraft:block/ginger_island/crystal_cave_brazier",
       "kind": "decor",
-      "type": "furniture"
+      "type": "furniture",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_crystal_cave_statue",
@@ -383,103 +447,96 @@
       "state_models": {
         "false": "stardewcraft:block/ginger_island/crystal_cave_statue",
         "true": "stardewcraft:block/ginger_island/crystal_cave_statue_active"
-      }
+      },
+      "state_role": "interaction",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_gourmand_incense_burner",
       "model": "stardewcraft:block/ginger_island/gourmand_incense_burner",
       "kind": "decor",
-      "type": "furniture"
+      "type": "furniture",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_gourmand_woven_mat",
       "model": "stardewcraft:block/ginger_island/gourmand_woven_mat",
       "kind": "decor",
-      "type": "carpet"
+      "type": "carpet",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_sand_duggy_hole",
       "model": "stardewcraft:block/ginger_island/sand_duggy_hole",
       "kind": "decor",
-      "type": "natural_ground"
+      "type": "natural_ground",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_island_shipwreck",
       "model": "stardewcraft:block/ginger_island/island_shipwreck",
       "kind": "decor",
-      "type": "building"
+      "type": "building",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_resort_bar_drinks",
       "model": "stardewcraft:block/ginger_island/resort_bar_drinks",
       "kind": "decor",
-      "type": "furniture"
+      "type": "furniture",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_resort_carved_bar_counter",
       "model": "stardewcraft:block/ginger_island/resort_carved_bar_counter",
       "kind": "decor",
-      "type": "furniture"
+      "type": "furniture",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_resort_changing_entry",
       "model": "stardewcraft:block/ginger_island/resort_changing_entry",
       "kind": "decor",
-      "type": "building"
+      "type": "building",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_resort_leaf_wrapped_column",
       "model": "stardewcraft:block/ginger_island/resort_leaf_wrapped_column",
       "kind": "decor",
-      "type": "building"
+      "type": "building",
+      "catalog_owner": "ginger_resort_ruined_column",
+      "canonical_state": {
+        "repaired": "true"
+      },
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_resort_ruined_column",
-      "model": "stardewcraft:block/ginger_island/resort_ruined_column",
-      "kind": "decor",
-      "type": "building"
-    },
-    {
-      "id": "ginger_resort_tile_roof_high",
-      "model": "stardewcraft:block/ginger_island/resort_tile_roof_high",
-      "kind": "decor",
-      "type": "building"
-    },
-    {
-      "id": "ginger_resort_tile_roof_low",
-      "model": "stardewcraft:block/ginger_island/resort_tile_roof_low",
-      "kind": "decor",
-      "type": "building"
-    },
-    {
-      "id": "ginger_resort_tile_roof_mid",
-      "model": "stardewcraft:block/ginger_island/resort_tile_roof_mid",
-      "kind": "decor",
-      "type": "building"
-    },
-    {
-      "id": "ginger_resort_tile_roof_ridge",
-      "model": "stardewcraft:block/ginger_island/resort_tile_roof_ridge",
-      "kind": "decor",
-      "type": "building"
-    },
-    {
-      "id": "ginger_resort_tile_roof_wide_crown",
-      "model": "stardewcraft:block/ginger_island/resort_tile_roof_wide_crown",
-      "kind": "decor",
-      "type": "building"
+      "model": "stardewcraft:block/ginger_island/resort_ruined_column_state_false",
+      "kind": "state_decor",
+      "type": "building",
+      "state_property": "repaired",
+      "state_models": {
+        "false": "stardewcraft:block/ginger_island/resort_ruined_column_state_false",
+        "true": "stardewcraft:block/ginger_island/resort_ruined_column_state_true"
+      },
+      "state_role": "progress",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_resort_beach_chair",
       "model": "stardewcraft:block/ginger_island/resort_beach_chair",
       "kind": "beach_chair",
-      "type": "furniture"
+      "type": "furniture",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_resort_opening_notice",
       "model": "stardewcraft:block/ginger_island/resort_opening_notice",
       "kind": "decor",
-      "type": "furniture"
+      "type": "furniture",
+      "placement_mode": "wall"
     },
     {
       "id": "ginger_resort_towel_green",
@@ -490,7 +547,9 @@
       "state_models": {
         "0": "stardewcraft:block/ginger_island/resort_towel_green",
         "1": "stardewcraft:block/ginger_island/resort_towel_peach"
-      }
+      },
+      "state_role": "appearance",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_resort_umbrella_coral",
@@ -501,55 +560,65 @@
       "state_models": {
         "0": "stardewcraft:block/ginger_island/resort_umbrella_coral",
         "1": "stardewcraft:block/ginger_island/resort_umbrella_mint"
-      }
+      },
+      "state_role": "appearance",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_island_flute_block",
       "model": "stardewcraft:block/ginger_island/island_flute_block",
       "kind": "decor",
-      "type": "utility"
+      "type": "utility",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_mermaid_performance_rock",
       "model": "stardewcraft:block/ginger_island/mermaid_performance_rock",
       "kind": "decor",
-      "type": "natural_rock"
+      "type": "natural_rock",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_pirate_bar_assembly",
       "model": "stardewcraft:block/ginger_island/pirate_bar_assembly",
       "kind": "decor",
-      "type": "furniture"
+      "type": "furniture",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_pirate_square_stool",
       "model": "stardewcraft:block/ginger_island/pirate_square_stool",
       "kind": "chair",
-      "type": "furniture"
+      "type": "furniture",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_pirate_barrel_dark",
       "model": "stardewcraft:block/ginger_island/pirate_barrel_dark",
       "kind": "decor",
-      "type": "furniture"
+      "type": "furniture",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_pirate_cannon",
       "model": "stardewcraft:block/ginger_island/pirate_cannon",
       "kind": "decor",
-      "type": "furniture"
+      "type": "furniture",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_pirate_dartboard",
       "model": "stardewcraft:block/ginger_island/pirate_dartboard",
       "kind": "decor",
-      "type": "furniture"
+      "type": "furniture",
+      "placement_mode": "wall"
     },
     {
       "id": "ginger_pirate_skull_flag",
       "model": "stardewcraft:block/ginger_island/pirate_skull_flag",
       "kind": "decor",
-      "type": "furniture_painting"
+      "type": "furniture_painting",
+      "placement_mode": "wall"
     },
     {
       "id": "ginger_pirate_palm_planter_teal",
@@ -560,73 +629,90 @@
       "state_models": {
         "0": "stardewcraft:block/ginger_island/pirate_palm_planter_teal",
         "1": "stardewcraft:block/ginger_island/pirate_palm_planter_wine"
-      }
+      },
+      "state_role": "appearance",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_pirate_round_table",
       "model": "stardewcraft:block/ginger_island/pirate_round_table",
       "kind": "decor",
-      "type": "furniture"
+      "type": "furniture",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_pirate_cove_rowboat",
       "model": "stardewcraft:block/ginger_island/pirate_cove_rowboat",
       "kind": "decor",
-      "type": "building"
+      "type": "building",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_pirate_purple_rug",
       "model": "stardewcraft:block/ginger_island/pirate_purple_rug",
       "kind": "decor",
-      "type": "carpet"
+      "type": "carpet",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_pirate_treasure_table",
       "model": "stardewcraft:block/ginger_island/pirate_treasure_table",
       "kind": "decor",
-      "type": "furniture"
+      "type": "furniture",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_island_sand_starfish",
       "model": "stardewcraft:block/ginger_island/island_sand_starfish",
       "kind": "decor",
-      "type": "natural_aquatic"
+      "type": "natural_aquatic",
+      "catalog_owner": "ginger_island_starfish_gold",
+      "canonical_state": {
+        "variant": "3"
+      },
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_volcano_bone_spike",
       "model": "stardewcraft:block/ginger_island/volcano_bone_spike",
       "kind": "decor",
-      "type": "natural_rock"
+      "type": "natural_rock",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_volcano_dragon_skull",
       "model": "stardewcraft:block/ginger_island/volcano_dragon_skull",
       "kind": "decor",
-      "type": "natural_rock"
+      "type": "natural_rock",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_volcano_femur_in_rock",
       "model": "stardewcraft:block/ginger_island/volcano_femur_in_rock",
       "kind": "decor",
-      "type": "natural_rock"
+      "type": "natural_rock",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_volcano_rib_arch",
       "model": "stardewcraft:block/ginger_island/volcano_rib_arch",
       "kind": "decor",
-      "type": "natural_rock"
+      "type": "natural_rock",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_caldera_forge",
       "model": "stardewcraft:block/ginger_island/caldera_forge",
       "kind": "forge",
-      "type": "utility"
+      "type": "utility",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_caldera_monument",
       "model": "stardewcraft:block/ginger_island/caldera_monument",
       "kind": "decor",
-      "type": "building"
+      "type": "building",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_volcano_canister_174",
@@ -637,61 +723,72 @@
       "state_models": {
         "0": "stardewcraft:block/ginger_island/volcano_canister_174",
         "1": "stardewcraft:block/ginger_island/volcano_canister_175"
-      }
+      },
+      "state_role": "appearance",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_volcano_dwarf_cabinet",
       "model": "stardewcraft:block/ginger_island/volcano_dwarf_cabinet",
       "kind": "decor",
-      "type": "furniture"
+      "type": "furniture",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_volcano_dwarf_counter",
       "model": "stardewcraft:block/ginger_island/volcano_dwarf_counter",
       "kind": "decor",
-      "type": "furniture"
+      "type": "furniture",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_volcano_dwarf_display_table",
       "model": "stardewcraft:block/ginger_island/volcano_dwarf_display_table",
       "kind": "decor",
-      "type": "furniture"
+      "type": "furniture",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_volcano_dwarf_lantern",
       "model": "stardewcraft:block/ginger_island/volcano_dwarf_lantern",
       "kind": "decor",
-      "type": "furniture"
+      "type": "furniture",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_volcano_dwarf_slab",
       "model": "stardewcraft:block/ginger_island/volcano_dwarf_slab",
       "kind": "decor",
-      "type": "building"
+      "type": "building",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_volcano_magma_cap",
       "model": "stardewcraft:block/ginger_island/volcano_magma_cap",
       "kind": "decor",
-      "type": "forage"
+      "type": "forage",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_volcano_floor_switch",
       "model": "stardewcraft:block/ginger_island/volcano_floor_switch",
       "kind": "volcano_switch",
-      "type": "building"
+      "type": "building",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_volcano_parrot_perch",
       "model": "stardewcraft:block/ginger_island/volcano_parrot_perch",
       "kind": "decor",
-      "type": "building"
+      "type": "building",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_volcano_shortcut_hole",
       "model": "stardewcraft:block/ginger_island/volcano_shortcut_hole",
       "kind": "decor",
-      "type": "building"
+      "type": "building",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_volcano_spout_dry",
@@ -702,151 +799,187 @@
       "state_models": {
         "false": "stardewcraft:block/ginger_island/volcano_spout_dry",
         "true": "stardewcraft:block/ginger_island/volcano_spout"
-      }
+      },
+      "state_role": "interaction",
+      "placement_mode": "wall"
     },
     {
       "id": "ginger_volcano_well_pipe",
       "model": "stardewcraft:block/ginger_island/volcano_well_pipe",
       "kind": "decor",
-      "type": "building"
+      "type": "building",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_volcano_big_gear",
       "model": "stardewcraft:block/ginger_island/volcano_big_gear",
       "kind": "decor",
-      "type": "building"
+      "type": "building",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_volcano_bolt",
       "model": "stardewcraft:block/ginger_island/volcano_bolt",
       "kind": "decor",
-      "type": "building"
+      "type": "building",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_volcano_broken_pillar",
       "model": "stardewcraft:block/ginger_island/volcano_broken_pillar",
       "kind": "decor",
-      "type": "building"
+      "type": "building",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_volcano_floor_hatch",
       "model": "stardewcraft:block/ginger_island/volcano_floor_hatch",
       "kind": "decor",
-      "type": "building"
+      "type": "building",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_volcano_medium_gear",
       "model": "stardewcraft:block/ginger_island/volcano_medium_gear",
       "kind": "decor",
-      "type": "building"
+      "type": "building",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_volcano_rubble",
       "model": "stardewcraft:block/ginger_island/volcano_rubble",
       "kind": "decor",
-      "type": "natural_rock"
+      "type": "natural_rock",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_volcano_small_gear",
       "model": "stardewcraft:block/ginger_island/volcano_small_gear",
       "kind": "decor",
-      "type": "building"
+      "type": "building",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_volcano_vent_brick",
       "model": "stardewcraft:block/ginger_island/volcano_vent_brick",
       "kind": "decor",
-      "type": "building"
+      "type": "building",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_qi_challenge_board",
       "model": "stardewcraft:block/ginger_island/qi_challenge_board",
       "kind": "decor",
-      "type": "utility"
+      "type": "utility",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_qi_computer_desk",
       "model": "stardewcraft:block/ginger_island/qi_computer_desk",
       "kind": "decor",
-      "type": "furniture"
+      "type": "furniture",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_qi_dropbox",
       "model": "stardewcraft:block/ginger_island/qi_dropbox",
       "kind": "decor",
-      "type": "utility"
+      "type": "utility",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_physics_101",
       "model": "stardewcraft:block/ginger_island/physics_101",
       "kind": "decor",
-      "type": "furniture_painting"
+      "type": "furniture_painting",
+      "placement_mode": "wall"
     },
     {
       "id": "ginger_squirrel_figurine",
       "model": "stardewcraft:block/ginger_island/squirrel_figurine",
       "kind": "decor",
-      "type": "furniture"
+      "type": "furniture",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_bamboo_mat",
       "model": "stardewcraft:block/ginger_island/bamboo_mat",
       "kind": "decor",
-      "type": "carpet"
+      "type": "carpet",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_burlap_rug",
       "model": "stardewcraft:block/ginger_island/burlap_rug",
       "kind": "decor",
-      "type": "carpet"
+      "type": "carpet",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_oceanic_rug",
       "model": "stardewcraft:block/ginger_island/oceanic_rug",
       "kind": "decor",
-      "type": "carpet"
+      "type": "carpet",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_foliage_print",
       "model": "stardewcraft:block/ginger_island/foliage_print",
       "kind": "decor",
-      "type": "furniture_painting"
+      "type": "furniture_painting",
+      "placement_mode": "wall"
     },
     {
       "id": "ginger_lifesaver",
       "model": "stardewcraft:block/ginger_island/lifesaver",
       "kind": "decor",
-      "type": "furniture"
+      "type": "furniture",
+      "placement_mode": "wall"
     },
     {
       "id": "ginger_tropical_chair",
       "model": "stardewcraft:block/ginger_island/tropical_chair",
       "kind": "chair",
-      "type": "furniture"
+      "type": "furniture",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_tropical_tv",
       "model": "stardewcraft:block/ginger_island/tropical_tv",
       "kind": "tv",
-      "type": "furniture"
+      "type": "furniture",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_palm_wall_ornament_left",
       "model": "stardewcraft:block/ginger_island/palm_wall_ornament_left",
-      "kind": "decor",
-      "type": "furniture_painting"
+      "kind": "state_decor",
+      "type": "furniture_painting",
+      "state_property": "variant",
+      "state_models": {
+        "0": "stardewcraft:block/ginger_island/palm_wall_ornament_left",
+        "1": "stardewcraft:block/ginger_island/palm_wall_ornament_right"
+      },
+      "state_role": "appearance",
+      "placement_mode": "wall"
     },
     {
       "id": "ginger_palm_wall_ornament_right",
       "model": "stardewcraft:block/ginger_island/palm_wall_ornament_right",
       "kind": "decor",
-      "type": "furniture_painting"
+      "type": "furniture_painting",
+      "catalog_owner": "ginger_palm_wall_ornament_left",
+      "canonical_state": {
+        "variant": "1"
+      },
+      "placement_mode": "wall"
     },
     {
       "id": "ginger_volcano_photo",
       "model": "stardewcraft:block/ginger_island/volcano_photo",
       "kind": "decor",
-      "type": "furniture_painting"
+      "type": "furniture_painting",
+      "placement_mode": "wall"
     },
     {
       "id": "ginger_basic_window",
@@ -857,139 +990,170 @@
       "state_models": {
         "false": "stardewcraft:block/ginger_island/basic_window",
         "true": "stardewcraft:block/ginger_island/basic_window_night"
-      }
+      },
+      "state_role": "environment",
+      "placement_mode": "wall"
     },
     {
       "id": "ginger_jungle_torch",
       "model": "stardewcraft:block/ginger_island/jungle_torch",
       "kind": "decor",
-      "type": "furniture"
+      "type": "furniture",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_ostrich_incubator_empty",
       "model": "stardewcraft:block/ginger_island/ostrich_incubator_empty",
       "kind": "ostrich_incubator",
-      "type": "utility"
+      "type": "utility",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_heavy_tapper",
       "model": "stardewcraft:block/ginger_island/heavy_tapper",
       "kind": "heavy_tapper",
-      "type": "utility"
+      "type": "utility",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_hopper",
       "model": "stardewcraft:block/ginger_island/hopper",
       "kind": "decor",
-      "type": "utility"
+      "type": "utility",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_island_beached_seaweed",
       "model": "stardewcraft:block/ginger_island/island_beached_seaweed",
       "kind": "decor",
-      "type": "natural_aquatic"
+      "type": "natural_aquatic",
+      "passable": true,
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_island_shell_clam",
       "model": "stardewcraft:block/ginger_island/island_shell_clam",
       "kind": "decor",
-      "type": "natural_aquatic"
+      "type": "natural_aquatic",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_island_shell_cockle",
       "model": "stardewcraft:block/ginger_island/island_shell_cockle",
       "kind": "decor",
-      "type": "natural_aquatic"
+      "type": "natural_aquatic",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_island_bright_longleaf_assembly",
       "model": "stardewcraft:block/ginger_island/island_bright_longleaf_assembly",
       "kind": "decor",
-      "type": "natural_grass"
+      "type": "natural_grass",
+      "passable": true,
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_island_counting_purple_flowers",
       "model": "stardewcraft:block/ginger_island/island_counting_purple_flowers",
       "kind": "decor",
-      "type": "natural_flower"
+      "type": "natural_flower",
+      "passable": true,
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_island_broadleaf_rosette",
       "model": "stardewcraft:block/ginger_island/island_broadleaf_rosette",
       "kind": "decor",
-      "type": "natural_grass"
+      "type": "natural_grass",
+      "passable": true,
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_island_curled_fern",
       "model": "stardewcraft:block/ginger_island/island_curled_fern",
       "kind": "decor",
-      "type": "natural_grass"
+      "type": "natural_grass",
+      "passable": true,
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_volcano_floor",
       "model": "stardewcraft:block/ginger_island/volcano_floor",
       "kind": "volcano_floor",
-      "type": "natural_rock"
+      "type": "natural_rock",
+      "variant_count": 6,
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_volcano_wall",
       "model": "stardewcraft:block/ginger_island/volcano_wall",
       "kind": "cube",
-      "type": "natural_rock"
+      "type": "natural_rock",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_volcano_mud",
       "model": "stardewcraft:block/ginger_island/volcano_mud",
       "kind": "cube",
-      "type": "natural_ground"
+      "type": "natural_ground",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_caldera_floor",
       "model": "stardewcraft:block/ginger_island/caldera_floor",
       "kind": "caldera_floor",
-      "type": "natural_rock"
+      "type": "natural_rock",
+      "variant_count": 3,
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_caldera_wall",
       "model": "stardewcraft:block/ginger_island/caldera_wall",
       "kind": "cube",
-      "type": "natural_rock"
+      "type": "natural_rock",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_dwarf_brick",
       "model": "stardewcraft:block/ginger_island/dwarf_brick",
       "kind": "cube",
-      "type": "building"
+      "type": "building",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_dwarf_capstone",
       "model": "stardewcraft:block/ginger_island/dwarf_capstone",
       "kind": "cube",
-      "type": "building"
+      "type": "building",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_volcano_bridge_deck",
       "model": "stardewcraft:block/ginger_island/volcano_bridge_deck",
       "kind": "cube",
-      "type": "building"
+      "type": "building",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_volcano_bridge_rail",
       "model": "stardewcraft:block/ginger_island/volcano_bridge_rail",
       "kind": "cube",
-      "type": "building"
+      "type": "building",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_qi_room_tile",
       "model": "stardewcraft:block/ginger_island/qi_room_tile",
       "kind": "cube",
-      "type": "building"
+      "type": "building",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_volcano_cooled_lava",
       "model": "stardewcraft:block/ginger_island/volcano_cooled_lava",
       "kind": "cooled_lava",
-      "type": "natural_rock"
+      "type": "natural_rock",
+      "placement_mode": "floor"
     },
     {
       "id": "ginger_dig_site_bridge",
@@ -1000,7 +1164,64 @@
       "state_models": {
         "false": "stardewcraft:block/ginger_island/dig_site_bridge_state_false",
         "true": "stardewcraft:block/ginger_island/dig_site_bridge_state_true"
-      }
+      },
+      "state_role": "progress",
+      "placement_mode": "floor"
+    },
+    {
+      "id": "ginger_resort_roof",
+      "model": "stardewcraft:block/ginger_island/resort_roof_state_0",
+      "kind": "state_decor",
+      "type": "building",
+      "state_property": "variant",
+      "state_models": {
+        "0": "stardewcraft:block/ginger_island/resort_roof_state_0",
+        "1": "stardewcraft:block/ginger_island/resort_roof_state_1"
+      },
+      "state_role": "appearance",
+      "placement_mode": "floor"
+    },
+    {
+      "id": "ginger_south_palm",
+      "model": "stardewcraft:block/ginger_island/south_palm_state_0",
+      "kind": "state_decor",
+      "type": "natural_grass",
+      "state_property": "variant",
+      "state_models": {
+        "0": "stardewcraft:block/ginger_island/south_palm_state_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_state_1",
+        "2": "stardewcraft:block/ginger_island/south_palm_state_2",
+        "3": "stardewcraft:block/ginger_island/south_palm_state_3"
+      },
+      "state_role": "appearance",
+      "placement_mode": "cliff_palm"
+    },
+    {
+      "id": "ginger_willy_boat",
+      "model": "stardewcraft:block/ginger_island/willy_boat_state_false",
+      "kind": "state_decor",
+      "type": "building",
+      "state_property": "repaired",
+      "state_models": {
+        "false": "stardewcraft:block/ginger_island/willy_boat_state_false",
+        "true": "stardewcraft:block/ginger_island/willy_boat_state_true"
+      },
+      "state_role": "progress",
+      "placement_mode": "floor"
+    },
+    {
+      "id": "ginger_island_arrival_totem",
+      "model": "stardewcraft:block/ginger_island/island_arrival_totem",
+      "kind": "decor",
+      "type": "building",
+      "placement_mode": "floor"
+    },
+    {
+      "id": "ginger_music_crystal",
+      "model": "stardewcraft:block/ginger_island/music_crystal",
+      "kind": "decor",
+      "type": "natural_rock",
+      "placement_mode": "floor"
     }
   ]
 }

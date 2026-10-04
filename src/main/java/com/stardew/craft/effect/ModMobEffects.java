@@ -50,7 +50,7 @@ public final class ModMobEffects {
 
     /**
      * Statue of Blessings _0 — SDV Buffs.json Effects.Speed=0.5。
-     * 0.5 SDV tile/sec ≈ 25% MC 移速增益（与原 SpeedEffect 持平的换算）。
+     * 基础速度 5，速度每点 = MC 移速 +20%（5→6），故 +0.5 ≈ +10%。
      * 单独注册以保留独立图标 (mob_effect/statue_of_blessings_0.png)。
      */
     private static final class StatueBlessingSpeedEffect extends MobEffect {
@@ -59,7 +59,7 @@ public final class ModMobEffects {
             this.addAttributeModifier(
                 Attributes.MOVEMENT_SPEED,
                 com.stardew.craft.port.PortAttributeModifiers.uuidString(STATUE_SPEED_ID),
-                0.25D,
+                0.10D,
                 AttributeModifier.Operation.MULTIPLY_TOTAL
             );
         }
@@ -67,12 +67,12 @@ public final class ModMobEffects {
         private static final ResourceLocation STATUE_SPEED_ID =
                 new ResourceLocation(StardewCraft.MODID, "effect.statue_of_blessings_0");
 
-        // PORT(1.20.1): NeoForge curve amplifier -> 0.25 (constant). 1.20.1 has no curve; the amount for every
+        // PORT(1.20.1): NeoForge curve amplifier -> 0.10 (constant). 1.20.1 has no curve; the amount for every
         // amplifier comes from getAttributeModifierValue (also used by the potion tooltip).
         @Override
         public double getAttributeModifierValue(int amplifier, AttributeModifier modifier) {
             if (modifier.getId().equals(com.stardew.craft.port.PortAttributeModifiers.uuid(STATUE_SPEED_ID))) {
-                return 0.25D;
+                return 0.10D;
             }
             return super.getAttributeModifierValue(amplifier, modifier);
         }

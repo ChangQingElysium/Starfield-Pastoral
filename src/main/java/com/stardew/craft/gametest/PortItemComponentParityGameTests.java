@@ -68,6 +68,10 @@ public final class PortItemComponentParityGameTests {
     @GameTest(templateNamespace = "stardewcraft_port_dump", template = "empty")
     public static void independentNamesRoundTripAndCustomDataRemainInteroperable(GameTestHelper helper) {
         ItemStack stack = new ItemStack(Items.DIAMOND);
+        helper.assertTrue(!PortItemData.has(stack, DataComponents.ITEM_NAME)
+                && PortItemData.get(stack, DataComponents.ITEM_NAME) == null
+                && stack.getItem().getName(stack).equals(stack.getHoverName()),
+                "Ordinary hover-name fallback must not create an explicit item_name component");
         Component base = Component.literal("Base diamond");
         Component custom = Component.literal("Player's diamond");
         PortItemData.set(stack, DataComponents.CUSTOM_NAME, custom);
@@ -89,9 +93,14 @@ public final class PortItemComponentParityGameTests {
             helper.assertTrue(custom.equals(received.getHoverName()) && base.equals(PortItemData.get(received, DataComponents.ITEM_NAME)),
                     "Clearing custom_data erased reserved names");
             PortItemData.remove(received, DataComponents.ITEM_NAME);
-            helper.assertTrue(custom.equals(received.getHoverName()) && received.hasCustomHoverName(), "Clearing item_name erased player rename");
+            helper.assertTrue(custom.equals(received.getHoverName()) && received.hasCustomHoverName()
+                    && !PortItemData.has(received, DataComponents.ITEM_NAME)
+                    && PortItemData.get(received, DataComponents.ITEM_NAME) == null,
+                    "Clearing item_name must remove the component without erasing player rename");
             PortItemData.remove(received, DataComponents.CUSTOM_NAME);
-            helper.assertTrue(received.getTag() == null && ItemStack.isSameItemSameTags(received, new ItemStack(Items.DIAMOND)),
+            helper.assertTrue(received.getTag() == null && ItemStack.isSameItemSameTags(received, new ItemStack(Items.DIAMOND))
+                    && !PortItemData.has(received, DataComponents.ITEM_NAME)
+                    && received.getItem().getName(received).equals(received.getHoverName()),
                     "Cleared explicit names changed ordinary native NBT/stacking");
         } finally {
             network.release();

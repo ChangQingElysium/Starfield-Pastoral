@@ -129,7 +129,7 @@
                                     "query": {
                                       "type": "stardewcraft:item",
                                       "data": {
-                                        "item": "stardewcraft:gold_bar",
+                                        "item": "stardewcraft:iridium_bar",
                                         "count": 1
                                       }
                                     },
@@ -203,14 +203,14 @@
                                 {
                                   "type": "stardewcraft:item",
                                   "data": {
-                                    "item": "stardewcraft:deluxe_worm_bin",
+                                    "item": "stardewcraft:shrimp_cocktail",
                                     "count": 1
                                   }
                                 },
                                 {
                                   "type": "stardewcraft:item",
                                   "data": {
-                                    "item": "stardewcraft:fish_smoker",
+                                    "item": "stardewcraft:fish_stew",
                                     "count": 1
                                   }
                                 },
@@ -2142,7 +2142,7 @@
                                     "query": {
                                       "type": "stardewcraft:item",
                                       "data": {
-                                        "item": "stardewcraft:gold_bar",
+                                        "item": "stardewcraft:iridium_bar",
                                         "count": 1
                                       }
                                     },
@@ -2216,14 +2216,14 @@
                                 {
                                   "type": "stardewcraft:item",
                                   "data": {
-                                    "item": "stardewcraft:deluxe_worm_bin",
+                                    "item": "stardewcraft:shrimp_cocktail",
                                     "count": 1
                                   }
                                 },
                                 {
                                   "type": "stardewcraft:item",
                                   "data": {
-                                    "item": "stardewcraft:fish_smoker",
+                                    "item": "stardewcraft:fish_stew",
                                     "count": 1
                                   }
                                 },

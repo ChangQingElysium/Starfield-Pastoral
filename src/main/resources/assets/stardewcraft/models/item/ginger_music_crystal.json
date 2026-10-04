@@ -1,0 +1,16 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "stardewcraft:item/ginger_island/scene_cursors2_music_crystal",
+    "particle": "stardewcraft:block/ginger_island/music_crystal_particle"
+  },
+  "display": {
+    "gui": {
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    }
+  }
+}

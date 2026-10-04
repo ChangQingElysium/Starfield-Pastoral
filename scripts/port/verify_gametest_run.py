@@ -28,6 +28,8 @@ def verify(log: str, process_status: int) -> list[str]:
         errors.append("required-test success count exceeds completed tests")
     if "Failed to load datapacks" in log or "BUILD FAILED" in log:
         errors.append("runtime/build failure in log")
+    if "Couldn't parse element loot_tables:" in log:
+        errors.append("loot-table parse failure in log")
     fatal = (
         "Exception stopping the server", "Exception caught during firing event",
         "Exception in server tick loop", "Encountered an unexpected exception",

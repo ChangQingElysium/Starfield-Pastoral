@@ -10,7 +10,7 @@
 		"stardewcraft:textures/entity/npc_native/emily.png" : "normal_sprite:stardew_emily.png",
 		"stardewcraft:textures/entity/npc_native/evelyn.png" : "normal_sprite:stardew_evelyn.png",
 		"stardewcraft:textures/entity/npc_native/george.png" : "normal_sprite:stardew_george.png",
-		"stardewcraft:textures/entity/npc/gunther.png" : "normal_sprite:stardew_gunther.png",
+		"stardewcraft:textures/entity/npc_native/gunther.png" : "normal_sprite:stardew_gunther.png",
 		"stardewcraft:textures/entity/npc_native/gus.png" : "normal_sprite:stardew_gus.png",
 		"stardewcraft:textures/entity/npc_native/haley.png" : "normal_sprite:stardew_haley.png",
 		"stardewcraft:textures/entity/npc_native/harvey.png" : "normal_sprite:stardew_harvey.png",

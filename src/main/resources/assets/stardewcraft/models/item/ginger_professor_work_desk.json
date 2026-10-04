@@ -1,3 +1,7 @@
 {
-  "parent": "stardewcraft:block/ginger_island/professor_work_desk"
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "stardewcraft:item/ginger_island/ginger_professor_work_desk",
+    "particle": "stardewcraft:block/ginger_island/professor_work_desk_particle"
+  }
 }

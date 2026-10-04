@@ -573,37 +573,48 @@ public class HoeItem extends Item implements IStardewItem {
     @SuppressWarnings("null")
     private void rollBuriedDrops(ServerLevel level, BlockPos tilledPos, BlockState preTillState, ServerPlayer player, ItemStack tool) {
         if (com.stardew.craft.manager.ArtifactSpotDigService.isSpot(preTillState)) return;
-        double archaeologistMul = StardewEnchantments.has(tool, StardewEnchantments.ARCHAEOLOGIST) ? 2.0 : 1.0;
-        int generousCount = StardewEnchantments.has(tool, StardewEnchantments.GENEROUS) ? 2 : 1;
-        if (shouldRollWinterBuriedForage(level, tilledPos)
-                && level.random.nextDouble() < 0.08 * archaeologistMul) {
+        // GameLocation.checkForBuriedItem: the archaeologist enchantment does not touch these rolls;
+        // generous gives one extra copy with a 50% chance.
+        boolean generous = StardewEnchantments.has(tool, StardewEnchantments.GENEROUS);
+        if (shouldRollWinterBuriedForage(level, tilledPos) && level.random.nextDouble() < 0.08) {
             ItemStack drop = level.random.nextBoolean()
                     ? new ItemStack(ModItems.VANILLA_CATEGORY_ITEMS.get("winter_root").get())
                     : new ItemStack(ModItems.VANILLA_CATEGORY_ITEMS.get("snow_yam").get());
-            for (int i = 0; i < generousCount; i++) {
-                Block.popResource(level, tilledPos.above(), drop.copy());
+            Block.popResource(level, tilledPos.above(), drop.copy());
+            if (generous && level.random.nextDouble() < 0.5) {
+                Block.popResource(level, tilledPos.above(), new ItemStack(
+                        level.random.nextBoolean() ? ModItems.VANILLA_CATEGORY_ITEMS.get("winter_root").get()
+                                : ModItems.VANILLA_CATEGORY_ITEMS.get("snow_yam").get()));
             }
             return;
         }
-        // 普通锄地：少量概率出粘土/混合种子
-        if (level.random.nextDouble() < 0.03 * archaeologistMul) {
-            for (int i = 0; i < generousCount; i++) {
+        // Outdoor tiles roll clay (location ChanceForClay, default 3%).
+        if (isOutdoorsForBuriedItems(level, tilledPos) && level.random.nextDouble() < 0.03) {
+            Block.popResource(level, tilledPos.above(), new ItemStack(ModItems.CLAY.get()));
+            if (generous && level.random.nextDouble() < 0.5) {
                 Block.popResource(level, tilledPos.above(), new ItemStack(ModItems.CLAY.get()));
             }
             return;
         }
-        if (level.random.nextDouble() < 0.01 * archaeologistMul) {
-            for (int i = 0; i < generousCount; i++) {
+        if (level.random.nextDouble() < 0.01) {
+            Block.popResource(level, tilledPos.above(), new ItemStack(ModItems.MIXED_SEEDS.get()));
+            if (generous) {
                 Block.popResource(level, tilledPos.above(), new ItemStack(ModItems.MIXED_SEEDS.get()));
             }
         }
+    }
+
+    private static boolean isOutdoorsForBuriedItems(ServerLevel level, BlockPos pos) {
+        return level.dimension() == ModDimensions.STARDEW_VALLEY
+                && level.canSeeSky(pos.above())
+                && !com.stardew.craft.greenhouse.GreenhouseManager.isInGreenhouseInterior(level, pos);
     }
 
     private static boolean shouldRollWinterBuriedForage(ServerLevel level, BlockPos pos) {
         return level.dimension() == ModDimensions.STARDEW_VALLEY
                 && StardewTimeManager.get().getCurrentSeason() == 3
                 && level.canSeeSky(pos.above())
-                && com.stardew.craft.core.FarmAreaResolver.isInAnyFarm(level, pos)
+                && !com.stardew.craft.core.FarmAreaResolver.isInAnyFarm(level, pos)
                 && !com.stardew.craft.desert.DesertConstants.isInDesertRegion(pos)
                 && !com.stardew.craft.greenhouse.GreenhouseManager.isInGreenhouseInterior(level, pos);
     }

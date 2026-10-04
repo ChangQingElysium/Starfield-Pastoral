@@ -156,7 +156,8 @@ public final class OstrichIncubatorHomeGameTests {
             BuildingProtection.internal(() -> {
                 for (BlockPos pos : placed) level.setBlock(pos, Blocks.AIR.defaultBlockState(), QUIET_FLAGS);
             });
-            var fixtureBounds = new AABB(helper.absolutePos(BlockPos.ZERO), helper.absolutePos(new BlockPos(48, 24, 48)));
+            var fixtureBounds = new AABB(Vec3.atLowerCornerOf(helper.absolutePos(BlockPos.ZERO)),
+                    Vec3.atLowerCornerOf(helper.absolutePos(new BlockPos(48, 24, 48))));
             for (ItemEntity dropped : level.getEntitiesOfClass(ItemEntity.class, fixtureBounds)) dropped.discard();
             buildings.removeFarm(farm.getInstanceId());
             farms.deleteFarm(owner);

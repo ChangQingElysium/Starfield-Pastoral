@@ -1,0 +1,73 @@
+{
+  "parent": "minecraft:block/block",
+  "loader": "forge:composite",
+  "textures": {
+    "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
+  },
+  "children": {
+    "0": {
+      "parent": "stardewcraft:block/ginger_island/south_palm_ground",
+      "transform": {
+        "translation": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    }
+  },
+  "stardewcraft:collision": {
+    "mode": "custom",
+    "boxes": [
+      {
+        "from": [
+          2.0,
+          0.0,
+          2.0
+        ],
+        "to": [
+          14.0,
+          8.0,
+          14.0
+        ]
+      },
+      {
+        "from": [
+          3.0,
+          7.0,
+          3.0
+        ],
+        "to": [
+          13.0,
+          27.0,
+          13.0
+        ]
+      },
+      {
+        "from": [
+          3.0,
+          26.0,
+          3.0
+        ],
+        "to": [
+          13.0,
+          48.0,
+          13.0
+        ]
+      },
+      {
+        "from": [
+          3.0,
+          47.0,
+          3.0
+        ],
+        "to": [
+          13.0,
+          67.0,
+          13.0
+        ]
+      }
+    ],
+    "policy": "compound_palm_trunk"
+  }
+}

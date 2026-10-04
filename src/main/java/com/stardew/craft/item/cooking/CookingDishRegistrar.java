@@ -17,7 +17,7 @@ public final class CookingDishRegistrar {
         register(registry, "autumn_s_bounty", 350, 88, List.of(new CookingDishItem.DishBuff(CookingDishItem.BuffType.FORAGING, 2, 9240), new CookingDishItem.DishBuff(CookingDishItem.BuffType.DEFENSE, 2, 9240)), result);
         register(registry, "baked_fish", 100, 30, List.of(), result);
         register(registry, "banana_pudding", 260, 50, List.of(new CookingDishItem.DishBuff(CookingDishItem.BuffType.MINING, 1, 6020), new CookingDishItem.DishBuff(CookingDishItem.BuffType.LUCK, 1, 6020), new CookingDishItem.DishBuff(CookingDishItem.BuffType.DEFENSE, 1, 6020)), result);
-        register(registry, "bean_hotpot", 100, 50, List.of(new CookingDishItem.DishBuff(CookingDishItem.BuffType.MAX_ENERGY, 30, 8400), new CookingDishItem.DishBuff(CookingDishItem.BuffType.MAGNETIC_RADIUS, 3, 8400)), result);
+        register(registry, "bean_hotpot", 100, 50, List.of(new CookingDishItem.DishBuff(CookingDishItem.BuffType.MAX_ENERGY, 30, 8400), new CookingDishItem.DishBuff(CookingDishItem.BuffType.MAGNETIC_RADIUS, 32, 8400)), result);
         register(registry, "blackberry_cobbler", 260, 70, List.of(), result);
         register(registry, "blueberry_tart", 150, 50, List.of(), result);
         register(registry, "bread", 60, 20, List.of(), result);
@@ -32,7 +32,7 @@ public final class CookingDishRegistrar {
         register(registry, "crab_cakes", 275, 90, List.of(new CookingDishItem.DishBuff(CookingDishItem.BuffType.SPEED, 1, 20160), new CookingDishItem.DishBuff(CookingDishItem.BuffType.DEFENSE, 1, 20160)), result);
         register(registry, "cranberry_candy", 175, 50, List.of(), result);
         register(registry, "cranberry_sauce", 120, 50, List.of(new CookingDishItem.DishBuff(CookingDishItem.BuffType.MINING, 2, 4200)), result);
-        register(registry, "crispy_bass", 150, 36, List.of(new CookingDishItem.DishBuff(CookingDishItem.BuffType.MAGNETIC_RADIUS, 6, 8400)), result);
+        register(registry, "crispy_bass", 150, 36, List.of(new CookingDishItem.DishBuff(CookingDishItem.BuffType.MAGNETIC_RADIUS, 64, 8400)), result);
         register(registry, "dish_o_the_sea", 220, 60, List.of(new CookingDishItem.DishBuff(CookingDishItem.BuffType.FISHING, 3, 6720)), result);
         register(registry, "eggplant_parmesan", 200, 70, List.of(new CookingDishItem.DishBuff(CookingDishItem.BuffType.MINING, 1, 5600), new CookingDishItem.DishBuff(CookingDishItem.BuffType.DEFENSE, 3, 5600)), result);
         register(registry, "escargot", 125, 90, List.of(new CookingDishItem.DishBuff(CookingDishItem.BuffType.FISHING, 2, 20160)), result);
@@ -55,7 +55,7 @@ public final class CookingDishRegistrar {
         register(registry, "maki_roll", 220, 40, List.of(), result);
         register(registry, "mango_sticky_rice", 250, 45, List.of(new CookingDishItem.DishBuff(CookingDishItem.BuffType.DEFENSE, 3, 6020)), result);
         register(registry, "maple_bar", 300, 90, List.of(new CookingDishItem.DishBuff(CookingDishItem.BuffType.FARMING, 1, 20160), new CookingDishItem.DishBuff(CookingDishItem.BuffType.FISHING, 1, 20160), new CookingDishItem.DishBuff(CookingDishItem.BuffType.MINING, 1, 20160)), result);
-        register(registry, "miner_s_treat", 200, 50, List.of(new CookingDishItem.DishBuff(CookingDishItem.BuffType.MINING, 3, 6720), new CookingDishItem.DishBuff(CookingDishItem.BuffType.MAGNETIC_RADIUS, 3, 6720)), result);
+        register(registry, "miner_s_treat", 200, 50, List.of(new CookingDishItem.DishBuff(CookingDishItem.BuffType.MINING, 3, 6720), new CookingDishItem.DishBuff(CookingDishItem.BuffType.MAGNETIC_RADIUS, 32, 6720)), result);
         register(registry, "moss_soup", 80, 28, List.of(), result);
         register(registry, "omelet", 125, 40, List.of(), result);
         register(registry, "pale_broth", 150, 50, List.of(), result);

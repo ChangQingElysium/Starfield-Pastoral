@@ -179,7 +179,8 @@ public class WildTreeSeedManager extends SavedData {
 				@SuppressWarnings("null")
 				BlockPos target = pos.offset(Mth.nextInt(level.random, -3, 3), 0, Mth.nextInt(level.random, -3, 3));
 				com.stardew.craft.farm.FarmInstance sourceFarm = farmAt(pos);
-				if ((sourceFarm == null || sourceFarm.contains(target))
+				// Tree.dayUpdate: mature trees only seed new trees on the Farm.
+				if (sourceFarm != null && sourceFarm.contains(target)
 						&& tryPlaceSapling(level, target, def, sourceFarm)) {
 					TreeGrowthManager.get(level).addSapling(level, target);
 					changed = true;

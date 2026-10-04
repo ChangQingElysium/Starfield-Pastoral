@@ -53,7 +53,7 @@ public final class StardewHudLayoutEditorScreen extends Screen implements com.st
         boxes.clear();
         for (Config.HudElement element : EDITABLE_ELEMENTS) {
             int baseWidth = element == Config.HudElement.PLAYER_BARS ? StardewPlayerHud.baseWidth() : element.baseWidth();
-            int baseHeight = element.baseHeight();
+            int baseHeight = element == Config.HudElement.PLAYER_BARS ? StardewPlayerHud.baseHeight() : element.baseHeight();
             StardewHudLayout.Placement placement = StardewHudLayout.current(
                     element, width, height, baseWidth, baseHeight);
             boxes.put(element, new HudBox(placement.x(), placement.y(), placement.width(), placement.height(),

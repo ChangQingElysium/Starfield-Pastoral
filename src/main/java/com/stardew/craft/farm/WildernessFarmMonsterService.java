@@ -85,8 +85,12 @@ public final class WildernessFarmMonsterService {
         } else if (random.nextDouble() < 0.66D) {
             kind = com.stardew.craft.monster.FarmGolemRules.iridium(combat, true, random) ? "iridium_golem" : "wilderness_golem"; floor = 1;
         } else {
-            kind = "green_slime";
-            floor = combat >= 10 ? 140 : combat >= 8 ? 100 : combat >= 4 ? 41 : 1;
+            // Farm.spawnGroundMonsterOffScreen builds GreenSlime(virtual mine level 1/41/100/140): the colour
+            // comes from the level, which this project expresses with the slime entity type.
+            if (combat >= 10) { kind = "sludge"; floor = 140; }
+            else if (combat >= 8) { kind = "sludge"; floor = 100; }
+            else if (combat >= 4) { kind = "frost_jelly"; floor = 41; }
+            else { kind = "green_slime"; floor = 1; }
         }
         spawn(level, kind, spawn, floor, farmers, combat);
     }

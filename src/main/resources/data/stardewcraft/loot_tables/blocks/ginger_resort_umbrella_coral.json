@@ -18,7 +18,16 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "stardewcraft:ginger_resort_umbrella_coral"
+          "name": "stardewcraft:ginger_resort_umbrella_coral",
+          "functions": [
+            {
+              "function": "minecraft:copy_state",
+              "block": "stardewcraft:ginger_resort_umbrella_coral",
+              "properties": [
+                "variant"
+              ]
+            }
+          ]
         }
       ]
     }

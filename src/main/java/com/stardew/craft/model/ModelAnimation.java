@@ -9,4 +9,3 @@ public record ModelAnimation(String clip, boolean loop, boolean hold, double tim
     public static ModelAnimation state(String clip) { return new ModelAnimation(clip, false, true, Double.NaN, true); }
     public ModelAnimation withTime(double seconds) { return new ModelAnimation(clip, loop, hold, seconds, initiallyComplete); }
 }
-

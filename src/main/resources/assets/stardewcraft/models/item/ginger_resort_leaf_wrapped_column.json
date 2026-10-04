@@ -1,3 +1,7 @@
 {
-  "parent": "stardewcraft:block/ginger_island/resort_leaf_wrapped_column"
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "stardewcraft:item/ginger_island/ginger_resort_leaf_wrapped_column",
+    "particle": "stardewcraft:block/ginger_island/resort_leaf_wrapped_column_particle"
+  }
 }

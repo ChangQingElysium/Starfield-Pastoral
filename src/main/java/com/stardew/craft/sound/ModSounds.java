@@ -234,6 +234,7 @@ public final class ModSounds {
     // Mine
     public static final DeferredHolder<SoundEvent, SoundEvent> MUSIC_EARTH_MINE = register("music_earth_mine");
     public static final DeferredHolder<SoundEvent, SoundEvent> MUSIC_FROST_MINE = register("music_frost_mine");
+    public static final DeferredHolder<SoundEvent, SoundEvent> MUSIC_LAVA_MINE = register("music_lava_mine");
     // Indoor locations
     public static final DeferredHolder<SoundEvent, SoundEvent> MUSIC_SALOON = register("music_saloon");
     public static final DeferredHolder<SoundEvent, SoundEvent> MUSIC_WIZARD_TOWER = register("music_wizard_tower");

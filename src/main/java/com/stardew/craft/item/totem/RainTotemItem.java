@@ -51,9 +51,9 @@ public class RainTotemItem extends Item implements IStardewItem {
             return InteractionResultHolder.pass(stack);
         }
 
-        // SDV: 检查当前位置是否允许使用求雨图腾
-        // 在 Stardew 维度中始终允许
-        if (player.level().dimension() != ModDimensions.STARDEW_VALLEY) {
+        // Object.rainTotem: every Stardew location context (Default/Island/Desert, including the mines)
+        // allows the totem and ultimately drives the shared valley weather; other dimensions refuse it.
+        if (!player.level().dimension().location().getNamespace().equals(com.stardew.craft.StardewCraft.MODID)) {
             player.displayClientMessage(
                     Component.translatable("message.stardewcraft.rain_totem_denied"), true);
             return InteractionResultHolder.fail(stack);
@@ -64,8 +64,14 @@ public class RainTotemItem extends Item implements IStardewItem {
             return InteractionResultHolder.fail(stack);
         }
 
-        // SDV: 设置明天天气为 Rain
-        WeatherManager.setTomorrowWeather(stardewLevel, "Rain");
+        // SDV: 设置明天天气为 Rain（明天是节日则不生效，也没有“暴风雨正在酝酿”提示）
+        var clock = com.stardew.craft.time.StardewTimeManager.get();
+        boolean festivalTomorrow = clock.getCurrentDay() < 28
+                && com.stardew.craft.festival.FestivalRegistry.activeFestivals().stream()
+                        .anyMatch(festival -> festival.isDate(clock.getCurrentSeason(), clock.getCurrentDay() + 1));
+        if (!festivalTomorrow) {
+            WeatherManager.setTomorrowWeather(stardewLevel, "Rain");
+        }
 
         // SDV: 播放 thunder 音效
         level.playSound(null, player.blockPosition(), ModSounds.THUNDER.get(), SoundSource.PLAYERS, 1.0f, 1.0f);
@@ -104,8 +110,10 @@ public class RainTotemItem extends Item implements IStardewItem {
         }
 
         // SDV: 延迟 2000ms 后显示消息 "暴风雨正在酝酿中..."
-        player.displayClientMessage(
-                Component.translatable("message.stardewcraft.rain_totem_used"), true);
+        if (!festivalTomorrow) {
+            player.displayClientMessage(
+                    Component.translatable("message.stardewcraft.rain_totem_used"), true);
+        }
 
         return InteractionResultHolder.consume(stack);
     }

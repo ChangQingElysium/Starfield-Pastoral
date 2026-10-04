@@ -116,7 +116,7 @@ public final class SiloRuntimeGameTests {
                         PrefabDefinitions.world(tier.manager(),tier.anchor(),anchor,rotation),facing,claim);
                 var permit=UUID.randomUUID();data.recordPurchase(permit,farm.getInstanceId(),true,UtilityBuildings.SILO);
                 h.assertTrue(data.beginPrefab(record,permit,10)==BuildingWorldData.Result.SUCCESS,"Silo order rejected");record=data.find(record.id());
-                h.assertTrue(data.order(record.id()).remainingDays()==3,"User's three-day new construction rule changed");
+                h.assertTrue(data.order(record.id()).remainingDays()==2,"Silo build days must match vanilla (2)");
                 BuildingPlacementService.scaffold(level,record);RisingConstruction.clear(level,record.id());BuildingPlacementService.scaffold(level,record);
                 var workers=level.getEntitiesOfClass(RobinConstructionEntity.class,BuildingPlacementService.aabb(claim));
                 h.assertTrue(workers.size()==1 && !com.stardew.craft.port.PortJava.getFirst(workers).blockPosition().equals(record.manager()),"Worker inside manager");

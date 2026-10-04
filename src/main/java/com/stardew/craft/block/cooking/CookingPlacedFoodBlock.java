@@ -14,6 +14,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import com.stardew.craft.port.net.minecraft.world.ItemInteractionResult;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -96,6 +97,13 @@ public class CookingPlacedFoodBlock extends HorizontalDirectionalBlock implement
         return new CookingPlacedFoodBlockEntity(pos, state);
     }
 
+    @Override
+    public void setPlacedBy(Level level, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack) {
+        if (level.getBlockEntity(pos) instanceof CookingPlacedFoodBlockEntity food) {
+            food.setStoredFood(stack);
+        }
+    }
+
     // PORT(1.20.1): replay the 1.21 useItemOn/useWithoutItem dispatch.
     @Override
     public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player,
@@ -133,6 +141,9 @@ public class CookingPlacedFoodBlock extends HorizontalDirectionalBlock implement
     }
 
     private boolean pickup(Level level, BlockPos pos, Player player) {
+        if (!player.mayBuild() || !level.getBlockState(pos).is(this)) {
+            return false;
+        }
         ItemStack food = createFoodStack(level, pos);
         if (food.isEmpty()) {
             return false;

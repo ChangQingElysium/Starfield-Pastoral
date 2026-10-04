@@ -3,7 +3,6 @@ package com.stardew.craft.blockentity;
 import com.stardew.craft.port.PortItemStacks;
 import com.stardew.craft.time.StardewTimeManager;
 import com.stardew.craft.book.BookPowerEffects;
-import com.stardew.craft.core.ModTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -26,6 +25,8 @@ import net.minecraftforge.items.IItemHandler;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -159,6 +160,16 @@ public class CrabPotBlockEntity extends BlockEntity implements UtilityAutomation
 			isMagic = baitKey.equals("stardewcraft:magic_bait");
 		}
 
+		// 目标鱼饵（SpecificBait）：垃圾概率减半，并提高目标条目的几率。
+		String targetFishId = null;
+		if (bait.getItem() instanceof com.stardew.craft.item.SpecificBaitItem) {
+			String raw = com.stardew.craft.item.SpecificBaitItem.getTargetFishId(bait);
+			if (raw != null && !raw.isBlank()) {
+				targetFishId = raw;
+				junkChance /= 2.0;
+			}
+		}
+
 		// Deluxe / Wild bait: 垃圾概率减半
 		if (isDeluxe || isWild) {
 			junkChance /= 2.0;
@@ -170,7 +181,7 @@ public class CrabPotBlockEntity extends BlockEntity implements UtilityAutomation
 			result = FishingDataManager.get().getRandomJunk(random);
 		} else {
 			// 捕获蟹笼物品
-			result = getCrabPotCatch(level, pos, isOceanBiome, random, isMagic);
+			result = getCrabPotCatch(level, pos, isOceanBiome, random, isMagic, hasMariner, targetFishId);
 		}
 
 		// Deluxe 增加品质一档；Wild 有 25% 概率产出双倍
@@ -226,59 +237,74 @@ public class CrabPotBlockEntity extends BlockEntity implements UtilityAutomation
 
 
 
+	/** Data/Fish "trap" entries in source order (CrabPot.DayUpdate iterates them and rolls each one's own chance). */
+	private record TrapEntry(String itemId, double chance) {
+	}
+
+	private static final List<TrapEntry> TRAP_ENTRIES = List.of(
+			new TrapEntry("stardewcraft:lobster", 0.05),
+			new TrapEntry("stardewcraft:crab", 0.10),
+			new TrapEntry("stardewcraft:oyster", 0.15),
+			new TrapEntry("stardewcraft:clam", 0.15),
+			new TrapEntry("stardewcraft:shrimp", 0.20),
+			new TrapEntry("stardewcraft:cockle", 0.30),
+			new TrapEntry("stardewcraft:mussel", 0.35),
+			new TrapEntry("stardewcraft:snail", 0.25),
+			new TrapEntry("stardewcraft:crayfish", 0.35),
+			new TrapEntry("stardewcraft:periwinkle", 0.55));
+
 	/**
 	 * 获取蟹笼捕获物
-	 * 参考 CrabPot.DayUpdate 的选鱼逻辑
+	 * 参考 CrabPot.DayUpdate：按 Data/Fish 中 trap 条目顺序逐个用各自几率掷骰，首个命中即得；
+	 * Mariner 则收集所有适配条目后随机取一；目标鱼饵对目标条目几率 ×4/×3/×2。
 	 */
 	@SuppressWarnings("null")
-	private ItemStack getCrabPotCatch(Level level, BlockPos pos, boolean isOcean, RandomSource random, boolean ignoreSeasonTime) {
-		// 获取所有蟹笼物品
-		var registry = BuiltInRegistries.ITEM;
-		@SuppressWarnings("null")
-		var tagContents = registry.getTag(ModTags.Items.CRAB_POT_ITEMS);
-		
-		if (tagContents.isEmpty()) {
-			// 如果 tag 为空，返回默认物品
-			return new ItemStack(BuiltInRegistries.ITEM.get(
-				new ResourceLocation("stardewcraft", "crab")
-			));
-		}
-
-		// 根据钓鱼规则数据驱动过滤物品：
-		// - 总是匹配 biome（如果该物品在 FishingDataManager 中有规则）
-		// - 非魔法饵时：额外匹配 season/time/weather（同 selectFish 的规则）
+	private ItemStack getCrabPotCatch(Level level, BlockPos pos, boolean isOcean, RandomSource random,
+									  boolean ignoreSeasonTime, boolean mariner, String targetFishId) {
 		String season = getCurrentSeasonKey();
 		boolean isRaining = com.stardew.craft.weather.WeatherManager.isRaining(level);
 		int stardewTime = FishingDataManager.currentStardewTime();
 
-		@SuppressWarnings("null")
-		var items = tagContents.get().stream().toList().stream()
-				.filter(h -> {
-					try {
-						@SuppressWarnings("null")
-						ResourceLocation id = BuiltInRegistries.ITEM.getKey(h.value());
-						String itemId = id.toString();
-						if (!matchesCrabPotWaterType(itemId, isOcean)) return false;
-						var ruleOpt = FishingDataManager.get().getRuleByItemId(itemId);
-						if (ruleOpt.isEmpty()) return true;
-						var rule = ruleOpt.get();
-						if (!rule.matchesBiome(level.getBiome(pos))) return false;
-						if (ignoreSeasonTime) return true;
-						if (!rule.matchesSeason(season)) return false;
-						if (!rule.matchesWeather(isRaining)) return false;
-						return rule.matchesStardewTime(stardewTime);
-					} catch (Exception ex) {
-						return true;
+		List<Item> marinerList = new ArrayList<>();
+		for (TrapEntry entry : TRAP_ENTRIES) {
+			String itemId = entry.itemId();
+			if (!matchesCrabPotWaterType(itemId, isOcean)) {
+				continue;
+			}
+			Item item = BuiltInRegistries.ITEM.get(new ResourceLocation(itemId));
+			if (item == net.minecraft.world.item.Items.AIR) {
+				continue;
+			}
+			try {
+				var ruleOpt = FishingDataManager.get().getRuleByItemId(itemId);
+				if (ruleOpt.isPresent()) {
+					var rule = ruleOpt.get();
+					if (!rule.matchesBiome(level.getBiome(pos))) continue;
+					if (!ignoreSeasonTime
+							&& (!rule.matchesSeason(season) || !rule.matchesWeather(isRaining)
+							|| !rule.matchesStardewTime(stardewTime))) {
+						continue;
 					}
-				})
-				.toList();
-		if (items.isEmpty()) {
-			return ItemStack.EMPTY;
+				}
+			} catch (Exception ignored) {
+				// Rule lookup failures keep the entry eligible.
+			}
+			if (mariner) {
+				marinerList.add(item);
+				continue;
+			}
+			double chance = entry.chance();
+			if (targetFishId != null && targetFishId.equals(itemId)) {
+				chance *= chance < 0.1 ? 4 : (chance < 0.2 ? 3 : 2);
+			}
+			if (random.nextDouble() < chance) {
+				return new ItemStack(item);
+			}
 		}
-
-		int index = random.nextInt(items.size());
-		Item item = items.get(index).value();
-		return new ItemStack(item);
+		if (mariner && !marinerList.isEmpty()) {
+			return new ItemStack(marinerList.get(random.nextInt(marinerList.size())));
+		}
+		return FishingDataManager.get().getRandomJunk(random);
 	}
 
 	private static boolean matchesCrabPotWaterType(String itemId, boolean isOcean) {

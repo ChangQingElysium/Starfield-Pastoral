@@ -57,7 +57,8 @@ def block_display():
     return 'minecraft:block/block'
 
 
-def import_bbmodel(project, identifier, emissive_elements=()):
+def import_bbmodel(project, identifier, emissive_elements=(), *, texture_metadata=None,
+                   allow_inverted_hulls=False, allow_mesh=False):
     fmt = project.get('meta', {}).get('model_format')
     if fmt not in ('java_block', 'free', 'bedrock', 'geckolib', 'geckolib_model'):
         raise ValueError(f'Unsupported bbmodel format: {fmt}')
@@ -82,13 +83,18 @@ def import_bbmodel(project, identifier, emissive_elements=()):
         if not png.startswith(b'\x89PNG\r\n\x1a\n'):
             raise ValueError('Invalid embedded PNG')
         files[output_path(name, 'textures', '.png')] = png
-        if texture.get('height', 0) > texture.get('uv_height', texture.get('height', 0)):
-            raise ValueError('Animated texture needs explicit frame metadata; import a static texture or author its .mcmeta')
+        # Integer-upscaled item art is one image, not a vertical animation strip.
+        if texture.get('height', 0) > texture.get('width', 0) and texture.get('height', 0) * texture.get('uv_width', resolution['width']) > texture.get('width', 0) * texture.get('uv_height', resolution['height']):
+            metadata = (texture_metadata or {}).get(index)
+            if metadata is None or 'animation' not in metadata:
+                raise ValueError('Animated texture needs explicit frame metadata; import a static texture or author its .mcmeta')
+            files[output_path(name, 'textures', '.png.mcmeta')] = (json.dumps(metadata) + '\n').encode()
     if not textures:
         raise ValueError('Model has no textures')
     particle = next((str(i) for i, t in enumerate(project['textures']) if t.get('particle')), '0')
     textures['particle'] = textures[particle]
     converted = []
+    quads = []
     unmatched_emissive = set(emissive_elements)
 
     def walk(nodes, parent):
@@ -105,6 +111,42 @@ def import_bbmodel(project, identifier, emissive_elements=()):
             e = elements[node]
             if not e.get('export', True):
                 continue
+            if e.get('type') == 'mesh' and allow_mesh and not native:
+                # Explicitly authorized meshes use the already shipped quad
+                # loader. Preserve their local vertices, winding and UVs.
+                matrix = mul(parent, mul(translate(e.get('origin', [0, 0, 0])),
+                                        rotate([0, 0, 0], e.get('rotation', [0, 0, 0]))))
+                for face in e.get('faces', {}).values():
+                    ref = face.get('texture')
+                    if ref is None or not face.get('enabled', True):
+                        continue
+                    key = aliases.get(ref)
+                    if key is None:
+                        raise ValueError(f'Unknown mesh texture {ref}')
+                    order = face['vertices']
+                    if len(order) != 4 or len(set(order)) != 4:
+                        raise ValueError('Authorized static mesh requires four distinct vertices per face')
+                    tex = project['textures'][int(key)]
+                    width = tex.get('uv_width') or resolution['width']
+                    height = tex.get('uv_height') or resolution['height']
+                    vertices = []
+                    for vertex in order:
+                        point = e['vertices'][vertex]
+                        uv = face['uv'][vertex]
+                        if len(point) != 3 or len(uv) != 2 or not all(math.isfinite(v) for v in point + uv):
+                            raise ValueError('Invalid authorized mesh vertex or UV')
+                        if not (0 <= uv[0] <= width and 0 <= uv[1] <= height):
+                            raise ValueError('Authorized mesh UV is outside its texture canvas')
+                        vertices.extend([sum(matrix[a][j] * point[j] for j in range(3)) + matrix[a][3]
+                                         for a in range(3)] + [uv[0] / width, uv[1] / height])
+                    a, b, c = [vertices[start:start + 3] for start in (0, 5, 10)]
+                    ab, ac = [b[i] - a[i] for i in range(3)], [c[i] - a[i] for i in range(3)]
+                    normal = [ab[1]*ac[2]-ab[2]*ac[1], ab[2]*ac[0]-ab[0]*ac[2], ab[0]*ac[1]-ab[1]*ac[0]]
+                    if sum(value * value for value in normal) <= 1e-14:
+                        raise ValueError('Degenerate authorized mesh face')
+                    quads.append({'vertices': vertices, 'texture': '#' + key,
+                                  'shade': e.get('shade', True)})
+                continue
             if e.get('type', 'cube') != 'cube':
                 raise ValueError('Only cuboid generic models are supported; mesh elements must be converted explicitly')
             if e.get('box_uv'):
@@ -112,7 +154,8 @@ def import_bbmodel(project, identifier, emissive_elements=()):
             inflate = e.get('inflate', 0)
             part = {'from': [x - inflate for x in e['from']], 'to': [x + inflate for x in e['to']], 'faces': {}}
             # Java accepts reversed endpoints for authored inward-facing outline shells.
-            if not native and any(part['to'][i] < part['from'][i] for i in range(3)):
+            if not native and any(part['to'][i] < part['from'][i] for i in range(3)) and not (
+                    allow_inverted_hulls and all(part['to'][i] < part['from'][i] for i in range(3))):
                 raise ValueError('Inverted cuboid bounds')
             angles = e.get('rotation', [0, 0, 0])
             if native:
@@ -153,16 +196,21 @@ def import_bbmodel(project, identifier, emissive_elements=()):
                 if not 0 <= emission <= 15:
                     raise ValueError('Element emission must be between 0 and 15')
                 part['shade'] = False
-                part['neoforge_data'] = {'block_light': emission, 'sky_light': emission, 'ambient_occlusion': False}
+                # Forge's BlockModel parser uses forge_data; our shared imported
+                # geometry loader explicitly retains the neoforge_data contract.
+                part['forge_data' if native else 'neoforge_data'] = {
+                    'block_light': emission, 'sky_light': emission, 'ambient_occlusion': False}
             converted.append(part)
 
     walk(project.get('outliner') or list(elements), identity())
-    if not converted:
+    if not converted and not quads:
         raise ValueError('No exported cuboids')
     if unmatched_emissive:
         raise ValueError('Emissive elements not exported: ' + ', '.join(sorted(unmatched_emissive)))
     model = {'parent': block_display(), 'render_type': 'minecraft:cutout', 'textures': textures}
     model['elements' if native else 'parts'] = converted
+    if quads:
+        model['quads'] = quads
     if not native:
         model['loader'] = 'stardewcraft:geometry'
     if project.get('display'):

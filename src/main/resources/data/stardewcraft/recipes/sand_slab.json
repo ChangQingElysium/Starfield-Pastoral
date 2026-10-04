@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "###"
+  ],
+  "key": {
+    "#": {
+      "item": "stardewcraft:sand"
+    }
+  },
+  "result": {
+    "item": "stardewcraft:sand_slab",
+    "count": 6
+  }
+}

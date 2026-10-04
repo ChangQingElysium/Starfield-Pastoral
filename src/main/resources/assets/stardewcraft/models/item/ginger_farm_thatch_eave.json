@@ -1,3 +1,7 @@
 {
-  "parent": "stardewcraft:block/ginger_island/farm_thatch_eave"
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "stardewcraft:item/ginger_island/ginger_farm_thatch_eave",
+    "particle": "stardewcraft:block/ginger_island/farm_thatch_eave_particle"
+  }
 }

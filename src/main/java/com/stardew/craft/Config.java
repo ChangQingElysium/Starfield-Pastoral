@@ -23,6 +23,7 @@ public final class Config {
     public static final ForgeConfigSpec.BooleanValue ENABLE_WEAPON_SPECIAL_EFFECTS = CLIENT.ENABLE_WEAPON_SPECIAL_EFFECTS;
     public static final ForgeConfigSpec.BooleanValue ENABLE_WEAPON_POST_EFFECTS = CLIENT.ENABLE_WEAPON_POST_EFFECTS;
     public static final ForgeConfigSpec.BooleanValue SHOW_MONSTER_HP_BAR = CLIENT.SHOW_MONSTER_HP_BAR;
+    public static final ForgeConfigSpec.BooleanValue USE_LEGACY_PLAYER_BARS = CLIENT.USE_LEGACY_PLAYER_BARS;
     public static final ForgeConfigSpec.BooleanValue ENABLE_STARDEW_FONTS = CLIENT.ENABLE_STARDEW_FONTS;
     public static final ForgeConfigSpec.BooleanValue USE_CHINESE_SMOOTH_FONT = CLIENT.USE_CHINESE_SMOOTH_FONT;
 
@@ -38,6 +39,7 @@ public final class Config {
         public final ForgeConfigSpec.BooleanValue ENABLE_WEAPON_SPECIAL_EFFECTS;
         public final ForgeConfigSpec.BooleanValue ENABLE_WEAPON_POST_EFFECTS;
         public final ForgeConfigSpec.BooleanValue SHOW_MONSTER_HP_BAR;
+        public final ForgeConfigSpec.BooleanValue USE_LEGACY_PLAYER_BARS;
         public final ForgeConfigSpec.BooleanValue ENABLE_STARDEW_FONTS;
         public final ForgeConfigSpec.BooleanValue USE_CHINESE_SMOOTH_FONT;
         public final ForgeConfigSpec.IntValue READING_TEXT_SCALE_PERCENT;
@@ -92,6 +94,10 @@ public final class Config {
             builder.pop();
 
             builder.push("hud");
+            USE_LEGACY_PLAYER_BARS = builder
+                    .comment("Use the original continuous health and energy bars instead of the ten-icon HUD. Applies immediately and only to this client.")
+                    .translation("config.stardewcraft.client.use_legacy_player_bars")
+                    .define("useLegacyPlayerBars", false);
             HUD_SCALE_PERCENT = builder
                     .comment("Scale of the Stardew time, date, money, and quest HUD")
                     .translation("config.stardewcraft.client.hud_scale")

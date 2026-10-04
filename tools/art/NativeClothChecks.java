@@ -56,11 +56,17 @@ public final class NativeClothChecks {
         // Cast through actual final cloth triangles at points along each posed leg's edges.
         // Stay above the hem and below the waist overlap, where the garment must cover the legs.
         boolean skirt=settings.kind().equals("skirt");
-        for(var q:m.quads())if(p.isLegBone(q.bone())) {
+        var hipSurface=p.surfaceVertices(matrices);
+        for(int qi=0;qi<m.quads().size();qi++)if(p.isLegBone(m.quads().get(qi).bone())) {
+            var q=m.quads().get(qi);
             Matrix4f relative=new Matrix4f(inverse).mul(matrices[q.bone()]);
             for(int edge=0;edge<4;edge++)for(int sample=0;sample<5;sample++) {
                 var a=q.vertices()[edge];var b=q.vertices()[(edge+1)%4];float t=sample/4F;
-                var v=relative.transformPosition(new Vector3f(a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t));
+                Vector3f v;
+                if(NativeNpcCloth.hipBound(m,q)) {
+                    var av=hipSurface[qi][edge];var bv=hipSurface[qi][(edge+1)%4];
+                    v=inverse.transformPosition(new Vector3f(av[0]+(bv[0]-av[0])*t,av[1]+(bv[1]-av[1])*t,av[2]+(bv[2]-av[2])*t));
+                } else v=relative.transformPosition(new Vector3f(a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t));
                 if(v.y<settings.hemY()+hemInset || v.y>Math.min(12.8,settings.anchorY()-attachmentInset))continue;
                 float min=Float.POSITIVE_INFINITY,max=Float.NEGATIVE_INFINITY;
                 for(var face:surface)for(int tri=0;tri<2;tri++) {
@@ -95,20 +101,24 @@ public final class NativeClothChecks {
     }
     public static void verify(NativeNpcModel m,String id) {
         coveragePart=m.profile().cloth().clearancePart();
-        hemInset=coveragePart!=null || m.profile().cloth().kind().equals("apron")?.12F:1.3F;
+        boolean shortGarment=m.profile().cloth().anchorY()-m.profile().cloth().hemY()<=4;
+        hemInset=shortGarment || coveragePart!=null || m.profile().cloth().kind().equals("apron")?.12F:1.3F;
         // Long cardigans cover the upper thigh too; do not exempt the former waist-overlap band.
-        attachmentInset=id.equals("evelyn") || m.profile().cloth().kind().equals("apron")?.1F:2F;
+        attachmentInset=shortGarment || id.equals("evelyn") || m.profile().cloth().kind().equals("apron")?.1F:2F;
         checked=0;var p=new NativeNpcPose(m);var rig=m.profile().attentionRig();
         if(Set.of("skirt","mantle").contains(m.profile().cloth().kind())) {
-            p.addPosition("leg_right",0,-100,0);p.addPosition("leg_left",0,-100,0);
-            var cloth=p.clothVertices();var transforms=p.matrices();
+            // Remove leg surfaces for a true no-contact case. Translating thigh
+            // bones does not remove pants sewn to the pelvis by hip skinning.
+            var bare=new NativeNpcModel(m.version(),m.texture(),m.bones(),
+                    m.quads().stream().filter(q->!p.isLegBone(q.bone())).toList(),m.clips(),m.profile());
+            var barePose=new NativeNpcPose(bare);
+            var cloth=barePose.clothVertices();var transforms=barePose.matrices();
             for(int q=0;q<cloth.length;q++)if(cloth[q]!=null)for(int v=0;v<4;v++) {
-                var rest=m.quads().get(q).vertices()[v];
-                var expected=transforms[m.quads().get(q).bone()].transformPosition(new Vector3f(rest[0],rest[1],rest[2]));
+                var rest=bare.quads().get(q).vertices()[v];
+                var expected=transforms[bare.quads().get(q).bone()].transformPosition(new Vector3f(rest[0],rest[1],rest[2]));
                 if(expected.distance(new Vector3f(cloth[q][v]))>.0001)
                     throw new AssertionError("Skirt expands without contact");
             }
-            p.reset();
         }
         // Resolve rapid contact changes before comparing full and half time steps.
         // Coarse 1/120 samples can mistake continuous acceleration for a positional pop.

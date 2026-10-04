@@ -6,7 +6,6 @@ import com.stardew.craft.core.ModDimensions;
 import com.stardew.craft.core.ModMiningDimensions;
 import com.stardew.craft.core.ModTags;
 import com.stardew.craft.cutscene.server.CombatRescueCutsceneCoordinator;
-import com.stardew.craft.item.equipment.StardewBootsItem;
 import com.stardew.craft.item.equipment.StardewRingItem;
 import com.stardew.craft.item.weapon.StardewWeaponItem;
 import com.stardew.craft.network.payload.CombatRescueOutcomePayload;
@@ -638,8 +637,10 @@ public final class PassOutService {
     }
 
     /**
-     * SDV 原版：工具、武器、戒指、靴子不可丢失；
-     * 非星露谷物品不参与丢失；标记 prevent_loss_on_death 的物品不可丢失。
+     * 原版 Item.CanBeLostOnDeath：canBeTrashed 且无 prevent_loss_on_death。
+     * 近战武器（镰刀除外，Galaxy Sword / Infinity 三件在 Weapons.json 标 false）与弹弓可丢，靴子可丢；
+     * 锄头、斧头、镐、浇水壶、钓竿与淘金盘（Tools.json 全标 false）、戒指（Ring.CanBeLostOnDeath=false）不丢。
+     * 非星露谷物品不参与丢失。
      */
     private static boolean canBeLostOnDeath(ItemStack stack) {
         var item = stack.getItem();
@@ -648,21 +649,25 @@ public final class PassOutService {
         if (!StardewCraft.MODID.equals(id.getNamespace())) return false;
         // 数据标签黑名单（SDV prevent_loss_on_death 等价）
         if (stack.is(ModTags.Items.PREVENT_LOSS_ON_DEATH)) return false;
-        // 星露谷工具（锄头、斧头、镐、浇水壶、钓竿、镰刀、淘金盘）
+        // 镰刀
+        if (item instanceof com.stardew.craft.item.tool.ScytheItem) return false;
+        // 武器：Weapons.json 中 CanBeLostOnDeath=false 的 Galaxy Sword 与 Infinity 三件
+        if (item instanceof StardewWeaponItem || item instanceof com.stardew.craft.item.weapon.StardewDaggerItem
+                || item instanceof com.stardew.craft.item.weapon.StardewClubItem
+                || item instanceof com.stardew.craft.item.weapon.SlingshotItem) {
+            String path = id.getPath();
+            return !(path.equals("galaxy_sword") || path.equals("infinity_blade")
+                    || path.equals("infinity_gavel") || path.equals("infinity_dagger"));
+        }
+        // 其余星露谷工具：Tools.json 全部 CanBeLostOnDeath=false
         if (item instanceof net.minecraft.world.item.TieredItem) return false;
         if (item instanceof com.stardew.craft.item.tool.HoeItem) return false;
         if (item instanceof com.stardew.craft.item.tool.WateringCanItem) return false;
         if (item instanceof com.stardew.craft.item.tool.FishingRodItem) return false;
-        if (item instanceof com.stardew.craft.item.tool.ScytheItem) return false;
         if (item instanceof com.stardew.craft.item.tool.PanItem) return false;
-        // 武器（剑、匕首、棍棒）
-        if (item instanceof StardewWeaponItem) return false;
-        if (item instanceof com.stardew.craft.item.weapon.StardewDaggerItem) return false;
-        if (item instanceof com.stardew.craft.item.weapon.StardewClubItem) return false;
-        // 戒指
+        // 戒指：原版 Ring.CanBeLostOnDeath 恒为 false
         if (item instanceof StardewRingItem) return false;
-        // 靴子
-        if (item instanceof StardewBootsItem) return false;
+        // 靴子可丢（Boots 无覆盖，走 Item 默认）
         return true;
     }
 

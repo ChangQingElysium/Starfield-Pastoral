@@ -457,6 +457,12 @@ public class ModBlocks {
         public static final DeferredBlock<com.stardew.craft.block.terrain.TerrainStairBlock> DIRT_STAIRS = BLOCKS.register("dirt_stairs",
                         () -> new com.stardew.craft.block.terrain.TerrainStairBlock.Dirt(Block.Properties.of().mapColor(MapColor.DIRT).sound(SoundType.GRAVEL).strength(0.5F)));
 
+        public static final DeferredBlock<com.stardew.craft.block.terrain.TerrainSlabBlock> SAND_SLAB = BLOCKS.register("sand_slab",
+                        () -> new com.stardew.craft.block.terrain.TerrainSlabBlock.Sand(Block.Properties.of().mapColor(MapColor.SAND).sound(SoundType.SAND).strength(0.5F)));
+
+        public static final DeferredBlock<com.stardew.craft.block.terrain.TerrainStairBlock> SAND_STAIRS = BLOCKS.register("sand_stairs",
+                        () -> new com.stardew.craft.block.terrain.TerrainStairBlock.Sand(Block.Properties.of().mapColor(MapColor.SAND).sound(SoundType.SAND).strength(0.5F)));
+
         public static final DeferredBlock<com.stardew.craft.block.terrain.TerrainSlabBlock> CLIFF_SLAB = BLOCKS.register("cliff_slab",
                         () -> new com.stardew.craft.block.terrain.TerrainSlabBlock.Cliff(Block.Properties.of().mapColor(MapColor.STONE).sound(SoundType.STONE).strength(1.5F, 6.0F).requiresCorrectToolForDrops()));
 

@@ -156,8 +156,11 @@ def compile_model(model, profile, variant='sam', required_clips=None):
             normal=rotate(normals[side], rotation)
             if bone==cloth_bone:
                 # Horizontal rows let the source cloth bend continuously without splitting its silhouette.
-                a=max(1,math.ceil(max(abs(vertices[3][1]-vertices[0][1]),abs(vertices[2][1]-vertices[1][1]))/.75))
-                b=max(1,math.ceil(max(abs(vertices[1][1]-vertices[0][1]),abs(vertices[2][1]-vertices[3][1]))/.75))
+                # Short coat panels need enough rows to clear a thigh immediately
+                # below the fixed waist seam, rather than a long straight triangle.
+                row_step=.25 if cloth['anchorY']-cloth['hemY']<=4 else .75
+                a=max(1,math.ceil(max(abs(vertices[3][1]-vertices[0][1]),abs(vertices[2][1]-vertices[1][1]))/row_step))
+                b=max(1,math.ceil(max(abs(vertices[1][1]-vertices[0][1]),abs(vertices[2][1]-vertices[3][1]))/row_step))
                 def surface(u,v):
                     return [vertices[0][k]*(1-u)*(1-v)+vertices[1][k]*(1-u)*v+vertices[2][k]*u*v+vertices[3][k]*u*(1-v) for k in range(5)]
                 for x in range(a):
@@ -231,7 +234,10 @@ def compile_model(model, profile, variant='sam', required_clips=None):
     for name in required:
         if name not in clips:
             raise ValueError(f'Missing pilot clip: {name}')
-    quads = skin_joints(bones, cubes, quads)
+    hip_skin=float(profile.get('hipSkinHeight', 0))
+    if not math.isfinite(hip_skin) or not 0 <= hip_skin <= 4:
+        raise ValueError('Invalid hip skin height')
+    quads = skin_joints(bones, cubes, quads, hip_skin)
     animated = {track['bone'] for clip in clips.values() for track in clip['tracks']}
     for quad in quads:
         skin = quad.get('skin')

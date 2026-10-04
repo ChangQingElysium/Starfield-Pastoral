@@ -1,3 +1,21 @@
 {
-  "parent": "stardewcraft:block/ginger_island/volcano_canister_174"
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "stardewcraft:item/ginger_island/ginger_volcano_canister_174",
+    "particle": "stardewcraft:block/ginger_island/volcano_canister_174_particle"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "stardewcraft:ginger_island_variant": 0.0
+      },
+      "model": "stardewcraft:item/ginger_island/ginger_volcano_canister_174_0"
+    },
+    {
+      "predicate": {
+        "stardewcraft:ginger_island_variant": 1.0
+      },
+      "model": "stardewcraft:item/ginger_island/ginger_volcano_canister_174_1"
+    }
+  ]
 }

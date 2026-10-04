@@ -36,6 +36,12 @@ public class StardewQualityItem extends Item implements IStardewItem {
 
 	@SuppressWarnings("null")
 	public StardewQualityItem(String typeKey, int basePrice, int edibility, boolean supportsQuality, Properties properties, boolean drinkAnimation) {
+		this(typeKey, basePrice, edibility, supportsQuality, properties, drinkAnimation, 0.45f);
+	}
+
+	/** healthRatio：原版 Object.healthRecoveredOnConsumption 的体力→生命系数（默认 0.45，Bug Steak 0.68，Energy Tonic 0）。 */
+	@SuppressWarnings("null")
+	public StardewQualityItem(String typeKey, int basePrice, int edibility, boolean supportsQuality, Properties properties, boolean drinkAnimation, float healthRatio) {
 		super(isEdible(edibility)
 				? properties.food(new FoodProperties.Builder().nutrition(2).saturationMod(0.3f).alwaysEat().build())
 				: properties);
@@ -46,7 +52,7 @@ public class StardewQualityItem extends Item implements IStardewItem {
 		this.edible = isEdible(edibility);
 		this.priceByQuality = buildPriceByQuality(basePrice);
 		this.energyByQuality = buildEnergyByQuality(edibility);
-		this.healthByQuality = buildHealthByQuality(this.energyByQuality);
+		this.healthByQuality = buildHealthByQuality(edibility, this.energyByQuality, healthRatio);
 		this.drinkAnimation = drinkAnimation;
 	}
 
@@ -74,10 +80,13 @@ public class StardewQualityItem extends Item implements IStardewItem {
 		return out;
 	}
 
-	private static int[] buildHealthByQuality(int[] energyByQuality) {
+	private static int[] buildHealthByQuality(int edibility, int[] energyByQuality, float healthRatio) {
 		int[] out = new int[4];
+		if (edibility < 0) {
+			return out; // 原版 Object.healthRecoveredOnConsumption：Edibility<0 → 0，不扣血
+		}
 		for (int i = 0; i < 4; i++) {
-			out[i] = (int) (energyByQuality[i] * 0.45f);
+			out[i] = (int) (energyByQuality[i] * healthRatio);
 		}
 		return out;
 	}

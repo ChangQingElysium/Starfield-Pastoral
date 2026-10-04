@@ -1,3 +1,7 @@
 {
-  "parent": "stardewcraft:block/ginger_island/volcano_dragon_skull"
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "stardewcraft:item/ginger_island/ginger_volcano_dragon_skull",
+    "particle": "stardewcraft:block/ginger_island/volcano_dragon_skull_particle"
+  }
 }

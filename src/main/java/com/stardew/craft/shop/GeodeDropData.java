@@ -63,6 +63,13 @@ public final class GeodeDropData {
 
     public static Optional<ItemStack> roll(ResourceLocation id, ServerPlayer player, Random random,
             java.util.function.Consumer<com.stardew.craft.api.v1.action.StardewAction> effects) {
+        return roll(id, player, random, effects, Map.of());
+    }
+
+    /** {@code parameters} override loot-context metrics (for example the post-increment GeodesCracked stat). */
+    public static Optional<ItemStack> roll(ResourceLocation id, ServerPlayer player, Random random,
+            java.util.function.Consumer<com.stardew.craft.api.v1.action.StardewAction> effects,
+            Map<String, Double> parameters) {
         Catalog current = catalog;
         StardewGeodeDropDefinition definition =
                 current.definitions().definitions().get(id);
@@ -80,7 +87,7 @@ public final class GeodeDropData {
             }
         }
         List<ItemStack> stacks = StardewItemQueries.resolve(selected.query(),
-                        new StardewItemQueryContext(player.serverLevel(), player, random, Map.of(), effects))
+                        new StardewItemQueryContext(player.serverLevel(), player, random, parameters, effects))
                 .resultOrPartial(message -> StardewCraft.LOGGER.error(
                         "[Geode drop] Definition {} failed: {}", id, message))
                 .orElse(List.of());

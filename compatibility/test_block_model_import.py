@@ -17,6 +17,16 @@ def fixture(fmt='java_block'):
             'outliner': ['cube']}
 
 
+def mesh_fixture():
+    project = fixture('free')
+    project['elements'] = [{'type': 'mesh', 'uuid': 'mesh', 'origin': [8, 0, 8],
+        'vertices': {'a': [-4, 0, -2], 'b': [-4, 8, -2], 'c': [4, 8, -2], 'd': [4, 0, -2]},
+        'faces': {'front': {'texture': 0, 'vertices': ['a', 'b', 'c', 'd'],
+            'uv': {'a': [0, 8], 'b': [0, 0], 'c': [8, 0], 'd': [8, 8]}}}}]
+    project['outliner'] = ['mesh']
+    return project
+
+
 class ModelImportTests(unittest.TestCase):
     def test_only_named_light_is_emissive_in_both_formats(self):
         for fmt in ('java_block', 'free'):
@@ -26,9 +36,12 @@ class ModelImportTests(unittest.TestCase):
             project['outliner'].append('lamp')
             model, _ = importer.import_bbmodel(project, 'stardewcraft:block/test', ['light'])
             pole, lamp = model.get('elements', model.get('parts'))
-            self.assertNotIn('neoforge_data', pole)
+            metadata = 'forge_data' if fmt == 'java_block' else 'neoforge_data'
+            other_metadata = 'neoforge_data' if fmt == 'java_block' else 'forge_data'
+            self.assertNotIn(metadata, pole)
             self.assertNotIn('shade', pole)
-            self.assertEqual({'block_light': 15, 'sky_light': 15, 'ambient_occlusion': False}, lamp['neoforge_data'])
+            self.assertEqual({'block_light': 15, 'sky_light': 15, 'ambient_occlusion': False}, lamp[metadata])
+            self.assertNotIn(other_metadata, lamp)
             self.assertFalse(lamp['shade'])
             with self.assertRaisesRegex(ValueError, 'not exported'):
                 importer.import_bbmodel(project, 'stardewcraft:block/test', ['missing'])
@@ -68,6 +81,42 @@ class ModelImportTests(unittest.TestCase):
         project['elements'][0]['type'] = 'mesh'
         with self.assertRaisesRegex(ValueError, 'mesh'):
             importer.import_bbmodel(project, 'stardewcraft:block/test')
+
+    def test_mesh_requires_explicit_opt_in_and_keeps_vertices_uvs_and_winding(self):
+        project = mesh_fixture()
+        with self.assertRaisesRegex(ValueError, 'mesh'):
+            importer.import_bbmodel(project, 'stardewcraft:block/test')
+        model, _ = importer.import_bbmodel(project, 'stardewcraft:block/test', allow_mesh=True)
+        self.assertEqual('stardewcraft:geometry', model['loader'])
+        self.assertEqual([], model['parts'])
+        self.assertEqual([4, 0, 6, 0, .25, 4, 8, 6, 0, 0,
+                          12, 8, 6, .25, 0, 12, 0, 6, .25, .25], model['quads'][0]['vertices'])
+        self.assertEqual('#0', model['quads'][0]['texture'])
+        project['meta']['model_format'] = 'java_block'
+        with self.assertRaisesRegex(ValueError, 'mesh'):
+            importer.import_bbmodel(project, 'stardewcraft:block/test', allow_mesh=True)
+
+    def test_authorized_mesh_rejects_invalid_faces_without_silent_conversion(self):
+        for defect in ('triangle', 'missing_uv', 'out_of_bounds', 'nonfinite', 'degenerate'):
+            project = mesh_fixture()
+            mesh = project['elements'][0]
+            if defect == 'triangle': mesh['faces']['front']['vertices'].pop()
+            elif defect == 'missing_uv': del mesh['faces']['front']['uv']['d']
+            elif defect == 'out_of_bounds': mesh['faces']['front']['uv']['a'] = [33, 0]
+            elif defect == 'nonfinite': mesh['vertices']['a'][0] = float('nan')
+            elif defect == 'degenerate': mesh['vertices']['c'] = [-4, 9, -2]
+            with self.subTest(defect=defect), self.assertRaises((ValueError, KeyError)):
+                importer.import_bbmodel(project, 'stardewcraft:block/test', allow_mesh=True)
+
+    def test_authorized_mesh_retains_parent_rotation(self):
+        project = mesh_fixture()
+        project['groups'] = [{'uuid': 'group', 'origin': [0, 0, 0], 'rotation': [0, 90, 0]}]
+        project['outliner'] = [{'uuid': 'group', 'children': ['mesh']}]
+        model, _ = importer.import_bbmodel(project, 'stardewcraft:block/test', allow_mesh=True)
+        first = model['quads'][0]['vertices'][:3]
+        self.assertAlmostEqual(6, first[0])
+        self.assertAlmostEqual(0, first[1])
+        self.assertAlmostEqual(-4, first[2])
 
     def test_group_export_switch_is_resolved_from_blockbench_5_groups(self):
         project = fixture()

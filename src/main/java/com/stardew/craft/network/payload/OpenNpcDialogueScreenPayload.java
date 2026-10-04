@@ -34,6 +34,12 @@ public record OpenNpcDialogueScreenPayload(
         List<String> answeredDialogueIds
 ) implements CustomPacketPayload {
     public static final String DIRECT_DIALOGUE_PREFIX = "__direct_dialogue::";
+    /** Event 191393: community center opening (Game1.isLocationAccessible CommunityCenter/JojaMart). */
+    public static final String CC_OPEN_EVENT_ID = "191393";
+    /** Marker in {@link #answeredDialogueIds()}: this player has seen {@link #CC_OPEN_EVENT_ID}. */
+    public static final String CC_OPEN_SELF_MARKER = "event:" + CC_OPEN_EVENT_ID;
+    /** Marker in {@link #answeredDialogueIds()}: any player has seen {@link #CC_OPEN_EVENT_ID}. */
+    public static final String CC_OPEN_ANY_MARKER = "eventany:" + CC_OPEN_EVENT_ID;
 
     /** Encodes literal text for the existing client-side NPC dialogue pipeline. */
     public static String directText(String text) {
@@ -208,36 +214,55 @@ public record OpenNpcDialogueScreenPayload(
     }
 
     /**
-     * Resolves top-level {@code ^} gender split: {@code maleText^femaleText}.
-     * Only splits on `^` that is NOT inside a {@code $q/$r} question block or
-     * a {@code ${...}$} inline token.  In practice SDV uses at most one
-     * top-level {@code ^} per dialogue string.
+     * Resolves top-level {@code ^} gender split: {@code maleText^femaleText}, applied to each
+     * {@code #} page separately (Dialogue.parseDialogueString / applyGenderSwitch).
      *
      * @param text  raw dialogue text (inline tokens should already be resolved)
      * @param male  true to keep male half
      */
     public static String resolveGenderSplit(String text, boolean male) {
         if (text == null || (!text.contains("^") && !text.contains("¦"))) return text;
-        // Don't split inside $q/$r question blocks — those use ^ differently
-        // Find the first ^ that is not inside ${...}$
-        int depth = 0;
-        for (int i = 0; i < text.length(); i++) {
-            char c = text.charAt(i);
-            if (c == '$' && i + 1 < text.length() && text.charAt(i + 1) == '{') {
-                depth++;
-                i++;
+        // Dialogue.parseDialogueString splits on '#' (and '||' alternatives, which are chosen
+        // before the split) and applies applyGenderSwitch to every segment on its own, so a
+        // '^' only discards the rest of its own page.
+        StringBuilder out = new StringBuilder(text.length());
+        int segmentStart = 0;
+        int i = 0;
+        while (i <= text.length()) {
+            boolean atEnd = i == text.length();
+            int delimiterLength = 0;
+            if (!atEnd) {
+                char c = text.charAt(i);
+                if (c == '#') {
+                    delimiterLength = 1;
+                } else if (c == '|' && i + 1 < text.length() && text.charAt(i + 1) == '|') {
+                    delimiterLength = 2;
+                }
+            }
+            if (atEnd || delimiterLength > 0) {
+                out.append(splitGenderSegment(text.substring(segmentStart, i), male));
+                if (!atEnd) {
+                    out.append(text, i, i + delimiterLength);
+                }
+                i += Math.max(delimiterLength, 1);
+                segmentStart = i;
                 continue;
             }
-            if (c == '}' && i + 1 < text.length() && text.charAt(i + 1) == '$') {
-                depth = Math.max(0, depth - 1);
-                i++;
-                continue;
-            }
-            if ((c == '^' || c == '¦') && depth == 0) {
-                return male ? text.substring(0, i) : text.substring(i + 1);
-            }
+            i++;
         }
-        return text;
+        return out.toString();
+    }
+
+    /** Dialogue.applyGenderSwitch for one segment: first '^' wins, otherwise first '¦'. */
+    private static String splitGenderSegment(String segment, boolean male) {
+        int splitIndex = segment.indexOf('^');
+        if (splitIndex == -1) {
+            splitIndex = segment.indexOf('¦');
+        }
+        if (splitIndex == -1) {
+            return segment;
+        }
+        return male ? segment.substring(0, splitIndex) : segment.substring(splitIndex + 1);
     }
 
     /** Applies the shared player-dependent dialogue pipeline for NPC and cutscene text. */
@@ -443,14 +468,19 @@ public record OpenNpcDialogueScreenPayload(
             }
 
             // ── $d <state> — world state branch ──
+            // Dialogue.cs: everything after the command is the branch source. If it contains '|' the
+            // text splits on '|' (true side / false side, each a multi-page '#' list), otherwise on
+            // '#' (first page = true, second page = false). The chosen side replaces the remaining pages.
             if (seg.matches("\\$d\\s+\\w+")) {
                 String state = seg.substring(3).trim().toLowerCase(Locale.ROOT);
-                i++; // skip command
-                if (i < segments.length) {
-                    boolean condTrue = dialogueWorldState(state);
-                    output.add(pickPipeBranch(segments[i], condTrue));
-                    i++;
-                }
+                boolean condTrue = dialogueWorldState(state, answeredDialogueIds);
+                String rest = String.join("#", java.util.Arrays.asList(segments).subList(i + 1, segments.length));
+                char delimiter = rest.indexOf('|') >= 0 ? '|' : '#';
+                String[] branches = rest.split(java.util.regex.Pattern.quote(String.valueOf(delimiter)), -1);
+                int branchIndex = condTrue ? 0 : 1;
+                String chosen = branchIndex < branches.length ? branches[branchIndex] : "";
+                segments = chosen.split("#", -1);
+                i = 0;
                 continue;
             }
 
@@ -504,22 +534,18 @@ public record OpenNpcDialogueScreenPayload(
         if (time == null) {
             return 0;
         }
-        int daysPlayed = Math.max(0,
+        // Game1.stats.DaysPlayed is 1 on the first day (Dialogue.cs: DaysPlayed / 7 % count).
+        int daysPlayed = Math.max(1,
                 (time.getCurrentYear() - 1) * 112
                         + time.getCurrentSeason() * 28
-                        + time.getCurrentDay() - 1);
+                        + time.getCurrentDay());
         return daysPlayed / 7;
     }
 
-    private static boolean dialogueWorldState(String state) {
+    private static boolean dialogueWorldState(String state, List<String> markers) {
         return switch (state) {
-            case "joja" -> !com.stardew.craft.client.ClientPlayerDataCache.hasMailFlag(
-                    com.stardew.craft.communitycenter.state.CCStoryFlags.CC_IS_COMPLETE);
-            case "cc", "communitycenter" ->
-                    com.stardew.craft.client.ClientPlayerDataCache.hasMailFlag(
-                            com.stardew.craft.communitycenter.state.CCStoryFlags.CC_DOOR_UNLOCKED)
-                            && !com.stardew.craft.client.ClientPlayerDataCache.hasMailFlag(
-                                    com.stardew.craft.communitycenter.state.CCStoryFlags.JOJA_MEMBER);
+            case "joja" -> !markers.contains(CC_OPEN_ANY_MARKER);
+            case "cc", "communitycenter" -> markers.contains(CC_OPEN_SELF_MARKER);
             case "bus" -> com.stardew.craft.client.ClientPlayerDataCache.hasMailFlag(
                     com.stardew.craft.communitycenter.state.CCStoryFlags.CC_VAULT);
             case "kent" -> {
@@ -641,7 +667,10 @@ public record OpenNpcDialogueScreenPayload(
         String favoriteThing = com.stardew.craft.client.ClientPlayerDataCache.getFavoriteThing();
         text = replaceToken(text, "favorite",
                 favoriteThing == null || favoriteThing.isBlank() ? "something special" : favoriteThing);
-        text = replaceToken(text, "band", "The Stardew Band");
+        // Game1.samBandName defaults to the localized "The Alfalfas" (Game1.cs.2156).
+        if (hasToken(text, "band")) {
+            text = replaceToken(text, "band", rawTranslation("stardewcraft.dialogue.band_default"));
+        }
         text = replaceToken(text, "book", "Blue Tower");
 
         // Behaviour / event tokens → strip (no visible text)

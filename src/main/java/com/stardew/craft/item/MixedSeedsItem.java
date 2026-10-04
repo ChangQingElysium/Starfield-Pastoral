@@ -67,7 +67,9 @@ public class MixedSeedsItem extends Item implements IStardewItem {
 				return InteractionResult.FAIL;
 			}
 
-			level.setBlock(abovePos, cropState, 3);
+			if (!com.stardew.craft.farming.CropPlanting.place(level, abovePos, cropState)) {
+				return InteractionResult.FAIL;
+			}
 			level.playSound(null, abovePos, SoundEvents.HOE_TILL, SoundSource.BLOCKS, 1.0F, 1.0F);
 			context.getItemInHand().shrink(1);
 		}

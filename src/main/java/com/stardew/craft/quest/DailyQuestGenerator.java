@@ -55,6 +55,14 @@ public final class DailyQuestGenerator {
             return null;
         }
 
+        // SDV Game1.RefreshQuestOfTheDay: no daily quest on a festival day or the day before it
+        int dayOfMonth = Math.floorMod(gameDay - 1, 28) + 1;
+        int seasonIndex = Math.floorMod((gameDay - 1) / 28, 4);
+        if (com.stardew.craft.festival.FestivalService.isFestivalDay(dayOfMonth, seasonIndex)
+                || com.stardew.craft.festival.FestivalService.isFestivalDay(dayOfMonth + 1, seasonIndex)) {
+            return null;
+        }
+
         // SDV: CreateDaySaveRandom(100.0, DaysPlayed * 777).NextDouble()
         // 确定性：同一 gameDay + 同一 worldSeed → 同一随机数。多玩家独立生成可以用玩家 UUID 加入种子。
         long baseSeed = worldSeed + gameDay * 777L;
@@ -136,7 +144,7 @@ public final class DailyQuestGenerator {
         q.setTitle("Socialization");
         q.setDescription("Introduce yourself to everyone in the valley.");
         q.setObjectiveText("Meet every villager");
-        q.setMoneyReward(500);
+        // SDV getQuestOfTheDay: the socialize quest has no reward (moneyReward stays 0)
         return q;
     }
 

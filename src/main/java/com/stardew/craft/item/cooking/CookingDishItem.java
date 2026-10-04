@@ -87,8 +87,8 @@ public class CookingDishItem extends Item implements IStardewItem {
     }
 
     private static int computeHealth(int energy) {
-        if (energy <= INEDIBLE_THRESHOLD) {
-            return 0;
+        if (energy <= INEDIBLE_THRESHOLD || energy < 0) {
+            return 0; // 原版：负 Edibility 生命恢复为 0
         }
         return (int) (energy * 0.45F);
     }
@@ -151,7 +151,7 @@ public class CookingDishItem extends Item implements IStardewItem {
             String effectKey = effectTranslationKeyFor(buff.type());
             String valueKey = valueTranslationKeyFor(buff.type());
             ChatFormatting color = colorFor(buff.type());
-            int displayAmount = displayAmountFor(buff);
+            Object displayAmount = displayAmountFor(buff);
 
             MutableComponent title = Component.literal("[")
                     .append(Component.translatable(effectKey))
@@ -291,7 +291,12 @@ public class CookingDishItem extends Item implements IStardewItem {
         };
     }
 
-    private static int displayAmountFor(DishBuff buff) {
+    /** 磁力半径按原版像素存储（64 = 1 格），提示以格显示（32 -> 0.5）。 */
+    public static Object displayAmountFor(DishBuff buff) {
+        if (buff.type() == BuffType.MAGNETIC_RADIUS) {
+            double tiles = buff.amount() / 64.0;
+            return tiles == Math.rint(tiles) ? String.valueOf((int) tiles) : String.valueOf(tiles);
+        }
         return buff.amount();
     }
 }

@@ -38,7 +38,7 @@ public final class VanillaCookingRecipeData {
     private static final ResourceLocation LEGACY_TOKENS = id("vanilla_cooking_ingredient_map");
     private static final ResourceLocation FISH = id("fish");
     private static final ResourceLocation LEGENDARY_FISH = id("legendary_fish");
-    private static final ResourceLocation EGGS = new ResourceLocation("c", "eggs");
+    private static final ResourceLocation EGGS = new ResourceLocation("stardewcraft", "cooking/any_egg");
     private static final ResourceLocation MILK = new ResourceLocation("c", "milk");
     private static final AtomicDefinitionStore<StardewCookingRecipeDefinition> STORE = new AtomicDefinitionStore<>();
     private static final Map<String, ResourceLocation> FALLBACK_ITEMS = Map.of(

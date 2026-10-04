@@ -161,6 +161,7 @@ public final class ContextualLootQueries {
         if (key.startsWith("special_item:")) return data.hasSpecialItem(key.substring(13)) ? 1 : 0;
         if (key.startsWith("mastery:")) return data.hasMastery(SkillType.valueOf(key.substring(8).toUpperCase(Locale.ROOT))) ? 1 : 0;
         if (key.startsWith("skill:")) return PlayerStardewDataAPI.getSkillLevel(player, SkillType.valueOf(key.substring(6).toUpperCase(Locale.ROOT)));
+        if (key.equals("deepest_mine_level")) return com.stardew.craft.mining.MiningDataManager.getPlayerData(player).getMaxFloorReached();
         if (key.equals("luck_buff")) return Math.max(0, PlayerStardewDataAPI.getLuckBuffLevel(player));
         if (key.equals("can_find_lost_book")) return com.stardew.craft.museum.LostBookService.canFindAnother(player) ? 1 : 0;
         if (key.equals("host_volcano_shortcut")) {

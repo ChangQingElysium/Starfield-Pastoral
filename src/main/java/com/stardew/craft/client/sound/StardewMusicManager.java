@@ -56,6 +56,8 @@ public final class StardewMusicManager {
 
     /** SDV: EarthMine = floors 1-39, FrostMine = floors 40-79. */
     private static final int FROST_MINE_START = 40;
+    private static final int LAVA_MINE_START = 80;
+    private static final int SKULL_CAVERN_FIRST_FLOOR = 121;
 
     private static final int NO_TIME_LIMIT = -1;
     private static final int COMMUNITY_CENTER_WIDTH = 23;
@@ -540,11 +542,28 @@ public final class StardewMusicManager {
      */
     private static SoundEvent pickMineTrack() {
         int floor = MiningFloorHud.getCurrentFloor();
+        // MineShaft.getMineSong: <40 EarthMine, <80 FrostMine, skull caverns 75% LavaMine / 25% EarthMine, else LavaMine.
         if (floor < FROST_MINE_START) {
             return ModSounds.MUSIC_EARTH_MINE.get();
-        } else {
+        }
+        if (floor < LAVA_MINE_START) {
             return ModSounds.MUSIC_FROST_MINE.get();
         }
+        if (floor > SKULL_CAVERN_FIRST_FLOOR - 1) {
+            Minecraft mc = Minecraft.getInstance();
+            if (mc.level != null && mc.level.random.nextDouble() >= 0.75D) {
+                return ModSounds.MUSIC_EARTH_MINE.get();
+            }
+        }
+        return lavaMineTrack();
+    }
+
+    /**
+     * SDV "LavaMine" cue = Of Dwarves / Near The Planet Core / Overcast / tribal (Sound Bank.xsb variation table).
+     * The music_lava_mine sound event holds all four and the sound system picks one at random, like the other mine groups.
+     */
+    private static SoundEvent lavaMineTrack() {
+        return ModSounds.MUSIC_LAVA_MINE.get();
     }
 
     /**

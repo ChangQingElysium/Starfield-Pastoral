@@ -99,6 +99,7 @@ public final class ModClientSetup {
 		event.registerBlockEntityRenderer(ModBlockEntities.BLACKSMITH_VENTILATOR.get(), com.stardew.craft.client.render.BlacksmithVentilatorBlockEntityRenderer::new);
 		event.registerBlockEntityRenderer(ModBlockEntities.PLAZA_DISPLAY.get(), com.stardew.craft.client.render.PlazaDisplayBlockEntityRenderer::new);
 		event.registerBlockEntityRenderer(ModBlockEntities.PARKED_VEHICLE.get(), com.stardew.craft.client.render.ParkedVehicleBlockEntityRenderer::new);
+        event.registerBlockEntityRenderer(ModBlockEntities.WILLY_BOAT.get(), com.stardew.craft.client.render.WillyBoatBlockEntityRenderer::new);
 		event.registerBlockEntityRenderer(ModBlockEntities.PLAYGROUND.get(), com.stardew.craft.client.render.PlaygroundBlockEntityRenderer::new);
 		event.registerBlockEntityRenderer(ModBlockEntities.DOUBLE_SWING.get(), com.stardew.craft.client.render.DoubleSwingBlockEntityRenderer::new);
 		event.registerBlockEntityRenderer(ModBlockEntities.PARK_FOUNTAIN.get(), com.stardew.craft.client.render.ParkFountainBlockEntityRenderer::new);

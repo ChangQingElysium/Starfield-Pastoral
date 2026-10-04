@@ -142,7 +142,8 @@ public final class RingUtilityGameTests {
         ServerPlayer player = player(helper);
         player.setPos(player.getX() - 2, player.getY(), player.getZ());
         PlayerDataManager.getPlayerData(player).setEquippedLeftRingStack(new ItemStack(ModItems.MAGNET_RING.get()));
-        ItemEntity item = item(helper, player, -4);
+        // Remain inside the source-correct four-tile radius after the first sprint step.
+        ItemEntity item = item(helper, player, -3);
         item.setNoGravity(false);
         try {
             for (int tick = 0; tick < 25; tick++) {

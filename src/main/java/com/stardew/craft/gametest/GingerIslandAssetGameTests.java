@@ -55,10 +55,11 @@ import com.stardew.craft.port.PortBlockInteraction;
 @GameTestHolder("stardewcraft_ginger_assets")
 @PrefixGameTestTemplate(false)
 public final class GingerIslandAssetGameTests {
-    private static final String NS = "stardewcraft_ginger_assets";
+    // Even the small behavioral tests write at relative (5..9, 3, 5..9).
+    // Keep them inside a real 20x10x20 fixture instead of the legacy 1x1x1 file.
+    private static final String NS = "stardewcraft_ginger_collision";
 
-    // World-writing cases need the full rotated footprints isolated in a 32x12x32 air volume.
-    @GameTest(templateNamespace = NS, template = "asset_test")
+    @GameTest(templateNamespace = NS, template = "empty")
     public static void objectStatesShareOneRegistrationAndPreservePicking(GameTestHelper h) {
         var level = h.getLevel();
         var pos = h.absolutePos(new BlockPos(5, 3, 5));
@@ -68,9 +69,9 @@ public final class GingerIslandAssetGameTests {
         level.setBlock(pos, ruby, 3);
         h.assertTrue(pedestal.modelForState(ruby).endsWith("/gem_pedestal_ruby"), "Gem state selects the wrong model");
         var picked = pedestal.getCloneItemStack(level, pos, ruby);
-        h.assertTrue(picked.is(pedestal.asItem()) && PortItemData.get(picked, DataComponents.BLOCK_STATE)
-                .get(GingerIslandStateDecorBlock.GEM) == GingerIslandStateDecorBlock.Gem.RUBY,
-                "Picking a pedestal lost its gem or created a second item");
+        h.assertTrue(ItemStack.isSameItemSameTags(picked, new ItemStack(pedestal))
+                        && !PortItemData.has(picked, DataComponents.BLOCK_STATE),
+                "Picking a pedestal leaked its offering as an item state or created a second item");
         var ids = GingerIslandAssets.blocks().stream().map(GingerIslandAssets.BlockAsset::id).toList();
         h.assertTrue(ids.stream().filter(id -> id.startsWith("ginger_gem_pedestal")).count() == 1,
                 "Gem variations are still registered as independent blocks");
@@ -89,7 +90,7 @@ public final class GingerIslandAssetGameTests {
         h.succeed();
     }
 
-    @GameTest(templateNamespace = NS, template = "asset_test")
+    @GameTest(templateNamespace = NS, template = "empty")
     public static void volcanoSwitchLatchesOnlyForGroundedPlayers(GameTestHelper h) {
         var level = h.getLevel();
         var button = (VolcanoFloorSwitchBlock) GingerIslandBlocks.get("ginger_volcano_floor_switch");
@@ -141,12 +142,14 @@ public final class GingerIslandAssetGameTests {
         h.succeed();
     }
 
-    @GameTest(templateNamespace = NS, template = "asset_test")
+    @GameTest(templateNamespace = "stardewcraft_ginger_placement", template = "large_empty")
     public static void cabinPassageAllFacingsAndNoReservedInterior(GameTestHelper h) {
+        prepareAssemblySpace(h);
         var level = h.getLevel();
         var cabin = (MapDecorStaticBlock) GingerIslandBlocks.get("ginger_captain_cabin_shell");
-        var main = h.absolutePos(new BlockPos(10, 3, 10));
+        var main = h.absolutePos(new BlockPos(40, 4, 40)).above(cabin.placementAnchorYOffset());
         for (Direction facing : Direction.Plane.HORIZONTAL) {
+            assertFootprintInside(h, cabin, main, facing);
             var state = cabin.defaultBlockState().setValue(MapDecorStaticBlock.FACING, facing);
             level.setBlock(main, state, 2 | 16);
             h.assertTrue(cabin.placeExtensions(level, main, state), "Cabin placement failed: " + facing);
@@ -162,12 +165,12 @@ public final class GingerIslandAssetGameTests {
             var body = new net.minecraft.world.phys.AABB(feet.x - .3, feet.y, feet.z - .3,
                     feet.x + .3, feet.y + 1.8, feet.z + .3);
             h.assertTrue(level.noCollision(body), "Normal player does not fit cabin entry: " + facing);
-            level.removeBlock(main, false);
+            MapDecorStaticBlock.runWithDropsSuppressed(() -> level.removeBlock(main, false));
         }
         h.succeed();
     }
 
-    @GameTest(templateNamespace = NS, template = "asset_test")
+    @GameTest(templateNamespace = NS, template = "empty")
     public static void ostrichIncubatorOneReceiptReadyAppearanceAndUpperAccess(GameTestHelper h) {
         var level = h.getLevel();
         var block = (OstrichIncubatorBlock) GingerIslandBlocks.get("ginger_ostrich_incubator_empty");
@@ -200,7 +203,7 @@ public final class GingerIslandAssetGameTests {
         });
     }
 
-    @GameTest(templateNamespace = NS, template = "asset_test")
+    @GameTest(templateNamespace = NS, template = "empty")
     public static void fireplaceStateLightingAndExtensionInteraction(GameTestHelper h) {
         var level = h.getLevel();
         var fireplace = (IslandFlameBlock) GingerIslandBlocks.get("ginger_stove_fireplace");
@@ -267,12 +270,14 @@ public final class GingerIslandAssetGameTests {
                 + ", occupiedCells=" + cells.size() + ", rejectedCells=" + rejected;
     }
 
-    @GameTest(templateNamespace = NS, template = "asset_test")
+    @GameTest(templateNamespace = "stardewcraft_ginger_placement", template = "large_empty")
     public static void tropicalBedTwoLanesAllFacingsAndCleanup(GameTestHelper h) {
+        prepareAssemblySpace(h);
         var level = h.getLevel();
         var bed = (TropicalBedBlock) GingerIslandBlocks.get("ginger_tropical_bed");
-        BlockPos main = h.absolutePos(new BlockPos(8, 3, 8));
+        BlockPos main = h.absolutePos(new BlockPos(40, 4, 40)).above(bed.placementAnchorYOffset());
         for (Direction facing : Direction.Plane.HORIZONTAL) {
+            assertFootprintInside(h, bed, main, facing);
             var state = bed.defaultBlockState().setValue(MapDecorStaticBlock.FACING, facing);
             level.setBlock(main, state, 2 | 16);
             boolean placed = bed.placeExtensions(level, main, state);
@@ -286,7 +291,7 @@ public final class GingerIslandAssetGameTests {
                 h.assertTrue(bed.sleepAnchor(level, head, level.getBlockState(head)).equals(head), "Head must resolve its own lane");
             }
             h.assertTrue(bed.sleepYOffset() == 15.0 / 16.0, "Sleeper does not match authored blanket height");
-            level.removeBlock(main, false);
+            MapDecorStaticBlock.runWithDropsSuppressed(() -> level.removeBlock(main, false));
             for (BlockPos pos : BlockPos.betweenClosed(main.offset(-5, -1, -5), main.offset(5, 3, 5))) {
                 h.assertTrue(!level.getBlockState(pos).is(bed), "Bed extension remained after removal: " + facing + " " + pos);
             }
@@ -294,7 +299,7 @@ public final class GingerIslandAssetGameTests {
         h.succeed();
     }
 
-    @GameTest(templateNamespace = NS, template = "asset_test")
+    @GameTest(templateNamespace = NS, template = "empty")
     public static void heavyTapperOneJobRoundedDaysAndUpperAutomation(GameTestHelper h) {
         var level = h.getLevel();
         var registry = PrefabTreeRegistry.get(level);
@@ -335,11 +340,13 @@ public final class GingerIslandAssetGameTests {
         h.succeed();
     }
 
-    @GameTest(templateNamespace = NS, template = "asset_test")
+    @GameTest(templateNamespace = "stardewcraft_ginger_placement", template = "large_empty")
     public static void forgeExtensionOpensSameMenuAndTracksWorkstation(GameTestHelper h) {
+        prepareAssemblySpace(h);
         var level = h.getLevel();
         var forge = (MapDecorStaticBlock) GingerIslandBlocks.get("ginger_caldera_forge");
-        var pos = h.absolutePos(new BlockPos(8, 3, 8));
+        var pos = h.absolutePos(new BlockPos(40, 4, 40)).above(forge.placementAnchorYOffset());
+        assertFootprintInside(h, forge, pos, Direction.NORTH);
         var state = forge.defaultBlockState();
         level.setBlock(pos, state, 2 | 16);
         h.assertTrue(forge.placeExtensions(level, pos, state), "Forge footprint failed");
@@ -365,6 +372,21 @@ public final class GingerIslandAssetGameTests {
         h.assertTrue(!player.containerMenu.stillValid(player), "Menu survived destroying workstation");
         player.containerMenu.removed(player);
         h.succeed();
+    }
+
+    private static void prepareAssemblySpace(GameTestHelper h) {
+        var level = h.getLevel();
+        for (BlockPos relative : BlockPos.betweenClosed(10, 3, 10, 69, 23, 69)) {
+            BlockPos pos = h.absolutePos(relative);
+            h.assertTrue(com.stardew.craft.port.PortGameTests.getBounds(h).contains(Vec3.atCenterOf(pos)), "Assembly setup escaped the real fixture");
+            level.setBlock(pos, relative.getY() == 3 ? Blocks.STONE.defaultBlockState() : Blocks.AIR.defaultBlockState(), 18);
+        }
+    }
+
+    private static void assertFootprintInside(GameTestHelper h, MapDecorStaticBlock block, BlockPos main, Direction facing) {
+        for (BlockPos cell : block.placementPositions(main, facing)) {
+            h.assertTrue(com.stardew.craft.port.PortGameTests.getBounds(h).contains(Vec3.atCenterOf(cell)), "Assembly footprint escaped the real fixture: " + cell);
+        }
     }
 
     @GameTest(templateNamespace = NS, template = "empty")
@@ -408,7 +430,7 @@ public final class GingerIslandAssetGameTests {
         return root.toString();
     }
 
-    @GameTest(templateNamespace = NS, template = "asset_test")
+    @GameTest(templateNamespace = NS, template = "empty")
     public static void coolingConnectionsAndProtectedLocations(GameTestHelper h) {
         var level = h.getLevel();
         var pos = h.absolutePos(new BlockPos(6, 3, 6));

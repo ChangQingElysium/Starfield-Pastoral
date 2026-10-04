@@ -1,0 +1,16 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "stardewcraft:item/ginger_island/original_f_2393",
+    "particle": "stardewcraft:block/ginger_island/palm_wall_ornament_left_particle"
+  },
+  "display": {
+    "gui": {
+      "scale": [
+        0.5,
+        0.5,
+        1
+      ]
+    }
+  }
+}

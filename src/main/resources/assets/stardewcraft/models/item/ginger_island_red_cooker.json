@@ -1,3 +1,7 @@
 {
-  "parent": "stardewcraft:block/ginger_island/island_red_cooker"
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "stardewcraft:item/ginger_island/ginger_island_red_cooker",
+    "particle": "stardewcraft:block/ginger_island/island_red_cooker_particle"
+  }
 }

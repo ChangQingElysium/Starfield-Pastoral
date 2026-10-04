@@ -150,7 +150,7 @@ class SyncFromMainTest(unittest.TestCase):
     def test_java_rewrite_failure_also_precedes_production_mutation(self):
         new = self.advance({"src/main/resources/content.txt": "incoming\n",
                             "src/main/java/Example.java": "class Incoming {}\n"})
-        with mock.patch.object(self.sync, "scripted", side_effect=RuntimeError("rewrite failed")):
+        with mock.patch.object(self.sync.JavaBatchConverters, "convert", side_effect=RuntimeError("rewrite failed")):
             with self.assertRaisesRegex(RuntimeError, "rewrite failed"):
                 self.call("--snapshot", new)
         self.assertEqual(self.content("src/main/resources/content.txt"), b"old\n")
@@ -394,6 +394,132 @@ class SyncFromMainTest(unittest.TestCase):
         merged, conflict = self.sync.merge_bytes(base, ours, theirs)
         self.assertTrue(conflict)
         self.assertEqual(merged.count(b"<<<<<<< port"), 2)
+
+    def real_java_adapters(self):
+        names = ("rewrite_1201", "adapt_nbt_provider", "adapt_block_use",
+                 "adapt_overrides_1201", "adapt_vertex_api", "strict_optional_fields_1201")
+        scripts = self.root / "scripts/port"
+        scripts.mkdir(parents=True, exist_ok=True)
+        for name in (*names, "fix_errors_1201"):
+            shutil.copyfile(SCRIPTS / (name + ".py"), scripts / (name + ".py"))
+        shutil.copyfile(SCRIPTS / "shim-classes.txt", scripts / "shim-classes.txt")
+        self.sync.SCRIPTS = [scripts / (name + ".py") for name in names]
+
+    @staticmethod
+    def interaction_block(name, parent="Block"):
+        return f"""package com.stardew.fixture;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.level.block.Block;
+class {name} extends {parent} {{
+    @Override
+    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos,
+                                               Player player, BlockHitResult hit) {{
+        return super.useWithoutItem(state, level, pos, player, hit);
+    }}
+}}
+"""
+
+    def legacy_java_conversion(self, text, destination):
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_text(text, encoding="utf-8")
+        for script in self.sync.SCRIPTS:
+            subprocess.run(["python3", "-B", str(script), str(destination)],
+                           check=True, capture_output=True)
+        return destination.read_bytes()
+
+    def test_batch_java_matches_isolated_legacy_adapters_and_keeps_target_context_separate(self):
+        self.real_java_adapters()
+        self.put("src/main/java/ParentBlock.java", "package com.stardew.fixture; class ParentBlock extends Block {}\n")
+        self.put("src/main/java/CodecUser.java", "class CodecUser { Object used = TestBlock.CODEC; }\n")
+        texts = {
+            "ParentBlock.java": self.interaction_block("ParentBlock"),
+            "ChildBlock.java": self.interaction_block("ChildBlock", "ParentBlock"),
+            "TestBlock.java": """package com.stardew.fixture;
+class TestBlock extends Block {
+    public static final MapCodec<TestBlock> CODEC = simpleCodec(TestBlock::new);
+    @Override
+    protected MapCodec<? extends Block> codec() { return CODEC; }
+}
+""",
+            "ApiCalls.java": """package com.stardew.fixture;
+import net.minecraft.resources.ResourceLocation;
+class ApiCalls extends BlockEntity {
+    protected void saveAdditional(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
+        super.saveAdditional(tag, registries);
+    }
+    void calls() {
+        ResourceLocation id = ResourceLocation.parse("stardewcraft:test");
+        var option = Codec.STRING.optionalFieldOf("name", "default");
+        consumer.addVertex(pose, 1, 2, 3).setColor(1, 2, 3, 4).setNormal(pose, 0, 1, 0);
+    }
+}
+""",
+        }
+        stage = self.root / "build/batch"
+        stage.mkdir(parents=True)
+        for name, source in texts.items():
+            (stage / name).write_text(source, encoding="utf-8")
+        converters = self.sync.JavaBatchConverters()
+        with mock.patch.object(self.sync.subprocess, "run", side_effect=AssertionError("adapter subprocess")):
+            converters.convert([stage / name for name in texts])
+        for name, source in texts.items():
+            expected = self.legacy_java_conversion(source, self.root / "build/legacy" / name)
+            self.assertEqual((stage / name).read_bytes(), expected, name)
+        # A pending parent must not suppress the child's independent use bridge.
+        self.assertIn(b"PortBlockInteraction.dispatch", (stage / "ChildBlock.java").read_bytes())
+        self.assertIn(b"static final MapCodec<TestBlock> CODEC", (stage / "TestBlock.java").read_bytes())
+
+    def test_batch_java_reads_forge_context_once_and_refreshes_next_plan(self):
+        self.real_java_adapters()
+        parent = self.root / "src/main/java/ParentBlock.java"
+        self.put(str(parent.relative_to(self.root)), "package com.stardew.fixture; class ParentBlock extends Block {}\n")
+        source_paths = {path.resolve() for path in (self.root / "src/main/java").rglob("*.java")}
+        reads = {path: 0 for path in source_paths}
+        read_text = Path.read_text
+
+        def counted_read(path, *args, **kwargs):
+            resolved = path.resolve()
+            if resolved in reads:
+                reads[resolved] += 1
+            return read_text(path, *args, **kwargs)
+
+        stage = self.root / "build/context"
+        stage.mkdir(parents=True)
+        targets = [stage / "old.java", stage / "new.java"]
+        for target in targets:
+            target.write_text(self.interaction_block("ChildBlock", "ParentBlock"), encoding="utf-8")
+        with mock.patch.object(Path, "read_text", new=counted_read):
+            converters = self.sync.JavaBatchConverters()
+            converters.convert(targets[:1])
+            converters.convert(targets[1:])
+        self.assertEqual(reads, {path: 1 for path in source_paths})
+        self.assertIn(b"PortBlockInteraction.dispatch", targets[0].read_bytes())
+        parent.write_text(self.interaction_block("ParentBlock"), encoding="utf-8")
+        targets[0].write_text(self.interaction_block("ChildBlock", "ParentBlock"), encoding="utf-8")
+        self.sync.JavaBatchConverters().convert(targets[:1])
+        self.assertNotIn(b"PortBlockInteraction.dispatch", targets[0].read_bytes())
+
+    def test_batch_java_staging_preserves_add_delete_and_duplicate_basenames(self):
+        first = "src/main/java/first/Same.java"
+        second = "src/main/java/second/Same.java"
+        deleted = "src/main/java/Removed.java"
+        added = "src/main/java/Added.java"
+        self.put(first, "package first; class Same { int old = 1; }\n")
+        self.put(second, "package second; class Same { int old = 2; }\n")
+        self.put(deleted, "class Removed {}\n")
+        self.old = self.commit()
+        self.put("scripts/port/main-sync-state.txt", self.old + "\n")
+        new = self.advance({first: "package first; class Same { int updated = 11; }\n",
+                            second: "package second; class Same { int updated = 22; }\n",
+                            added: "class Added {}\n", deleted: None})
+        with mock.patch.object(self.sync, "export_tree", wraps=self.sync.export_tree) as exports:
+            self.assertEqual(self.call("--snapshot", new), 0)
+        java_exports = [call for call in exports.call_args_list if call.kwargs.get("known_existing")]
+        self.assertEqual(len(java_exports), 2)
+        self.assertEqual(self.content(first), b"package first; class Same { int updated = 11; }\n")
+        self.assertEqual(self.content(second), b"package second; class Same { int updated = 22; }\n")
+        self.assertEqual(self.content(added), b"class Added {}\n")
+        self.assertFalse((self.root / deleted).exists())
 
 
 if __name__ == "__main__":

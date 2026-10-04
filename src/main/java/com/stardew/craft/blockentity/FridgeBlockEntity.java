@@ -22,7 +22,8 @@ import javax.annotation.Nullable;
 
 @SuppressWarnings("null")
 public class FridgeBlockEntity extends net.minecraft.world.level.block.entity.BlockEntity implements Container, MenuProvider {
-    private static final int SLOT_COUNT = 27;
+    /** Original 1.6 mini-fridge capacity (Chest.GetActualCapacity = 36). Old 27-slot saves keep slots 0..26 as-is (sparse Slot index). */
+    private static final int SLOT_COUNT = 36;
     private final NonNullList<ItemStack> items = NonNullList.withSize(SLOT_COUNT, ItemStack.EMPTY);
     private boolean doorOpen;
     private float openness;
@@ -244,6 +245,6 @@ public class FridgeBlockEntity extends net.minecraft.world.level.block.entity.Bl
     @Nullable
     @Override
     public AbstractContainerMenu createMenu(int containerId, Inventory playerInventory, Player player) {
-        return ChestMenu.threeRows(containerId, playerInventory, this);
+        return new ChestMenu(net.minecraft.world.inventory.MenuType.GENERIC_9x4, containerId, playerInventory, this, 4);
     }
 }

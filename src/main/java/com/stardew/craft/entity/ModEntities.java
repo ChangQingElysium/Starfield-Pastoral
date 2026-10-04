@@ -431,6 +431,12 @@ public final class ModEntities {
                     // Keep the stationary worker's facing and animation smooth on clients.
                     .sized(0.6f, 1.9f).clientTrackingRange(8).updateInterval(1).build("robin_construction"));
 
+    public static final DeferredHolder<EntityType<?>, EntityType<com.stardew.craft.gingerisland.GiantTurtleEntity>> GINGER_GIANT_TURTLE = ENTITY_TYPES.register(
+            "ginger_giant_turtle", () -> EntityType.Builder.<com.stardew.craft.gingerisland.GiantTurtleEntity>of(
+                    com.stardew.craft.gingerisland.GiantTurtleEntity::new, MobCategory.MISC)
+                    .sized(com.stardew.craft.gingerisland.GiantTurtleEntity.WIDTH, com.stardew.craft.gingerisland.GiantTurtleEntity.HEIGHT)
+                    .clientTrackingRange(12).updateInterval(2).build("ginger_giant_turtle"));
+
 	public static final DeferredHolder<EntityType<?>, EntityType<StardewNpcEntity>> STARDEW_NPC = ENTITY_TYPES.register(
 			"stardew_npc",
 			() -> EntityType.Builder.<StardewNpcEntity>of(StardewNpcEntity::new, MobCategory.CREATURE)

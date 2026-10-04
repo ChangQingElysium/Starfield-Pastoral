@@ -37,7 +37,7 @@ import net.minecraft.world.item.armortrim.ArmorTrim;
  * custom_model_data     CustomModelData (int)
  * block_state           BlockStateTag {property: "value"}
  * custom_name           display.Name (JSON)
- * item_name             stardewcraft:ItemName (JSON)         read falls back to the item name
+ * item_name             stardewcraft:ItemName (JSON)         absent = null; hover name handles fallback
  * lore                  display.Lore [JSON]                  absent = ItemLore.EMPTY
  * enchantments          Enchantments [{id, lvl}] + HideFlags ENCHANTMENTS   absent = ItemEnchantments.EMPTY
  * stored_enchantments   StoredEnchantments [{id, lvl}] + HideFlags ADDITIONAL (EMPTY default on enchanted books)
@@ -185,8 +185,7 @@ public final class DataComponents {
                     if (stack.isEmpty()) {
                         return null;
                     }
-                    Component name = PortItemNbt.itemName(stack);
-                    return name != null ? name : stack.getItem().getName(stack);
+                    return PortItemNbt.itemName(stack);
                 }
 
                 @Override

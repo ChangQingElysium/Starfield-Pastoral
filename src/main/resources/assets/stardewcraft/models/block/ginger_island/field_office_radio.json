@@ -1,214 +1,276 @@
 {
   "parent": "minecraft:block/block",
+  "loader": "forge:composite",
   "render_type": "minecraft:cutout",
   "textures": {
     "0": "stardewcraft:block/ginger_island/field_office_radio",
     "particle": "stardewcraft:block/ginger_island/field_office_radio_particle"
   },
-  "elements": [
-    {
-      "from": [
-        1,
-        1,
-        9
+  "display": {
+    "gui": {
+      "rotation": [
+        30,
+        225,
+        0
       ],
-      "to": [
-        15,
-        11,
-        14
+      "translation": [
+        0.0,
+        0.5412658773652742,
+        0.31249999999999994
       ],
-      "faces": {
-        "north": {
-          "uv": [
-            0.25,
-            0.25,
-            3.75,
-            2.75
-          ],
-          "texture": "#0"
-        },
-        "east": {
-          "uv": [
-            10.0,
-            0.25,
-            11.25,
-            2.75
-          ],
-          "texture": "#0"
-        },
-        "south": {
-          "uv": [
-            4.25,
-            0.25,
-            7.75,
-            2.75
-          ],
-          "texture": "#0"
-        },
-        "west": {
-          "uv": [
-            8.25,
-            0.25,
-            9.5,
-            2.75
-          ],
-          "texture": "#0"
-        },
-        "up": {
-          "uv": [
-            0.25,
-            3.25,
-            3.75,
-            4.5
-          ],
-          "texture": "#0"
-        },
-        "down": {
-          "uv": [
-            4.25,
-            3.25,
-            7.75,
-            4.5
-          ],
-          "texture": "#0"
-        }
-      }
-    },
-    {
-      "from": [
-        3,
-        2,
-        8.25
-      ],
-      "to": [
-        6,
-        3,
-        9.25
-      ],
-      "faces": {
-        "north": {
-          "uv": [
-            8.25,
-            3.25,
-            9.0,
-            3.5
-          ],
-          "texture": "#0"
-        },
-        "east": {
-          "uv": [
-            9.75,
-            3.25,
-            10.0,
-            3.5
-          ],
-          "texture": "#0"
-        },
-        "west": {
-          "uv": [
-            9.25,
-            3.25,
-            9.5,
-            3.5
-          ],
-          "texture": "#0"
-        },
-        "up": {
-          "uv": [
-            10.25,
-            3.25,
-            11.0,
-            3.5
-          ],
-          "texture": "#0"
-        },
-        "down": {
-          "uv": [
-            11.25,
-            3.25,
-            12.0,
-            3.5
-          ],
-          "texture": "#0"
-        }
-      }
-    },
-    {
-      "from": [
-        11,
-        10.75,
-        12
-      ],
-      "to": [
-        12,
-        12.75,
-        13
-      ],
-      "faces": {
-        "north": {
-          "uv": [
-            12.5,
-            0.25,
-            12.75,
-            0.75
-          ],
-          "texture": "#0"
-        },
-        "east": {
-          "uv": [
-            14.0,
-            0.25,
-            14.25,
-            0.75
-          ],
-          "texture": "#0"
-        },
-        "south": {
-          "uv": [
-            13.0,
-            0.25,
-            13.25,
-            0.75
-          ],
-          "texture": "#0"
-        },
-        "west": {
-          "uv": [
-            13.5,
-            0.25,
-            13.75,
-            0.75
-          ],
-          "texture": "#0"
-        },
-        "up": {
-          "uv": [
-            14.5,
-            0.25,
-            14.75,
-            0.5
-          ],
-          "texture": "#0"
-        }
-      }
+      "scale": [
+        0.625,
+        0.625,
+        0.625
+      ]
     }
-  ],
+  },
+  "children": {
+    "authored": {
+      "parent": "minecraft:block/block",
+      "render_type": "minecraft:cutout",
+      "textures": {
+        "0": "stardewcraft:block/ginger_island/field_office_radio",
+        "particle": "stardewcraft:block/ginger_island/field_office_radio_particle"
+      },
+      "elements": [
+        {
+          "from": [
+            1,
+            1,
+            9
+          ],
+          "to": [
+            15,
+            11,
+            14
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                0.25,
+                0.25,
+                3.75,
+                2.75
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                10.0,
+                0.25,
+                11.25,
+                2.75
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                4.25,
+                0.25,
+                7.75,
+                2.75
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                8.25,
+                0.25,
+                9.5,
+                2.75
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                0.25,
+                3.25,
+                3.75,
+                4.5
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                4.25,
+                3.25,
+                7.75,
+                4.5
+              ],
+              "texture": "#0"
+            }
+          }
+        },
+        {
+          "from": [
+            3,
+            2,
+            8.25
+          ],
+          "to": [
+            6,
+            3,
+            9.25
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                8.25,
+                3.25,
+                9.0,
+                3.5
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                9.75,
+                3.25,
+                10.0,
+                3.5
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                9.25,
+                3.25,
+                9.5,
+                3.5
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                10.25,
+                3.25,
+                11.0,
+                3.5
+              ],
+              "texture": "#0"
+            },
+            "down": {
+              "uv": [
+                11.25,
+                3.25,
+                12.0,
+                3.5
+              ],
+              "texture": "#0"
+            }
+          }
+        },
+        {
+          "from": [
+            11,
+            10.75,
+            12
+          ],
+          "to": [
+            12,
+            12.75,
+            13
+          ],
+          "faces": {
+            "north": {
+              "uv": [
+                12.5,
+                0.25,
+                12.75,
+                0.75
+              ],
+              "texture": "#0"
+            },
+            "east": {
+              "uv": [
+                14.0,
+                0.25,
+                14.25,
+                0.75
+              ],
+              "texture": "#0"
+            },
+            "south": {
+              "uv": [
+                13.0,
+                0.25,
+                13.25,
+                0.75
+              ],
+              "texture": "#0"
+            },
+            "west": {
+              "uv": [
+                13.5,
+                0.25,
+                13.75,
+                0.75
+              ],
+              "texture": "#0"
+            },
+            "up": {
+              "uv": [
+                14.5,
+                0.25,
+                14.75,
+                0.5
+              ],
+              "texture": "#0"
+            }
+          }
+        }
+      ]
+    }
+  },
   "stardewcraft:collision": {
     "mode": "custom",
     "boxes": [
       {
         "from": [
-          1,
-          1,
+          1.0,
+          0,
           8.25
         ],
         "to": [
-          15,
-          12.75,
-          14
+          15.0,
+          11.75,
+          14.0
         ]
       }
     ],
     "policy": "aabb"
+  },
+  "stardewcraft:placement": {
+    "version": 2,
+    "reason": "ground_contact_at_reserved_integer_datum",
+    "clockwise_y": 0,
+    "offset_pixels": [
+      0,
+      -1,
+      0
+    ]
+  },
+  "transform": {
+    "matrix": [
+      [
+        1,
+        0,
+        0,
+        0.0
+      ],
+      [
+        0,
+        1,
+        0,
+        -0.0625
+      ],
+      [
+        0,
+        0,
+        1,
+        0.0
+      ]
+    ]
   }
 }

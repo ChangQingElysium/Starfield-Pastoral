@@ -19,9 +19,12 @@ complete that exact snapshot. Completion runs lint but is not a build/release ga
 from __future__ import annotations
 
 import argparse
+import contextlib
 import importlib.util
+import io
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -79,13 +82,6 @@ def tree_paths(rev: str, prefix: str) -> set[str]:
 def changed_paths(old: str, new: str, prefix: str) -> list[tuple[str, str]]:
     out = git("diff", "--name-status", "--no-renames", old, new, "--", prefix)
     return [tuple(line.split("\t", 1)) for line in out.splitlines() if line]
-
-
-def blob(rev: str, path: str) -> bytes | None:
-    if subprocess.run(["git", "cat-file", "-e", f"{rev}:{path}"], cwd=ROOT,
-                      capture_output=True).returncode != 0:
-        return None
-    return git("show", f"{rev}:{path}", binary=True)
 
 
 def local_path(rel: str) -> Path:
@@ -147,25 +143,123 @@ def merge_bytes(base: bytes | None, ours: bytes | None,
         return current.read_bytes(), res.returncode != 0
 
 
-def scripted(rev: str, path: str, workdir: Path) -> bytes | None:
-    data = blob(rev, path)
-    if data is None:
-        return None
-    target = workdir / Path(path).name
-    target.write_bytes(data)
-    for script in SCRIPTS:
-        subprocess.run([sys.executable, str(script), str(target)], check=True, capture_output=True)
-    return target.read_bytes()
+class JavaSource:
+    """Read-only source view for adapters' unchanged, live Forge context."""
+
+    def __init__(self, path: Path):
+        self.path = path
+        self.text = path.read_text(encoding="utf-8")
+
+    def read_text(self, encoding=None, errors=None):
+        return self.text
+
+    def __getattr__(self, name):
+        return getattr(self.path, name)
+
+    def __fspath__(self):
+        return os.fspath(self.path)
+
+    def __str__(self):
+        return str(self.path)
+
+
+class JavaBatchConverters:
+    """Reuse adapter modules and their frozen context, keeping per-file semantics.
+
+    Passing every incoming file to adapt_block_use.main at once changes its class
+    index: another pending parent/sibling can replace the live Forge definition.
+    Instead each file still runs the same six entry points alone, in the original
+    order. Only the unchanged ROOT source reads/parses are cached. The cache lives
+    for this plan only, and is never used for staging targets or another sync.
+    """
+
+    def __init__(self):
+        self.adapters = []
+        self.sources = None
+        for script in SCRIPTS:
+            spec = importlib.util.spec_from_file_location(f"port_sync_java_{script.stem}", script)
+            adapter = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(adapter)
+            self.adapters.append(adapter)
+            if script.stem in ("adapt_block_use", "adapt_overrides_1201"):
+                self.cache_source_context(adapter, script.stem)
+            elif script.stem == "rewrite_1201":
+                rules = adapter.build_rules()
+                adapter.build_rules = lambda rules=rules: rules
+
+    def cache_source_context(self, adapter, name):
+        source_root = adapter.ROOT / "src/main/java"
+        if self.sources is None:
+            self.sources = tuple(JavaSource(path) for path in sorted(source_root.rglob("*.java")))
+        original_collect = adapter.collect
+
+        def collect(paths):
+            if len(paths) == 1 and Path(paths[0]) == source_root:
+                return self.sources
+            return original_collect(paths)
+
+        adapter.collect = collect
+        if name == "adapt_block_use":
+            original_java_file = adapter.JavaFile
+            parsed = {source: original_java_file(source) for source in self.sources}
+
+            class CachedJavaFile(original_java_file):
+                def __new__(cls, path=None):
+                    # widen() also allocates a parser with JavaFile.__new__(JavaFile).
+                    if path in parsed:
+                        return parsed[path]
+                    return super().__new__(cls)
+
+            adapter.JavaFile = CachedJavaFile
+        else:
+            # Both queries are functions of the frozen Forge tree, not staging.
+            blocks = adapter.block_class_names(self.sources)
+            original_block_names = adapter.block_class_names
+            adapter.block_class_names = lambda paths: (blocks if paths is self.sources
+                                                       else original_block_names(paths))
+            codec_pattern = r"(?<![\w])(\w+)\.CODEC\b"
+            matches = {source.text: tuple(re.finditer(codec_pattern, source.text))
+                       for source in self.sources}
+
+            class ContextRegex:
+                def finditer(self, pattern, text, flags=0):
+                    if pattern == codec_pattern and flags == 0 and text in matches:
+                        return iter(matches[text])
+                    return re.finditer(pattern, text, flags)
+
+                def __getattr__(self, attr):
+                    return getattr(re, attr)
+
+            adapter.re = ContextRegex()
+
+    def convert(self, targets: list[Path]) -> None:
+        for target in targets:
+            for adapter in self.adapters:
+                # The previous subprocess runner also captured adapter diagnostics.
+                with contextlib.redirect_stdout(io.StringIO()):
+                    status = adapter.main([str(target)])
+                if status not in (None, 0):
+                    raise SystemExit(f"Java adapter {adapter.__file__} failed: {status}")
 
 
 def plan_java(old: str, new: str, workdir: Path) -> tuple[dict, list[str], list[str]]:
     changes, touched, conflicts = {}, [], []
+    paths = changed_paths(old, new, "src/main/java")
+    if not paths:
+        return changes, touched, conflicts
     previous, incoming = workdir / "java-base", workdir / "java-incoming"
     previous.mkdir()
     incoming.mkdir()
-    for status, path in changed_paths(old, new, "src/main/java"):
-        base = scripted(old, path, previous)
-        theirs = scripted(new, path, incoming)
+    old_paths = [path for status, path in paths if status != "A"]
+    new_paths = [path for status, path in paths if status != "D"]
+    export_tree(old, old_paths, previous, known_existing=True)
+    export_tree(new, new_paths, incoming, known_existing=True)
+    converters = JavaBatchConverters()
+    converters.convert([previous / path for path in old_paths])
+    converters.convert([incoming / path for path in new_paths])
+    for status, path in paths:
+        base = (previous / path).read_bytes() if status != "A" else None
+        theirs = (incoming / path).read_bytes() if status != "D" else None
         ours = read_local(path)
         merged, conflict = merge_bytes(base, ours, theirs)
         touched.append(f"{status} {path}")
@@ -176,9 +270,9 @@ def plan_java(old: str, new: str, workdir: Path) -> tuple[dict, list[str], list[
     return changes, touched, conflicts
 
 
-def export_tree(rev: str, prefixes: list[str], project: Path) -> None:
+def export_tree(rev: str, prefixes: list[str], project: Path, known_existing: bool = False) -> None:
     """Export all requested blobs in one Git process, rejecting links/path escapes."""
-    existing = [prefix for prefix in prefixes if tree_paths(rev, prefix)]
+    existing = prefixes if known_existing else [prefix for prefix in prefixes if tree_paths(rev, prefix)]
     if not existing:
         return
     process = subprocess.Popen(["git", "archive", "--format=tar", rev, "--", *existing],
@@ -193,7 +287,7 @@ def export_tree(rev: str, prefixes: list[str], project: Path) -> None:
                 if member.isdir():
                     target.mkdir(parents=True, exist_ok=True)
                 elif member.isfile():
-                    if not any(member.name.startswith(prefix + "/") for prefix in existing):
+                    if not any(member.name == prefix or member.name.startswith(prefix + "/") for prefix in existing):
                         raise SystemExit(f"unexpected snapshot archive file: {member.name}")
                     target.parent.mkdir(parents=True, exist_ok=True)
                     with archive.extractfile(member) as source, target.open("wb") as output:

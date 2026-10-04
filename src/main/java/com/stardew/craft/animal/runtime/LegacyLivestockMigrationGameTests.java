@@ -266,6 +266,7 @@ public final class LegacyLivestockMigrationGameTests {
         String animalKey() { return "animal:" + animalId; }
         void awaitEntityChunks(GameTestHelper h, Runnable action) {
             var chunks = new ArrayList<ChunkPos>();
+            var fullNeighbors = new LinkedHashSet<ChunkPos>();
             try {
                 var bounds = new BuildingBounds(manager.offset(-5, -1, -5), manager.offset(6, 4, 6));
                 for (int x = bounds.min().getX() >> 4; x <= bounds.maxInclusive().getX() >> 4; x++) {
@@ -275,8 +276,16 @@ public final class LegacyLivestockMigrationGameTests {
                             forcedChunks.add(chunk);
                             level.setChunkForced(x, z, true);
                         }
+                        // Both versions' ChunkMap#prepareEntityTickingChunk require radius-two FULL
+                        // neighbors before the asynchronous full-status callback can expose entities.
+                        // Prepare that dependency before spending this remote fixture's bounded tick
+                        // budget; synchronously loading only the home is not entity-ticking readiness.
+                        for (int dx = -2; dx <= 2; dx++) {
+                            for (int dz = -2; dz <= 2; dz++) fullNeighbors.add(new ChunkPos(x + dx, z + dz));
+                        }
                     }
                 }
+                for (var chunk : fullNeighbors) level.getChunk(chunk.x, chunk.z);
                 awaitEntityChunks(h, chunks, action, 0);
             } catch (RuntimeException | Error failure) { close(); throw failure; }
         }
@@ -291,7 +300,11 @@ public final class LegacyLivestockMigrationGameTests {
                     action.run();
                     return;
                 }
-                h.assertTrue(waitedTicks < 100, "Timed out waiting for entity-ready fixture chunks: " + chunks);
+                h.assertTrue(waitedTicks < 100, "Timed out waiting for entity-ready fixture chunks: " + chunks
+                        + "; states=" + chunks.stream().map(chunk -> chunk + "{loaded="
+                        + level.areEntitiesLoaded(chunk.toLong()) + ", ticking="
+                        + level.isPositionEntityTicking(new BlockPos(chunk.getMinBlockX(), manager.getY(), chunk.getMinBlockZ()))
+                        + ", forced=" + level.getForcedChunks().contains(chunk.toLong()) + "}").toList());
                 h.runAfterDelay(1, () -> awaitEntityChunks(h, chunks, action, waitedTicks + 1));
             } catch (RuntimeException | Error failure) { close(); throw failure; }
         }

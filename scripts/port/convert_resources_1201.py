@@ -9,7 +9,7 @@ handled separately by the NBT downgrade tool.
   1.21.1 (never loaded there), so they are replaced, not merged, to keep parity.
 - Recipes: item result objects use `item` instead of `id`; cooking/stonecutting
   results are plain strings (+ top-level `count` for stonecutting).
-- Loot tables: `match_tool` item predicates use 1.20.1 list/enchantment syntax.
+- Loot tables: `match_tool` predicates use 1.20.1 syntax; block-state components use BlockStateTag NBT.
 - Native StardewCraft models: NeoForge face metadata and supported built-in loaders -> Forge equivalents.
 """
 from __future__ import annotations
@@ -142,6 +142,19 @@ def walk_loot(o):
     if isinstance(o, dict):
         if o.get("condition") == "minecraft:match_tool" and isinstance(o.get("predicate"), dict):
             convert_item_predicate(o["predicate"])
+        if o.get("function") == "minecraft:set_components":
+            components = o.get("components")
+            if not isinstance(components, dict) or set(components) != {"minecraft:block_state"}:
+                raise SystemExit("unsupported loot components need manual conversion")
+            properties = components["minecraft:block_state"]
+            if not isinstance(properties, dict) or not all(
+                    isinstance(key, str) and isinstance(value, str) for key, value in properties.items()):
+                raise SystemExit("loot block-state properties must be strings")
+            # Quoted JSON compounds are valid SNBT. The vanilla BlockItem and our
+            # BLOCK_STATE component bridge both read this exact string compound.
+            o["function"] = "minecraft:set_nbt"
+            o["tag"] = json.dumps({"BlockStateTag": properties}, ensure_ascii=False, separators=(",", ":"))
+            del o["components"]
         for v in o.values():
             walk_loot(v)
     elif isinstance(o, list):

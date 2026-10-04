@@ -14,6 +14,32 @@ SPEC.loader.exec_module(CONVERSION)
 
 
 class ModelResourceConversionTest(unittest.TestCase):
+    def test_loot_block_state_components_keep_variant_and_conditions(self):
+        function = {"function": "minecraft:set_components",
+                    "components": {"minecraft:block_state": {"variant": "3", "facing": "east"}},
+                    "conditions": [{"condition": "minecraft:survives_explosion"}]}
+        converted = CONVERSION.walk_loot(copy.deepcopy(function))
+        self.assertEqual(converted["function"], "minecraft:set_nbt")
+        self.assertEqual(json.loads(converted["tag"]),
+                         {"BlockStateTag": {"variant": "3", "facing": "east"}})
+        self.assertEqual(converted["conditions"], function["conditions"])
+        self.assertNotIn("components", converted)
+        self.assertEqual(CONVERSION.walk_loot(copy.deepcopy(converted)), converted)
+
+    def test_unknown_loot_components_and_non_string_states_fail(self):
+        for components in ({"minecraft:custom_data": {"value": 1}},
+                           {"minecraft:block_state": {"variant": 3}},
+                           {"minecraft:block_state": {}, "minecraft:custom_name": "name"}, None):
+            with self.subTest(components=components), self.assertRaises(SystemExit):
+                CONVERSION.walk_loot({"function": "minecraft:set_components", "components": components})
+
+    def test_shipped_loot_tables_are_already_converted(self):
+        data = SCRIPT.parents[2] / "src/main/resources/data"
+        for path in sorted(data.glob("*/loot_tables/**/*.json")):
+            value = json.loads(path.read_text(encoding="utf-8"))
+            self.assertEqual(CONVERSION.walk_loot(copy.deepcopy(value)), value,
+                             f"Unconverted loot-table payload: {path.relative_to(data)}")
+
     def test_element_and_face_data_are_lossless_and_idempotent(self):
         element_data = {"color": "ffa1b2c3", "sky_light": 9, "ambient_occlusion": False}
         face_data = {"block_light": 15, "ambient_occlusion": False}

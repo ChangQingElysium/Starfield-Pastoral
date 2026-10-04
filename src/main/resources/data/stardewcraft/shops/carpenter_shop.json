@@ -70,7 +70,9 @@
     },
     {
       "item": "stardewcraft:shipping_bin",
-      "price": 2500
+      "price": 250,
+      "trade_item": "stardewcraft:wood_normal",
+      "trade_item_count": 150
     },
     {
       "item": "stardewcraft:incubator",

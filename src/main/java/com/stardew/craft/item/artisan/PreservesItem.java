@@ -149,7 +149,7 @@ public class PreservesItem extends Item implements IStardewItem {
     @Override
     public int getHealth(ItemStack stack) {
         int edibility = getIntTag(stack, TAG_EDIBILITY, getBaseEdibility());
-        if (edibility <= -300) {
+        if (edibility < 0) {
             return 0;
         }
         int energy = energyFromEdibility(edibility);

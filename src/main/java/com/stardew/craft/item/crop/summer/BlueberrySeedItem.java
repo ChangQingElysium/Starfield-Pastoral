@@ -65,7 +65,9 @@ public class BlueberrySeedItem extends Item implements IStardewItem {
         if (!level.isClientSide) {
                     BlockState cropState = Objects.requireNonNull(ModBlocks.BLUEBERRY_CROP.get().defaultBlockState(), "cropState");
                     SoundEvent hoeSound = Objects.requireNonNull(SoundEvents.HOE_TILL, "hoeSound");
-                level.setBlock(abovePos, cropState, 3);
+                if (!com.stardew.craft.farming.CropPlanting.place(level, abovePos, cropState)) {
+                    return InteractionResult.FAIL;
+                }
                 level.playSound(null, abovePos, hoeSound,
                     net.minecraft.sounds.SoundSource.BLOCKS,
                     1.0F, 1.0F);

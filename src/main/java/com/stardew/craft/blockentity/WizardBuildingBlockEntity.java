@@ -228,10 +228,11 @@ public final class WizardBuildingBlockEntity extends net.minecraft.world.level.b
             return;
         }
         lastProcessedDay = day;
-        if (raisinDaysLeft > 0) {
+        boolean winter = StardewTimeManager.get().getCurrentSeason() == 3;
+        if (raisinDaysLeft > 0 && !winter) {
             raisinDaysLeft--;
         }
-        if (raisinDaysLeft == 0 && StardewTimeManager.get().getCurrentSeason() != 3
+        if (raisinDaysLeft == 0 && !winter
                 && consumeOne(ModItems.RAISINS.get())) {
             raisinDaysLeft = RAISIN_BUFF_DAYS;
         }

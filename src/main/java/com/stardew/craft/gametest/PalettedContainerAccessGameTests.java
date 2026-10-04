@@ -14,7 +14,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.locks.LockSupport;
 
 /** Exercises the actual palette implementation without changing the test world. */
 @GameTestHolder("stardewcraft_buildings")
@@ -27,83 +26,104 @@ public final class PalettedContainerAccessGameTests {
     private PalettedContainerAccessGameTests() {}
 
     @GameTest(templateNamespace = "stardewcraft_buildings", template = "empty", timeoutTicks = 400)
-    public static void paletteReadersWaitForWritersAndPreserveResizedState(GameTestHelper helper) throws Exception {
+    public static void paletteSupportsWorldGenerationHandoffAndConcurrentResize(GameTestHelper helper) throws Exception {
         IdMapper<Integer> registry = new IdMapper<>(VALUES);
         Integer[] values = new Integer[VALUES];
         for (int i = 0; i < VALUES; i++) {
             values[i] = Integer.valueOf(i);
             registry.add(values[i]);
         }
-        assertReaderWaitsForAcquire(helper, registry, values);
+        assertGenerationCompletionRelease(helper, registry, values);
+        assertWorldGenerationHandoff(helper, registry, values);
         long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(15);
         for (int round = 0; round < ROUNDS; round++) {
             PalettedContainer<Integer> container = new PalettedContainer<>(
                     registry, values[0], PalettedContainer.Strategy.SECTION_STATES);
-            exerciseConcurrentResize(helper, container, values, round, deadline);
+            exerciseConcurrentResize(helper, container, registry, values, round, deadline);
             assertCopyAndSerialization(helper, container, registry, values, round);
         }
         helper.succeed();
     }
 
-    private static void assertReaderWaitsForAcquire(GameTestHelper helper, IdMapper<Integer> registry,
-                                                    Integer[] values) throws Exception {
+    /** Generation completion can release a section without writing another palette slot. */
+    private static void assertGenerationCompletionRelease(GameTestHelper helper, IdMapper<Integer> registry,
+                                                          Integer[] values) throws Exception {
         PalettedContainer<Integer> container = new PalettedContainer<>(
                 registry, values[0], PalettedContainer.Strategy.SECTION_STATES);
-        CountDownLatch entered = new CountDownLatch(1);
-        CompletableFuture<Integer> result = new CompletableFuture<>();
-        Thread reader = new Thread(() -> {
-            entered.countDown();
+        CompletableFuture<Void> result = new CompletableFuture<>();
+        AtomicBoolean released = new AtomicBoolean();
+        Thread completion = new Thread(() -> {
             try {
-                result.complete(container.get(0, 0, 0));
+                // Optimized writers can bypass slot wrappers; completion must still release safely.
+                container.release();
+                released.set(true);
+                result.complete(null);
             } catch (Throwable failure) {
                 result.completeExceptionally(failure);
             }
-        }, "stardew-palette-locked-reader");
-        reader.setDaemon(true);
+        }, "stardew-palette-generation-completion");
+        completion.setDaemon(true);
         container.acquire();
         try {
-            reader.start();
-            helper.assertTrue(entered.await(2, TimeUnit.SECONDS), "Palette reader did not start");
-            long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(2);
-            boolean waitingInGet = false;
-            while (!result.isDone() && System.nanoTime() < deadline) {
-                Thread.State state = reader.getState();
-                if (state == Thread.State.WAITING || state == Thread.State.BLOCKED) {
-                    for (StackTraceElement frame : reader.getStackTrace()) {
-                        if (frame.getClassName().equals(PalettedContainer.class.getName())
-                                && frame.getMethodName().equals("get")) {
-                            waitingInGet = true;
-                            break;
-                        }
-                    }
-                }
-                if (waitingInGet) break;
-                LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(1));
-            }
-            helper.assertTrue(waitingInGet && !result.isDone(),
-                    "Public palette get did not wait for the acquired writer lock");
+            completion.start();
+            result.get(2, TimeUnit.SECONDS);
         } finally {
-            container.release();
-            reader.join(TimeUnit.SECONDS.toMillis(2));
-            if (reader.isAlive()) {
-                reader.interrupt();
-                reader.join(TimeUnit.SECONDS.toMillis(2));
-            }
-            helper.assertTrue(!reader.isAlive(), "Locked palette reader was not joined after release");
+            if (!released.get()) container.release();
+            completion.join(TimeUnit.SECONDS.toMillis(2));
+            helper.assertTrue(!completion.isAlive(), "Palette generation completion remained blocked");
         }
-        helper.assertTrue(result.get(2, TimeUnit.SECONDS) == values[0],
-                "Reader returned a different state after the writer lock was released");
+        helper.assertTrue(released.get(), "Generation completion could not release another thread's acquire");
+        helper.assertTrue(container.get(0, 0, 0) == values[0], "Completion release changed an untouched state");
+        // A successfully handed-off section must be available to the caller again.
+        container.acquire();
+        container.release();
+    }
+
+    /** NoiseBasedChunkGenerator acquires sections before handing their fill/release to a worker. */
+    private static void assertWorldGenerationHandoff(GameTestHelper helper, IdMapper<Integer> registry,
+                                                     Integer[] values) throws Exception {
+        PalettedContainer<Integer> container = new PalettedContainer<>(
+                registry, values[0], PalettedContainer.Strategy.SECTION_STATES);
+        CompletableFuture<Void> result = new CompletableFuture<>();
+        AtomicBoolean released = new AtomicBoolean();
+        Thread worker = new Thread(() -> {
+            try {
+                // Unchecked writes are the vanilla world-generation path, including palette growth.
+                for (int index = 0; index < STATES; index++) {
+                    int x = index & 15, y = index >> 8, z = (index >> 4) & 15;
+                    container.getAndSetUnchecked(x, y, z, values[expected(index, 0)]);
+                }
+                container.release();
+                released.set(true);
+                result.complete(null);
+            } catch (Throwable failure) {
+                result.completeExceptionally(failure);
+            }
+        }, "stardew-palette-world-generation");
+        worker.setDaemon(true);
+        container.acquire();
+        try {
+            worker.start();
+            result.get(2, TimeUnit.SECONDS);
+        } finally {
+            // Release on the caller only to unblock the deliberately broken implementation on failure.
+            if (!released.get()) container.release();
+            worker.join(TimeUnit.SECONDS.toMillis(2));
+            helper.assertTrue(!worker.isAlive(), "Palette generation worker remained blocked after cleanup");
+        }
+        helper.assertTrue(released.get(), "Generation worker could not release the caller's acquire");
+        assertAllStates(helper, container, values, 0);
     }
 
     private static void exerciseConcurrentResize(GameTestHelper helper, PalettedContainer<Integer> container,
-                                                 Integer[] values, int round, long deadline) throws Exception {
+                                                 IdMapper<Integer> registry, Integer[] values, int round, long deadline) throws Exception {
         AtomicBoolean stop = new AtomicBoolean();
         AtomicBoolean writerActive = new AtomicBoolean();
         AtomicReference<Throwable> failure = new AtomicReference<>();
-        CountDownLatch readersReady = new CountDownLatch(2);
-        CountDownLatch readersDuringWrite = new CountDownLatch(2);
-        long[] reads = new long[2];
-        Thread[] workers = new Thread[3];
+        CountDownLatch readersReady = new CountDownLatch(3);
+        CountDownLatch readersDuringWrite = new CountDownLatch(3);
+        long[] reads = new long[3];
+        Thread[] workers = new Thread[4];
         for (int number = 0; number < 2; number++) {
             int readerNumber = number;
             workers[number] = new Thread(() -> {
@@ -160,6 +180,50 @@ public final class PalettedContainerAccessGameTests {
                 stop.set(true);
             }
         }, "stardew-palette-writer-" + round);
+        workers[3] = new Thread(() -> {
+            boolean announced = false;
+            boolean sampledWriter = false;
+            try {
+                while (!stop.get() && !Thread.currentThread().isInterrupted()) {
+                    FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
+                    PalettedContainer<Integer> decoded = new PalettedContainer<>(
+                            registry, values[0], PalettedContainer.Strategy.SECTION_STATES);
+                    try {
+                        container.write(buffer);
+                        decoded.read(buffer);
+                        require(!buffer.isReadable(), "Concurrent serialization left unread data");
+                    } finally {
+                        buffer.release();
+                    }
+                    require(container.pack(registry, PalettedContainer.Strategy.SECTION_STATES) != null,
+                            "Concurrent save returned no packed palette");
+                    PalettedContainer<Integer> copy = container.copy();
+                    for (int index = 0; index < STATES; index++) {
+                        int x = index & 15, y = index >> 8, z = (index >> 4) & 15;
+                        Integer decodedValue = decoded.get(x, y, z);
+                        Integer copiedValue = copy.get(x, y, z);
+                        require(decodedValue != null && decodedValue >= 0 && decodedValue < VALUES
+                                        && decodedValue == values[decodedValue],
+                                "Concurrent serialization produced an invalid state");
+                        require(copiedValue != null && copiedValue >= 0 && copiedValue < VALUES
+                                        && copiedValue == values[copiedValue],
+                                "Concurrent copy produced an invalid state");
+                    }
+                    reads[2]++;
+                    if (!announced) {
+                        announced = true;
+                        readersReady.countDown();
+                    }
+                    if (!sampledWriter && writerActive.get()) {
+                        sampledWriter = true;
+                        readersDuringWrite.countDown();
+                    }
+                }
+            } catch (Throwable caught) {
+                failure.compareAndSet(null, caught);
+                stop.set(true);
+            }
+        }, "stardew-palette-serializer-" + round);
         for (Thread worker : workers) worker.setDaemon(true);
         try {
             for (Thread worker : workers) worker.start();
@@ -174,8 +238,8 @@ public final class PalettedContainerAccessGameTests {
             helper.assertTrue(!worker.isAlive(), "Palette worker leaked after cleanup: " + worker.getName());
         }
         if (failure.get() != null) throw new AssertionError("Concurrent palette resize failed", failure.get());
-        helper.assertTrue(readersDuringWrite.getCount() == 0 && reads[0] > 0 && reads[1] > 0,
-                "Concurrent palette readers did not execute");
+        helper.assertTrue(readersDuringWrite.getCount() == 0 && reads[0] > 0 && reads[1] > 0 && reads[2] > 0,
+                "Concurrent palette readers or serializer did not execute");
         assertAllStates(helper, container, values, round);
     }
 

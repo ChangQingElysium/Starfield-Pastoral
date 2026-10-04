@@ -18,7 +18,13 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "stardewcraft:ginger_palm_wall_ornament_right"
+          "name": "stardewcraft:ginger_palm_wall_ornament_left",
+          "functions": [
+            {
+              "function": "minecraft:set_nbt",
+              "tag": "{\"BlockStateTag\":{\"variant\":\"1\"}}"
+            }
+          ]
         }
       ]
     }

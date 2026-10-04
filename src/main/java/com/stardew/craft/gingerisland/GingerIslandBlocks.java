@@ -28,6 +28,7 @@ public final class GingerIslandBlocks {
 
     private static Block create(GingerIslandAssets.BlockAsset asset) {
         var props = Block.Properties.of().mapColor(MapColor.COLOR_BROWN).strength(1.5F).sound(SoundType.WOOD);
+        if (asset.passable()) props.noCollission();
         if (asset.type().equals("natural_rock")) {
             props.mapColor(MapColor.STONE).strength(3F).sound(SoundType.STONE);
         } else if (asset.type().equals("natural_ground")) {
@@ -36,9 +37,12 @@ public final class GingerIslandBlocks {
                 || asset.type().equals("natural_aquatic") || asset.type().equals("forage")) {
             props.mapColor(MapColor.PLANT).strength(.2F).sound(SoundType.GRASS);
         }
+        if (asset.legacyAlias()) return new GingerIslandLegacyAliasBlock(props.noOcclusion(), asset);
+        if (asset.id().equals("ginger_willy_boat")) return new WillyBoatBlock(props.noOcclusion(), asset);
+        if (asset.id().equals("ginger_island_shipwreck")) return new GingerIslandShipwreckBlock(props.noOcclusion(), asset.model());
         return switch (asset.kind()) {
-            case "volcano_floor" -> new GingerIslandSurfaceBlock(props.sound(SoundType.STONE).strength(3F), 6, 75);
-            case "caldera_floor" -> new GingerIslandSurfaceBlock(props.sound(SoundType.STONE).strength(3F), 3, 80);
+            case "volcano_floor" -> new GingerIslandSurfaceBlock(props.sound(SoundType.STONE).strength(3F), asset.variant_count(), 75);
+            case "caldera_floor" -> new GingerIslandSurfaceBlock(props.sound(SoundType.STONE).strength(3F), asset.variant_count(), 80);
             case "cube" -> new Block(asset.type().equals("natural_ground")
                     ? props : props.sound(SoundType.STONE).strength(3F));
             case "cooled_lava" -> new CooledLavaBlock(props.sound(SoundType.STONE).strength(-1F, 3600000F).noOcclusion().noLootTable());
@@ -64,12 +68,21 @@ public final class GingerIslandBlocks {
     public static Map<String, DeferredItem<Item>> registerItems(DeferredRegister.Items registry) {
         Map<String, DeferredItem<Item>> items = new LinkedHashMap<>();
         for (var asset : GingerIslandAssets.blocks()) {
-            items.put(asset.id(), registry.register(asset.id(), () -> asset.kind().equals("heavy_tapper")
-                    ? new com.stardew.craft.item.TapperItem(get(asset.id()), new Item.Properties().stacksTo(999))
-                    : new StardewBlockItem(get(asset.id()), "stardewcraft.type." + asset.type(), -1,
-                            new Item.Properties().stacksTo(999))));
+            items.put(asset.id(), registry.register(asset.id(), () -> createItem(asset)));
         }
         return Collections.unmodifiableMap(items);
+    }
+
+    private static Item createItem(GingerIslandAssets.BlockAsset asset) {
+        Block block = get(asset.id());
+        Item.Properties properties = new Item.Properties().stacksTo(999);
+        String type = "stardewcraft.type." + (asset.legacyAlias() ? "hidden" : asset.type());
+        if (asset.kind().equals("heavy_tapper")) return new com.stardew.craft.item.TapperItem(block, properties);
+        if (asset.id().equals("ginger_willy_boat") || asset.id().equals("ginger_island_shipwreck"))
+            return new GingerIslandBoatItem(block, type, -1, properties);
+        if (block instanceof MapDecorStaticBlock)
+            return new GingerIslandDecorBlockItem(block, type, -1, properties, asset.placement_mode());
+        return new StardewBlockItem(block, type, -1, properties);
     }
 
     public static Block get(String id) {

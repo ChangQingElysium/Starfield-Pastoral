@@ -1,3 +1,7 @@
 {
-  "parent": "stardewcraft:block/ginger_island/dig_ammonite_relief"
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "stardewcraft:item/ginger_island/ginger_dig_ammonite_relief",
+    "particle": "stardewcraft:block/ginger_island/dig_ammonite_relief_particle"
+  }
 }

@@ -11,10 +11,22 @@ import net.minecraft.world.phys.Vec3;
 public final class PlayerMagnetHandler {
     private PlayerMagnetHandler() {}
 
+    /** 原版磁力半径以像素计，64 像素 = 1 格；食物 Buff（Bean Hotpot +32、Crispy Bass +64）按像素存储。 */
+    private static final double PIXELS_PER_TILE = 64.0;
+    /** 原版玩家无装备时的基础磁力半径 128 像素 = 2 格；戒指数值（RingType）已是含基础半径的总格数。 */
+    private static final double BASE_RADIUS_TILES = 2.0;
+
+    /** 总吸附半径（格）：戒指总半径（已含基础）+ 食物 Buff 像素加成换算；无戒指时 Buff 叠加在原版基础半径上。 */
+    private static double attractRadius(ServerPlayer player) {
+        double food = PlayerDataManager.getPlayerData(player).getTempMagneticRadiusBonus() / PIXELS_PER_TILE;
+        int ring = EquipmentResolver.getMergedStats(player).getMagneticRadius();
+        if (ring > 0) return ring + food;
+        return food > 0 ? BASE_RADIUS_TILES + food : 0.0;
+    }
+
     public static void tick(ServerPlayer player) {
         if (!player.isAlive() || player.isSpectator()) return;
-        int radius = PlayerDataManager.getPlayerData(player).getTempMagneticRadiusBonus()
-                + EquipmentResolver.getMergedStats(player).getMagneticRadius();
+        double radius = attractRadius(player);
         if (radius <= 0) return;
 
         Vec3 target = player.position().add(0.0, 0.35, 0.0);
@@ -34,8 +46,7 @@ public final class PlayerMagnetHandler {
                 if (other == player || !other.isAlive() || other.isSpectator() || !canAttract(other, item)) continue;
                 double otherDistance = other.position().add(0.0, 0.35, 0.0).distanceTo(origin);
                 if (otherDistance >= distance) continue;
-                int otherRadius = PlayerDataManager.getPlayerData(other).getTempMagneticRadiusBonus()
-                        + EquipmentResolver.getMergedStats(other).getMagneticRadius();
+                double otherRadius = attractRadius(other);
                 if (otherDistance <= otherRadius && player.level().clip(new ClipContext(origin,
                         other.position().add(0.0, 0.35, 0.0), ClipContext.Block.COLLIDER,
                         ClipContext.Fluid.NONE, item)).getType() == HitResult.Type.MISS) {

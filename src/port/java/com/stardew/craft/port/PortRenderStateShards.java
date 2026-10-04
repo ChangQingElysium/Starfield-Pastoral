@@ -12,6 +12,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 @OnlyIn(Dist.CLIENT)
 public final class PortRenderStateShards extends RenderStateShard {
     public static final ShaderStateShard RENDERTYPE_ENTITY_TRANSLUCENT_SHADER = RenderStateShard.RENDERTYPE_ENTITY_TRANSLUCENT_SHADER;
+    public static final ShaderStateShard RENDERTYPE_ENTITY_TRANSLUCENT_CULL_SHADER = RenderStateShard.RENDERTYPE_ENTITY_TRANSLUCENT_CULL_SHADER;
+    public static final ShaderStateShard RENDERTYPE_ITEM_ENTITY_TRANSLUCENT_CULL_SHADER = RenderStateShard.RENDERTYPE_ITEM_ENTITY_TRANSLUCENT_CULL_SHADER;
     public static final TransparencyStateShard TRANSLUCENT_TRANSPARENCY = RenderStateShard.TRANSLUCENT_TRANSPARENCY;
     public static final CullStateShard CULL = RenderStateShard.CULL;
     public static final CullStateShard NO_CULL = RenderStateShard.NO_CULL;

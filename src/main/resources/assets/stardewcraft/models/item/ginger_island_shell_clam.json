@@ -1,3 +1,16 @@
 {
-  "parent": "stardewcraft:block/ginger_island/island_shell_clam"
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "stardewcraft:item/ginger_island/original_o_372",
+    "particle": "stardewcraft:block/ginger_island/island_shell_clam_particle"
+  },
+  "display": {
+    "gui": {
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    }
+  }
 }

@@ -48,6 +48,30 @@ public final class MasteryBuffLifecycle {
         }
     }
 
+    /**
+     * 睡觉时清除全部 Buff（原版 Farmer.ClearBuffs → BuffManager.Clear：食物、饮料、祝福、减益一并移除），
+     * 并清空由食物 / 药水写入的临时属性加成；随后执行每日雕像 Buff 的状态复位。
+     */
+    public static void clearAllBuffs(ServerPlayer player) {
+        if (player == null) return;
+        for (var entry : ModMobEffects.MOB_EFFECTS.getEntries()) {
+            player.removeEffect(entry.value());
+        }
+        PlayerStardewData data = PlayerDataManager.getPlayerData(player);
+        if (data != null) {
+            data.clearTempFishingLevelBonus();
+            data.clearTempLuckBonus();
+            data.clearTempMaxEnergyBonus();
+            data.clearTempFarmingLevelBonus();
+            data.clearTempForagingLevelBonus();
+            data.clearTempMiningLevelBonus();
+            data.clearTempAttackBonus();
+            data.clearTempDefenseBonus();
+            data.clearTempMagneticRadiusBonus();
+        }
+        clearAllDailyMasteryBuffs(player);
+    }
+
     /** 是否任意 statue_of_blessings_* / dwarf_statue_* 在身上（用于消息提示等）。 */
     public static boolean hasAnyMasteryBuff(ServerPlayer player) {
         if (player == null) return false;

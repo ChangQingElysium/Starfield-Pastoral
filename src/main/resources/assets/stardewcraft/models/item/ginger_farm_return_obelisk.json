@@ -1,3 +1,7 @@
 {
-  "parent": "stardewcraft:block/ginger_island/farm_return_obelisk"
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "stardewcraft:item/ginger_island/ginger_farm_return_obelisk",
+    "particle": "stardewcraft:block/ginger_island/farm_return_obelisk_particle"
+  }
 }

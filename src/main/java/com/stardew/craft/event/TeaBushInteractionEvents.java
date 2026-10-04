@@ -63,7 +63,7 @@ public final class TeaBushInteractionEvents {
         }
         level.getServer().tell(new TickTask(level.getServer().getTickCount() + 1,
                 () -> {
-                    TeaBushManager.get(level).synchronizeChunk(level, chunk.getPos());
+                    TeaBushManager.get(level).synchronizeChunk(level, chunk);
                     if (chunk.getPos().equals(new net.minecraft.world.level.ChunkPos(
                             SunroomService.CENTRAL_TEA_BUSH))) {
                         SunroomService.ensurePlaced(level);

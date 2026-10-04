@@ -2017,11 +2017,34 @@ public final class NpcInteractionService {
                                 .answeredDialogueIds(player.getUUID()))));
     }
 
+    /**
+     * Dialogue.cs {@code $d cc/joja} read event 191393 (community center opening) from the
+     * server-side seen-event store, which the client does not mirror. Attach it as markers.
+     */
+    private static OpenNpcDialogueScreenPayload withWorldStateMarkers(
+            ServerPlayer player,
+            OpenNpcDialogueScreenPayload payload
+    ) {
+        var seen = com.stardew.craft.cutscene.server.EventSeenData.get(player.serverLevel());
+        List<String> ids = new ArrayList<>(payload.answeredDialogueIds());
+        if (seen.hasSeen(player.getUUID(), OpenNpcDialogueScreenPayload.CC_OPEN_EVENT_ID)) {
+            ids.add(OpenNpcDialogueScreenPayload.CC_OPEN_SELF_MARKER);
+        }
+        if (seen.hasAnyPlayerSeen(OpenNpcDialogueScreenPayload.CC_OPEN_EVENT_ID)) {
+            ids.add(OpenNpcDialogueScreenPayload.CC_OPEN_ANY_MARKER);
+        }
+        if (ids.size() == payload.answeredDialogueIds().size()) {
+            return payload;
+        }
+        return new OpenNpcDialogueScreenPayload(payload.npcId(), payload.translateKey(),
+                payload.friendshipPoints(), payload.afterCloseItemId(), payload.garbleDwarvish(), ids);
+    }
+
     /** Common server send path, also used by wizard/Joja/shop dialogue adapters. */
     public static void sendDialogue(ServerPlayer player,OpenNpcDialogueScreenPayload payload) {
         beginDialogueSession(player,payload.npcId());
         NpcQuestionAuthority.open(player,payload.npcId(),payload.translateKey());
-        PacketDistributor.sendToPlayer(player,payload);
+        PacketDistributor.sendToPlayer(player,withWorldStateMarkers(player,payload));
     }
 
     public static void handleClientQuestionAnswer(

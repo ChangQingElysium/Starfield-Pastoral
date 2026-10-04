@@ -1,0 +1,21 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "stardewcraft:item/ginger_island/ginger_resort_roof_small",
+    "particle": "stardewcraft:block/ginger_island/resort_tile_roof_low_particle"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "stardewcraft:ginger_island_variant": 0.0
+      },
+      "model": "stardewcraft:item/ginger_island/ginger_resort_roof_0"
+    },
+    {
+      "predicate": {
+        "stardewcraft:ginger_island_variant": 1.0
+      },
+      "model": "stardewcraft:item/ginger_island/ginger_resort_roof_1"
+    }
+  ]
+}

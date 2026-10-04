@@ -1,3 +1,7 @@
 {
-  "parent": "stardewcraft:block/ginger_island/resort_beach_chair"
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "stardewcraft:item/ginger_island/ginger_resort_beach_chair",
+    "particle": "stardewcraft:block/ginger_island/resort_beach_chair_particle"
+  }
 }

@@ -2323,11 +2323,18 @@ public class PlayerStardewData {
     }
 
     public int incrementStat(String key, int amount) {
-        if (key == null || key.isBlank() || amount <= 0) {
+        if (key == null || key.isBlank() || amount == 0) {
             return getStat(key);
         }
-        int next = getStat(key) + amount;
-        stats.put(key, next);
+        // 原版 Stats.Increment(key, int)：负数改走 Decrement，最低减到 0
+        int next = amount > 0
+                ? (int) Math.min((long) Integer.MAX_VALUE, (long) getStat(key) + amount)
+                : (int) Math.max(0L, (long) getStat(key) + amount);
+        if (next == 0) {
+            stats.remove(key);
+        } else {
+            stats.put(key, next);
+        }
         markDirty();
         return next;
     }

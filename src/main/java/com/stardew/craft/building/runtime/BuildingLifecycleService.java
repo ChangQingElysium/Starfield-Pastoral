@@ -128,6 +128,18 @@ public final class BuildingLifecycleService {
             level.getServer().overworld().getDataStorage().save();
         }
         completeTransfer(level, data.transfer(record.id()));
+        mailIncubatorOnCoopUpgrade(level, data.find(record.id()));
+    }
+
+    /** Vanilla Buildings.json: Big Coop / Deluxe Coop carry AddMailOnBuild ["incubator"], sent to every farmer. */
+    private static void mailIncubatorOnCoopUpgrade(ServerLevel level, BuildingRecord upgraded) {
+        if (upgraded == null || upgraded.tier() < 2 || !PrefabDefinitions.COOP.equals(upgraded.family())) return;
+        var farm = com.stardew.craft.farm.FarmInstanceRegistry.get(level.getServer()).getFarmByInstanceId(upgraded.farmId());
+        if (farm == null) return;
+        for (var farmer : farm.getAllFarmers()) {
+            var player = level.getServer().getPlayerList().getPlayer(farmer);
+            if (player != null) com.stardew.craft.mail.MailService.addMail(player, "incubator");
+        }
     }
     public static boolean move(ServerPlayer player, BuildingRecord record, BlockPos anchor) {
         return record != null && move(player, record, anchor, record.facing());

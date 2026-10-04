@@ -245,15 +245,18 @@ public class TotemPoleBlock extends MapUtilityStaticBlock implements EntityBlock
         if (level.dimension() != ModDimensions.STARDEW_VALLEY) {
             return false;
         }
-        return getPlacementBounds().contains(pos);
+        PlacementBounds bounds = getPlacementBounds();
+        return bounds != null && bounds.contains(pos);
     }
 
+    @Nullable
     private PlacementBounds getPlacementBounds() {
         return switch (totemType) {
             case FARM -> FARM_BOUNDS;
             case MOUNTAIN -> MOUNTAIN_BOUNDS;
             case BEACH -> BEACH_BOUNDS;
             case DESERT -> DESERT_BOUNDS;
+            case ISLAND -> null; // Island arrival pillars are part of the authored island template.
         };
     }
 

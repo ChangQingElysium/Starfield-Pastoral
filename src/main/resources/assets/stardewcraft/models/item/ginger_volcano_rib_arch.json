@@ -1,3 +1,7 @@
 {
-  "parent": "stardewcraft:block/ginger_island/volcano_rib_arch"
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "stardewcraft:item/ginger_island/ginger_volcano_rib_arch",
+    "particle": "stardewcraft:block/ginger_island/volcano_rib_arch_particle"
+  }
 }

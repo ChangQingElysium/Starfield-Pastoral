@@ -84,6 +84,13 @@ public class StardewQuest {
 
     public void onMonsterSlain(ServerPlayer player, String monsterType) {}
 
+    /** One kill of one monster carrying several type tags; default reports each tag separately. */
+    public void onMonsterSlain(ServerPlayer player, java.util.Collection<String> monsterTags) {
+        for (String tag : monsterTags) {
+            onMonsterSlain(player, tag);
+        }
+    }
+
     public void onFishCaught(ServerPlayer player, String itemId, int count) {}
 
     public void onItemReceived(ServerPlayer player, String itemId, int count) {}
