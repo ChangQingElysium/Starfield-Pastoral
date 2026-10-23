@@ -10,6 +10,10 @@ The Fabric platform suite initially ran 804 tests with one failure: `ModelTransf
 
 The new Fabric production smoke initially exited before startup because its run-directory configuration was absent at server launch. Install the isolated configuration in the Gradle task action after output preparation. The persistence probe now writes and reads vanilla command storage directly, avoiding an unloaded-chunk placement and a chat broadcast as a success signal. Both create/save/stop and reopen/read/save/stop subsequently passed using the remapped artifact. The smoke still rejects early process exit, missing shutdown/save markers and ABI failures.
 
+## 0.6.3fix2 NeoForge — unrelated Maven timeout while resolving the tracked Jade API (2026-10-23)
+
+The push run [39983823580](https://github.com/ChangQingElysium/Starfield-Pastoral/actions/runs/39983823580) failed before compilation while resolving `snownee.jade:Jade-1.21.1-NeoForge:15.10.4`: the POM request to `maven.ryanliptak.com` (the AppleSkin repository) timed out. The simultaneous PR run [39983832777](https://github.com/ChangQingElysium/Starfield-Pastoral/actions/runs/39983832777) passed both complete NeoForge and Fabric jobs. Gradle's module notation still searches remote metadata despite the tracked Jade JAR and flatDir declaration. Use an explicit compile-only file dependency on the existing tracked `libs/Jade-1.21.1-NeoForge-15.10.4.jar`; this preserves the exact API binary and avoids irrelevant network lookup. Repeat the exact-candidate clean gate and remote CI before publishing.
+
 ## Recurring structural cause
 
 ### 0.6.3fix1 candidate — joint classification and stale gameplay fixtures (2026-10-05)

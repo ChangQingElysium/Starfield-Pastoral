@@ -176,7 +176,7 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     // Jade API (Compile Only - Local - FlatDir)
-    compileOnly "snownee.jade:Jade-1.21.1-NeoForge:15.10.4"
+    compileOnly files("libs/Jade-1.21.1-NeoForge-15.10.4.jar")
     
     // JEI optional dependency for fishing info display (Compile Only - Local - FlatDir)
     compileOnly "mezz.jei:jei-1.21.1-neoforge:${jei_version}"
