@@ -2,6 +2,11 @@
 
 This file is the durable record for release-related CI failures. A release is not considered complete until the exact candidate commit passes the full GitHub workflow from a clean, tracked-only checkout and the pushed GitHub Actions run finishes successfully.
 
+## 0.6.3fix2 Forge — unrelated dependency queried against AppleSkin Maven (2026-10-23)
+
+Tag workflow [39988163946](https://github.com/ChangQingElysium/Starfield-Pastoral/actions/runs/39988163946) failed during dependency configuration before compilation. Gradle queried `maven.modrinth:jade:11.13.3+forge` at `https://maven.ryanliptak.com/` and timed out, disabling that repository and aborting `modules_userdev_resolver`. The exact tagged source had already passed branch workflow 39985740946 with 810 GameTests. Restrict the AppleSkin repository to its actual `squeek.appleskin` group; Jade continues to resolve from the existing Modrinth repository. Dependency versions, runtime source and release artifact contents are unchanged. Repeat the full clean-checkout gate and branch workflow; retry the original tag workflow separately rather than moving the existing tag.
+
+
 ### 0.6.3fix1 Forge candidate — ordinary item names falsely become explicit components (2026-10-05)
 
 The tracked-only Forge candidate `fbf150e80` completed 788 GameTests with three required failures. `catalogExposesOnlyAuthoredStatesAndStableItemOverrides` rejected the plain `ginger_gem_pedestal` catalog stack because the port's `ITEM_NAME` accessor fell back to `Item.getName` when no explicit component was present. `PortItemData.has` derives presence from that accessor, so every ordinary nonempty stack incorrectly claimed to carry a variant/base-name component. The actual NeoForge 21.1.217 sources include no `ITEM_NAME` in `COMMON_ITEM_COMPONENTS`; ordinary-name fallback belongs to `ItemStack.getHoverName`, after explicit `CUSTOM_NAME` and `ITEM_NAME` lookup. The existing Forge base-name Mixin already preserves that presentation order.
