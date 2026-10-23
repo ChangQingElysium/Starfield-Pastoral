@@ -13033,5 +13033,16 @@
   "stardewcraft.gui.profile.birthday_order": "%2$s, %1$s. Gün",
   "block.stardewcraft.ginger_music_crystal": "Müzik kristali",
   "block.stardewcraft.sand_slab": "Kum Basamağı",
-  "block.stardewcraft.sand_stairs": "Kum Merdiveni"
+  "block.stardewcraft.sand_stairs": "Kum Merdiveni",
+  "stardewcraft.ginger_island.state.walnut_present": "Altın cevizli",
+  "stardewcraft.ginger_island.state.walnut_empty": "Altın cevizsiz",
+  "block.stardewcraft.ginger_island_yellowgreen_leaf_clump": "Kısa yapraklı tropik küme",
+  "block.stardewcraft.ginger_island_blue_spiky_seedling": "Sivri yapraklı tropik filiz",
+  "block.stardewcraft.palm_log": "Palmiye Kütüğü",
+  "block.stardewcraft.palm_leaves": "Palmiye Yaprakları",
+  "block.stardewcraft.palm_planks": "Palmiye Tahtaları",
+  "block.stardewcraft.palm_planks_stairs": "Palmiye Merdiven",
+  "block.stardewcraft.palm_planks_slab": "Palmiye Basamak",
+  "block.stardewcraft.palm_trapdoor": "Palmiye Tuzak Kapısı",
+  "block.stardewcraft.palm_coconut_block": "Dekoratif Hindistan Cevizi Bloğu"
 }

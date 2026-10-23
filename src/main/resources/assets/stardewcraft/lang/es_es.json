@@ -13033,5 +13033,16 @@
   "stardewcraft.gui.profile.birthday_order": "%2$s %1$s",
   "block.stardewcraft.ginger_music_crystal": "Cristal musical",
   "block.stardewcraft.sand_slab": "Losa de arena",
-  "block.stardewcraft.sand_stairs": "Escaleras de arena"
+  "block.stardewcraft.sand_stairs": "Escaleras de arena",
+  "stardewcraft.ginger_island.state.walnut_present": "Con nuez dorada",
+  "stardewcraft.ginger_island.state.walnut_empty": "Sin nuez dorada",
+  "block.stardewcraft.ginger_island_yellowgreen_leaf_clump": "Mata tropical de hojas cortas",
+  "block.stardewcraft.ginger_island_blue_spiky_seedling": "Brote tropical de hojas puntiagudas",
+  "block.stardewcraft.palm_log": "Tronco de palmera",
+  "block.stardewcraft.palm_leaves": "Hojas de palmera",
+  "block.stardewcraft.palm_planks": "Tablones de palmera",
+  "block.stardewcraft.palm_planks_stairs": "Escaleras de palmera",
+  "block.stardewcraft.palm_planks_slab": "Losa de palmera",
+  "block.stardewcraft.palm_trapdoor": "Trampilla de palmera",
+  "block.stardewcraft.palm_coconut_block": "Bloque de coco decorativo"
 }

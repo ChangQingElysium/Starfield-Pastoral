@@ -5,6 +5,7 @@ import com.stardew.craft.block.ModBlocks;
 import com.stardew.craft.block.mine.DesertWallConnections;
 import com.stardew.craft.block.terrain.TerrainFaceConnections;
 import com.stardew.craft.block.terrain.TownPavingConnections;
+import com.stardew.craft.gingerisland.GingerIslandBlocks;
 import java.util.List;
 import java.util.Objects;
 import javax.annotation.Nullable;
@@ -29,36 +30,58 @@ import net.minecraftforge.client.model.IDynamicBakedModel;
 import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.client.model.data.ModelProperty;
 
-/** Selects native 16px atlas cells on all six faces, before the existing mine-soil overlay wraps them. */
+/** Native wall phases on all six faces, before the mine-soil overlay wraps them. */
 @SuppressWarnings("removal")
 @EventBusSubscriber(modid = StardewCraft.MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public final class DesertWallModels {
     private static final ModelProperty<int[]> CELLS = new ModelProperty<>();
     private static final ModelResourceLocation ATLAS = new ModelResourceLocation(
             new ResourceLocation(StardewCraft.MODID, "block/mine_desert_wall/connected"), "standalone");
+    private static final ModelResourceLocation VOLCANO_ATLAS = new ModelResourceLocation(
+            new ResourceLocation(StardewCraft.MODID, "block/ginger_island/volcano_wall_phases"), "standalone");
+    private static final ModelResourceLocation CALDERA_ATLAS = new ModelResourceLocation(
+            new ResourceLocation(StardewCraft.MODID, "block/ginger_island/caldera_wall_phases"), "standalone");
 
     private DesertWallModels() {}
 
     @SubscribeEvent
-    public static void register(ModelEvent.RegisterAdditional event) { event.register(ATLAS); }
+    public static void register(ModelEvent.RegisterAdditional event) {
+        event.register(ATLAS);
+        event.register(VOLCANO_ATLAS);
+        event.register(CALDERA_ATLAS);
+    }
 
     @SubscribeEvent
     public static void bake(ModelEvent.ModifyBakingResult event) {
-        BakedModel atlas = Objects.requireNonNull(event.getModels().get(ATLAS));
-        BakedQuad[][][] quads = new BakedQuad[6][12][47];
-        for (Direction face : Direction.values()) {
-            BakedQuad source = com.stardew.craft.port.PortJava.getFirst(atlas.getQuads(null, face, RandomSource.create(0)));
-            for (int column = 0; column < 12; column++) for (int row = 0; row < 47; row++)
-                quads[face.ordinal()][column][row] = tile(source, column, row);
-        }
+        BakedQuad[][][] quads = tiles(Objects.requireNonNull(event.getModels().get(ATLAS)), 47);
         for (BlockState state : ModBlocks.MINE_DESERT_WALL.get().getStateDefinition().getPossibleStates()) {
             var id = BlockModelShaper.stateToModelLocation(state);
             event.getModels().put(id, new Wall(Objects.requireNonNull(event.getModels().get(id)), quads));
         }
+        BakedQuad[][][] volcanic = tiles(Objects.requireNonNull(event.getModels().get(VOLCANO_ATLAS)), 1);
+        for (BlockState state : GingerIslandBlocks.get("ginger_volcano_wall").getStateDefinition().getPossibleStates()) {
+            var id = BlockModelShaper.stateToModelLocation(state);
+            event.getModels().put(id, new Wall(Objects.requireNonNull(event.getModels().get(id)), volcanic));
+        }
+        BakedQuad[][][] caldera = tiles(Objects.requireNonNull(event.getModels().get(CALDERA_ATLAS)), 1);
+        for (BlockState state : GingerIslandBlocks.get("ginger_caldera_wall").getStateDefinition().getPossibleStates()) {
+            var id = BlockModelShaper.stateToModelLocation(state);
+            event.getModels().put(id, new Wall(Objects.requireNonNull(event.getModels().get(id)), caldera));
+        }
         // Inventory retains the normal native single-block model and its opaque particle material.
     }
 
-    private static BakedQuad tile(BakedQuad source, int column, int row) {
+    private static BakedQuad[][][] tiles(BakedModel atlas, int rows) {
+        BakedQuad[][][] result = new BakedQuad[6][12][rows];
+        for (Direction face : Direction.values()) {
+            BakedQuad source = com.stardew.craft.port.PortJava.getFirst(atlas.getQuads(null, face, RandomSource.create(0)));
+            for (int column = 0; column < 12; column++) for (int row = 0; row < rows; row++)
+                result[face.ordinal()][column][row] = tile(source, column, row, rows);
+        }
+        return result;
+    }
+
+    private static BakedQuad tile(BakedQuad source, int column, int row, int rows) {
         int[] vertices = source.getVertices().clone();
         int stride = vertices.length / 4;
         var frame = TerrainFaceConnections.frame(source.getDirection());
@@ -70,7 +93,7 @@ public final class DesertWallModels {
             float u = frame.x(p) > .5 ? 15.999f : .001f;
             float v = frame.y(p) > .5 ? 15.999f : .001f;
             vertices[at + 4] = Float.floatToRawIntBits(com.stardew.craft.port.PortSprites.getU(sprite, (column * 16 + u) / 192f));
-            vertices[at + 5] = Float.floatToRawIntBits(com.stardew.craft.port.PortSprites.getV(sprite, (row * 16 + v) / 752f));
+            vertices[at + 5] = Float.floatToRawIntBits(com.stardew.craft.port.PortSprites.getV(sprite, (row * 16 + v) / (rows * 16f)));
         }
         return new BakedQuad(vertices, source.getTintIndex(), source.getDirection(), sprite,
                 source.isShade(), source.hasAmbientOcclusion());
@@ -78,13 +101,19 @@ public final class DesertWallModels {
 
     private static final class Wall extends BakedModelWrapper<BakedModel> implements IDynamicBakedModel {
         private final BakedQuad[][][] quads;
-        Wall(BakedModel original, BakedQuad[][][] quads) { super(original); this.quads = quads; }
+        private final int rows;
+        Wall(BakedModel original, BakedQuad[][][] quads) {
+            super(original);
+            this.quads = quads;
+            this.rows = quads[0][0].length;
+        }
 
         @Override public ModelData getModelData(BlockAndTintGetter level, BlockPos pos, BlockState state, ModelData data) {
             int[] cells = new int[6];
             for (Direction face : Direction.values()) {
                 int column = DesertWallConnections.phase(pos, face) * 3 + DesertWallConnections.variant(pos, face);
-                cells[face.ordinal()] = column * 47 + TownPavingConnections.row(DesertWallConnections.mask(level, pos, face));
+                cells[face.ordinal()] = column * rows + (rows == 1 ? 0
+                        : TownPavingConnections.row(DesertWallConnections.mask(level, pos, face)));
             }
             return originalModel.getModelData(level, pos, state, data).derive().with(CELLS, cells).build();
         }
@@ -99,7 +128,7 @@ public final class DesertWallModels {
             if (state == null || cells == null) return originalModel.getQuads(state, side, random, data, renderType);
             if (side == null || renderType != null && renderType != RenderType.solid()) return List.of();
             int cell = cells[side.ordinal()];
-            return List.of(quads[side.ordinal()][cell / 47][cell % 47]);
+            return List.of(quads[side.ordinal()][cell / rows][cell % rows]);
         }
     }
 }

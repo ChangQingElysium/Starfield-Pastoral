@@ -180,7 +180,7 @@ public final class PortScreens {
 
     /** 1.21.1 {@code AbstractContainerScreen#renderSlot}; 1.20.1's private implementation is the same code. */
     public static void vanillaRenderSlot(AbstractContainerScreen<?> screen, GuiGraphics graphics, Slot slot) {
-        ((PortContainerScreenAccessor) screen).port$renderSlot(graphics, slot);
+        ((PortContainerScreenAccessor) screen).port$invokeVanillaRenderSlot(graphics, slot);
     }
 
     /** 1.21.1 {@code AbstractContainerScreen#renderSlotHighlight(GuiGraphics, Slot, int, int, float)}. */

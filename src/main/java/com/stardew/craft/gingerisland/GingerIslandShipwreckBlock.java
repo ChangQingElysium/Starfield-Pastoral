@@ -47,4 +47,9 @@ public final class GingerIslandShipwreckBlock extends MapDecorStaticBlock implem
         BlockState updated = super.updateShape(state, direction, neighbor, level, pos, neighborPos);
         return updated.isAir() ? state.getFluidState().createLegacyBlock() : updated;
     }
+
+    @Override public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean moving) {
+        if (GingerIslandLegacyBoatCleanup.onMainRemoved(state, level, pos, newState, moving)) return;
+        super.onRemove(state, level, pos, newState, moving);
+    }
 }

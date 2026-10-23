@@ -118,6 +118,19 @@ class SyncFromMainTest(unittest.TestCase):
         self.assertFalse(self.sync.PENDING.exists())
         self.assertEqual(self.conversion.call_count, 2)
 
+    def test_tree_snapshot_sync_and_completion_do_not_create_commits(self):
+        new = self.advance({"src/main/resources/content.txt": "incoming\n"})
+        tree = self.git("rev-parse", new + "^{tree}")
+        self.put("src/main/resources/content.txt", "local edit\n")
+        before = self.git("rev-list", "--all", "--count")
+        self.assertEqual(self.call("--snapshot", tree), 1)
+        self.put("src/main/resources/content.txt", "merged local and incoming\n")
+        self.assertEqual(self.call("--complete-snapshot", tree), 0)
+        self.assertEqual(self.sync.STATE.read_text().strip(), tree)
+        self.assertEqual(self.git("rev-parse", "refs/port/main-snapshot-trees/" + tree), tree)
+        self.assertEqual(self.git("rev-list", "--all", "--count"), before)
+        self.assertEqual(self.call("--snapshot", tree), 0)
+
     def test_platform_files_mixins_and_port_only_resources_survive(self):
         new = self.advance({
             "src/main/resources/content.txt": "incoming\n",

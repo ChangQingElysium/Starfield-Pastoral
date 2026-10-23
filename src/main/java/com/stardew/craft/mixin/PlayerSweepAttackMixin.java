@@ -1,5 +1,7 @@
 package com.stardew.craft.mixin;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.stardew.craft.combat.OrdinaryWeaponAttackFrameStore;
 import com.stardew.craft.combat.WeaponStats;
 import com.stardew.craft.combat.WeaponCombatIdentity;
@@ -63,7 +65,7 @@ public abstract class PlayerSweepAttackMixin {
         }
     }
 
-    @Redirect(
+    @WrapOperation(
             method = "attack",
             at = @At(
                     value = "INVOKE",
@@ -73,13 +75,15 @@ public abstract class PlayerSweepAttackMixin {
     private boolean stardewcraft$suppressNativeSweepHurt(
             LivingEntity target,
             DamageSource source,
-            float vanillaDamage
+            float vanillaDamage,
+            Operation<Boolean> original
     ) {
         Player player = (Player) (Object) this;
         if (WeaponCombatIdentity.isWeapon(player.getMainHandItem())) {
             return false;
         }
-        return target.hurt(source, vanillaDamage);
+        // Preserve the original chain, including Apothic Attributes' auxiliary-kill redirect.
+        return original.call(target, source, vanillaDamage);
     }
 
     private float stableStardewDamageInput(float vanillaDamage) {

@@ -14,29 +14,27 @@ import org.lwjgl.opengl.GL20;
  */
 public final class TownDoorClipping {
     public static final String UNIFORM = "stardewcraft_TownDoorClipEquation";
+    public static final String SCREEN_UNIFORM = "stardewcraft_TownDoorClipScreen";
+    public static final String VIEWPORT_UNIFORM = "stardewcraft_TownDoorClipViewport";
     private static final float[] DISABLED = {0, 0, 0, 1};
-    private static final float[] BEFORE_MODEL_VIEW = {0, 0, 0, 1};
     private static final float[] AFTER_MODEL_VIEW = {0, 0, 0, 1};
+    private static final Vector4f SCREEN_PLANE = new Vector4f(0, 0, 0, 1);
     private static boolean enabled;
     private static int cachedProgram;
     private static int cachedLocation = -1;
 
     private TownDoorClipping() {}
 
-    static void enable(Vec3 planePoint, Vec3 normal, Vec3 camera, Matrix4f modelView) {
+    static void enable(Vec3 planePoint, Vec3 normal, Vec3 camera, Matrix4f modelView, Matrix4f projection) {
         Vec3 relativePoint = planePoint.add(normal.scale(.01)).subtract(camera);
         Vector4f before = new Vector4f((float) normal.x, (float) normal.y, (float) normal.z,
                 (float) -normal.dot(relativePoint));
-        BEFORE_MODEL_VIEW[0] = before.x;
-        BEFORE_MODEL_VIEW[1] = before.y;
-        BEFORE_MODEL_VIEW[2] = before.z;
-        BEFORE_MODEL_VIEW[3] = before.w;
         Vector4f after = new Matrix4f(modelView).invert().transpose().transform(new Vector4f(before));
         AFTER_MODEL_VIEW[0] = after.x;
         AFTER_MODEL_VIEW[1] = after.y;
         AFTER_MODEL_VIEW[2] = after.z;
         AFTER_MODEL_VIEW[3] = after.w;
-        GL11.glEnable(GL11.GL_CLIP_PLANE0);
+        new Matrix4f(projection).invert().transpose().transform(after, SCREEN_PLANE);
         enabled = true;
     }
 
@@ -60,10 +58,16 @@ public final class TownDoorClipping {
     }
 
     public static void updateVanillaUniform(Uniform uniform) {
-        // PORT(1.20.1): entity/block-entity vertices already include the camera rotation on 1.20.1, so the
-        // patched vanilla shaders clip in view space (ModelViewMat * Position) with the transformed plane.
-        float[] equation = enabled ? AFTER_MODEL_VIEW : DISABLED;
+        setProgramClipping(true);
+        float[] equation = enabled && !TownDoorRenderContext.isShadowPass() ? AFTER_MODEL_VIEW : DISABLED;
         uniform.set(equation[0], equation[1], equation[2], equation[3]);
+    }
+
+    /** gl_ClipDistance is undefined for sky/fullscreen programs which do not write it. */
+    public static void setProgramClipping(boolean hasClipOutput) {
+        if (!enabled) return;
+        if (hasClipOutput && !TownDoorRenderContext.isShadowPass()) GL11.glEnable(GL11.GL_CLIP_PLANE0);
+        else GL11.glDisable(GL11.GL_CLIP_PLANE0);
     }
 
     /** Renderer-mod shader objects cache this lookup once instead of synchronizing with GL every draw. */
@@ -75,16 +79,39 @@ public final class TownDoorClipping {
         if (!RenderSystem.isOnRenderThread()) return Integer.MIN_VALUE;
         int program = activeProgram();
         if (program == 0) return -1;
-        if (program != cachedProgram) {
-            cachedProgram = program;
-            cachedLocation = GL20.glGetUniformLocation(program, UNIFORM);
-        }
+        // The caller caches this per shader object. GL can recycle a numeric program ID after a
+        // pack/resource reload, so a process-wide ID cache must not reuse the previous location.
+        cachedProgram = program;
+        cachedLocation = GL20.glGetUniformLocation(program, UNIFORM);
         return cachedLocation;
     }
 
     public static void uploadRendererModUniform(int location) {
+        setProgramClipping(location >= 0);
         if (location < 0) return;
-        float[] equation = enabled ? AFTER_MODEL_VIEW : DISABLED;
+        float[] equation = enabled && !TownDoorRenderContext.isShadowPass() ? AFTER_MODEL_VIEW : DISABLED;
         GL20.glUniform4f(location, equation[0], equation[1], equation[2], equation[3]);
+    }
+
+    public static int[] findIrisUniforms() {
+        int program = activeProgram();
+        return new int[]{GL20.glGetUniformLocation(program, SCREEN_UNIFORM),
+                GL20.glGetUniformLocation(program, VIEWPORT_UNIFORM)};
+    }
+
+    public static void uploadIrisUniforms(int[] locations) {
+        setProgramClipping(false);
+        if (locations[0] < 0) return;
+        if (!enabled || TownDoorRenderContext.isShadowPass()) {
+            GL20.glUniform4f(locations[0], 0, 0, 0, 1);
+            if (locations[1] >= 0) GL20.glUniform4f(locations[1], 0, 0, 1, 1);
+            return;
+        }
+        GL20.glUniform4f(locations[0], SCREEN_PLANE.x, SCREEN_PLANE.y, SCREEN_PLANE.z, SCREEN_PLANE.w);
+        if (locations[1] >= 0) {
+            int[] viewport = new int[4];
+            GL11.glGetIntegerv(GL11.GL_VIEWPORT, viewport);
+            GL20.glUniform4f(locations[1], viewport[0], viewport[1], viewport[2], viewport[3]);
+        }
     }
 }

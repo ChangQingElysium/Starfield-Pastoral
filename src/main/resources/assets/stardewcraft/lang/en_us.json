@@ -13033,5 +13033,16 @@
   "stardewcraft.gui.profile.birthday_order": "%2$s %1$s",
   "block.stardewcraft.ginger_music_crystal": "Music Crystal",
   "block.stardewcraft.sand_slab": "Sand Slab",
-  "block.stardewcraft.sand_stairs": "Sand Stairs"
+  "block.stardewcraft.sand_stairs": "Sand Stairs",
+  "stardewcraft.ginger_island.state.walnut_present": "With Walnut",
+  "stardewcraft.ginger_island.state.walnut_empty": "Without Walnut",
+  "block.stardewcraft.ginger_island_yellowgreen_leaf_clump": "Tropical Shortleaf Clump",
+  "block.stardewcraft.ginger_island_blue_spiky_seedling": "Tropical Spiky Seedling",
+  "block.stardewcraft.palm_log": "Palm Log",
+  "block.stardewcraft.palm_leaves": "Palm Leaves",
+  "block.stardewcraft.palm_planks": "Palm Planks",
+  "block.stardewcraft.palm_planks_stairs": "Palm Stairs",
+  "block.stardewcraft.palm_planks_slab": "Palm Slab",
+  "block.stardewcraft.palm_trapdoor": "Palm Trapdoor",
+  "block.stardewcraft.palm_coconut_block": "Decorative Coconut Block"
 }

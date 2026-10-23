@@ -11,7 +11,6 @@ import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.resources.ResourceLocation;
@@ -23,9 +22,14 @@ import net.minecraft.world.level.block.state.BlockState;
 import javax.annotation.Nonnull;
 
 import com.stardew.craft.port.PortVertex;
-public class FurnaceBlockEntityRenderer implements BlockEntityRenderer<FurnaceBlockEntity>, com.stardew.craft.port.net.neoforged.neoforge.client.extensions.IBlockEntityRendererExtension<FurnaceBlockEntity> {
+public class FurnaceBlockEntityRenderer implements ProductionMachineBlockEntityRenderer<FurnaceBlockEntity> {
     private static final ResourceLocation BUBBLE_TEX = new ResourceLocation(StardewCraft.MODID, "textures/gui/bubble.png");
     private static final float PX = 1.0f / 32.0f;
+
+    @Override
+    public boolean isReadyForBubble(FurnaceBlockEntity blockEntity) {
+        return blockEntity.isReady();
+    }
 
     public FurnaceBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
     }

@@ -20,7 +20,8 @@ public final class GingerIslandVariantStacks {
     private GingerIslandVariantStacks() {}
 
     public static boolean isLegacyAlias(Item item) {
-        return item instanceof BlockItem blockItem && blockItem.getBlock() instanceof GingerIslandLegacyAliasBlock;
+        return item instanceof BlockItem blockItem && (blockItem.getBlock() instanceof GingerIslandLegacyAliasBlock
+                || blockItem.getBlock() instanceof RetiredPalmBlock);
     }
 
     public static boolean supports(Item item) {
@@ -59,7 +60,9 @@ public final class GingerIslandVariantStacks {
             if (!decor.hasBuildingVariants()) return stack;
             String property = decor.visualStateProperty();
             String value = decor.itemState(stack).properties().get(property);
-            label = property.equals("variant") ? Component.literal(Integer.toString(Integer.parseInt(value) + 1))
+            label = decor == GingerIslandBlocks.get("ginger_golden_walnut_bush_rework")
+                    ? Component.translatable(LABEL + (value.equals("1") ? "walnut_empty" : "walnut_present"))
+                    : property.equals("variant") ? Component.literal(Integer.toString(Integer.parseInt(value) + 1))
                     : property.equals("gem") ? Component.translatable(value.equals("empty")
                             ? LABEL + "empty" : "item.stardewcraft." + value)
                     : Component.translatable(LABEL + property + "." + value);

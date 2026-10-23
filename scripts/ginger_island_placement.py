@@ -100,6 +100,8 @@ def apply(write=True):
     reader = ItemBoundsReader(RESOURCES)
     changed, reviewed = [], []
     for asset in catalog['blocks']:
+        if asset.get('retired'):
+            continue
         name = asset['id'].removeprefix('ginger_')
         role = 'wall' if name in WALL else 'cliff_palm' if name == 'south_palm' else 'floor'
         asset['placement_mode'] = role
@@ -136,6 +138,8 @@ def apply(write=True):
                                      for b in data['stardewcraft:collision']['boxes']
                                      for p in itertools.product(*zip(b['from'], b['to']))]
                 offset[2] = 16 - max(p[2] for p in projected + collision_corners)
+                if name in ('dig_ammonite_relief', 'dig_fossil_fragments'):
+                    offset[0] = -8
                 reason = 'wall_back_flush_and_authored_front_north'
             elif role == 'cliff_palm' and key == '1':
                 degrees = 270  # Authored leaning trunk +X becomes canonical NORTH.
@@ -146,6 +150,12 @@ def apply(write=True):
                 # into nearly a full block of empty air.
                 offset[1] = datum - lo[1]
                 reason = 'ground_contact_at_reserved_integer_datum'
+            if name == 'gem_shrine_assembly':
+                # The authoring axis is X16/Z8, not the mean of the carved
+                # head's asymmetric extrema. Keep the existing three-cell
+                # footprint in depth and center its width about MAIN.
+                offset[0] = -8
+                reason = 'centered_odd_shrine_footprint'
             if name in SOUTH_FRONT:
                 # Keep the actual reserved footprint, rather than counting
                 # cosmetic trim extending beyond a doorway's own grid cell.

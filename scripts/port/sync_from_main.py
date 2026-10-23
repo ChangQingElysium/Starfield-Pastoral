@@ -66,13 +66,30 @@ def snapshot(main: Path, parent: str, dry: bool = False) -> str:
         tree = git("write-tree", env=env)
     if dry:
         return tree
-    commit = git("commit-tree", tree, "-p", parent, "-m", f"port: snapshot of {main} workspace")
+    # A previous no-commit synchronization may record a tree object, which cannot
+    # be a commit parent. The source snapshot remains usable as the merge base.
+    parent_args = ["-p", parent] if git("cat-file", "-t", parent) == "commit" else []
+    commit = git("commit-tree", tree, *parent_args, "-m", f"port: snapshot of {main} workspace")
     refs = git("for-each-ref", "--format=%(refname)", "refs/port/main-snapshots/").splitlines()
     numbers = [int(ref.rsplit("/", 1)[1]) for ref in refs if ref.rsplit("/", 1)[1].isdigit()]
     n = max(numbers, default=-1) + 1
     # The expected zero ref prevents concurrent snapshots from overwriting one another.
     git("update-ref", f"refs/port/main-snapshots/{n:04d}", commit, "0" * 40)
     return commit
+
+
+def retain_snapshot(rev: str) -> None:
+    """Keep a no-commit source tree reachable for the next three-way synchronization."""
+    if git("cat-file", "-t", rev) == "tree":
+        git("update-ref", f"refs/port/main-snapshot-trees/{rev}", rev)
+
+
+def resolve_snapshot(rev: str) -> str:
+    """Accept immutable trees as well as commits; syncing need not create a commit."""
+    resolved = git("rev-parse", f"{rev}^{{}}")
+    if git("cat-file", "-t", resolved) not in ("commit", "tree"):
+        raise SystemExit("snapshot must be a commit or tree")
+    return resolved
 
 
 def tree_paths(rev: str, prefix: str) -> set[str]:
@@ -430,7 +447,7 @@ def complete_snapshot(rev: str) -> int:
     if not PENDING.is_file():
         raise SystemExit("no pending snapshot to complete")
     pending = json.loads(PENDING.read_text())
-    new = git("rev-parse", f"{rev}^{{commit}}")
+    new = resolve_snapshot(rev)
     old = STATE.read_text().split()[0]
     if new != pending["new"] or old != pending["old"]:
         raise SystemExit("snapshot/state does not match the pending synchronization")
@@ -445,6 +462,7 @@ def complete_snapshot(rev: str) -> int:
         raise SystemExit("unresolved conflict markers:\n  " + "\n  ".join(unresolved))
     if run_lint() != 0:
         return 1
+    retain_snapshot(new)
     STATE.write_text(new + "\n")
     PENDING.unlink()
     print(f"completed snapshot {new}; binary/delete/add collisions explicitly accepted")
@@ -456,7 +474,7 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--main", default=str(ROOT.parent / "StardewCraft"))
     ap.add_argument("--dry-run", action="store_true")
-    ap.add_argument("--snapshot", help="use an existing snapshot commit instead of taking a new one")
+    ap.add_argument("--snapshot", help="use an existing snapshot commit or tree instead of taking a new one")
     ap.add_argument("--complete-snapshot", help="acknowledge resolved conflicts and advance STATE")
     ap.add_argument("--retry-incomplete", action="store_true",
                     help="retry --snapshot after an interrupted application, not unresolved conflicts")
@@ -469,12 +487,12 @@ def main(argv=None) -> int:
     if PENDING.exists() and not args.dry_run:
         pending = json.loads(PENDING.read_text())
         retry = args.retry_incomplete and args.snapshot and not pending.get("applied")
-        if not retry or old != pending["old"] or git("rev-parse", f"{args.snapshot}^{{commit}}") != pending["new"]:
+        if not retry or old != pending["old"] or resolve_snapshot(args.snapshot) != pending["new"]:
             raise SystemExit("resolve the pending snapshot, then use --complete-snapshot with its exact SHA")
     elif args.retry_incomplete:
         ap.error("--retry-incomplete requires a pending interrupted synchronization")
     main_dir = Path(args.main).resolve()
-    new = git("rev-parse", f"{args.snapshot}^{{commit}}") if args.snapshot else snapshot(main_dir, old, args.dry_run)
+    new = resolve_snapshot(args.snapshot) if args.snapshot else snapshot(main_dir, old, args.dry_run)
     if git("rev-parse", f"{old}^{{tree}}") == git("rev-parse", f"{new}^{{tree}}"):
         print("main unchanged since last sync")
         return 0
@@ -512,6 +530,7 @@ def main(argv=None) -> int:
     if conflicts or lint_status:
         return 1
     if not args.dry_run:
+        retain_snapshot(new)
         STATE.write_text(new + "\n")
         PENDING.unlink()
         print("next: compile and run the required release checks")

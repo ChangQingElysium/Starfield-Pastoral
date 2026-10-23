@@ -5,6 +5,7 @@ parts stay available to their owner without becoming independent catalog entries
 """
 
 FAMILIES = {
+    'golden_walnut_bush_rework': ('variant', ['golden_walnut_bush_rework', 'golden_walnut_bush_empty']),
     'gem_pedestal': ('gem', ['gem_pedestal', 'gem_pedestal_amethyst', 'gem_pedestal_aquamarine',
                             'gem_pedestal_emerald', 'gem_pedestal_ruby', 'gem_pedestal_topaz']),
     'gem_shrine_assembly': ('solved', ['gem_shrine_assembly', 'gem_shrine_solved']),
@@ -53,10 +54,6 @@ MODEL_ONLY = {
     **dict.fromkeys(['resort_tile_roof_high', 'resort_tile_roof_low', 'resort_tile_roof_mid',
                     'resort_tile_roof_ridge', 'resort_tile_roof_wide_crown'],
                    '完整度假村屋顶的装配分段；ginger_resort_roof 统一拥有两种棚顶'),
-    **dict.fromkeys(['south_palm_ground', 'south_palm_cliff'],
-                   '成熟姜岛棕榈的完整造型状态；ginger_south_palm 统一拥有直干和斜干'),
-    'coconut_palm': '成熟姜岛密垂叶椰树的完整造型状态；ginger_south_palm variant2统一拥有',
-    'resort_young_palm': '度假村短干宽叶棕榈的完整造型状态；ginger_south_palm variant3统一拥有',
     **dict.fromkeys(['willy_boat_damaged', 'willy_boat_repaired'],
                    '威利船的完整静态造型状态；ginger_willy_boat统一拥有破损和修好外观'),
 }
@@ -82,11 +79,6 @@ ASSEMBLIES = {
         '2': [('field_office_fossil_backing', [0, 0, 0]), ('field_office_fossil_frog', [0, .35, 0])]}},
     'resort_roof': {'property': 'variant', 'placement_plan': '07_resort/roof/placement-plan.json',
                     'states': {'0': '6x4', '1': '7x4'}},
-    'south_palm': {'property': 'variant', 'states': {
-        '0': [('south_palm_ground', [0, 0, 0])],
-        '1': [('south_palm_cliff', [0, 0, 0])],
-        '2': [('coconut_palm', [0, 0, 0])],
-        '3': [('resort_young_palm', [0, 0, 0])]}},
     # Resource states only: repair costs, farmhouse ownership and travel are
     # gameplay responsibilities, not implied by this static registration.
     'willy_boat': {'property': 'repaired', 'states': {
@@ -115,6 +107,7 @@ STATE_ROLES = {
         'buried_round_stone_a', 'island_hint_white_flowers', 'island_starfish_gold',
         'resort_towel_green', 'resort_umbrella_coral', 'pirate_palm_planter_teal',
         'volcano_canister_174', 'resort_roof', 'south_palm', 'palm_wall_ornament_left'], 'appearance'),
+    'golden_walnut_bush_rework': 'appearance',
 }
 
 # Exact identities that really are furniture; scene buildings do not fall back here.
@@ -136,10 +129,12 @@ PAINTINGS = {'physics_101', 'foliage_print', 'palm_wall_ornament_left',
 CARPETS = {'bamboo_mat', 'burlap_rug', 'oceanic_rug', 'pirate_purple_rug',
            'gourmand_woven_mat', 'resort_towel_green'}
 PLANTS = {'golden_walnut_bush_rework', 'island_bright_longleaf_assembly',
-          'island_broadleaf_rosette', 'island_curled_fern', 'south_palm'}
+          'island_broadleaf_rosette', 'island_curled_fern', 'south_palm',
+          'island_yellowgreen_leaf_clump', 'island_blue_spiky_seedling'}
 FLOWERS = {'island_hint_white_flowers', 'island_counting_purple_flowers'}
 PASSABLE_PLANTS = FLOWERS | {'island_bright_longleaf_assembly', 'island_broadleaf_rosette',
-                            'island_curled_fern', 'island_beached_seaweed'}
+                            'island_curled_fern', 'island_beached_seaweed',
+                            'island_yellowgreen_leaf_clump', 'island_blue_spiky_seedling'}
 AQUATIC = {'island_beached_seaweed', 'island_shell_clam', 'island_shell_cockle',
            'island_starfish_gold', 'island_sand_starfish'}
 ROCKS = {'professor_boulder', 'dig_ammonite_relief', 'dig_fossil_fragments',

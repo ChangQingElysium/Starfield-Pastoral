@@ -61,3 +61,10 @@ grep -A3 ': error:' build/pj-<你的名字>.log | less
 - 不修改 `/Users/jiayuhan/游戏制作/StardewCraft`（1.21.1 主线）和 `../StardewCraft-1.20.1-Forge`（旧切片方案，原样保留）。
 - 需要对照 1.21.1 原始代码时用 `git show $(cat scripts/port/main-sync-state.txt):<path>`；1.21.1 原版 + NeoForge 反编译源码在 `build/port-mc121-src`。
 - Minecraft 1.20.1 / Forge 源码：反编译类在 `build/port-classpath.txt` 的 forge jar 中，可用 `javap -cp "$(cat build/port-classpath.txt)" -p <类名>` 查看签名。
+
+## 不创建提交的同步快照
+
+未获准 commit 时，先 `python3 scripts/port/sync_from_main.py --dry-run` 生成不可变 tree 并审查冲突，
+随后用 `--snapshot <tree SHA>` 应用同一份内容。解决冲突和编译检查后，
+`--complete-snapshot <tree SHA>` 推进同步点。tree 由 `refs/port/main-snapshot-trees/<SHA>` 保持可达，
+不会生成 commit、移动分支或推送。后续对照和三方合并均接受 commit 或 tree。

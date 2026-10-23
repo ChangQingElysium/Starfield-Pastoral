@@ -37,10 +37,11 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew build check --no-daemon --console=plain
 
-      - name: Verify stack-count Mixin mappings and packaged refmap
+      - name: Verify GUI Mixin mappings, slot dispatch and packaged refmap
         run: |
           ./gradlew printCompileClasspath --no-daemon --console=plain
           bash scripts/port/test_gui_stack_count_mixin_1201.sh --check-install-jar
+          bash scripts/port/test_container_slot_mixin_1201.sh
 
       - name: Test compatibility verifiers
         run: python3 -m unittest discover -s compatibility -p 'test_*.py'
@@ -75,3 +76,12 @@ jobs:
 
       - name: Validate example data pack
         run: python3 examples/stardewcraft-data-pack/validate.py
+
+      - name: Upload Forge package
+        uses: actions/upload-artifact@v4
+        with:
+          name: stardewcraft-forge
+          path: |
+            build/libs/stardewcraft-*.jar
+            !build/libs/*-slim.jar
+          if-no-files-found: error

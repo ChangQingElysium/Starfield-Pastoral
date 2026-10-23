@@ -508,6 +508,7 @@ public class StardewBombEntity extends Entity {
         List<LivingEntity> entities = level.getEntitiesOfClass(LivingEntity.class, damageBox);
 
         for (LivingEntity entity : entities) {
+            if (entity.isRemoved() || !entity.isAlive()) continue;
             if (Mth.ceil(entity.getY() - 1.0E-4D) != planeY) continue;
 
             DamageSource source = level.damageSources().explosion(

@@ -2,6 +2,20 @@
 
 This directory contains reviewed compatibility contracts for addon authors.
 
+## Forge container slot dispatch
+
+```bash
+./gradlew classes printCompileClasspath
+bash scripts/port/test_container_slot_mixin_1201.sh
+```
+
+The focused check applies the production container accessor Mixin in official-name
+and SRG contexts using the generated refmap. It verifies that the native invoker
+cannot collide with the overridable slot hook and executes the super-delegation
+chain without starting a Minecraft client. Only the native drawing body is
+replaced by a counter for this dispatch test; pixel output and in-game donation
+interaction still require a client check. CI runs this gate after compilation.
+
 ## `public-api-v1.txt`
 
 `public-api-v1.txt` is generated from compiled bytecode under

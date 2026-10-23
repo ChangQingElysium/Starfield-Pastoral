@@ -474,3 +474,21 @@ run-game-test/
 # The isolated Forge playtest directory contains user saves, never release source.
 /run-client-forge-1201/
 run-data/
+
+# Inputs and maintenance dependencies synchronized from the 1.21.1 fix2 source tree.
+!scripts/check_authoring_sources.py
+!scripts/ginger_island_boat_geometry.py
+!scripts/ginger_island_vegetation.py
+!scripts/import_palm_building_assets.py
+!/assets-src/authoring.json
+!/assets-src/decor/
+!/assets-src/decor/joja_parcel/
+!/assets-src/decor/joja_parcel/**
+!/assets-src/decor/shopping_basket/
+!/assets-src/decor/shopping_basket/**
+/.lwjgl/
+!docs/workspace-layout.md
+!docs/crop-model-delivery.md
+!docs/mine-node-mining.md
+!docs/permissions/
+!docs/permissions/russian-localization-annel0.md

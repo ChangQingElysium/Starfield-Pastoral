@@ -78,7 +78,7 @@ public final class GingerIslandAssetGameTests {
         h.assertTrue(!ids.contains("ginger_basic_window_night") && !ids.contains("ginger_crystal_cave_statue_active")
                 && !ids.contains("ginger_construction_chip_3d"), "State/effect pieces still pollute the item catalog");
         for (var asset : GingerIslandAssets.blocks()) {
-            if (!asset.kind().equals("state_decor")) continue;
+            if (!asset.kind().equals("state_decor") || GingerIslandBlocks.get(asset.id()) instanceof com.stardew.craft.gingerisland.RetiredPalmBlock) continue;
             var block = (GingerIslandStateDecorBlock) GingerIslandBlocks.get(asset.id());
             for (var choice : asset.state_models().entrySet()) {
                 var state = new com.stardew.craft.port.net.minecraft.world.item.component.BlockItemStateProperties(

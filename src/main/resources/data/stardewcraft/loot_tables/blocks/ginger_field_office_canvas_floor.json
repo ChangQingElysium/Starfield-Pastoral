@@ -5,13 +5,6 @@
       "rolls": 1,
       "conditions": [
         {
-          "condition": "minecraft:block_state_property",
-          "block": "stardewcraft:ginger_field_office_canvas_floor",
-          "properties": {
-            "part": "main"
-          }
-        },
-        {
           "condition": "minecraft:survives_explosion"
         }
       ],

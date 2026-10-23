@@ -15,7 +15,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.resources.ResourceLocation;
@@ -30,9 +29,14 @@ import com.stardew.craft.port.PortVertex;
 /**
  * Source-authored machine clips: root pulse, independent blades/apron, and actual feed item.
  */
-public class ReclamationMachineBlockEntityRenderer implements BlockEntityRenderer<ReclamationMachineBlockEntity>, com.stardew.craft.port.net.neoforged.neoforge.client.extensions.IBlockEntityRendererExtension<ReclamationMachineBlockEntity> {
+public class ReclamationMachineBlockEntityRenderer implements ProductionMachineBlockEntityRenderer<ReclamationMachineBlockEntity> {
     private static final ResourceLocation BUBBLE_TEX = new ResourceLocation(StardewCraft.MODID, "textures/gui/bubble.png");
     private static final float PX = 1.0f / 32.0f;
+
+    @Override
+    public boolean isReadyForBubble(ReclamationMachineBlockEntity blockEntity) {
+        return blockEntity.isReady();
+    }
 
     public ReclamationMachineBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
     }

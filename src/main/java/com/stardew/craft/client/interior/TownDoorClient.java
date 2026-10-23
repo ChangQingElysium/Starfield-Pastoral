@@ -37,6 +37,7 @@ public final class TownDoorClient {
     private TownDoorClient() {}
 
     public static void register(IEventBus bus) {
+        bus.addListener(TownDoorComposite::registerReloadListener);
         TownDoorNetwork.receiveState = state -> {
             ClientLevel current = Minecraft.getInstance().level;
             if (current != level) resetLevel(current);
@@ -266,6 +267,14 @@ public final class TownDoorClient {
                 && mc.level.dimension().equals(ModDimensions.STARDEW_VALLEY)) {
             RENDERER.render(delta, finishNanoTime, camera, view, projection);
         }
+    }
+
+    public static void renderAfterWorld(DeltaTracker delta, long finishNanoTime, Camera camera, com.mojang.blaze3d.vertex.PoseStack.Pose view, Matrix4f projection) {
+        if (Minecraft.getInstance().level == level && !doors.isEmpty()) RENDERER.renderAfterWorld(delta, finishNanoTime, camera, view, projection);
+    }
+
+    public static void shaderReload() {
+        RENDERER.close();
     }
 
     private record CameraCrossing(TownDoorNetwork.DoorState door, boolean entering, double fraction) {}

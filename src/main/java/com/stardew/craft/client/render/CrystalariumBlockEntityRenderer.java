@@ -23,13 +23,18 @@ import net.minecraft.world.level.block.state.BlockState;
 
 import com.stardew.craft.port.PortVertex;
 @SuppressWarnings("null")
-public class CrystalariumBlockEntityRenderer implements net.minecraft.client.renderer.blockentity.BlockEntityRenderer<CrystalariumBlockEntity>, com.stardew.craft.port.net.neoforged.neoforge.client.extensions.IBlockEntityRendererExtension<CrystalariumBlockEntity> {
+public class CrystalariumBlockEntityRenderer implements ProductionMachineBlockEntityRenderer<CrystalariumBlockEntity> {
     private static final ResourceLocation BUBBLE_TEX = new ResourceLocation(StardewCraft.MODID, "textures/gui/bubble.png");
     private static final float PX = 1.0f / 32.0f;
 
     @Override
     public net.minecraft.world.phys.AABB getRenderBoundingBox(CrystalariumBlockEntity be) {
         return new net.minecraft.world.phys.AABB(be.getBlockPos()).inflate(0.25, 1.25, 0.25);
+    }
+
+    @Override
+    public boolean isReadyForBubble(CrystalariumBlockEntity blockEntity) {
+        return blockEntity.isReady();
     }
 
     public CrystalariumBlockEntityRenderer(BlockEntityRendererProvider.Context context) {

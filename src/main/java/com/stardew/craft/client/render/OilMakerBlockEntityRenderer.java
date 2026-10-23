@@ -10,7 +10,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.resources.ResourceLocation;
@@ -22,9 +21,14 @@ import net.minecraft.world.level.block.state.BlockState;
 import javax.annotation.Nonnull;
 
 import com.stardew.craft.port.PortVertex;
-public class OilMakerBlockEntityRenderer implements BlockEntityRenderer<OilMakerBlockEntity> {
+public class OilMakerBlockEntityRenderer implements ProductionMachineBlockEntityRenderer<OilMakerBlockEntity> {
     private static final ResourceLocation BUBBLE_TEX = new ResourceLocation(StardewCraft.MODID, "textures/gui/bubble.png");
     private static final float PX = 1.0f / 32.0f;
+
+    @Override
+    public boolean isReadyForBubble(OilMakerBlockEntity blockEntity) {
+        return blockEntity.isReady();
+    }
 
     public OilMakerBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
     }

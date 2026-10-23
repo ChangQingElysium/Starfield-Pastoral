@@ -96,33 +96,24 @@ public final class GingerIslandAttachmentGameTests {
     }
 
     @GameTest(templateNamespace = NS, template = "large_empty", timeoutTicks = 100)
-    public static void cliffPalmLeansAwayFromEachClickedCliffFace(GameTestHelper h) {
+    public static void retiredPalmCannotBePlacedAgainstAnyCliffFace(GameTestHelper h) {
         var level = h.getLevel();
         BlockPos bottom = h.absolutePos(new BlockPos(40, 4, 40));
         Player player = PortGameTests.makeMockPlayer(h, GameType.SURVIVAL);
-        var block = (GingerIslandStateDecorBlock) GingerIslandBlocks.get("ginger_south_palm");
+        var block = GingerIslandBlocks.get("ginger_south_palm");
         for (Direction face : Direction.Plane.HORIZONTAL) {
             BlockPos support = bottom.relative(face.getOpposite());
-            var wall = supportingWall(h, support, face);
-            var hand = block.stackForVisualState("1"); hand.setCount(2);
+            level.setBlock(support, Blocks.STONE.defaultBlockState(), 3);
+            var hand = new net.minecraft.world.item.ItemStack(block, 2);
             player.setPos(Vec3.atBottomCenterOf(bottom.relative(face, 6)));
-            player.setYRot(face.getClockWise().toYRot());
             player.setItemInHand(InteractionHand.MAIN_HAND, hand);
             var hit = new BlockHitResult(Vec3.atCenterOf(support).add(Vec3.atLowerCornerOf(face.getNormal()).scale(.5)),
                     face, support, false);
-            h.assertTrue(hand.getItem().useOn(new UseOnContext(player, InteractionHand.MAIN_HAND, hit)).consumesAction(),
-                    "Cliff palm cannot attach to " + face);
-            var state = level.getBlockState(bottom);
-            var shape = state.getShape(level, bottom);
-            h.assertTrue(state.is(block) && state.getValue(MapDecorStaticBlock.FACING) == face
-                            && state.getValue(GingerIslandStateDecorBlock.VARIANT) == 1 && hand.getCount() == 1,
-                    "Cliff palm lost selected model or cliff-facing direction");
-            boolean outward = face.getAxisDirection() == Direction.AxisDirection.POSITIVE
-                    ? shape.max(face.getAxis()) > 2 : shape.min(face.getAxis()) < -1;
-            h.assertTrue(outward, "Palm trunk leans sideways/back into its cliff: " + face);
-            for (BlockPos cell : wall) h.assertTrue(level.getBlockState(cell).is(Blocks.STONE), "Palm reserved the cliff behind it");
-            level.removeBlock(bottom, false);
-            for (BlockPos cell : wall) level.removeBlock(cell, false);
+            h.assertTrue(!hand.getItem().useOn(new UseOnContext(player, InteractionHand.MAIN_HAND, hit)).consumesAction(),
+                    "Withdrawn palm still accepts hand placement: " + face);
+            h.assertTrue(level.getBlockState(bottom).isAir() && hand.getCount() == 2, "Rejected placement changed the world or item count");
+            h.assertTrue(level.getBlockState(support).is(Blocks.STONE), "Retired tree changed the cliff");
+            level.removeBlock(support, false);
         }
         h.succeed();
     }

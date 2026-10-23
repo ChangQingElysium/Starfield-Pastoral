@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "scope": "Two verified manual decoration authoring inputs; not a complete asset or acceptance catalog.",
+  "entries": [
+    {
+      "id": "stardewcraft:joja_supermarket_crate",
+      "role": "manual_authoring_source",
+      "source": "assets-src/decor/joja_parcel/joja_parcel.bbmodel",
+      "textures": [
+        {"index": 0, "path": "assets-src/decor/joja_parcel/joja_parcel.png"},
+        {"index": 1, "path": "assets-src/decor/joja_parcel/joja_parcel_particle.png"}
+      ],
+      "exporter": "tools/art/export_joja_parcel.py",
+      "outputs": [
+        "assets/stardewcraft/textures/block/decor/common/joja_supermarket_crate.png",
+        "assets/stardewcraft/textures/block/decor/common/joja_supermarket_crate_particle.png",
+        "assets/stardewcraft/models/decor/common/joja_supermarket_crate.json",
+        "assets/stardewcraft/models/decor/common/joja_supermarket_crate_top.json",
+        "assets/stardewcraft/models/decor/common/joja_supermarket_crate_double.json",
+        "assets/stardewcraft/blockstates/joja_supermarket_crate.json",
+        "assets/stardewcraft/models/item/joja_supermarket_crate.json",
+        "data/stardewcraft/loot_tables/blocks/joja_supermarket_crate.json"
+      ],
+      "provenance": {
+        "migrated_on": "2026-10-08",
+        "previous_source": "建模试作/Joja快递盒/比例返工/Joja快递盒-扁箱修订.bbmodel",
+        "basis": "Existing exporter and integration record; source bytes and all runtime outputs preserved."
+      }
+    },
+    {
+      "id": "stardewcraft:shopping_basket",
+      "role": "manual_authoring_source",
+      "source": "assets-src/decor/shopping_basket/shopping_basket.bbmodel",
+      "textures": [
+        {"index": 0, "path": "assets-src/decor/shopping_basket/joja_shopping_basket.png"},
+        {"index": 1, "path": "assets-src/decor/shopping_basket/joja_shopping_basket_particle.png"}
+      ],
+      "exporter": "tools/art/export_joja_shopping_basket.py",
+      "outputs": [
+        "assets/stardewcraft/textures/block/decor/common/shopping_basket.png",
+        "assets/stardewcraft/textures/block/decor/common/shopping_basket_particle.png",
+        "assets/stardewcraft/models/decor/common/shopping_basket.json",
+        "assets/stardewcraft/models/block/decor/extensions/shopping_basket_extension_empty.json",
+        "assets/stardewcraft/models/item/shopping_basket.json",
+        "assets/stardewcraft/blockstates/shopping_basket.json"
+      ],
+      "provenance": {
+        "migrated_on": "2026-10-08",
+        "previous_source": "建模试作/Joja购物篮/春季/Joja购物篮-春季.bbmodel",
+        "basis": "Existing exporter and integration record; independent basket identity preserved."
+      }
+    }
+  ]
+}

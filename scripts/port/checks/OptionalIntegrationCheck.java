@@ -34,6 +34,8 @@ public final class OptionalIntegrationCheck {
         "TownDoorSodiumOcclusionCullerMixin", "TownDoorSodiumViewportMixin", "TownDoorSodiumShaderLoaderMixin",
         "TownDoorSodiumShaderMixin", "TownDoorIrisTransformMixin", "TownDoorIrisSodiumShaderMixin",
         "TownDoorIrisPipelineManagerMixin", "TownDoorOculusProgramOverridesMixin",
+        "TownDoorIrisExtendedShaderMixin", "TownDoorIrisCommonUniformsMixin", "TownDoorIrisShaderSynthesizerMixin",
+        "TownDoorIrisShadowMixin", "TownDoorIrisVanillaPipelineMixin",
         "IrisMineLampActivePathMixin", "IrisMineLampPropertiesMixin", "IrisMineLampIncludeMixin",
         "CtmModelInitializationMixin", "Ae2FacadeItemMixin", "XaeroMinimapWriterMixin",
         "XaeroWorldMapWriterMixin", "XaeroWorldMapSettingsMixin"
@@ -49,9 +51,10 @@ public final class OptionalIntegrationCheck {
         checkListSnapshots();
         checkVanillaPipelineSettings();
         checkShaderSources();
+        checkChildPipelineReflection();
         System.out.println("Optional integrations: " + MIXINS.length + " mixin classes' targets, selectors, calls and handler signatures match locked Forge jars.");
         System.out.println("Embeddium ABGR/light merge, bounded AO coordinates, renderer-owned BE bounds, independent visibility snapshots,");
-        System.out.println("Oculus settings restoration and compatibility/core terrain GLSL passed.");
+        System.out.println("Oculus settings capture, child reflection contracts and fragment/terrain GLSL passed.");
         System.out.println("Boundary: not a full Mixin transformer/GL/client run; unknown renderer versions and optional FRAPI emitters are not certified.");
     }
 
@@ -77,6 +80,7 @@ public final class OptionalIntegrationCheck {
                             String selector = selectorValue.toString();
                             List<MethodNode> selected = new ArrayList<>();
                             for (MethodNode method : target.methods) if (selector.equals(method.name) || selector.equals(method.name + method.desc)) selected.add(method);
+                            if (simpleName.equals("TownDoorIrisExtendedShaderMixin") && selector.equals("apply")) continue; // MCP alias; locked release uses SRG.
                             require(!selected.isEmpty(), "Missing selector " + target.name + '.' + selector);
                             Object at = value(entry, "at");
                             List<?> points = at instanceof List<?> list ? list : at == null ? List.of() : List.of(at);
@@ -218,7 +222,7 @@ public final class OptionalIntegrationCheck {
         dispatcher.renderer = new ExtendedBoundsRenderer();
         require(PortBlockEntityRenderBounds.bounds(dispatcher, blockEntity).equals(RENDERER_BOUNDS), "Large renderer bounds were replaced by the anchor cell");
         dispatcher.renderer = (BlockEntityRenderer) new AnvilBlockEntityRenderer(null);
-        require(PortBlockEntityRenderBounds.bounds(dispatcher, blockEntity).equals(new AABB(BOUNDS_POS)), "Mod renderer default must match NeoForge unit-cell bounds");
+        require(PortBlockEntityRenderBounds.bounds(dispatcher, blockEntity).equals(new AABB(BOUNDS_POS).inflate(1.25, .5, 1.25).expandTowards(0, 2, 0)), "Production renderer must include body and billboard bounds");
         dispatcher.renderer = new BlockEntityRenderer<BlockEntity>() {
             @Override public void render(BlockEntity be, float tick, PoseStack pose, MultiBufferSource buffers, int light, int overlay) {}
         };
@@ -258,7 +262,10 @@ public final class OptionalIntegrationCheck {
         Class<?> lists = Class.forName(EMB.replace('/', '.') + "render.chunk.lists.SortedRenderLists");
         var constructor = lists.getDeclaredConstructor(ObjectArrayList.class); constructor.setAccessible(true);
         Object original = constructor.newInstance(ObjectArrayList.of(chunk));
-        Object copy = new EmbeddiumRenderLists(loader).copy(original);
+        Class<?> snapshotType = Class.forName("com.stardew.craft.client.interior.TownDoorSodiumLists");
+        var snapshotConstructor = snapshotType.getDeclaredConstructor(); snapshotConstructor.setAccessible(true);
+        var snapshotCopy = snapshotType.getDeclaredMethod("copy", Object.class); snapshotCopy.setAccessible(true);
+        Object copy = snapshotCopy.invoke(snapshotConstructor.newInstance(), original);
         Object copied = ((List<?>) reflectiveField(lists, "lists").get(copy)).get(0);
         require(copied != chunk && reflectiveField(chunk.getClass(), "region").get(copied) == regionObject, "Snapshot duplicated mesh/region or shared mutable list");
         for (String name : List.of("sectionsWithGeometry", "sectionsWithSprites", "sectionsWithEntities")) {
@@ -278,36 +285,45 @@ public final class OptionalIntegrationCheck {
                 "useExtendedVertexFormat", "voxelizeLightBlocks", "blockTypeIds", "reloadRequired"};
         Object[] values = {true, true, true, 0.35f, true, true, Map.of(), true};
         for (int i = 0; i < names.length; i++) reflectiveField(type, names[i]).set(settings, values[i]);
-        require(TownDoorIrisPipeline.vanilla() != null, "No Oculus vanilla nested pipeline");
+        // Capture an already-created pipeline. The production hook must not construct a second
+        // VanillaRenderingPipeline and reset an active pack's WorldRenderingSettings.
+        Object observed = new Object();
+        TownDoorIrisPipeline.captureVanilla(observed);
+        require(TownDoorIrisPipeline.vanilla() == observed, "Captured pipeline was replaced");
         for (int i = 0; i < names.length; i++) require(reflectiveField(type, names[i]).get(settings).equals(values[i]), "Vanilla constructor changed outer settings: " + names[i]);
         require(TownDoorIrisPipeline.vanilla() == TownDoorIrisPipeline.vanilla(), "Nested pipeline is not reused");
     }
 
+    private static void checkChildPipelineReflection() throws Exception {
+        for (String name : List.of("TownDoorShaderView", "TownDoorOculusPrograms")) {
+            Class<?> type = Class.forName("com.stardew.craft.client.interior." + name);
+            var resolve = type.getDeclaredMethod("resolve"); resolve.setAccessible(true);
+            Object instance = null;
+            if (!java.lang.reflect.Modifier.isStatic(resolve.getModifiers())) {
+                var ctor = type.getDeclaredConstructor(); ctor.setAccessible(true); instance = ctor.newInstance();
+            }
+            resolve.invoke(instance);
+        }
+    }
+
     private static void checkShaderSources() throws Exception {
-        // This check exercises the production GLSL transform, not mod-registration logging.
-        // StardewCraft.LOGGER initializes the registry-owning entrypoint in a plain JVM.
-        reflectiveField(TownDoorShaderPatcher.class, "loggedSodiumPatch").setBoolean(null, true);
         String path = "assets/sodium/shaders/blocks/block_layer_opaque.vsh";
         String source;
         try (var stream = OptionalIntegrationCheck.class.getClassLoader().getResourceAsStream(path)) { source = new String(stream.readAllBytes(), StandardCharsets.UTF_8); }
         String patched = TownDoorShaderPatcher.transformSodiumVertex(source);
         require(patched.contains("gl_ClipDistance[0] = dot((u_ModelViewMatrix * vec4(position, 1.0)).xyz"), "Embeddium terrain source not clipped");
         require(TownDoorShaderPatcher.transformSodiumVertex(patched).equals(patched), "Terrain clipping patched twice");
-        String irisSource = "#version 330\nuniform mat4 iris_ModelViewMatrix;\nvec4 getVertexPosition() { return vec4(0,0,0,1); }\nvoid main() { gl_Position = getVertexPosition(); }";
-        String irisPatched = TownDoorShaderPatcher.transformIrisVertex(irisSource);
-        require(irisPatched.contains("gl_ClipDistance[0] = dot((iris_ModelViewMatrix * getVertexPosition()).xyz"), "Oculus terrain source not clipped");
-        require(TownDoorShaderPatcher.transformIrisVertex(irisPatched).equals(irisPatched), "Oculus compatibility source patched twice");
-        String core = "#version 330\nuniform mat4 iris_ModelViewMatrix; uniform vec3 u_RegionOffset;\n"
-                + "vec3 _vert_position; uint _draw_id; vec3 _get_draw_translation(uint i) { return vec3(0); }\n"
-                + "void main() { /* } */ if (true) { _vert_position = vec3(0); } // }\n"
-                + "gl_Position = iris_ModelViewMatrix * vec4(_vert_position + u_RegionOffset + _get_draw_translation(_draw_id), 1); }\n"
-                + "void helper_after_main() { }\n";
-        String corePatched = TownDoorShaderPatcher.transformIrisVertex(core);
-        require(corePatched.contains("gl_ClipDistance[0] = dot((iris_ModelViewMatrix * vec4(_vert_position + u_RegionOffset + _get_draw_translation(_draw_id), 1.0)).xyz"), "Oculus core terrain source not clipped");
-        require(corePatched.indexOf("gl_ClipDistance[0]") < corePatched.indexOf("void helper_after_main"), "Clipping escaped main into a later function");
-        require(TownDoorShaderPatcher.transformIrisVertex(corePatched).equals(corePatched), "Oculus core source patched twice");
-        require(TownDoorShaderPatcher.transformIrisVertex("uniform mat4 iris_ModelViewMatrix; void main() { }")
-                .equals("uniform mat4 iris_ModelViewMatrix; void main() { }"), "Unknown vertex generators must stay unchanged");
+        for (String fragment : List.of(
+                "#version 330\nvoid main() { gl_FragColor=vec4(1); }",
+                "#version 330\n/* void main() {} */ void main(void) { if(true) { } }\nvoid helper_after_main() {}")) {
+            String clipped = TownDoorShaderPatcher.transformIrisFragment(fragment);
+            require(clipped.contains("gl_FragCoord.z * 2.0 - 1.0"), "Oculus fragment depth not clipped");
+            require(clipped.contains("discard;"), "Oculus fragment clip not applied");
+            require(TownDoorShaderPatcher.transformIrisFragment(clipped).equals(clipped), "Fragment clipped twice");
+            require(clipped.indexOf("discard;") > clipped.indexOf("void main("), "Clip escaped entry point");
+            if (clipped.contains("helper_after_main")) require(clipped.indexOf("discard;") < clipped.indexOf("helper_after_main"), "Clip escaped into helper");
+        }
+        require(TownDoorShaderPatcher.transformIrisFragment("// void main() {}\n").equals("// void main() {}\n"), "Comment mistaken for fragment entry point");
     }
 
     private static ClassNode node(String name) throws Exception {

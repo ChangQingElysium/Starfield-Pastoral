@@ -8,15 +8,19 @@ import com.stardew.craft.blockentity.TapperBlockEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
 import com.stardew.craft.port.PortVertex;
-public class TapperBlockEntityRenderer implements BlockEntityRenderer<TapperBlockEntity> {
+public class TapperBlockEntityRenderer implements ProductionMachineBlockEntityRenderer<TapperBlockEntity> {
 	private static final ResourceLocation BUBBLE_TEX = new ResourceLocation(StardewCraft.MODID, "textures/gui/bubble.png");
 	private static final float PX = 1.0f / 32.0f;
+
+    @Override
+    public boolean isReadyForBubble(TapperBlockEntity blockEntity) {
+        return blockEntity.isReady();
+    }
 
 	public TapperBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
 	}

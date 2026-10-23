@@ -45,7 +45,7 @@ public final class GingerIslandVariantGameTests {
         int worldStates = 0;
         int functional = 0;
         for (var asset : GingerIslandAssets.blocks()) {
-            if (!asset.kind().equals("state_decor")) continue;
+            if (!asset.kind().equals("state_decor") || GingerIslandBlocks.get(asset.id()) instanceof com.stardew.craft.gingerisland.RetiredPalmBlock) continue;
             var block = (GingerIslandStateDecorBlock) GingerIslandBlocks.get(asset.id());
             assets++;
             worldStates += asset.state_models().size();
@@ -96,12 +96,14 @@ public final class GingerIslandVariantGameTests {
                             .equals(GingerIslandVariantStacks.subtypeProperties(com.stardew.craft.port.PortJava.getFirst(choices))),
                     "JEI duplicates the unbound default and explicit default: " + asset.id());
         }
-        h.assertTrue(assets == 26 && worldStates == 69,
+        h.assertTrue(assets == 26 && worldStates == 67,
                 "World-state coverage changed: " + assets + " assets / " + worldStates + " states");
         h.assertTrue(functional == 10, "Catalog audit changed the functional/building owner boundary: " + functional);
-        var palm = (GingerIslandStateDecorBlock) GingerIslandBlocks.get("ginger_south_palm");
-        h.assertTrue(palm.visualStateValues().equals(List.of("0", "1", "2", "3")),
-                "Palm catalog displays unused variant 4 or 5");
+        var palm = GingerIslandBlocks.get("ginger_south_palm");
+        h.assertTrue(palm instanceof com.stardew.craft.gingerisland.RetiredPalmBlock,
+                "Withdrawn tree must remain only as a saved-block migration identity");
+        h.assertTrue(extras.stream().noneMatch(stack -> stack.is(palm.asItem())),
+                "Withdrawn tree is still exposed as a building variant");
         h.succeed();
     }
 
@@ -189,57 +191,28 @@ public final class GingerIslandVariantGameTests {
     }
 
     @GameTest(templateNamespace = "stardewcraft_ginger_collision", template = "empty", timeoutTicks = 100)
-    public static void realHandPlacementAndExtensionPickingPreservePalmChoice(GameTestHelper h) {
+    public static void retiredPalmCellsMigrateWithoutTouchingAdjacentPlayerBlocks(GameTestHelper h) {
         var level = h.getLevel();
+        var block = (com.stardew.craft.gingerisland.RetiredPalmBlock) GingerIslandBlocks.get("ginger_south_palm");
         var pos = h.absolutePos(new BlockPos(8, 3, 8));
-        var player = FakePlayerFactory.get(level, new GameProfile(UUID.randomUUID(), "Palm variants"));
-        player.setPos(Vec3.atBottomCenterOf(pos.south(20)));
-        player.setYRot(0);
-        var block = (GingerIslandStateDecorBlock) GingerIslandBlocks.get("ginger_south_palm");
-        Map<BlockPos, BlockState> previous = new LinkedHashMap<>();
-        try {
-            for (BlockPos p : BlockPos.betweenClosed(pos.offset(-8, -1, -8), pos.offset(8, 9, 8))) {
-                previous.put(p.immutable(), level.getBlockState(p));
-                level.setBlock(p, p.getY() < pos.getY() ? Blocks.STONE.defaultBlockState() : Blocks.AIR.defaultBlockState(), 18);
-            }
-            for (ItemStack choice : StardewItemDisplayStacks.stacksForItem(block.asItem())) {
-                ItemStack hand = choice.copy();
-                player.setItemInHand(InteractionHand.MAIN_HAND, hand);
-                h.assertTrue(hand.getItem().useOn(context(player, pos)).consumesAction(), "Registered palm item cannot be hand placed");
-                var state = level.getBlockState(pos);
-                var wanted = PortItemData.get(choice, DataComponents.BLOCK_STATE).get(GingerIslandStateDecorBlock.VARIANT);
-                h.assertTrue(state.is(block) && state.getValue(GingerIslandStateDecorBlock.VARIANT).equals(wanted),
-                        "BlockItem validation or setPlacedBy erased the selected palm");
-                h.assertTrue(ItemStack.isSameItemSameTags(choice, block.getCloneItemStack(level, pos, state)),
-                        "Picking the main loses the selected palm stack");
-                var drops = net.minecraft.world.level.block.Block.getDrops(state, level, pos, level.getBlockEntity(pos));
-                h.assertTrue(drops.size() == 1 && ItemStack.isSameItemSameTags(choice, com.stardew.craft.port.PortJava.getFirst(drops)),
-                        "Breaking the main loses its authored palm variant");
-                BlockPos extension = null;
-                for (BlockPos p : BlockPos.betweenClosed(pos.offset(-8, 0, -8), pos.offset(8, 9, 8))) {
-                    var part = level.getBlockState(p);
-                    if (!part.is(block) || part.getValue(MapDecorStaticBlock.PART) != MapDecorStaticBlock.Part.EXTENSION) continue;
-                    h.assertTrue(part.getValue(GingerIslandStateDecorBlock.VARIANT).equals(wanted),
-                            "An extension has another palm variant");
-                    extension = p.immutable();
-                }
-                h.assertTrue(extension != null && ItemStack.isSameItemSameTags(choice,
-                        block.getCloneItemStack(level, extension, level.getBlockState(extension))),
-                        "Picking an extension loses the selected palm stack");
-                h.assertTrue(net.minecraft.world.level.block.Block.getDrops(level.getBlockState(extension),
-                        level, extension, level.getBlockEntity(extension)).isEmpty(), "Extension duplicates the drop");
-                MapDecorStaticBlock.runWithDropsSuppressed(() -> level.removeBlock(pos, false));
-            }
-            ItemStack invalid = new ItemStack(block);
-            PortItemData.set(invalid, DataComponents.BLOCK_STATE, new BlockItemStateProperties(Map.of("variant", "5")));
-            player.setItemInHand(InteractionHand.MAIN_HAND, invalid);
-            h.assertTrue(invalid.getItem().useOn(context(player, pos)).consumesAction()
-                            && level.getBlockState(pos).getValue(GingerIslandStateDecorBlock.VARIANT) == 0,
-                    "Vanilla's second component application reintroduced an unauthored variant");
-        } finally {
-            MapDecorStaticBlock.runWithDropsSuppressed(() -> previous.forEach((p, state) -> level.setBlock(p, state, 18)));
-            player.getInventory().clearContent();
-        }
+        var extension = pos.east();
+        var protectedPos = pos.north();
+        var root = block.defaultBlockState();
+        var ext = root.setValue(MapDecorStaticBlock.PART, MapDecorStaticBlock.Part.EXTENSION);
+        level.setBlock(protectedPos, Blocks.GOLD_BLOCK.defaultBlockState(), 3);
+        level.setBlock(pos, root, 3);
+        level.setBlock(extension, ext, 3);
+        h.assertTrue(ext.getCollisionShape(level, extension).isEmpty(), "Legacy canopy still blocks movement");
+        h.assertTrue(block.getCloneItemStack(level, pos, root).is(com.stardew.craft.block.ModBlocks.PALM_LOG.get().asItem()),
+                "Picking a legacy tree resurrects the withdrawn model");
+        block.tick(root, level, pos, level.random);
+        block.tick(ext, level, extension, level.random);
+        h.assertTrue(level.getBlockState(pos).is(com.stardew.craft.block.ModBlocks.PALM_LOG.get()), "Legacy root did not migrate to a log");
+        h.assertTrue(level.getBlockState(extension).isAir(), "Legacy canopy cell was not retired");
+        h.assertTrue(level.getBlockState(protectedPos).is(Blocks.GOLD_BLOCK), "Migration changed a neighboring player block");
+        level.setBlock(pos, Blocks.DIAMOND_BLOCK.defaultBlockState(), 3);
+        block.tick(root, level, pos, level.random);
+        h.assertTrue(level.getBlockState(pos).is(Blocks.DIAMOND_BLOCK), "Stale scheduled migration overwrote a player's replacement");
         h.succeed();
     }
 

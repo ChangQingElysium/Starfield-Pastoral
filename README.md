@@ -66,7 +66,7 @@ Current builds include farming, animals, fishing, NPC schedules, dialogue, mail,
 | Mod loader | Forge 47.4.10 | NeoForge 21.1.217 |
 | Java | 17 | 21 |
 | Environment | Client and server | Client and server |
-| Source version | 0.6.3fix1 | 0.6.3fix1 |
+| Source version | 0.6.3fix2 | 0.6.3fix2 |
 
 Download the matching JAR from [GitHub Releases](https://github.com/ChangQingElysium/Starfield-Pastoral/releases), [CurseForge](https://www.curseforge.com/minecraft/mc-mods/starfield-pastoral), or [Modrinth](https://modrinth.com/mod/starfield-pastoral). Do not install both packages together or downgrade a 1.21.1 save to 1.20.1.
 
@@ -133,3 +133,5 @@ Starfield Pastoral has no affiliation with ConcernedApe, Mojang, or Microsoft.
 - QQ 群：`961767762`
 
 </details>
+
+Forge 0.6.3fix2 的同步范围、1.20.1 专属保留项及实际验证边界见 [同步记录](docs/porting/fix2-sync-audit.md)。

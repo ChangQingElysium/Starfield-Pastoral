@@ -91,9 +91,15 @@
     {
       "id": "ginger_golden_walnut_bush_rework",
       "model": "stardewcraft:block/ginger_island/golden_walnut_bush_rework",
-      "kind": "decor",
+      "kind": "state_decor",
       "type": "natural_grass",
-      "placement_mode": "floor"
+      "placement_mode": "floor",
+      "state_property": "variant",
+      "state_models": {
+        "0": "stardewcraft:block/ginger_island/golden_walnut_bush_rework",
+        "1": "stardewcraft:block/ginger_island/golden_walnut_bush_empty"
+      },
+      "state_role": "appearance"
     },
     {
       "id": "ginger_slingshot_walnut_target",
@@ -168,7 +174,7 @@
     {
       "id": "ginger_field_office_canvas_floor",
       "model": "stardewcraft:block/ginger_island/field_office_canvas_floor",
-      "kind": "decor",
+      "kind": "cube",
       "type": "building",
       "placement_mode": "floor"
     },
@@ -1182,21 +1188,6 @@
       "placement_mode": "floor"
     },
     {
-      "id": "ginger_south_palm",
-      "model": "stardewcraft:block/ginger_island/south_palm_state_0",
-      "kind": "state_decor",
-      "type": "natural_grass",
-      "state_property": "variant",
-      "state_models": {
-        "0": "stardewcraft:block/ginger_island/south_palm_state_0",
-        "1": "stardewcraft:block/ginger_island/south_palm_state_1",
-        "2": "stardewcraft:block/ginger_island/south_palm_state_2",
-        "3": "stardewcraft:block/ginger_island/south_palm_state_3"
-      },
-      "state_role": "appearance",
-      "placement_mode": "cliff_palm"
-    },
-    {
       "id": "ginger_willy_boat",
       "model": "stardewcraft:block/ginger_island/willy_boat_state_false",
       "kind": "state_decor",
@@ -1222,6 +1213,47 @@
       "kind": "decor",
       "type": "natural_rock",
       "placement_mode": "floor"
+    },
+    {
+      "id": "ginger_island_yellowgreen_leaf_clump",
+      "model": "stardewcraft:block/ginger_island/island_yellowgreen_leaf_clump",
+      "kind": "decor",
+      "type": "natural_grass",
+      "passable": true,
+      "placement_mode": "floor"
+    },
+    {
+      "id": "ginger_island_blue_spiky_seedling",
+      "model": "stardewcraft:block/ginger_island/island_blue_spiky_seedling",
+      "kind": "decor",
+      "type": "natural_grass",
+      "passable": true,
+      "placement_mode": "floor"
+    },
+    {
+      "id": "ginger_south_palm",
+      "model": "stardewcraft:block/ginger_island/south_palm_state_0",
+      "kind": "state_decor",
+      "type": "hidden",
+      "state_property": "variant",
+      "state_role": "environment",
+      "state_models": {
+        "0": "stardewcraft:block/ginger_island/south_palm_state_0",
+        "1": "stardewcraft:block/ginger_island/south_palm_state_1",
+        "2": "stardewcraft:block/ginger_island/south_palm_state_2",
+        "3": "stardewcraft:block/ginger_island/south_palm_state_3"
+      },
+      "retired": true,
+      "placement_mode": "floor",
+      "replacement": [
+        "palm_log",
+        "palm_leaves",
+        "palm_planks",
+        "palm_planks_stairs",
+        "palm_planks_slab",
+        "palm_trapdoor",
+        "palm_coconut_block"
+      ]
     }
   ]
 }

@@ -80,3 +80,4 @@ net.neoforged.neoforge.registries.NeoForgeRegistries
 net.neoforged.neoforge.registries.datamaps.AdvancedDataMapType
 net.neoforged.neoforge.registries.datamaps.DataMapType
 net.neoforged.neoforge.registries.datamaps.RegisterDataMapTypesEvent
+net.neoforged.neoforge.client.event.RegisterRenderBuffersEvent

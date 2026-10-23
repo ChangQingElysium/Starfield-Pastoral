@@ -1,0 +1,17 @@
+// Tracked headless machine batching regressions; does not load a client or use local shader packs.
+// ./gradlew -I compatibility/machine-rendering-tests.gradle classes test
+allprojects {
+    afterEvaluate {
+        if (plugins.hasPlugin('java')) {
+            dependencies { testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2' }
+            sourceSets.test.java.setSrcDirs([project.layout.projectDirectory.dir('compatibility/machine-rendering').asFile])
+            sourceSets.test.resources.setSrcDirs([])
+            tasks.named('test') {
+                useJUnitPlatform()
+                include 'com/stardew/craft/client/render/**'
+                reports.junitXml.outputLocation = layout.buildDirectory.dir('test-results/machine-rendering')
+                reports.html.outputLocation = layout.buildDirectory.dir('reports/tests/machine-rendering')
+            }
+        }
+    }
+}

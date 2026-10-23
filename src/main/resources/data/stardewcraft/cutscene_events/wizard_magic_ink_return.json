@@ -18,7 +18,7 @@
 
     { "cmd": "hide_npc", "npc_id": "wizard" },
     { "cmd": "spawn_actor", "actor": "wizard", "npc_id": "wizard",
-      "x": -186, "y": 34, "z": 55, "relative": false, "facing": 180 },
+      "x": -185.5, "y": 34, "z": 55, "relative": false, "facing": 180 },
     { "cmd": "spawn_actor", "actor": "fake_player", "npc_id": "player",
       "x": -184, "y": 34, "z": 55, "relative": false, "facing": 180 },
 
@@ -48,7 +48,7 @@
     { "cmd": "face_actor", "actor": "wizard", "face_actor": "fake_player" },
     { "cmd": "speak", "npc_id": "wizard", "text": "event.wizard_magic_ink.reward" },
     { "cmd": "move_actor", "actor": "wizard",
-      "x": -186, "y": 34, "z": 55, "ticks": 10, "relative": false },
+      "x": -185.5, "y": 34, "z": 55, "ticks": 10, "relative": false },
     { "cmd": "pause", "ticks": 16 },
     { "cmd": "face_actor", "actor": "wizard", "yaw": 180 },
     { "cmd": "pause", "ticks": 20 },

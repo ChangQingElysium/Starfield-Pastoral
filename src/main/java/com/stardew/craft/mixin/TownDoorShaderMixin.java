@@ -25,7 +25,7 @@ public abstract class TownDoorShaderMixin {
     /** Mirrors Immersive Portals: register one real Uniform while ShaderInstance resolves locations. */
     @Inject(method = "updateLocations", at = @At("HEAD"))
     private void stardewcraft$registerClipPlane(CallbackInfo ci) {
-        if (!TownDoorShaderPatcher.patchesVanilla(name)) return;
+        if (!TownDoorShaderPatcher.patchesVanilla(name) || stardewcraft$clipEquation != null) return;
         stardewcraft$clipEquation = new Uniform(TownDoorClipping.UNIFORM, 7, 4, (Shader) (Object) this);
         uniforms.add(stardewcraft$clipEquation);
     }
@@ -34,6 +34,8 @@ public abstract class TownDoorShaderMixin {
     private void stardewcraft$uploadClipPlane(CallbackInfo ci) {
         if (stardewcraft$clipEquation != null) {
             TownDoorClipping.updateVanillaUniform(stardewcraft$clipEquation);
+        } else {
+            TownDoorClipping.setProgramClipping(false);
         }
     }
 }

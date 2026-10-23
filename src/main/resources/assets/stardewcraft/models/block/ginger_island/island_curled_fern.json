@@ -1838,20 +1838,29 @@
   ],
   "stardewcraft:collision": {
     "mode": "custom",
+    "policy": "aabb",
     "boxes": [
       {
         "from": [
-          -4.875,
+          4,
           0,
-          0.9463
+          4
         ],
         "to": [
-          21.0,
-          25,
-          19.0866
+          12,
+          12,
+          12
         ]
       }
+    ]
+  },
+  "stardewcraft:plant_root": {
+    "version": 1,
+    "offset_pixels": [
+      0,
+      0,
+      0
     ],
-    "policy": "aabb"
+    "foliage_reserves_cells": false
   }
 }

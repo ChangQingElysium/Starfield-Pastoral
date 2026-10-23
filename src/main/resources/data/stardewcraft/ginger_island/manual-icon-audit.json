@@ -1,16 +1,16 @@
 {
   "version": 1,
   "evidence": "Shipped authored world geometry, inherited GUI transforms and owner/state metadata. These geometric checks are not a Minecraft screenshot or final visual acceptance.",
-  "owner_count": 147,
+  "owner_count": 149,
   "counts": {
-    "authored_16px": 69,
-    "original_sprite": 26,
-    "native_block": 52
+    "authored_16px": 68,
+    "original_sprite": 28,
+    "native_block": 53
   },
   "original_item_owner_count": 25,
-  "original_scene_owner_count": 1,
-  "canonical_owner_count": 144,
-  "legacy_alias_count": 3,
+  "original_scene_owner_count": 3,
+  "canonical_owner_count": 146,
+  "legacy_alias_count": 4,
   "policy": "Appearance states may select inventory models. Interaction, progression and environmental phases use only the ordinary base item. Ground includes its unbound natural/default display plus actual fixed variants.",
   "items": {
     "ginger_parrot_perch": {
@@ -293,8 +293,8 @@
       "world_geometry_bounds_pixels": {
         "stardewcraft:block/ginger_island/gem_shrine_assembly": [
           [
-            0.0,
-            32.4598
+            -8.0,
+            24.4598
           ],
           [
             0.0,
@@ -307,8 +307,8 @@
         ],
         "stardewcraft:block/ginger_island/gem_shrine_solved": [
           [
-            0.0,
-            32.0
+            -8.0,
+            24.0
           ],
           [
             0.0,
@@ -644,8 +644,11 @@
       "catalog_owner": "ginger_golden_walnut_bush_rework",
       "canonical_state": {},
       "visible_catalog_entry": true,
-      "state_role": null,
-      "item_states": [],
+      "state_role": "appearance",
+      "item_states": [
+        "0",
+        "1"
+      ],
       "world_dimensions_blocks": [
         2.11046,
         1.75,
@@ -654,12 +657,26 @@
       "world_geometry_bounds_pixels": {
         "stardewcraft:block/ginger_island/golden_walnut_bush_rework": [
           [
-            -0.8963,
-            32.8711
+            -8.8963,
+            24.8711
           ],
           [
             -0.0,
             28.0
+          ],
+          [
+            -5.7242,
+            20.0117
+          ]
+        ],
+        "stardewcraft:block/ginger_island/golden_walnut_bush_empty": [
+          [
+            -8.8963,
+            24.8711
+          ],
+          [
+            -0.0,
+            22.9534
           ],
           [
             -5.7242,
@@ -670,6 +687,36 @@
       "gui_models": [
         {
           "model": "stardewcraft:item/ginger_golden_walnut_bush_rework",
+          "mode": "generated",
+          "bounds": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ],
+          "span": [
+            16.0,
+            16.0
+          ],
+          "outside": false
+        },
+        {
+          "model": "stardewcraft:item/ginger_island/ginger_golden_walnut_bush_rework_0",
+          "mode": "generated",
+          "bounds": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ],
+          "span": [
+            16.0,
+            16.0
+          ],
+          "outside": false
+        },
+        {
+          "model": "stardewcraft:item/ginger_island/ginger_golden_walnut_bush_rework_1",
           "mode": "generated",
           "bounds": [
             0.0,
@@ -798,8 +845,8 @@
       "world_geometry_bounds_pixels": {
         "stardewcraft:block/ginger_island/dig_ammonite_relief": [
           [
-            4.5,
-            27.6872
+            -3.5,
+            19.6872
           ],
           [
             3.0,
@@ -846,8 +893,8 @@
       "world_geometry_bounds_pixels": {
         "stardewcraft:block/ginger_island/dig_fossil_fragments": [
           [
-            1.8488,
-            27.5
+            -6.1512,
+            19.5
           ],
           [
             2.0,
@@ -3421,7 +3468,7 @@
       "world_dimensions_blocks": [
         21.89566,
         8.78541,
-        15.77397
+        14.16099
       ],
       "world_geometry_bounds_pixels": {
         "stardewcraft:block/ginger_island/island_shipwreck": [
@@ -3434,7 +3481,7 @@
             120.9559
           ],
           [
-            -127.0811,
+            -101.2734,
             125.3024
           ]
         ]
@@ -7257,8 +7304,8 @@
       "world_geometry_bounds_pixels": {
         "stardewcraft:block/ginger_island/island_bright_longleaf_assembly": [
           [
-            0.0,
-            64.0
+            -24.0,
+            40.0
           ],
           [
             0.0,
@@ -8390,161 +8437,6 @@
       ],
       "default_texture": "stardewcraft:item/ginger_island/ginger_resort_roof_small"
     },
-    "ginger_south_palm": {
-      "display_mode": "authored_16px",
-      "reason": "Previously authored native 16x16 inventory drawing; approved source pixels retained.",
-      "catalog_owner": "ginger_south_palm",
-      "canonical_state": {},
-      "visible_catalog_entry": true,
-      "state_role": "appearance",
-      "item_states": [
-        "0",
-        "1",
-        "2",
-        "3"
-      ],
-      "world_dimensions_blocks": [
-        5.22492,
-        5.36729,
-        5.22492
-      ],
-      "world_geometry_bounds_pixels": {
-        "stardewcraft:block/ginger_island/south_palm_state_0": [
-          [
-            -33.3375,
-            49.8278
-          ],
-          [
-            0.0,
-            85.8766
-          ],
-          [
-            -33.3375,
-            50.2613
-          ]
-        ],
-        "stardewcraft:block/ginger_island/south_palm_state_1": [
-          [
-            -33.3375,
-            50.2613
-          ],
-          [
-            0.0,
-            83.3441
-          ],
-          [
-            -56.389,
-            26.7763
-          ]
-        ],
-        "stardewcraft:block/ginger_island/south_palm_state_2": [
-          [
-            -20.1103,
-            35.9518
-          ],
-          [
-            0.0,
-            71.0
-          ],
-          [
-            -20.1103,
-            37.0342
-          ]
-        ],
-        "stardewcraft:block/ginger_island/south_palm_state_3": [
-          [
-            -18.7381,
-            35.662
-          ],
-          [
-            0.0,
-            48.2107
-          ],
-          [
-            -18.7381,
-            33.8142
-          ]
-        ]
-      },
-      "gui_models": [
-        {
-          "model": "stardewcraft:item/ginger_south_palm",
-          "mode": "generated",
-          "bounds": [
-            0.0,
-            0.0,
-            16.0,
-            16.0
-          ],
-          "span": [
-            16.0,
-            16.0
-          ],
-          "outside": false
-        },
-        {
-          "model": "stardewcraft:item/ginger_island/ginger_south_palm_0",
-          "mode": "generated",
-          "bounds": [
-            0.0,
-            0.0,
-            16.0,
-            16.0
-          ],
-          "span": [
-            16.0,
-            16.0
-          ],
-          "outside": false
-        },
-        {
-          "model": "stardewcraft:item/ginger_island/ginger_south_palm_1",
-          "mode": "generated",
-          "bounds": [
-            0.0,
-            0.0,
-            16.0,
-            16.0
-          ],
-          "span": [
-            16.0,
-            16.0
-          ],
-          "outside": false
-        },
-        {
-          "model": "stardewcraft:item/ginger_island/ginger_south_palm_2",
-          "mode": "generated",
-          "bounds": [
-            0.0,
-            0.0,
-            16.0,
-            16.0
-          ],
-          "span": [
-            16.0,
-            16.0
-          ],
-          "outside": false
-        },
-        {
-          "model": "stardewcraft:item/ginger_island/ginger_south_palm_3",
-          "mode": "generated",
-          "bounds": [
-            0.0,
-            0.0,
-            16.0,
-            16.0
-          ],
-          "span": [
-            16.0,
-            16.0
-          ],
-          "outside": false
-        }
-      ],
-      "default_texture": "stardewcraft:item/ginger_island/ginger_south_palm_ground"
-    },
     "ginger_willy_boat": {
       "display_mode": "authored_16px",
       "reason": "Previously authored native 16x16 inventory drawing; approved source pixels retained.",
@@ -8561,8 +8453,8 @@
       "world_geometry_bounds_pixels": {
         "stardewcraft:block/ginger_island/willy_boat_state_false": [
           [
-            -65.0,
-            50.0
+            -34.0,
+            81.0
           ],
           [
             -29.1213,
@@ -8575,8 +8467,8 @@
         ],
         "stardewcraft:block/ginger_island/willy_boat_state_true": [
           [
-            -65.0,
-            50.0
+            -34.0,
+            81.0
           ],
           [
             -14.0,
@@ -8704,6 +8596,196 @@
       "default_texture": "stardewcraft:item/ginger_island/scene_cursors2_music_crystal",
       "source_kind": "scene_sprite",
       "source_scene": "ginger_island_music_crystal"
+    },
+    "ginger_island_yellowgreen_leaf_clump": {
+      "display_mode": "original_sprite",
+      "reason": "Original source sprite preserved exactly on a square transparent canvas, with its original proportions.",
+      "catalog_owner": "ginger_island_yellowgreen_leaf_clump",
+      "canonical_state": {},
+      "visible_catalog_entry": true,
+      "state_role": null,
+      "item_states": [],
+      "world_dimensions_blocks": [
+        1.51082,
+        1.34283,
+        1.23481
+      ],
+      "world_geometry_bounds_pixels": {
+        "stardewcraft:block/ginger_island/island_yellowgreen_leaf_clump": [
+          [
+            -3.1627,
+            21.0104
+          ],
+          [
+            0,
+            21.4853
+          ],
+          [
+            -2.0698,
+            17.6871
+          ]
+        ]
+      },
+      "gui_models": [
+        {
+          "model": "stardewcraft:item/ginger_island_yellowgreen_leaf_clump",
+          "mode": "generated",
+          "bounds": [
+            1.0,
+            1.0,
+            15.0,
+            15.0
+          ],
+          "span": [
+            14.0,
+            14.0
+          ],
+          "outside": false
+        }
+      ],
+      "default_texture": "stardewcraft:item/ginger_island/ginger_island_yellowgreen_leaf_clump",
+      "source_kind": "scene_sprite",
+      "source_scene": "island_yellowgreen_leaf_clump"
+    },
+    "ginger_island_blue_spiky_seedling": {
+      "display_mode": "original_sprite",
+      "reason": "Original source sprite preserved exactly on a square transparent canvas, with its original proportions.",
+      "catalog_owner": "ginger_island_blue_spiky_seedling",
+      "canonical_state": {},
+      "visible_catalog_entry": true,
+      "state_role": null,
+      "item_states": [],
+      "world_dimensions_blocks": [
+        1.73228,
+        1.41397,
+        1.61679
+      ],
+      "world_geometry_bounds_pixels": {
+        "stardewcraft:block/ginger_island/island_blue_spiky_seedling": [
+          [
+            -5.8582,
+            21.8582
+          ],
+          [
+            0,
+            22.6236
+          ],
+          [
+            -5.8582,
+            20.0104
+          ]
+        ]
+      },
+      "gui_models": [
+        {
+          "model": "stardewcraft:item/ginger_island_blue_spiky_seedling",
+          "mode": "generated",
+          "bounds": [
+            1.0,
+            1.0,
+            15.0,
+            15.0
+          ],
+          "span": [
+            14.0,
+            14.0
+          ],
+          "outside": false
+        }
+      ],
+      "default_texture": "stardewcraft:item/ginger_island/ginger_island_blue_spiky_seedling",
+      "source_kind": "scene_sprite",
+      "source_scene": "island_blue_spiky_seedling"
+    },
+    "ginger_south_palm": {
+      "display_mode": "native_block",
+      "reason": "Withdrawn whole-tree art; hidden save-only root uses the new native palm log.",
+      "catalog_owner": "ginger_south_palm",
+      "canonical_state": {},
+      "visible_catalog_entry": false,
+      "state_role": "environment",
+      "item_states": [],
+      "world_dimensions_blocks": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "world_geometry_bounds_pixels": {
+        "stardewcraft:block/ginger_island/south_palm_state_0": [
+          [
+            0,
+            16
+          ],
+          [
+            0,
+            16
+          ],
+          [
+            0,
+            16
+          ]
+        ],
+        "stardewcraft:block/ginger_island/south_palm_state_1": [
+          [
+            0,
+            16
+          ],
+          [
+            0,
+            16
+          ],
+          [
+            0,
+            16
+          ]
+        ],
+        "stardewcraft:block/ginger_island/south_palm_state_2": [
+          [
+            0,
+            16
+          ],
+          [
+            0,
+            16
+          ],
+          [
+            0,
+            16
+          ]
+        ],
+        "stardewcraft:block/ginger_island/south_palm_state_3": [
+          [
+            0,
+            16
+          ],
+          [
+            0,
+            16
+          ],
+          [
+            0,
+            16
+          ]
+        ]
+      },
+      "gui_models": [
+        {
+          "model": "stardewcraft:item/ginger_south_palm",
+          "mode": "3d",
+          "bounds": [
+            0.9289,
+            0.1343,
+            15.0711,
+            15.8657
+          ],
+          "span": [
+            14.1421,
+            15.7313
+          ],
+          "outside": false
+        }
+      ],
+      "native_group": "building_block"
     }
   }
 }

@@ -61,12 +61,17 @@ public final class SpatialBlockModelRenderer {
             }
         }
         if (cells.isEmpty()) return;
-        if (cells.size() == 1 && com.stardew.craft.port.PortJava.getFirst(cells).offset.equals(BlockPos.ZERO)) {
-            renderer.tesselateBlock(level, model, state, pos, pose, vertices, checkSides, random, seed, overlay, ModelData.EMPTY, null);
-            return;
+        ModelBlockRenderer.enableCaching();
+        try {
+            if (cells.size() == 1 && cells.get(0).offset.equals(BlockPos.ZERO)) {
+                renderer.tesselateBlock(level, model, state, pos, pose, vertices, checkSides, random, seed, overlay, ModelData.EMPTY, null);
+                return;
+            }
+            renderCells(renderer, level, cells, state, pos, pose, vertices, checkSides, random, seed,
+                    overlay, ModelData.EMPTY, null);
+        } finally {
+            ModelBlockRenderer.clearCache();
         }
-        renderCells(renderer, level, cells, state, pos, pose, vertices, checkSides, random, seed,
-                overlay, ModelData.EMPTY, null);
     }
 
     /**

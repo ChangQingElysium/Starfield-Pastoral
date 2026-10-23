@@ -865,6 +865,13 @@ public class ModItems {
         public static final DeferredItem<Item> POINTED_LEAVES = blockItem("pointed_leaves", ModBlocks.POINTED_LEAVES, "stardewcraft.type.natural_grass");
         public static final DeferredItem<Item> FOREST_LEAVES = blockItem("forest_leaves", ModBlocks.FOREST_LEAVES, "stardewcraft.type.natural_grass");
         public static final DeferredItem<Item> BROADLEAF_LEAVES = blockItem("broadleaf_leaves", ModBlocks.BROADLEAF_LEAVES, "stardewcraft.type.natural_grass");
+        public static final DeferredItem<Item> PALM_LOG = blockItem("palm_log", ModBlocks.PALM_LOG);
+        public static final DeferredItem<Item> PALM_LEAVES = blockItem("palm_leaves", ModBlocks.PALM_LEAVES, "stardewcraft.type.natural_grass");
+        public static final DeferredItem<Item> PALM_PLANKS = blockItem("palm_planks", ModBlocks.PALM_PLANKS);
+        public static final DeferredItem<Item> PALM_PLANKS_STAIRS = blockItem("palm_planks_stairs", ModBlocks.PALM_PLANKS_STAIRS);
+        public static final DeferredItem<Item> PALM_PLANKS_SLAB = blockItem("palm_planks_slab", ModBlocks.PALM_PLANKS_SLAB);
+        public static final DeferredItem<Item> PALM_TRAPDOOR = blockItem("palm_trapdoor", ModBlocks.PALM_TRAPDOOR);
+        public static final DeferredItem<Item> PALM_COCONUT_BLOCK = blockItem("palm_coconut_block", ModBlocks.PALM_COCONUT_BLOCK, "stardewcraft.type.natural_grass");
         public static final DeferredItem<Item> OAK_LEAVES_QUESTION = blockItem("oak_leaves_question", ModBlocks.OAK_LEAVES_QUESTION);
         public static final DeferredItem<Item> OAK_BRANCH = blockItem("oak_branch", ModBlocks.OAK_BRANCH);
 

@@ -12,7 +12,10 @@ public interface PortContainerScreenAccessor {
     @Invoker("renderBg")
     void port$renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY);
 
-    /** 1.20.1 renderSlot is private; 1.21 made it protected. */
+    /**
+     * 1.20.1 renderSlot is private; 1.21 made it protected. Keep this invoker distinct from
+     * PortContainerScreen.port$renderSlot: sharing that signature dispatches back into screen overrides.
+     */
     @Invoker("renderSlot")
-    void port$renderSlot(GuiGraphics graphics, Slot slot);
+    void port$invokeVanillaRenderSlot(GuiGraphics graphics, Slot slot);
 }

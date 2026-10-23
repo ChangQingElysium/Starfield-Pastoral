@@ -10,7 +10,6 @@ import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.resources.ResourceLocation;
@@ -22,9 +21,14 @@ import net.minecraft.world.level.block.state.BlockState;
 import javax.annotation.Nonnull;
 
 import com.stardew.craft.port.PortVertex;
-public class AnvilBlockEntityRenderer implements BlockEntityRenderer<AnvilBlockEntity> {
+public class AnvilBlockEntityRenderer implements ProductionMachineBlockEntityRenderer<AnvilBlockEntity> {
     private static final ResourceLocation BUBBLE_TEX = new ResourceLocation(StardewCraft.MODID, "textures/gui/bubble.png");
     private static final float PX = 1.0f / 32.0f;
+
+    @Override
+    public boolean isReadyForBubble(AnvilBlockEntity blockEntity) {
+        return blockEntity.isReady();
+    }
 
     public AnvilBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
     }
@@ -171,7 +175,7 @@ public class AnvilBlockEntityRenderer implements BlockEntityRenderer<AnvilBlockE
 
     @Override
     public boolean shouldRenderOffScreen(@Nonnull AnvilBlockEntity blockEntity) {
-        return true;
+        return false;
     }
 
     private record Keyframe(float t, float sx, float sy, float sz, float y) {}

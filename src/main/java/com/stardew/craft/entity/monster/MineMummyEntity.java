@@ -38,6 +38,8 @@ public final class MineMummyEntity extends StardewMonsterEntity {
  private static boolean admin(DamageSource s){return s.is(DamageTypes.GENERIC_KILL)||s.is(DamageTypes.FELL_OUT_OF_WORLD);}
  private static boolean crusader(DamageSource s){if(!(s.getEntity() instanceof Player p)||s.is(net.minecraft.tags.DamageTypeTags.IS_EXPLOSION))return false;var item=p.getMainHandItem();var data=com.stardew.craft.api.v1.equipment.StardewEquipmentDataApi.get(item);return (item.getItem() instanceof net.minecraft.world.item.SwordItem||data!=null&&data.weapon().isPresent())&&com.stardew.craft.enchantment.StardewEnchantments.has(item,com.stardew.craft.enchantment.StardewEnchantments.CRUSADER);}
  @Override public boolean hurt(DamageSource source,float amount){
+  // The collapsed visual phase survives death and NBT reload, but terminal life cannot revive.
+  if(isRemoved()||!isAlive()||initialized()&&(monsterState().life()==MonsterState.Life.DEAD||monsterState().life()==MonsterState.Life.CLEANUP))return false;
   if(!level().isClientSide&&!initialized())initialize(MonsterSpawnContext.capture((ServerLevel)level(),MonsterSpawnContext.Source.WORLD,121));
   boolean wasCollapsed=collapsed(),bomb=source.is(net.minecraft.tags.DamageTypeTags.IS_EXPLOSION);
   if(wasCollapsed&&!bomb&&!admin(source))return false;

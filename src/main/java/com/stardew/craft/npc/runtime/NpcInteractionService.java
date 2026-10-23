@@ -2074,7 +2074,11 @@ public final class NpcInteractionService {
         }
         // Morris: Yes/No on membership / CD form
         if ("morris".equals(npcId) && com.stardew.craft.joja.MorrisService.handleAnswer(player, nextDialogueNode)) {
-            endDialogueSession(player.getUUID(), npcId);
+            // The first Yes opens a new confirmation. Retain that page's authority;
+            // closing the old answer here would silently reject the second Yes.
+            if (!NpcQuestionAuthority.hasPending(player, npcId)) {
+                endDialogueSession(player.getUUID(), npcId);
+            }
             return;
         }
 

@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "stardewcraft:block/wood/palm_coconut_block",
+    "particle": "stardewcraft:block/wood/palm_coconut_block"
+  }
+}

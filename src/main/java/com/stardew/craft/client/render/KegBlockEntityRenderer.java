@@ -10,7 +10,6 @@ import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.resources.ResourceLocation;
@@ -25,9 +24,14 @@ import com.stardew.craft.port.PortVertex;
 /**
  * 小桶渲染：就绪气泡 + 产物图标
  */
-public class KegBlockEntityRenderer implements BlockEntityRenderer<KegBlockEntity>, com.stardew.craft.port.net.neoforged.neoforge.client.extensions.IBlockEntityRendererExtension<KegBlockEntity> {
+public class KegBlockEntityRenderer implements ProductionMachineBlockEntityRenderer<KegBlockEntity> {
 	private static final ResourceLocation BUBBLE_TEX = new ResourceLocation(StardewCraft.MODID, "textures/gui/bubble.png");
 	private static final float PX = 1.0f / 32.0f;
+
+    @Override
+    public boolean isReadyForBubble(KegBlockEntity blockEntity) {
+        return blockEntity.isReady();
+    }
 
 	public KegBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
 	}
