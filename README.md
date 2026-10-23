@@ -136,3 +136,5 @@ Starfield Pastoral has no affiliation with ConcernedApe, Mojang, or Microsoft.
 - QQ 群：`961767762`
 
 </details>
+
+Repository branches, shared fixes and public-file policy: [多版本维护与发布](docs/forge-1.20.1-migration-plan.md).

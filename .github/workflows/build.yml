@@ -3,7 +3,22 @@ name: Build
 on: [push, pull_request]
 
 jobs:
+  repository-content:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Check public repository contents
+        run: python3 compatibility/check_repository_contents.py
+      - name: Test repository content gate
+        run: python3 -m unittest discover -s compatibility -p 'test_repository_contents.py'
+
   build:
+    needs: repository-content
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -62,6 +77,7 @@ jobs:
           if-no-files-found: error
 
   fabric:
+    needs: repository-content
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
