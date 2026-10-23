@@ -24,6 +24,19 @@ tasks.register('runFabricCandidateServer', project.ext.fabricCandidateServerTask
     loaderVersion.set(providers.gradleProperty('loader_version'))
     minecraftVersion.set(providers.gradleProperty('minecraft_version'))
     runDir.set(layout.projectDirectory.dir(providers.gradleProperty('fabricCandidateRunDir').getOrElse('run-candidate-server')))
+    // Gradle may remove stale task outputs before this task starts. Install the
+    // smoke configuration afterwards, without changing normal developer runs.
+    if (providers.gradleProperty('fabricSmokeConfig').isPresent()) {
+        def smokeConfig = file(providers.gradleProperty('fabricSmokeConfig').get())
+        inputs.dir(smokeConfig)
+        doFirst {
+            project.copy {
+                from smokeConfig
+                include 'eula.txt', 'server.properties'
+                into runDir.get().asFile
+            }
+        }
+    }
     // A second invocation must actually reopen the world, even when the JAR
     // and launcher outputs are unchanged. This is a live server lifecycle.
     outputs.upToDateWhen { false }

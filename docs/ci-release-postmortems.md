@@ -8,6 +8,8 @@ The shared Ginger Island fixtures still required the retired whole-tree palm to 
 
 The Fabric platform suite initially ran 804 tests with one failure: `ModelTransformationDeserializerTest` expected 54 array-transform model files, but the updated resources contain 46 (43 Ginger Island files). Eight whole-tree palm model bindings no longer contain those composite transforms. Update the reviewed root inventory and replace the old approximate `>1700` child threshold with exact recursive counts from every current authored model; continue to reproduce the original Gson failure and exercise the actual native/Porting Lib deserializers for every input. This is a stale resource fixture, not a reason to relax model parsing.
 
+The new Fabric production smoke initially exited before startup because its run-directory configuration was absent at server launch. Install the isolated configuration in the Gradle task action after output preparation. The persistence probe now writes and reads vanilla command storage directly, avoiding an unloaded-chunk placement and a chat broadcast as a success signal. Both create/save/stop and reopen/read/save/stop subsequently passed using the remapped artifact. The smoke still rejects early process exit, missing shutdown/save markers and ABI failures.
+
 ## Recurring structural cause
 
 ### 0.6.3fix1 candidate — joint classification and stale gameplay fixtures (2026-10-05)

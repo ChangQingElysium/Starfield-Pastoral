@@ -52,12 +52,14 @@ def main():
     reports.mkdir(parents=True, exist_ok=True)
     # Every invocation owns a fresh directory; never reset a developer's server world.
     run = Path(tempfile.mkdtemp(prefix="world-", dir=reports))
+    config = reports / (run.name + "-config")
+    config.mkdir()
     port, rcon = free_port(), free_port()
     while rcon == port:
         rcon = free_port()
     password = secrets.token_hex(16)
-    (run / "eula.txt").write_text("eula=true\n")
-    (run / "server.properties").write_text(
+    (config / "eula.txt").write_text("eula=true\n")
+    (config / "server.properties").write_text(
         f"server-ip=127.0.0.1\nserver-port={port}\nonline-mode=false\n"
         f"enable-rcon=true\nrcon.port={rcon}\nrcon.password={password}\n"
         "level-name=world\nlevel-seed=6302\nview-distance=2\nsimulation-distance=2\n"
@@ -68,7 +70,8 @@ def main():
         with output.open("w") as stream:
             process = subprocess.Popen([
                 str(root / "gradlew"), "-p", "fabric", "runFabricCandidateServer",
-                f"-PfabricCandidateRunDir={run}", "--no-daemon", "--console=plain",
+                f"-PfabricCandidateRunDir={run}", f"-PfabricSmokeConfig={config}",
+                "--no-daemon", "--console=plain",
             ], cwd=root, stdout=stream, stderr=subprocess.STDOUT, start_new_session=True)
             try:
                 deadline = time.monotonic() + 600
@@ -83,12 +86,11 @@ def main():
                     time.sleep(1)
                 with socket.create_connection(("127.0.0.1", rcon), timeout=30) as sock:
                     packet(sock, 3, password)
-                    packet(sock, 2, "forceload add 0 0")
                     if cycle == "create":
-                        packet(sock, 2, "setblock 0 100 0 minecraft:diamond_block")
-                    response = packet(sock, 2, "execute if block 0 100 0 minecraft:diamond_block run say FABRIC_SAVE_MARKER_OK")
+                        packet(sock, 2, 'data modify storage stardewcraft:release_smoke marker set value "FABRIC_SAVE_MARKER_OK"')
+                    response = packet(sock, 2, "data get storage stardewcraft:release_smoke marker")
                     if "FABRIC_SAVE_MARKER_OK" not in response:
-                        raise RuntimeError(f"Saved block marker missing during {cycle}: {response}")
+                        raise RuntimeError(f"Saved storage marker missing during {cycle}: {response}")
                     packet(sock, 2, "save-all flush")
                     packet(sock, 2, "stop")
                 code = process.wait(timeout=120)
