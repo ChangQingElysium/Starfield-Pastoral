@@ -18,16 +18,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "stardewcraft:ginger_south_palm",
-          "functions": [
-            {
-              "function": "minecraft:copy_state",
-              "block": "stardewcraft:ginger_south_palm",
-              "properties": [
-                "variant"
-              ]
-            }
-          ]
+          "name": "stardewcraft:palm_log"
         }
       ]
     }

@@ -13033,5 +13033,16 @@
   "stardewcraft.gui.profile.birthday_order": "%2$s %1$s",
   "block.stardewcraft.ginger_music_crystal": "Musikkristall",
   "block.stardewcraft.sand_slab": "Sandstufe",
-  "block.stardewcraft.sand_stairs": "Sandtreppe"
+  "block.stardewcraft.sand_stairs": "Sandtreppe",
+  "stardewcraft.ginger_island.state.walnut_present": "Mit Goldnuss",
+  "stardewcraft.ginger_island.state.walnut_empty": "Ohne Goldnuss",
+  "block.stardewcraft.ginger_island_yellowgreen_leaf_clump": "Tropisches Kurzblattbüschel",
+  "block.stardewcraft.ginger_island_blue_spiky_seedling": "Tropischer Spitzblattsetzling",
+  "block.stardewcraft.palm_log": "Palmenstamm",
+  "block.stardewcraft.palm_leaves": "Palmenblätter",
+  "block.stardewcraft.palm_planks": "Palmenholzbretter",
+  "block.stardewcraft.palm_planks_stairs": "Palmenholztreppe",
+  "block.stardewcraft.palm_planks_slab": "Palmenholzstufe",
+  "block.stardewcraft.palm_trapdoor": "Palmenholzfalltür",
+  "block.stardewcraft.palm_coconut_block": "Dekorativer Kokosnussblock"
 }

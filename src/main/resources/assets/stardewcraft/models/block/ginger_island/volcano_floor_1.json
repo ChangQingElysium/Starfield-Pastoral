@@ -2,12 +2,12 @@
   "parent": "minecraft:block/block",
   "textures": {
     "particle": "stardewcraft:block/ginger_island/volcano/volcano_floor_particle",
-    "north": "stardewcraft:block/ginger_island/volcano/volcano_wall",
-    "east": "stardewcraft:block/ginger_island/volcano/volcano_wall",
-    "south": "stardewcraft:block/ginger_island/volcano/volcano_wall",
-    "west": "stardewcraft:block/ginger_island/volcano/volcano_wall",
+    "north": "stardewcraft:block/ginger_island/volcano/volcano_floor",
+    "east": "stardewcraft:block/ginger_island/volcano/volcano_floor",
+    "south": "stardewcraft:block/ginger_island/volcano/volcano_floor",
+    "west": "stardewcraft:block/ginger_island/volcano/volcano_floor",
     "up": "stardewcraft:block/ginger_island/volcano/volcano_floor_pit_a",
-    "down": "stardewcraft:block/ginger_island/volcano/volcano_wall"
+    "down": "stardewcraft:block/ginger_island/volcano/volcano_floor"
   },
   "elements": [
     {

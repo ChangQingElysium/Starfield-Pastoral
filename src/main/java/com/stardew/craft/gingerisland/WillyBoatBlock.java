@@ -55,6 +55,16 @@ public final class WillyBoatBlock extends GingerIslandStateDecorBlock implements
         return state.getValue(PART) == Part.MAIN ? new WillyBoatBlockEntity(pos, state) : null;
     }
 
+    @Override public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean moving) {
+        if (GingerIslandLegacyBoatCleanup.onMainRemoved(state, level, pos, newState, moving)) {
+            // Bypass MapDecor's unqualified old cascade; the utility has kept
+            // neighboring owners and unknown BEs while clearing this footprint.
+            if (state.hasBlockEntity()) level.removeBlockEntity(pos);
+            return;
+        }
+        super.onRemove(state, level, pos, newState, moving);
+    }
+
     @Override protected RenderShape getRenderShape(BlockState state) {
         return RenderShape.ENTITYBLOCK_ANIMATED;
     }

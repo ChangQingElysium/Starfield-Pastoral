@@ -18,7 +18,16 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "stardewcraft:ginger_golden_walnut_bush_rework"
+          "name": "stardewcraft:ginger_golden_walnut_bush_rework",
+          "functions": [
+            {
+              "function": "minecraft:copy_state",
+              "block": "stardewcraft:ginger_golden_walnut_bush_rework",
+              "properties": [
+                "variant"
+              ]
+            }
+          ]
         }
       ]
     }

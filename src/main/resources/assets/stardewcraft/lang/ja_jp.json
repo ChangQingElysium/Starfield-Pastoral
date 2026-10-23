@@ -13033,5 +13033,16 @@
   "stardewcraft.gui.profile.birthday_order": "%2$sの%1$s日",
   "block.stardewcraft.ginger_music_crystal": "音楽の水晶",
   "block.stardewcraft.sand_slab": "砂のハーフブロック",
-  "block.stardewcraft.sand_stairs": "砂の階段"
+  "block.stardewcraft.sand_stairs": "砂の階段",
+  "stardewcraft.ginger_island.state.walnut_present": "金のクルミあり",
+  "stardewcraft.ginger_island.state.walnut_empty": "金のクルミなし",
+  "block.stardewcraft.ginger_island_yellowgreen_leaf_clump": "熱帯の短葉の茂み",
+  "block.stardewcraft.ginger_island_blue_spiky_seedling": "熱帯の尖った葉の若芽",
+  "block.stardewcraft.palm_log": "ヤシの原木",
+  "block.stardewcraft.palm_leaves": "ヤシの葉",
+  "block.stardewcraft.palm_planks": "ヤシの板材",
+  "block.stardewcraft.palm_planks_stairs": "ヤシの階段",
+  "block.stardewcraft.palm_planks_slab": "ヤシのハーフブロック",
+  "block.stardewcraft.palm_trapdoor": "ヤシのトラップドア",
+  "block.stardewcraft.palm_coconut_block": "装飾用ココナッツブロック"
 }

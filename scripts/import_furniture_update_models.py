@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Import approved Blockbench models from tmp/家具更新 into game resources."""
+"""Import maintained mailbox models; local source intake is not a CI build input."""
 
 from __future__ import annotations
 
+import argparse
 import base64
 import binascii
 import copy
@@ -12,7 +13,7 @@ from typing import Iterator
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE_DIR = ROOT / "tmp/家具更新"
+SOURCE_DIR = ROOT / "assets-src/furniture/mailbox"
 MODEL_OUT = ROOT / "src/main/resources/assets/stardewcraft/models/block/utility"
 TEXTURE_OUT = ROOT / "src/main/resources/assets/stardewcraft/textures/block/utility"
 # The four exported flipbook strips are complementary odd/even-frame layers.
@@ -299,9 +300,19 @@ def import_mailboxes() -> None:
         print(f"Imported {source_name} -> {target_name}.json ({len(model['elements'])} elements)")
 
 
-def main() -> None:
+def main(output_root: Path | None = None, source_dir: Path | None = None) -> None:
+    global SOURCE_DIR, MODEL_OUT, TEXTURE_OUT
+    if source_dir is not None:
+        SOURCE_DIR = source_dir
+    if output_root is not None:
+        MODEL_OUT = output_root / "assets/stardewcraft/models/block/utility"
+        TEXTURE_OUT = output_root / "assets/stardewcraft/textures/block/utility"
     import_mailboxes()
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--output-root", type=Path, help="Resource root; defaults to src/main/resources.")
+    parser.add_argument("--source-dir", type=Path, help="Override the local mailbox source directory.")
+    options = parser.parse_args()
+    main(options.output_root, options.source_dir)

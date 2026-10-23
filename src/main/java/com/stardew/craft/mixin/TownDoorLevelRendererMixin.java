@@ -1,8 +1,11 @@
 package com.stardew.craft.mixin;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.stardew.craft.client.interior.TownDoorClient;
+import com.stardew.craft.client.interior.TownDoorForegroundUniforms;
 import com.stardew.craft.client.interior.TownDoorRenderContext;
 import com.stardew.craft.client.interior.TownDoorVanillaVisibility;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -12,6 +15,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.ViewArea;
 import net.minecraft.client.renderer.chunk.SectionRenderDispatcher;
 import net.minecraft.client.renderer.culling.Frustum;
@@ -30,6 +34,21 @@ import javax.annotation.Nullable;
 /** Nested world-render hooks adapted from Immersive Portals (Apache-2.0). */
 @Mixin(value = LevelRenderer.class, priority = 1100)
 public abstract class TownDoorLevelRendererMixin {
+    @WrapOperation(method = "renderLevel", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/client/renderer/LevelRenderer;renderSectionLayer(Lnet/minecraft/client/renderer/RenderType;DDDLorg/joml/Matrix4f;Lorg/joml/Matrix4f;)V"))
+    private void stardewcraft$foregroundTransparency(LevelRenderer renderer, RenderType layer,
+                                                     double x, double y, double z, Matrix4f view, Matrix4f projection,
+                                                     Operation<Void> original) {
+        if (layer == RenderType.translucent() && !TownDoorRenderContext.isRendering()) {
+            TownDoorForegroundUniforms.collect(() -> original.call(renderer, layer, x, y, z, view, projection));
+        } else {
+            original.call(renderer, layer, x, y, z, view, projection);
+        }
+        if (layer == RenderType.translucent() && TownDoorRenderContext.usesIsolatedTarget()) {
+            TownDoorRenderContext.renderForegroundTranslucents();
+        }
+    }
+
     @Shadow private RenderTarget itemEntityTarget;
     @Shadow private RenderTarget weatherTarget;
     @Shadow private RenderTarget translucentTarget;
@@ -42,7 +61,7 @@ public abstract class TownDoorLevelRendererMixin {
     @Redirect(method = "renderLevel", at = @At(value = "INVOKE",
             target = "Lcom/mojang/blaze3d/systems/RenderSystem;clear(IZ)V", remap = false))
     private void stardewcraft$skipNestedClear(int mask, boolean clearError) {
-        if (!TownDoorRenderContext.isRendering()) RenderSystem.clear(mask, clearError);
+        if (!TownDoorRenderContext.isRendering() || TownDoorRenderContext.usesIsolatedTarget()) RenderSystem.clear(mask, clearError);
     }
 
     /** Render after opaque blocks/entities and before translucent buffers, matching the upstream hook. */

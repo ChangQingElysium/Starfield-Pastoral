@@ -1,5 +1,29 @@
 # Changelog
 
+## 0.6.3fix2 - 2026-10-23
+
+### 更新日志（中文）
+
+- 修复沉浸式门的光影管线、深度合成及渲染状态恢复，改善门内空白、聊天字体污染和透明地形显示；不同光影的水面反射、折射仍需逐组合验证，不宣称全部光影兼容。
+- 优化机器产物气泡的批量绘制及静态模型光照缓存，减少重复提交，保留原生物品渲染和遮挡关系。
+- 修复木乃伊被炸弹终结时的状态处理，更新沙漠节巴士和 Joja 会员交互。
+- 更新姜岛船只放置、场景道具与植物碰撞，补充棕榈建筑方块；旧整棵棕榈模型仅保留存档迁移，迁移不覆盖玩家替换的方块。
+- Forge 1.20.1 同步共同内容，保留平台专属适配、Apothic Attributes 兼容及社区中心槽位递归修复；继续保留既有 FLOW / BOLT 和鱼塘水滴水石功能差异。
+- 新增 Fabric 1.21.1 实验性安装包，与 NeoForge 共用主线内容和资源，并加入独立的构建、平台测试、Mixin 及生产专服保存重开验证。Fabric 客户端画面、GUI 和可选渲染模组组合仍需实机验收。
+
+三个加载器的安装包不可混装。Fabric 需要 Fabric API 和 Forge Config API Port，详见 `fabric/INSTALL.md`。
+
+### Update Log (English)
+
+- Repairs portal shader pipelines, depth compositing and render-state restoration, addressing empty portal views, corrupted chat text and translucent terrain. Water reflections/refraction still require verification per shader combination; universal shader support is not claimed.
+- Batches machine product bubbles and caches static-model lighting while retaining native item rendering and occlusion.
+- Fixes terminal mummy/bomb state handling and updates Desert Festival bus and Joja membership interactions.
+- Updates Ginger Island boat placement, props and plant collision. Adds palm building blocks and retires old whole-tree models through migration that preserves player replacements.
+- Synchronizes Forge 1.20.1 while retaining its platform adaptations, Apothic Attributes compatibility and Community Center slot-recursion fix. Existing FLOW / BOLT and Fish Pond Water dripstone differences remain.
+- Introduces an experimental Fabric 1.21.1 package sharing the mainline content/resources, with independent build, platform tests, Mixin audit and production server save/reopen checks. Client visuals, GUI and optional renderer combinations remain unverified.
+
+Install only the package matching your loader. Fabric also requires Fabric API and Forge Config API Port; see `fabric/INSTALL.md`.
+
 ## 0.6.3fix1 - 2026-10-05
 
 ### 更新日志（中文）

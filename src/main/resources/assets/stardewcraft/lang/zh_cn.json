@@ -13033,5 +13033,16 @@
   "stardewcraft.gui.profile.birthday_order": "%2$s %1$s 日",
   "block.stardewcraft.ginger_music_crystal": "音乐水晶",
   "block.stardewcraft.sand_slab": "沙子台阶",
-  "block.stardewcraft.sand_stairs": "沙子楼梯"
+  "block.stardewcraft.sand_stairs": "沙子楼梯",
+  "stardewcraft.ginger_island.state.walnut_present": "有核桃",
+  "stardewcraft.ginger_island.state.walnut_empty": "无核桃",
+  "block.stardewcraft.ginger_island_yellowgreen_leaf_clump": "热带短叶丛",
+  "block.stardewcraft.ginger_island_blue_spiky_seedling": "热带尖叶嫩株",
+  "block.stardewcraft.palm_log": "棕榈原木",
+  "block.stardewcraft.palm_leaves": "棕榈树叶",
+  "block.stardewcraft.palm_planks": "棕榈木板",
+  "block.stardewcraft.palm_planks_stairs": "棕榈木楼梯",
+  "block.stardewcraft.palm_planks_slab": "棕榈木半砖",
+  "block.stardewcraft.palm_trapdoor": "棕榈木活板门",
+  "block.stardewcraft.palm_coconut_block": "装饰椰子方块"
 }

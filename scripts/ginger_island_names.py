@@ -20,6 +20,8 @@ ENTITY_NAMES = {
 }
 
 ROWS = '''
+island_yellowgreen_leaf_clump|Tropical Shortleaf Clump|热带短叶丛|Tropisches Kurzblattbüschel|Mata tropical de hojas cortas|Touffe tropicale à feuilles courtes|Ciuffo tropicale a foglie corte|Rövid levelű trópusi növénycsomó|熱帯の短葉の茂み|열대 짧은잎 덤불|Tufo tropical de folhas curtas|Тропический куст коротких листьев|Kısa yapraklı tropik küme
+island_blue_spiky_seedling|Tropical Spiky Seedling|热带尖叶嫩株|Tropischer Spitzblattsetzling|Brote tropical de hojas puntiagudas|Jeune pousse tropicale à feuilles pointues|Germoglio tropicale a foglie appuntite|Hegyes levelű trópusi hajtás|熱帯の尖った葉の若芽|열대 뾰족잎 새싹|Broto tropical de folhas pontiagudas|Тропический росток с острыми листьями|Sivri yapraklı tropik filiz
 music_crystal|Music Crystal|音乐水晶|Musikkristall|Cristal musical|Cristal musical|Cristallo musicale|Zenei kristály|音楽の水晶|음악 수정|Cristal musical|Музыкальный кристалл|Müzik kristali
 island_arrival_totem|Island Arrival Totem|姜岛传送落点柱|Insel-Ankunftstotem|Tótem de llegada a la isla|Totem d'arrivée sur l'île|Totem di arrivo sull'isola|Szigeti érkezési totem|島への到着トーテム|섬 도착 토템|Totem de chegada à ilha|Тотем прибытия на остров|Adaya varış totemi
 willy_boat|Willy's Boat|威利的船|Willys Boot|Barco de Willy|Bateau de Willy|Barca di Willy|Willy hajója|ウィリーの船|윌리의 배|Barco do Willy|Лодка Вилли|Willy'nin teknesi

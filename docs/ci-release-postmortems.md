@@ -2,6 +2,12 @@
 
 This file is the durable record for release-related CI failures. A release is not considered complete until the exact candidate commit passes the full GitHub workflow from a clean, tracked-only checkout and the pushed GitHub Actions run finishes successfully.
 
+## 0.6.3fix2 candidate — retired palm fixtures and Fabric model enumeration (2026-10-23)
+
+The shared Ginger Island fixtures still required the retired whole-tree palm to be placeable and counted it as a live model owner. Forge's full default suite had already established the intended retirement contract. Port only those fixture changes back to 1.21.1: reject new placement, migrate legacy MAIN/EXT cells, preserve neighbors and later player replacements, and retain the remaining ground-variant tests. Do not reinstate the withdrawn model to satisfy old assertions.
+
+The Fabric platform suite initially ran 804 tests with one failure: `ModelTransformationDeserializerTest` expected 54 array-transform model files, but the updated resources contain 46 (43 Ginger Island files). Eight whole-tree palm model bindings no longer contain those composite transforms. Update the reviewed root inventory and replace the old approximate `>1700` child threshold with exact recursive counts from every current authored model; continue to reproduce the original Gson failure and exercise the actual native/Porting Lib deserializers for every input. This is a stale resource fixture, not a reason to relax model parsing.
+
 ## Recurring structural cause
 
 ### 0.6.3fix1 candidate — joint classification and stale gameplay fixtures (2026-10-05)

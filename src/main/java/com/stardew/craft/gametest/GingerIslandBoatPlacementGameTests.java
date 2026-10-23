@@ -4,20 +4,29 @@ import com.stardew.craft.block.decor.MapDecorStaticBlock;
 import com.stardew.craft.blockentity.WillyBoatBlockEntity;
 import com.stardew.craft.gingerisland.GingerIslandBlocks;
 import com.stardew.craft.gingerisland.GingerIslandStateDecorBlock;
+import com.google.gson.JsonParser;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.Fluids;
@@ -35,6 +44,256 @@ public final class GingerIslandBoatPlacementGameTests {
     private static final List<String> BOATS = List.of("ginger_willy_boat", "ginger_island_shipwreck");
 
     private GingerIslandBoatPlacementGameTests() {}
+
+    @GameTest(templateNamespace = TEMPLATE_NS, template = "large_empty", timeoutTicks = 200)
+    public static void futureNorthBoatAtZ77HasWalkableBoardingFromTheUnchangedSourcePier(GameTestHelper h) {
+        basin(h, 5);
+        var level = h.getLevel();
+        BlockPos main = h.absolutePos(new BlockPos(40, 9, 40));
+        var pierBlock = BuiltInRegistries.BLOCK.get(ResourceLocation.fromNamespaceAndPath("stardewcraft", "oak_planks"));
+        h.assertTrue(pierBlock != Blocks.AIR, "Use the project's actual source-pier material");
+        Set<BlockPos> pier = new LinkedHashSet<>();
+        // Same relative positions as MAIN=(30,64,77), pier=(34..36,64,70..80).
+        for (int x = 4; x <= 6; x++) {
+            for (int z = -7; z <= 3; z++) {
+                BlockPos cell = main.offset(x, 0, z);
+                pier.add(cell);
+                level.setBlock(cell, pierBlock.defaultBlockState(), 2 | 16);
+            }
+        }
+        var block = (MapDecorStaticBlock) GingerIslandBlocks.get("ginger_willy_boat");
+        var state = block.defaultBlockState().setValue(MapDecorStaticBlock.FACING, Direction.NORTH)
+                .setValue(GingerIslandStateDecorBlock.REPAIRED, true);
+        h.assertTrue(block.placementPositions(main, Direction.NORTH).stream().noneMatch(pier::contains),
+                "The new boat must retain all 33 existing source-pier floor cells");
+        level.setBlock(main, state, 2 | 16);
+        h.assertTrue(block.placeExtensions(level, main, state), "Future source-pier boat failed its actual footprint");
+        Player player = h.makeMockPlayer(GameType.SURVIVAL);
+        h.assertTrue(level.addFreshEntity(player), "Boarding player must participate in real world collisions");
+        try {
+            player.setPos(main.getX() + 5, main.getY() + 1.05, main.getZ() + 43D / 16);
+            player.move(MoverType.SELF, new Vec3(0, -.1, 0));
+            for (int step = 0; step < 18; step++) {
+                player.move(MoverType.SELF, new Vec3(-.25, -.1, 0));
+                h.assertTrue(Math.abs(player.getY() - (main.getY() + 1)) < .01,
+                        "Player fell into a gap or required a one-block jump at boarding step " + step);
+            }
+            h.assertTrue(Math.abs(player.getX() - (main.getX() + .5)) < .001 && player.onGround(),
+                    "The real player could not walk from source pier through the gate onto the deck");
+            for (BlockPos cell : pier)
+                h.assertTrue(level.getBlockState(cell).is(pierBlock), "Boarding construction changed a source-pier floor cell");
+        } finally {
+            player.discard();
+            MapDecorStaticBlock.runWithDropsSuppressed(() -> level.setBlock(main, Blocks.AIR.defaultBlockState(), 2 | 16));
+        }
+        h.succeed();
+    }
+
+    @GameTest(templateNamespace = TEMPLATE_NS, template = "large_empty", timeoutTicks = 200)
+    public static void dismantlingOldWillyClearsLegacyCellsButKeepsOtherOwnersAndBEs(GameTestHelper h) {
+        assertLegacyDismantling(h, "ginger_willy_boat", 328, 4);
+        h.succeed();
+    }
+
+    @GameTest(templateNamespace = TEMPLATE_NS, template = "large_empty", timeoutTicks = 200)
+    public static void dismantlingOldShipwreckClearsLegacyCellsButKeepsOtherOwners(GameTestHelper h) {
+        assertLegacyDismantling(h, "ginger_island_shipwreck", 1722, 15);
+        h.succeed();
+    }
+
+    private static void assertLegacyDismantling(GameTestHelper h, String id, int expectedCells, int otherX) {
+        var level = h.getLevel();
+        var block = (MapDecorStaticBlock) GingerIslandBlocks.get(id);
+        BlockPos main = h.absolutePos(new BlockPos(40, 8, 40));
+        Player player = h.makeMockPlayer(GameType.SURVIVAL);
+        for (Direction facing : Direction.Plane.HORIZONTAL) {
+            Set<BlockPos> oldCells = legacyCells(id, main, facing);
+            h.assertTrue(oldCells.size() == expectedCells, "Fixture must use the actual pre-correction boat footprint");
+            BlockPos otherMain = main.offset(new BlockPos(otherX, 0, 0).rotate(rotation(facing)));
+            Set<BlockPos> otherCells = new LinkedHashSet<>(block.placementPositions(otherMain, facing));
+            // A surviving neighbor can still own pre-correction extensions.
+            // Install and verify its entire legacy/current union, rather than
+            // calling correctly protected old cells ghosts of the removed ship.
+            otherCells.addAll(legacyCells(id, otherMain, facing));
+            h.assertTrue(!oldCells.contains(otherMain) && otherCells.stream().anyMatch(oldCells::contains),
+                    "Neighbor fixture must overlap the old footprint without replacing its MAIN");
+            h.assertTrue(!otherCells.contains(main), "Neighbor fixture cannot overwrite the dismantled MAIN");
+            BlockPos foreign = oldCells.stream().filter(p -> !p.equals(main) && p.getY() >= main.getY() + 1
+                    && !otherCells.contains(p)).findFirst().orElseThrow();
+            BlockPos unknownBe = id.equals("ginger_willy_boat") ? oldCells.stream().filter(p -> !p.equals(main)
+                    && !p.equals(foreign) && p.getY() >= main.getY() + 1 && !otherCells.contains(p))
+                    .findFirst().orElseThrow() : null;
+            BlockPos wrongFacing = oldCells.stream().filter(p -> !p.equals(main) && !p.equals(foreign)
+                    && !p.equals(unknownBe) && p.getY() >= main.getY() + 1 && !otherCells.contains(p))
+                    .findFirst().orElseThrow();
+            var state = block.defaultBlockState().setValue(MapDecorStaticBlock.FACING, facing);
+            if (state.hasProperty(GingerIslandStateDecorBlock.REPAIRED))
+                state = state.setValue(GingerIslandStateDecorBlock.REPAIRED, true);
+            for (BlockPos cell : oldCells) {
+                if (cell.equals(foreign)) {
+                    level.setBlock(cell, Blocks.STONE.defaultBlockState(), 2 | 16);
+                } else {
+                    var cellState = cell.equals(main) ? state : state.setValue(MapDecorStaticBlock.PART,
+                            MapDecorStaticBlock.Part.EXTENSION);
+                    if (!cell.equals(main)) cellState = cellState.setValue(BlockStateProperties.WATERLOGGED,
+                            cell.getY() < main.getY());
+                    if (cell.equals(wrongFacing)) cellState = cellState.setValue(MapDecorStaticBlock.FACING,
+                            facing.getOpposite());
+                    level.setBlock(cell, cellState, 2 | 16);
+                }
+            }
+            if (unknownBe != null)
+                level.setBlockEntity(new WillyBoatBlockEntity(unknownBe, level.getBlockState(unknownBe)));
+            var retainedBe = unknownBe == null ? null : level.getBlockEntity(unknownBe);
+            var wrongState = level.getBlockState(wrongFacing);
+            for (BlockPos cell : otherCells) {
+                var cellState = cell.equals(otherMain) ? state : state.setValue(MapDecorStaticBlock.PART,
+                        MapDecorStaticBlock.Part.EXTENSION).setValue(BlockStateProperties.WATERLOGGED,
+                        cell.getY() < main.getY());
+                level.setBlock(cell, cellState, 2 | 16);
+            }
+            Map<BlockPos, BlockState> otherBefore = snapshot(h, otherCells);
+            var otherBe = level.getBlockEntity(otherMain);
+            h.assertTrue(level.destroyBlock(main, true, player), "Old boat MAIN must actually be dismantled");
+            h.assertTrue(level.getBlockEntity(main) == null, "Old removed boat kept its render BE");
+            for (BlockPos cell : oldCells) {
+                if (otherCells.contains(cell)) continue;
+                if (cell.equals(foreign)) {
+                    h.assertTrue(level.getBlockState(cell).is(Blocks.STONE), "Legacy removal destroyed foreign construction");
+                } else if (cell.equals(unknownBe)) {
+                    h.assertTrue(level.getBlockEntity(cell) == retainedBe && level.getBlockState(cell).is(block),
+                            "Legacy removal deleted an unknown extension BE");
+                } else if (cell.equals(wrongFacing)) {
+                    h.assertTrue(level.getBlockState(cell).equals(wrongState), "Legacy removal deleted a different-facing cell");
+                } else if (cell.getY() < main.getY()) {
+                    h.assertTrue(level.getBlockState(cell).is(Blocks.WATER) && level.getFluidState(cell).isSource(),
+                            "Legacy underwater cell did not restore its source: " + cell);
+                } else {
+                    h.assertTrue(level.getBlockState(cell).isAir(), "Legacy boat left a ghost EXT: " + cell);
+                }
+            }
+            for (var entry : otherBefore.entrySet()) {
+                var actual = level.getBlockState(entry.getKey());
+                h.assertTrue(actual.equals(entry.getValue()), "Legacy removal changed neighboring boat at "
+                        + entry.getKey() + ": expected " + entry.getValue() + ", actual " + actual);
+            }
+            h.assertTrue(level.getBlockEntity(otherMain) == otherBe,
+                    "Neighbor's MAIN BE changed at " + otherMain + ": expected " + otherBe
+                            + ", actual " + level.getBlockEntity(otherMain));
+            var drops = level.getEntitiesOfClass(ItemEntity.class, new AABB(main).inflate(35),
+                    e -> e.getItem().getItem() == block.asItem());
+            h.assertTrue(drops.stream().mapToInt(e -> e.getItem().getCount()).sum() == 1,
+                    "Dismantling legacy MAIN must drop exactly one boat");
+            drops.forEach(ItemEntity::discard);
+            Set<BlockPos> all = new LinkedHashSet<>(oldCells); all.addAll(otherCells);
+            MapDecorStaticBlock.runWithDropsSuppressed(() -> {
+                level.setBlock(otherMain, Blocks.AIR.defaultBlockState(), 2 | 16);
+                for (BlockPos cell : all) {
+                    level.removeBlockEntity(cell);
+                    level.setBlock(cell, Blocks.AIR.defaultBlockState(), 2 | 16);
+                }
+            });
+        }
+    }
+
+    private static Set<BlockPos> legacyCells(String id, BlockPos main, Direction facing) {
+        try (var stream = GingerIslandBoatPlacementGameTests.class.getResourceAsStream(
+                "/data/stardewcraft/ginger_island/legacy_boat_footprints.json")) {
+            if (stream == null) throw new IllegalStateException("Legacy footprint fixture missing");
+            var root = JsonParser.parseReader(new InputStreamReader(stream, StandardCharsets.UTF_8)).getAsJsonObject();
+            Set<BlockPos> result = new LinkedHashSet<>();
+            for (var value : root.getAsJsonObject("boats").getAsJsonObject(id).getAsJsonArray("north_offsets")) {
+                var cell = value.getAsJsonArray();
+                result.add(main.offset(new BlockPos(cell.get(0).getAsInt(), cell.get(1).getAsInt(),
+                        cell.get(2).getAsInt()).rotate(rotation(facing))));
+            }
+            return result;
+        } catch (Exception error) {
+            throw new IllegalStateException("Cannot load old-profile regression fixture", error);
+        }
+    }
+
+    private static Rotation rotation(Direction facing) {
+        return switch (facing) {
+            case EAST -> Rotation.CLOCKWISE_90;
+            case SOUTH -> Rotation.CLOCKWISE_180;
+            case WEST -> Rotation.COUNTERCLOCKWISE_90;
+            default -> Rotation.NONE;
+        };
+    }
+
+    @GameTest(templateNamespace = TEMPLATE_NS, template = "large_empty", timeoutTicks = 200)
+    public static void reflectedWillyBoardingSideHasSupportAndARealOpenGateAllFacings(GameTestHelper h) {
+        var block = GingerIslandBlocks.get("ginger_willy_boat");
+        BlockPos main = h.absolutePos(new BlockPos(40, 8, 40));
+        for (Direction facing : Direction.Plane.HORIZONTAL) {
+            var state = block.defaultBlockState().setValue(MapDecorStaticBlock.FACING, facing)
+                    .setValue(GingerIslandStateDecorBlock.REPAIRED, true);
+            var repaired = state.getCollisionShape(h.getLevel(), main);
+            // This is the whole swept volume of a standard 0.6 x 1.8 player
+            // walking from the new +X plank into the open deck at Z=43.
+            AABB walk = rotatePixels(new AABB(3.2, 16.8, 38.2, 60.8, 45.6, 47.8), facing);
+            h.assertTrue(repaired.toAabbs().stream().noneMatch(walk::intersects),
+                    "The reflected repaired gate/rail seals its boarding path: " + facing);
+            var damaged = state.setValue(GingerIslandStateDecorBlock.REPAIRED, false)
+                    .getCollisionShape(h.getLevel(), main);
+            h.assertTrue(damaged.toAabbs().stream().anyMatch(walk::intersects),
+                    "The damaged closed gate no longer blocks the same boarding path: " + facing);
+
+            AABB onNewPlank = rotatePixels(new AABB(51.2, 16.8, 38.2, 60.8, 45.6, 47.8), facing);
+            double supported = repaired.collide(Direction.Axis.Y, onNewPlank, -.1);
+            h.assertTrue(supported > -.1 && supported < 0,
+                    "Mirrored boarding render has no matching +X support surface: " + facing);
+            AABB oldPlank = rotatePixels(new AABB(-60.8, 16.8, 38.2, -51.2, 45.6, 47.8), facing);
+            h.assertTrue(Math.abs(repaired.collide(Direction.Axis.Y, oldPlank, -.1) + .1) < 1e-7,
+                    "An invisible old -X plank collision remains after reflection: " + facing);
+        }
+        h.succeed();
+    }
+
+    @GameTest(templateNamespace = TEMPLATE_NS, template = "large_empty", timeoutTicks = 200)
+    public static void turnedShipSectionsKeepTheCaptainEntryOnTheShoreAllFacings(GameTestHelper h) {
+        var block = GingerIslandBlocks.get("ginger_island_shipwreck");
+        BlockPos main = h.absolutePos(new BlockPos(40, 8, 40));
+        for (Direction facing : Direction.Plane.HORIZONTAL) {
+            var state = block.defaultBlockState().setValue(MapDecorStaticBlock.FACING, facing);
+            var collision = state.getCollisionShape(h.getLevel(), main);
+            // The source threshold after its local reflection and section turn
+            // sits at X=-127.24..-101.29, on the NORTH/shore side. This is a
+            // standard player sweeping across that real aperture into the hull.
+            AABB shoreEntry = rotatePixels(new AABB(-125.8, 22, -79.8, -116.2, 50.8, -20.2), facing);
+            h.assertTrue(collision.toAabbs().stream().noneMatch(shoreEntry::intersects),
+                    "Section turns sealed the shore captain-room entry: " + facing);
+            AABB seaSide = rotatePixels(new AABB(-125.8, 22, 37, -116.2, 50.8, 65), facing);
+            h.assertTrue(collision.toAabbs().stream().anyMatch(seaSide::intersects),
+                    "The old unreflected portal was cut into the sea-side wall: " + facing);
+        }
+        h.succeed();
+    }
+
+    private static AABB rotatePixels(AABB pixels, Direction facing) {
+        double minX = Double.POSITIVE_INFINITY, minZ = Double.POSITIVE_INFINITY;
+        double maxX = Double.NEGATIVE_INFINITY, maxZ = Double.NEGATIVE_INFINITY;
+        for (double x : new double[]{pixels.minX / 16, pixels.maxX / 16}) {
+            for (double z : new double[]{pixels.minZ / 16, pixels.maxZ / 16}) {
+                double outX = switch (facing) {
+                    case EAST -> 1 - z;
+                    case SOUTH -> 1 - x;
+                    case WEST -> z;
+                    default -> x;
+                };
+                double outZ = switch (facing) {
+                    case EAST -> x;
+                    case SOUTH -> 1 - z;
+                    case WEST -> 1 - x;
+                    default -> z;
+                };
+                minX = Math.min(minX, outX); maxX = Math.max(maxX, outX);
+                minZ = Math.min(minZ, outZ); maxZ = Math.max(maxZ, outZ);
+            }
+        }
+        return new AABB(minX, pixels.minY / 16, minZ, maxX, pixels.maxY / 16, maxZ);
+    }
 
     @GameTest(templateNamespace = TEMPLATE_NS, template = "large_empty", timeoutTicks = 200)
     public static void deepWaterAndSeabedHandClicksUseTheActualSurfaceAllFacings(GameTestHelper h) {
@@ -264,8 +523,13 @@ public final class GingerIslandBoatPlacementGameTests {
     }
 
     private static void assertRestored(GameTestHelper h, Map<BlockPos, BlockState> before) {
-        for (var entry : before.entrySet()) h.assertTrue(h.getLevel().getBlockState(entry.getKey()).equals(entry.getValue())
-                && h.getLevel().getBlockEntity(entry.getKey()) == null, "Boat removal/refusal changed source water or seabed");
+        for (var entry : before.entrySet()) {
+            var actual = h.getLevel().getBlockState(entry.getKey());
+            var actualBe = h.getLevel().getBlockEntity(entry.getKey());
+            h.assertTrue(actual.equals(entry.getValue()) && actualBe == null,
+                    "Boat removal/refusal changed source water or seabed at " + entry.getKey()
+                            + ": expected " + entry.getValue() + " without BE, actual " + actual + ", BE " + actualBe);
+        }
     }
 
     private static void assertInside(GameTestHelper h, Set<BlockPos> cells) {

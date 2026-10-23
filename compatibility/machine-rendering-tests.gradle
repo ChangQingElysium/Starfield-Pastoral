@@ -1,0 +1,15 @@
+// Tracked, headless machine dispatcher, buffer batching and native lighting regressions.
+// ./gradlew -I compatibility/machine-rendering-tests.gradle classes test
+allprojects {
+    afterEvaluate {
+        if (plugins.hasPlugin('java')) {
+            sourceSets.test.java.setSrcDirs([project.layout.projectDirectory.dir('compatibility/machine-rendering')])
+            sourceSets.test.resources.setSrcDirs([])
+            tasks.named('test') {
+                include 'com/stardew/craft/client/render/**'
+                reports.junitXml.outputLocation = layout.buildDirectory.dir('test-results/machine-rendering')
+                reports.html.outputLocation = layout.buildDirectory.dir('reports/tests/machine-rendering')
+            }
+        }
+    }
+}

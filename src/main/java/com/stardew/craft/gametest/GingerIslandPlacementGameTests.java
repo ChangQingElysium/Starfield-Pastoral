@@ -128,7 +128,7 @@ public final class GingerIslandPlacementGameTests {
                 }
             }
         }
-        h.assertTrue(owners == 25 && checked == 208, "Building placement audit missed choices: " + owners + " / " + checked);
+        h.assertTrue(owners == 25 && checked == 200, "Building placement audit missed choices: " + owners + " / " + checked);
         h.succeed();
     }
 

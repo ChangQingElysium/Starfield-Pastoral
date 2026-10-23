@@ -1605,6 +1605,22 @@ public static final DeferredBlock<Block> DEAD_CROP = BLOCKS.register("dead_crop"
         public static final DeferredBlock<Block> FOREST_LEAVES = forestCanopyLeaves("forest_leaves");
         public static final DeferredBlock<Block> BROADLEAF_LEAVES = forestCanopyLeaves("broadleaf_leaves");
 
+        // User-supplied palm building kit; ordinary blocks, not a whole-tree multiblock.
+        public static final DeferredBlock<Block> PALM_LOG = BLOCKS.register("palm_log",
+                () -> new net.minecraft.world.level.block.RotatedPillarBlock(newTreeWoodProps()));
+        public static final DeferredBlock<Block> PALM_LEAVES = forestCanopyLeaves("palm_leaves");
+        public static final DeferredBlock<Block> PALM_PLANKS = BLOCKS.register("palm_planks",
+                () -> new Block(newTreeWoodProps()));
+        public static final DeferredBlock<? extends Block> PALM_PLANKS_STAIRS =
+                stairsFromAnyBlock("palm_planks_stairs", PALM_PLANKS, newTreeWoodProps());
+        public static final DeferredBlock<? extends Block> PALM_PLANKS_SLAB =
+                slab("palm_planks_slab", newTreeWoodProps());
+        public static final DeferredBlock<Block> PALM_TRAPDOOR = BLOCKS.register("palm_trapdoor",
+                () -> new net.minecraft.world.level.block.TrapDoorBlock(
+                        net.minecraft.world.level.block.state.properties.BlockSetType.OAK, newTreeWoodProps().noOcclusion()));
+        public static final DeferredBlock<Block> PALM_COCONUT_BLOCK = BLOCKS.register("palm_coconut_block",
+                () -> new Block(newTreeWoodProps().strength(1F)));
+
         public static final DeferredBlock<Block> OAK_ROOT = newTreeRoot("oak");
         public static final DeferredBlock<Block> OAK_LOG = newTreeLog("oak");
         public static final DeferredBlock<Block> OAK_LEAVES = newTreeLeaves("oak");

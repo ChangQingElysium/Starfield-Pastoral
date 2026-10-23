@@ -1,0 +1,253 @@
+// Upstream-SHA256: 65cf3a2daca88051f2cb6f1dde5491012149dd2501b633466128f91a387ed1fb
+package com.stardew.craft;
+
+import org.slf4j.Logger;
+
+import com.mojang.logging.LogUtils;
+import com.stardew.craft.block.ModBlocks;
+import com.stardew.craft.capability.UtilityAutomationCapabilities;
+import com.stardew.craft.entity.ModEntities;
+import com.stardew.craft.effect.ModMobEffects;
+import com.stardew.craft.fluid.ModFluids;
+import com.stardew.craft.item.ModItems;
+import com.stardew.craft.item.catalog.StardewCatalogTab;
+import com.stardew.craft.item.catalog.StardewItemCatalog;
+import com.stardew.craft.sound.ModSounds;
+import com.stardew.craft.blockentity.ModBlockEntities;
+import com.stardew.craft.network.PacketHandler;
+import com.stardew.craft.event.WildTreeChopEvents;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
+import com.stardew.craft.platform.fabric.event.IEventBus;
+import com.stardew.craft.platform.fabric.event.SubscribeEvent;
+import com.stardew.craft.platform.fabric.lifecycle.FMLCommonSetupEvent;
+import com.stardew.craft.platform.fabric.event.FabricEvents;
+import com.stardew.craft.platform.fabric.event.ServerStartingEvent;
+import com.stardew.craft.platform.fabric.registry.DeferredHolder;
+import com.stardew.craft.platform.fabric.registry.DeferredRegister;
+
+// Constructed by the Fabric entrypoint after collecting the physical-side subscriber index.
+public class StardewCraft {
+    // Define mod id in a common place for everything to reference
+    public static final String MODID = "stardewcraft";
+    // Directly reference a slf4j logger
+    public static final Logger LOGGER = LogUtils.getLogger();
+
+    /** pregen .mca 文件在本次启动中被覆盖（版本升级），需要在 level 加载后 reset 管理器。 */
+    public static boolean pregenJustInstalled = false;
+    
+    // Create a Deferred Register to hold CreativeModeTabs which will all be registered under the "stardewcraft" namespace
+    @SuppressWarnings("null")
+    public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
+
+    // Stardew Valley catalog tabs. Keep stardew_tab as the first, farming-oriented tab for compatibility.
+    public static final java.util.Map<StardewCatalogTab, DeferredHolder<CreativeModeTab, CreativeModeTab>> STARDEW_CATALOG_TABS = registerCatalogTabs();
+
+    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> STARDEW_TAB =
+            STARDEW_CATALOG_TABS.get(StardewCatalogTab.FARMING_FORAGING);
+
+    private static java.util.Map<StardewCatalogTab, DeferredHolder<CreativeModeTab, CreativeModeTab>> registerCatalogTabs() {
+        java.util.EnumMap<StardewCatalogTab, DeferredHolder<CreativeModeTab, CreativeModeTab>> tabs =
+                new java.util.EnumMap<>(StardewCatalogTab.class);
+        StardewCatalogTab[] catalogTabs = StardewCatalogTab.values();
+        for (StardewCatalogTab tab : catalogTabs) {
+            tabs.put(tab, CREATIVE_MODE_TABS.register(tab.registryName(), () -> {
+                CreativeModeTab.Builder builder = CreativeModeTab.builder()
+                        .title(Component.translatable(tab.translationKey()))
+                        .icon(() -> tab.iconItem().getDefaultInstance())
+                        .displayItems((parameters, output) -> StardewItemCatalog.acceptTab(tab, output));
+                return builder.build();
+            }));
+        }
+        return java.util.Collections.unmodifiableMap(tabs);
+    }
+
+    // The Fabric entrypoint supplies the shared MOD bus before registry publication.
+    public StardewCraft(IEventBus modEventBus) {
+        com.stardew.craft.api.v1.internal.BuiltinApiTypes.bootstrap();
+        com.stardew.craft.world.interaction.BuiltinMapInteractionActions
+                .bootstrap();
+        com.stardew.craft.api.v1.internal.item.StardewAcquisitionSourceRegistry
+                .bootstrap();
+        com.stardew.craft.api.v1.internal.economy.StardewCurrencyRegistry
+                .bootstrap();
+        com.stardew.craft.api.v1.internal.shop.StardewShopProductRegistry
+                .bootstrap();
+        com.stardew.craft.api.v1.internal.network
+                .StardewNetworkCapabilityRegistry.bootstrap();
+        com.stardew.craft.farm.FarmInstanceInitializer.bootstrap();
+        com.stardew.craft.farm.MeadowlandsStarterService.bootstrap();
+        com.stardew.craft.greenhouse.GreenhouseBuildings.bootstrap();
+
+        com.stardew.craft.api.v1.pet.StardewPets.breeds();
+
+        // Register the commonSetup method for modloading
+        modEventBus.addListener(com.stardew.craft.platform.fabric.lifecycle.FMLCommonSetupEvent.class, this::commonSetup);
+        modEventBus.addListener(com.stardew.craft.platform.fabric.network.RegisterPayloadHandlersEvent.class, PacketHandler::register);
+        modEventBus.addListener(com.stardew.craft.platform.fabric.network.RegisterConfigurationTasksEvent.class, PacketHandler::registerConfigurationTasks);
+        modEventBus.addListener(com.stardew.craft.platform.fabric.capability.RegisterCapabilitiesEvent.class, UtilityAutomationCapabilities::registerCapabilities);
+        modEventBus.addListener(com.stardew.craft.platform.fabric.lifecycle.EntityAttributeCreationEvent.class, ModEntities::onEntityAttributeCreation);
+        modEventBus.addListener(com.stardew.craft.platform.fabric.datamap.RegisterDataMapTypesEvent.class, com.stardew.craft.data.StardewDataMaps::registerDataMaps);
+
+        // Register the Deferred Register to the mod event bus so tabs get registered
+        CREATIVE_MODE_TABS.register(modEventBus);
+        
+        // 注册作物系统的物品和方块
+        ModItems.ITEMS.register(modEventBus);
+        ModBlocks.BLOCKS.register(modEventBus);
+        com.stardew.craft.platform.fabric.attachment.FarmSoilMigrationAttachments.initialize();
+        com.stardew.craft.templates.TemplateContent.register(modEventBus);
+        // Fabric native FlowingFluid has no separate Forge FluidType registry.
+        ModFluids.FLUIDS.register(modEventBus);
+        ModBlockEntities.BLOCK_ENTITIES.register(modEventBus);
+		ModEntities.ENTITY_TYPES.register(modEventBus);
+        com.stardew.craft.interior.TownDoorSystem.register(modEventBus);
+		ModSounds.SOUND_EVENTS.register(modEventBus);
+
+		// 注册自定义 Buff（状态效果）
+		ModMobEffects.MOB_EFFECTS.register(modEventBus);
+		
+		// 注册自定义粒子
+		com.stardew.craft.weather.ModParticles.PARTICLES.register(modEventBus);
+		
+		// 注册菜单类型
+		com.stardew.craft.menu.ModMenuTypes.MENU_TYPES.register(modEventBus);
+
+		// 注册自定义 GameRules（睡眠比例、AFK 超时等）
+		com.stardew.craft.core.ModGameRules.init();
+
+
+        // Register ourselves for server and other game events we are interested in.
+        // Note that this is necessary if and only if we want *this* class (StardewCraft) to respond directly to events.
+        // Do not add this line if there are no @SubscribeEvent-annotated functions in this class, like onServerStarting() below.
+        FabricEvents.GAME.register(this);
+        
+        // 手动注册事件（确保事件被正确注册）
+        FabricEvents.GAME.register(WildTreeChopEvents.class);
+        FabricEvents.GAME.register(com.stardew.craft.event.ResourceClumpEvents.class);
+        // WeaponCombatEvents 已有 @EventBusSubscriber 自动注册，不需要手动注册
+
+        // Client-only manual subscribers are installed by StardewCraftClient.
+
+        com.stardew.craft.platform.fabric.config.FabricConfig.register(MODID,
+                Config.COMMON_SPEC, Config.CLIENT_SPEC, Config.SERVER_SPEC,
+                com.stardew.craft.config.ConfigMigration::onConfigEvent);
+    }
+
+    private void commonSetup(FMLCommonSetupEvent event) {
+        event.enqueueWork(com.stardew.craft.event.MineMonsterSpawnHandler::ensureProfilesRegistered);
+        // Some common setup code
+        LOGGER.info("HELLO FROM COMMON SETUP");
+        LOGGER.info("Initializing StardewCraft systems...");
+        
+        // 初始化维度和作物系统
+        event.enqueueWork(() -> {
+            com.stardew.craft.core.ModDimensions.register();
+
+            // 注入晕倒/死亡系统
+            com.stardew.craft.player.StardewDamageHooks.setKnockoutHandler(
+                    com.stardew.craft.player.PassOutService::onCombatDeath);
+        });
+
+    }
+
+    /**
+     * 在 createLevels() 之前安装预烘焙区域文件。
+     * ServerAboutToStartEvent 在 initServer() 早期触发，早于 LevelEvent.Load，
+     * 确保 .mca 文件在维度首次加载前就位。
+     */
+    @SuppressWarnings("null")
+    @SubscribeEvent
+    public void onServerAboutToStart(com.stardew.craft.platform.fabric.event.ServerAboutToStartEvent event) {
+        var server = event.getServer();
+        LOGGER.info("[VALLEY_MAP] Startup: trying prebuilt region install (ServerAboutToStart)");
+        var result = com.stardew.craft.dimension.StardewValleyPrebuiltRegionInstaller.installIfAvailable(server);
+        if (result.changedWorldFiles()) {
+            pregenJustInstalled = true;
+            LOGGER.info("[VALLEY_MAP] Prebuilt regions {}. Will reset managers on level load.", result);
+        } else if (result == com.stardew.craft.dimension.StardewValleyPrebuiltRegionInstaller.InstallResult.ALREADY_PRESENT) {
+            LOGGER.info("[VALLEY_MAP] Prebuilt regions ready (ALREADY_PRESENT).");
+        } else {
+            throw new IllegalStateException("Stardew Valley prebuilt region package is missing, invalid, or could not be installed: " + result);
+        }
+    }
+
+    // You can use SubscribeEvent and let the Event Bus discover methods to call
+    @SuppressWarnings("null")
+    @SubscribeEvent
+    public void onServerStarting(ServerStartingEvent event) {
+        LOGGER.info("HELLO from server starting");
+
+        // 加载任务数据
+        com.stardew.craft.quest.QuestDataLoader.load();
+
+        // 注册温室季节豁免规则
+        com.stardew.craft.greenhouse.GreenhouseManager.registerSeasonRule();
+
+        // 注册祝尼魔温室符文季节豁免规则
+        com.stardew.craft.manager.JunimoGreenhouseRuneManager.registerSeasonRule();
+
+        // 注册跨季宽限期季节豁免规则
+        com.stardew.craft.farming.SeasonLocationRules.registerGracePeriodRule();
+
+        com.stardew.craft.block.utility.GardenPotBlock.registerSeasonRule();
+
+        // Caroline's Sunroom is greenhouse-like in the original game.
+        com.stardew.craft.interior.SunroomService.registerSeasonRule();
+
+        var server = event.getServer();
+        // 预烘焙 region 已在 level 加载前安装；这里只记录轻量版本状态，不再解析巨型 schematic。
+        if (com.stardew.craft.dimension.StardewValleyPrebuiltRegionInstaller.hasInstalledPrebuilt(server)) {
+            var stardewLevel = server.getLevel(com.stardew.craft.core.ModDimensions.STARDEW_VALLEY);
+            if (stardewLevel != null) {
+                com.stardew.craft.dimension.StardewValleyMapBootstrap.markPrebuiltInstalled(
+                    stardewLevel,
+                    com.stardew.craft.dimension.StardewValleyPrebuiltRegionInstaller.CURRENT_PREGEN_VERSION
+                );
+
+                // pregen version 刚升级 → .mca 已在 ServerAboutToStart 被覆盖。
+                // 此时 level 已加载，执行所有管理器 reset，确保 ensurePlaced 会重新放置。
+                if (pregenJustInstalled) {
+                    pregenJustInstalled = false;
+                    com.stardew.craft.dimension.StardewBiomePatcher.schedulePregenBiomeMigration(
+                        stardewLevel, "pregen_region_reinstalled_startup");
+                    com.stardew.craft.interior.InteriorSubspaceManager.replaceAllPortalsIfReady(
+                        stardewLevel, "pregen_region_reinstalled_startup");
+
+                    // Reinstalling the prebuilt region replaces these dynamic blocks on disk.
+                    // Reset their placement versions only for that migration; doing this on
+                    // every normal startup makes the first player repeat all placement work.
+                    com.stardew.craft.farm.FarmEntryBarrierManager.get(stardewLevel).resetForMigration();
+                    com.stardew.craft.communitycenter.quarry.QuarryAccessManager.get(stardewLevel).resetForMigration();
+                    com.stardew.craft.sewer.SewerAccessManager.get(stardewLevel).resetForMigration();
+                    com.stardew.craft.minecart.MinecartStationManager.get(stardewLevel).resetForMigration();
+                    com.stardew.craft.manager.QuarrySpawnService.resetInitialSpawn(stardewLevel);
+                    com.stardew.craft.mastery.MasterySiteInstaller.get(stardewLevel).resetForMigration();
+                    com.stardew.craft.statue.UncertaintyStatueInstaller.get(stardewLevel).resetForMigration();
+                    com.stardew.craft.specialorder.SpecialOrderBoardInstaller.get(stardewLevel).resetForMigration();
+                    com.stardew.craft.fishing.server.BobberMachineInstaller.get(stardewLevel).resetForMigration();
+                    LOGGER.info("[VALLEY_PREGEN] Pregen just installed — portal replacement done (startup path)");
+                }
+            } else {
+                LOGGER.info("[VALLEY_MAP] Stardew level not loaded at startup, will mark pre-generated on first travel.");
+            }
+        }
+    }
+
+    @SubscribeEvent(priority = com.stardew.craft.platform.fabric.event.EventPriority.LOWEST)
+    public void onServerStarted(
+            com.stardew.craft.platform.fabric.event.ServerStartedEvent event
+    ) {
+        if (com.stardew.craft.platform.fabric.gametest.GameTestHooks
+                .isGametestServer()) {
+            LOGGER.info(
+                    "Keeping extension registrations open for isolated GameTests");
+            return;
+        }
+        com.stardew.craft.api.v1.internal.extension.ExtensionPointCatalog
+                .freezeAll();
+        LOGGER.info("Stardew extension registrations frozen");
+    }
+}

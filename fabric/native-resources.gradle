@@ -1,0 +1,62 @@
+// Reuse maintained authoring inputs and compilers, never another loader's build output.
+def upstreamDirectory = layout.projectDirectory.dir('..')
+def nativeNpcSource = upstreamDirectory.dir('assets-src/npc')
+def nativeNpcOutput = layout.buildDirectory.dir('generated/resources/nativeNpc')
+def nativeFurnitureOutput = layout.buildDirectory.dir('generated/native-furniture')
+def sharedNativeCompilerInputs = [
+        'tools/art/compile_native_npc.py',
+        'tools/art/npc_texture_atlas.py',
+        'tools/art/npc_joint_skin.py',
+        'requirements-build.txt'
+].collect { upstreamDirectory.file(it) }
+
+def compileNativeNpcModels = tasks.register('compileNativeNpcModels', Exec) {
+    group = 'build'
+    description = 'Compile the registered native NPC models for the Fabric artifact.'
+    inputs.files(fileTree(nativeNpcSource.asFile) {
+        include 'models.json', '**/*.bbmodel', '**/motion.json', '**/*.motion.json'
+    })
+    inputs.files(sharedNativeCompilerInputs)
+    outputs.dir(nativeNpcOutput)
+    workingDir upstreamDirectory.asFile
+    commandLine 'python3', upstreamDirectory.file('tools/art/compile_native_npc.py').asFile,
+            nativeNpcSource.asFile, nativeNpcOutput.get().asFile
+    // The compiler writes current manifest entries; clean this task's own tree
+    // first so a removed variant cannot survive as an obsolete runtime model.
+    doFirst { project.delete(nativeNpcOutput.get().asFile) }
+}
+
+def compileNativeFurnitureModels = tasks.register('compileNativeFurnitureModels', Exec) {
+    group = 'build'
+    description = 'Compile the maintained Sebastian computer for the Fabric artifact.'
+    inputs.file(upstreamDirectory.file('assets-src/furniture/sebastian_computer/sebastian_computer.bbmodel'))
+    inputs.file(upstreamDirectory.file('tools/art/compile_sebastian_computer.py'))
+    inputs.files(sharedNativeCompilerInputs)
+    outputs.dir(nativeFurnitureOutput)
+    workingDir upstreamDirectory.asFile
+    commandLine 'python3', upstreamDirectory.file('tools/art/compile_sebastian_computer.py').asFile,
+            nativeFurnitureOutput.get().asFile
+    doFirst { project.delete(nativeFurnitureOutput.get().asFile) }
+}
+
+sourceSets.main.resources.srcDir(compileNativeNpcModels)
+sourceSets.main.resources.srcDir(compileNativeFurnitureModels)
+
+// Match the main loader's replacement contract, including already processed
+// files left behind before this exclusion was added.
+def nativeNpcIds = new groovy.json.JsonSlurper().parseText(
+        providers.fileContents(nativeNpcSource.file('models.json')).asText.get()).keySet()
+def retiredNpcPaths = nativeNpcIds.collectMany { id -> [
+        "assets/stardewcraft/geo/entity/npc/${id}.geo.json".toString(),
+        "assets/stardewcraft/animations/entity/npc/${id}.animation.json".toString(),
+        "assets/stardewcraft/textures/entity/npc/${id}.png".toString()
+] }
+def processedResources = layout.buildDirectory.dir('resources/main')
+tasks.named('processResources') {
+    exclude retiredNpcPaths
+    doLast {
+        retiredNpcPaths.each { relative ->
+            java.nio.file.Files.deleteIfExists(processedResources.get().asFile.toPath().resolve(relative))
+        }
+    }
+}

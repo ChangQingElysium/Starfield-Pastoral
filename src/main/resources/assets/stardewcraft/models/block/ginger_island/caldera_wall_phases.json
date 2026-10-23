@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "stardewcraft:block/ginger_island/caldera/caldera_wall_phases",
+    "particle": "stardewcraft:block/ginger_island/caldera/caldera_wall_particle"
+  }
+}

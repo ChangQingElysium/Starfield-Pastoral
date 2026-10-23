@@ -1,0 +1,283 @@
+plugins {
+    id 'fabric-loom' version "${loom_version}"
+    id 'java-library'
+}
+
+def upstreamProperties = new Properties()
+file('../gradle.properties').withInputStream { upstreamProperties.load(it) }
+group = upstreamProperties.getProperty('mod_group_id')
+version = upstreamProperties.getProperty('mod_version')
+base.archivesName = 'stardewcraft-fabric'
+
+repositories {
+    maven { url = 'https://maven.fabricmc.net/' }
+    maven {
+        url = 'https://api.modrinth.com/maven'
+        content { includeGroup 'maven.modrinth' }
+    }
+    maven {
+        url = 'https://mvn.devos.one/snapshots/'
+        content { includeGroup 'io.github.fabricators_of_create.Porting-Lib' }
+    }
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${minecraft_version}"
+    mappings loom.officialMojangMappings()
+    modImplementation "net.fabricmc:fabric-loader:${loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}"
+    // Maintained Fabric implementation of the existing scoped TOML config API.
+    // This is a real runtime dependency, not a local NeoForge binary or stub.
+    modImplementation "maven.modrinth:forge-config-api-port:${forge_config_api_port_version}"
+    // Modrinth's POM omits FCAP's embedded libraries. Loom's development
+    // classpath needs them explicitly; the released FCAP JAR already bundles them.
+    runtimeOnly 'com.electronwill.night-config:core:3.8.0'
+    runtimeOnly 'com.electronwill.night-config:toml:3.8.0'
+    modCompileOnly "maven.modrinth:jade:${jade_version}"
+    modCompileOnly "maven.modrinth:jei:${jei_version}"
+    modCompileOnly "maven.modrinth:appleskin:${appleskin_version}"
+    compileOnly 'com.google.code.findbugs:jsr305:3.0.2'
+    // Preserve the update checker's Maven version ordering, including fix suffixes.
+    implementation(include('org.apache.maven:maven-artifact:3.8.5')) { transitive = false }
+    // Reuse the maintained 1.21.1 geometry loader and immutable model data.
+    // Include their explicit module closure; Loom's include is not transitive.
+    ['gametest', 'core', 'render_types', 'model_loader', 'model_data'].each { module ->
+        modImplementation(include("io.github.fabricators_of_create.Porting-Lib:${module}:${porting_lib_version}"))
+    }
+}
+
+// Opt-in client tooling is pinned to official Fabric releases. The installer
+// verifies the original JARs; Loom remaps them into the named development runtime.
+// Keep these off normal server/verification classpaths unless explicitly requested.
+if (providers.gradleProperty('fabricClientTestMods').orNull == 'true') {
+    def clientLock = new groovy.json.JsonSlurper().parse(file('client-mods.lock.json'))
+    clientLock.mods.findAll { !it.project_runtime_provided }.each { mod ->
+        def originalJar = file(".local/client-mods/${mod.filename}")
+        if (!originalJar.isFile()) {
+            throw new GradleException('Run python3 fabric/client.py install before enabling Fabric client test mods.')
+        }
+        dependencies.add('modLocalRuntime', files(originalJar))
+    }
+    def nestedIndex = file('.local/client-mods/nested-lock.json')
+    if (!nestedIndex.isFile()) {
+        throw new GradleException('Run python3 fabric/client.py install to prepare nested client libraries.')
+    }
+    new groovy.json.JsonSlurper().parse(nestedIndex).each { nested ->
+        dependencies.add(nested.fabric_mod ? 'modLocalRuntime' : 'runtimeOnly',
+                files(".local/client-mods/${nested.filename}"))
+    }
+}
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+
+def generatedSources = layout.buildDirectory.dir('generated/sources/stardewcraft')
+def generatedReport = layout.buildDirectory.file('reports/source-conversion.json')
+
+tasks.register('preparePortSources', Exec) {
+    description = 'Prepare all upstream Java sources using reviewed Fabric import conversions.'
+    inputs.dir('../src/main/java')
+    inputs.file('../scripts/port/prepare_fabric_sources.py')
+    inputs.dir('src/overrides/java')
+    outputs.dir(generatedSources)
+    outputs.file(generatedReport)
+    commandLine 'python3', '../scripts/port/prepare_fabric_sources.py',
+            '--root', '..', '--output', generatedSources.get().asFile,
+            '--report', generatedReport.get().asFile
+}
+
+def gameTestResources = layout.buildDirectory.dir('generated/resources/gametest')
+def indexGameTests = tasks.register('indexGameTests', Exec) {
+    inputs.dir('../src/main/java')
+    inputs.files('../scripts/port/fabric_gametest_index.py', '../scripts/port/fabric_inventory.py')
+    outputs.dir(gameTestResources)
+    outputs.file(layout.buildDirectory.file('reports/gametest-index.json'))
+    commandLine 'python3', '../scripts/port/fabric_gametest_index.py', '--root', '..',
+            '--output', gameTestResources.get().file('META-INF/stardewcraft/fabric-gametest-index.json').asFile,
+            '--report', layout.buildDirectory.file('reports/gametest-index.json').get().asFile
+}
+
+// Compile the real adapters separately while the complete port is in progress.
+// The normal classes/build tasks still compile EVERY upstream production class.
+sourceSets {
+    platform {
+        java.srcDir 'src/main/java'
+        java.include 'com/stardew/craft/platform/fabric/**'
+        java.include 'com/stardew/craft/platform/mixin/**'
+        compileClasspath += configurations.compileClasspath
+        runtimeClasspath += configurations.runtimeClasspath
+    }
+    platformTest {
+        java.srcDir 'src/platformTest/java'
+        resources.srcDir('src/main/resources')
+        resources.include('stardewcraft.fabric.mixins.json')
+        compileClasspath += sourceSets.platform.output + sourceSets.platform.compileClasspath
+        runtimeClasspath += sourceSets.platform.output + sourceSets.platform.runtimeClasspath
+    }
+    main {
+        java.setSrcDirs([generatedSources, 'src/main/java'])
+        java.exclude 'com/stardew/craft/platform/fabric/**'
+        java.exclude 'com/stardew/craft/platform/mixin/**'
+        compileClasspath += sourceSets.platform.output
+        runtimeClasspath += sourceSets.platform.output
+        resources.setSrcDirs(['../src/main/resources', '../src/generated/resources', 'src/main/resources'])
+        resources.exclude 'META-INF/neoforge.mods.toml', 'META-INF/accesstransformer.cfg'
+        // The index task also emits a diagnostic JSON file; only its resource
+        // directory belongs on the classpath.
+        resources.srcDir(files(gameTestResources).builtBy(indexGameTests))
+    }
+}
+
+def subscriberResources = layout.buildDirectory.dir('generated/resources/subscribers')
+def indexSubscribers = tasks.register('indexSubscribers', JavaExec) {
+    description = 'Index all compiled static event subscribers without initializing game classes.'
+    dependsOn tasks.named('compileJava'), tasks.named('platformClasses')
+    classpath = sourceSets.platform.runtimeClasspath
+    mainClass = 'com.stardew.craft.platform.fabric.bootstrap.SubscriberIndexGenerator'
+    inputs.files(sourceSets.main.output.classesDirs)
+    outputs.dir(subscriberResources)
+    args layout.buildDirectory.dir('classes/java/main').get().asFile,
+            subscriberResources.get().file('META-INF/stardewcraft/fabric-subscribers.json').asFile
+}
+sourceSets.main.resources.srcDir(files(subscriberResources).builtBy(indexSubscribers))
+
+dependencies {
+    platformTestImplementation platform('org.junit:junit-bom:5.11.4')
+    platformTestImplementation 'org.junit.jupiter:junit-jupiter'
+    platformTestRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.register('platformTest', Test) {
+    description = 'Verify Fabric platform adapters without launching a game.'
+    testClassesDirs = sourceSets.platformTest.output.classesDirs
+    // InputConstants resolves GLFW method handles even in headless tests. Use
+    // Loom's current-platform natives; no window or GLFW initialization occurs.
+    // Model-resource regressions invoke the real project geometry loader as
+    // well as the platform bridge, so use the compiled production outputs.
+    dependsOn tasks.named('classes')
+    classpath = sourceSets.platformTest.runtimeClasspath + sourceSets.main.output + configurations.minecraftNatives +
+            sourceSets.platform.compileClasspath.filter { it.name.toLowerCase(java.util.Locale.ROOT).contains('appleskin') }
+    useJUnitPlatform()
+}
+
+tasks.register('writeRuntimeClasspath') {
+    description = 'Export the real Fabric runtime classpath for the isolated Mixin transform audit.'
+    dependsOn tasks.named('classes'), tasks.named('platformTestClasses')
+    def destination = layout.buildDirectory.file('reports/client-runtime-classpath.txt')
+    inputs.property('classpathEntries', providers.provider { sourceSets.main.runtimeClasspath.asPath })
+    outputs.file(destination)
+    doLast {
+        destination.get().asFile.text = sourceSets.main.runtimeClasspath.files.collect { it.absolutePath }.join('\n') + '\n'
+    }
+}
+
+tasks.register('auditClientMixins', JavaExec) {
+    group = 'verification'
+    description = 'Apply real CLIENT Mixin transformations in an isolated process that forbids game/graphics initialization.'
+    dependsOn tasks.named('writeRuntimeClasspath')
+    classpath = sourceSets.platformTest.runtimeClasspath
+    mainClass = 'com.stardew.craft.platform.fabric.validation.ClientMixinTransformProbe'
+    args layout.buildDirectory.file('reports/client-runtime-classpath.txt').get().asFile,
+            layout.buildDirectory.dir('resources/main').get().asFile,
+            layout.buildDirectory.file('reports/mixin-audit/client-transform.json').get().asFile
+}
+
+tasks.register('clientLaunchCommandProbeAgent', Jar) {
+    description = 'Create the small premain probe used to verify the actual client JavaExec without running Minecraft.'
+    dependsOn tasks.named('compilePlatformTestJava')
+    destinationDirectory = layout.buildDirectory.dir('devtools')
+    archiveFileName = 'client-launch-command-probe.jar'
+    from(sourceSets.platformTest.output.classesDirs) {
+        include 'com/stardew/craft/platform/fabric/validation/ClientLaunchCommandProbe.class'
+    }
+    manifest.attributes('Premain-Class': 'com.stardew.craft.platform.fabric.validation.ClientLaunchCommandProbe')
+}
+
+tasks.register('checkTranslations', Exec) {
+    group = 'verification'
+    description = 'Check the twelve Fabric-only language files with the shared translation verifier.'
+    inputs.dir('src/main/resources/assets/stardewcraft_fabric/lang')
+    inputs.file('../compatibility/verify_translations.py')
+    commandLine 'python3', '../compatibility/verify_translations.py',
+            'src/main/resources/assets/stardewcraft_fabric/lang'
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('platformTest'), tasks.named('checkTranslations')
+}
+
+tasks.named('compileJava', JavaCompile) {
+    dependsOn tasks.named('preparePortSources'), tasks.named('platformClasses')
+    options.compilerArgs += ['-Xmaxerrs', '10000']
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = 21
+}
+
+tasks.named('jar', Jar) {
+    from sourceSets.platform.output
+    doFirst {
+        def mainEntry = 'com/stardew/craft/fabric/StardewCraftFabric.class'
+        def clientEntry = 'com/stardew/craft/fabric/StardewCraftFabricClient.class'
+        if (!file('src/main/resources/fabric.mod.json').isFile()
+                || !sourceSets.main.output.classesDirs.files.any { new File(it, mainEntry).isFile() && new File(it, clientEntry).isFile() }
+                || !subscriberResources.get().file('META-INF/stardewcraft/fabric-subscribers.json').asFile.isFile()) {
+            throw new GradleException('Fabric bootstrap and the complete compiled subscriber index are required; a partial development JAR must not be distributed.')
+        }
+    }
+}
+
+tasks.named('processResources', ProcessResources) {
+    def metadata = [version: project.version.toString(),
+                    mod_name: upstreamProperties.getProperty('mod_name'),
+                    mod_license: upstreamProperties.getProperty('mod_license')]
+    inputs.properties(metadata)
+    filesMatching('fabric.mod.json') { expand(metadata) }
+}
+
+loom {
+    accessWidenerPath = file('src/main/resources/stardewcraft.accesswidener')
+    runs {
+        client {
+            runDir 'run-client'
+            vmArgs '-Xms2G', '-Xmx8G'
+            programArgs '--width', '1280', '--height', '720', '--username', 'FabricDev'
+            if (providers.gradleProperty('fabricClientDebug').orNull == 'true') {
+                vmArgs '-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=127.0.0.1:5005'
+            }
+            if (providers.gradleProperty('fabricClientCommandProbe').orNull == 'true') {
+                // The agent exits in premain. The real JavaExec runs, but DLI,
+                // Minecraft, GLFW and graphics initialization are never reached.
+                vmArgs "-javaagent:${layout.buildDirectory.file('devtools/client-launch-command-probe.jar').get().asFile.absolutePath}",
+                        "-Dstardewcraft.fabric.launchProbeReport=${layout.buildDirectory.file('reports/client-launch-command-probe.json').get().asFile.absolutePath}"
+            }
+        }
+        server {
+            runDir 'run-server'
+            vmArgs '-Djava.awt.headless=true'
+            if (providers.gradleProperty('fabricSmokeGameTests').orNull == 'true') {
+                // Exposes individual test commands on the normal isolated world.
+                // Do not enable fabric-api.gametest, which would run the entire suite.
+                vmArgs '-Dfabric-api.gametest.command=true'
+                vmArgs "-Dstardewcraft.fabric.smokeReport=${layout.buildDirectory.file('reports/directed-gametests.json').get().asFile.absolutePath}"
+            }
+        }
+    }
+}
+
+tasks.named('runServer', JavaExec) {
+    standardInput = System.in
+}
+
+if (providers.gradleProperty('fabricClientCommandProbe').orNull == 'true') {
+    if (providers.gradleProperty('fabricClientDebug').orNull == 'true') {
+        throw new GradleException('Disable fabricClientDebug for the premain command probe, which must not wait for an IDE.')
+    }
+    tasks.named('runClient') { dependsOn tasks.named('clientLaunchCommandProbeAgent') }
+}
+
+apply from: 'native-resources.gradle'
+ext.fabricCandidateServerTaskType = net.fabricmc.loom.task.prod.ServerProductionRunTask
+apply from: 'production-smoke.gradle'
+apply from: 'client-runtime-snapshot.gradle'

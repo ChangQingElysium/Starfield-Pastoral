@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "axis=y": {
+      "model": "stardewcraft:block/wood/palm_log"
+    },
+    "axis=x": {
+      "model": "stardewcraft:block/wood/palm_log",
+      "x": 90,
+      "y": 90
+    },
+    "axis=z": {
+      "model": "stardewcraft:block/wood/palm_log",
+      "x": 90
+    }
+  }
+}

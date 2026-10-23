@@ -13,6 +13,18 @@ public final class TownDoorRenderContext {
     private static SectionPos discoveryOrigin;
     private static TargetBounds targetBounds;
     private static boolean rendererManagesTerrain;
+    private static boolean isolatedTarget;
+    private static boolean shadowPass;
+    private static Runnable foregroundTranslucents;
+
+    static void foregroundTranslucents(Runnable render) { foregroundTranslucents = render; }
+
+    /** Consumed once, after the child terrain's translucent layer, before Iris resolves it. */
+    public static void renderForegroundTranslucents() {
+        Runnable render = foregroundTranslucents;
+        foregroundTranslucents = null;
+        if (render != null) render.run();
+    }
 
     private TownDoorRenderContext() {}
 
@@ -37,6 +49,11 @@ public final class TownDoorRenderContext {
         rendererManagesTerrain = managesTerrain;
     }
 
+    static void isolatedTarget(boolean isolated) { isolatedTarget = isolated; }
+    public static boolean usesIsolatedTarget() { return isolatedTarget; }
+    public static boolean isShadowPass() { return shadowPass; }
+    public static void shadowPass(boolean active) { shadowPass = active; }
+
     static void end() {
         cameraPosition = null;
         portalCone = null;
@@ -44,6 +61,9 @@ public final class TownDoorRenderContext {
         discoveryOrigin = null;
         targetBounds = null;
         rendererManagesTerrain = false;
+        isolatedTarget = false;
+        shadowPass = false;
+        foregroundTranslucents = null;
     }
 
     public static boolean isRendering() {
@@ -57,18 +77,18 @@ public final class TownDoorRenderContext {
 
     /** Sodium must start its section walk at the destination aperture, not behind its clip plane. */
     public static SectionPos discoveryOrigin() {
-        return discoveryOrigin;
+        return shadowPass ? null : discoveryOrigin;
     }
 
     /** Vanilla terrain discovery is replaced only when no supported renderer backend owns it. */
     public static boolean shouldOverrideVanillaTerrainSetup() {
-        return cameraPosition != null && !rendererManagesTerrain;
+        return cameraPosition != null && !rendererManagesTerrain && !shadowPass;
     }
 
     /** Vanilla supplies world coordinates to {@code Frustum.cubeInFrustum}. */
     public static boolean isWorldBoxOutsidePortalView(double minX, double minY, double minZ,
                                                        double maxX, double maxY, double maxZ) {
-        if (cameraPosition == null) return false;
+        if (cameraPosition == null || shadowPass) return false;
         if (targetBounds != null && !targetBounds.intersects(minX, minY, minZ, maxX, maxY, maxZ)) return true;
         if (clipPlane != null && clipPlane.fullyClips(
                 minX - cameraPosition.x, minY - cameraPosition.y, minZ - cameraPosition.z,
@@ -81,7 +101,7 @@ public final class TownDoorRenderContext {
     /** Sodium's inner frustum call has already translated its box into camera coordinates. */
     public static boolean isCameraBoxOutsidePortalView(double minX, double minY, double minZ,
                                                         double maxX, double maxY, double maxZ) {
-        if (cameraPosition == null) return false;
+        if (cameraPosition == null || shadowPass) return false;
         if (targetBounds != null && !targetBounds.intersects(
                 minX + cameraPosition.x, minY + cameraPosition.y, minZ + cameraPosition.z,
                 maxX + cameraPosition.x, maxY + cameraPosition.y, maxZ + cameraPosition.z)) return true;

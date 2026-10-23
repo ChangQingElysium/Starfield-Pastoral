@@ -28,6 +28,11 @@ public final class GardenPotBlockEntityRenderer
     }
 
     @Override
+    public net.minecraft.world.phys.AABB getRenderBoundingBox(GardenPotBlockEntity be) {
+        return super.getRenderBoundingBox(be).minmax(be.getRenderBoundingBox());
+    }
+
+    @Override
     protected boolean shouldApplyWorkingAnimation(GardenPotBlockEntity be) {
         return false;
     }

@@ -128,7 +128,7 @@ def check(root, translations=False):
         ids.add(identifier)
         assert asset.get('placement_mode') in {'floor', 'wall', 'cliff_palm'}, \
             f'Unreviewed manual attachment: {identifier}'
-        assert asset['type'] in {'building', 'furniture', 'furniture_painting', 'carpet', 'utility',
+        assert (asset.get('retired') and asset['type'] == 'hidden') or asset['type'] in {'building', 'furniture', 'furniture_painting', 'carpet', 'utility',
                                  'forage', 'natural_ground', 'natural_rock', 'natural_grass',
                                  'natural_flower', 'natural_aquatic'}, f'Invalid catalog category: {identifier}'
         model(asset['model'])
@@ -163,10 +163,21 @@ def check(root, translations=False):
         model('stardewcraft:item/' + identifier)
         loot = root / f'data/stardewcraft/loot_table/blocks/{identifier}.json'
         if asset['kind'] != 'cooled_lava': assert loot.exists(), f'Missing loot: {identifier}'
-        if identifier in ('ginger_resort_roof', 'ginger_resort_umbrella_coral', 'ginger_south_palm'):
+        if identifier in ('ginger_resort_roof', 'ginger_resort_umbrella_coral'):
             functions = json.loads(loot.read_text())['pools'][0]['entries'][0].get('functions', [])
             assert {'function': 'minecraft:copy_state', 'block': 'stardewcraft:' + identifier,
                     'properties': ['variant']} in functions, f'Dropped visual variant lost: {identifier}'
+    # Client-registered additional models: world wall rendering uses all twelve
+    # phase/variation cells; inventory keeps the ordinary native block model.
+    for family in ('volcano', 'caldera'):
+        identifier = 'stardewcraft:block/ginger_island/' + family + '_wall_phases'
+        bindings = model(identifier)
+        texture_id = 'stardewcraft:block/ginger_island/' + family + '/' + family + '_wall_phases'
+        particle_id = 'stardewcraft:block/ginger_island/' + family + '/' + family + '_wall_particle'
+        assert bindings['all'] == texture_id and bindings['particle'] == particle_id, \
+            f'Wall phases use the wrong material: {identifier}'
+        assert struct.unpack('>II', resource('textures', texture_id, '.png').read_bytes()[16:24]) == (192, 16), \
+            f'Wall phase atlas has wrong dimensions: {texture_id}'
     aliases = {'stardewcraft:' + a['id'] for a in manifest['blocks'] if a.get('catalog_owner')}
     alias_tag = root / 'data/stardewcraft/tags/item/ginger_island_legacy_aliases.json'
     assert set(json.loads(alias_tag.read_text())['values']) == aliases, 'JEI aliases disagree with catalog metadata'
@@ -199,6 +210,38 @@ def check(root, translations=False):
     def intersects(a, b):
         return all(a['from'][i] < b['to'][i] - 1e-7 and b['from'][i] < a['to'][i] - 1e-7
                    for i in range(3))
+
+    for asset in manifest['blocks']:
+        if not asset.get('passable'): continue
+        for identifier in asset.get('state_models', {'default': asset['model']}).values():
+            data = read_model(identifier)
+            profile = data['stardewcraft:collision']
+            assert len(profile['boxes']) == 1 and cells(profile['boxes']) == {(0, 0, 0)}, \
+                'Herb leaf crowns must not reserve building cells'
+            assert data['stardewcraft:plant_root']['foliage_reserves_cells'] is False
+            b = profile['boxes'][0]
+            assert b['from'][1] == 0 and b['to'][1] <= 12
+            assert all(0 <= b['from'][a] < b['to'][a] <= 16 for a in (0, 2))
+    walnut = by_id['ginger_golden_walnut_bush_rework']
+    assert walnut['state_role'] == 'appearance' and set(walnut['state_models']) == {'0', '1'}
+    ripe, empty = [read_model(walnut['state_models'][state]) for state in ('0', '1')]
+    assert len(ripe['parts']) == 87 and len(empty['parts']) == 77
+    assert ripe['textures'] == empty['textures'] and ripe['parts'][10:] == empty['parts']
+    assert 'ginger_golden_walnut_bush_empty' not in ids
+    canvas = by_id['ginger_field_office_canvas_floor']
+    assert canvas['kind'] == 'cube'
+    faces = read_model(canvas['model'])['elements'][0]['faces']
+    assert all(face.get('cullface') == side for side, face in faces.items())
+    for name in ('dig_ammonite_relief', 'dig_fossil_fragments'):
+        b = read_model(by_id['ginger_' + name]['model'])['stardewcraft:collision']['boxes'][0]
+        assert b['from'][0] == 4 and b['to'][0] == 12 and b['to'][2] == 16
+        assert cells([b]) == {(0, 0, 0), (0, 1, 0)}, 'Wall relief must reserve only its mounting column'
+    shrine_cells = set()
+    for identifier in by_id['ginger_gem_shrine_assembly']['state_models'].values():
+        data = read_model(identifier)
+        assert data['stardewcraft:placement']['offset_pixels'] == [-8, 0, 0]
+        shrine_cells.update(cells(data['stardewcraft:collision']['boxes']))
+    assert { (x, z) for x, y, z in shrine_cells } == set(itertools.product(range(-1, 2), repeat=2))
 
     roof = next(a for a in manifest['blocks'] if a['id'] == 'ginger_resort_roof')
     assert roof['state_property'] == 'variant' and set(roof['state_models']) == {'0', '1'}
@@ -289,29 +332,12 @@ def check(root, translations=False):
     if 'ginger_south_palm' in ids:
         palm = next(a for a in manifest['blocks'] if a['id'] == 'ginger_south_palm')
         assert palm['state_property'] == 'variant' and set(palm['state_models']) == {'0', '1', '2', '3'}
-        palm_cells = set()
-        for state, count, footprint in (('0', 4, 5), ('1', 6, 10), ('2', 4, 4), ('3', 3, 3)):
-            data = read_model(palm['state_models'][state])
-            profile = data['stardewcraft:collision']
-            assert profile['policy'] == 'compound_palm_trunk'
-            boxes = profile['boxes']
-            assert len(boxes) == count and min(b['from'][1] for b in boxes) == 0
-            assert len(cells(boxes)) == footprint
-            turned = data.get('stardewcraft:placement', {}).get('clockwise_y') == 270
-            limit_x, limit_z = (12, 14) if turned else (14, 12)
-            assert all(b['to'][0] - b['from'][0] <= limit_x and b['to'][2] - b['from'][2] <= limit_z
-                       for b in boxes), 'Leaves must not reserve their broad crown envelope'
-            assert len(data['children']) == 1, 'Keep the whole authored visual tree'
-            palm_cells.update(cells(boxes))
-            # A player beside the trunk can stand under the crown.
-            player = {'from': [19.2, 0, 19.2], 'to': [28.8, 28.8, 28.8]}
-            assert not any(intersects(player, b) for b in boxes)
-        assert len(palm_cells) == 13, 'Only reserve the root and small trunk union, not empty crown air'
-        assert sum(y == 0 and x == z == 0 for x, y, z in palm_cells) == 1
-        assert (-2, 3, -2) not in palm_cells, 'Foliage beside existing terrain must not prevent placement'
-        north_lean = read_model(palm['state_models']['1']).get('stardewcraft:placement', {}).get('clockwise_y') == 270
-        assert all((x == 0 and -2 <= z <= 0 if north_lean else z == 0 and 0 <= x <= 2)
-                   and 0 <= y <= 4 for x, y, z in palm_cells)
+        assert palm.get('retired') and palm['type'] == 'hidden'
+        for model_id in palm['state_models'].values():
+            data = read_model(model_id)
+            assert data['parent'] == 'stardewcraft:block/wood/palm_log'
+            assert data['stardewcraft:collision']['boxes'] == [{'from': [0, 0, 0], 'to': [16, 16, 16]}]
+            assert 'children' not in data, 'Retired palm must never retain whole-tree art'
         for name in ('south_palm_ground', 'south_palm_cliff', 'coconut_palm', 'resort_young_palm'):
             assert 'ginger_' + name not in ids, 'Palm visual state registered independently'
             for p in (root / f'assets/stardewcraft/blockstates/ginger_{name}.json',

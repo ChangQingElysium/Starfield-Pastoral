@@ -1,0 +1,745 @@
+{
+  "schema": 1,
+  "minecraft": "1.21.1",
+  "loader": "fabric",
+  "loader_version": "0.19.5",
+  "java": 21,
+  "mods": [
+    {
+      "slug": "jei",
+      "project_id": "u6dRKJwZ",
+      "version_id": "sK2dqqaT",
+      "version_number": "19.32.0.358",
+      "filename": "jei-1.21.1-fabric-19.32.0.358.jar",
+      "url": "https://cdn.modrinth.com/data/u6dRKJwZ/versions/sK2dqqaT/jei-1.21.1-fabric-19.32.0.358.jar",
+      "sha512": "b6d2c24e93064ae51ca787f7ab1fddba61cd75c1eb8dfc256da638c6e235061ce82c469bd8b13ad8548c82affcaa36d7373fb5c37a7508bf0bdb342e4509c0ea",
+      "sha256": "4f281c0706dcfc35686cf3ba93a230d128ca9a7476d2c12e81e4a686a1f0795d",
+      "size": 1649693,
+      "homepage": "https://modrinth.com/mod/jei",
+      "source_url": "https://modrinth.com/mod/jei",
+      "license": "MIT",
+      "artifact_license": "The MIT License (MIT)",
+      "role": "requested_client_mod",
+      "project_runtime_provided": false,
+      "required_dependencies": [
+        {
+          "mod_id": "fabricloader",
+          "version_predicate": ">=0.16.3",
+          "provided_by": "platform"
+        },
+        {
+          "mod_id": "fabric-api",
+          "version_predicate": ">=0.102.0+1.21",
+          "project_slug": "fabric-api",
+          "project_id": "P7dR8mSH",
+          "provided_by": "locked_mod"
+        },
+        {
+          "mod_id": "java",
+          "version_predicate": ">=21",
+          "provided_by": "platform"
+        }
+      ],
+      "bundled_mods": [],
+      "incompatible_mod_versions": {},
+      "source_repository_url": "https://github.com/mezz/JustEnoughItems"
+    },
+    {
+      "slug": "jade",
+      "project_id": "nvQzSEkH",
+      "version_id": "anDPp1Qs",
+      "version_number": "15.10.4+fabric",
+      "filename": "Jade-1.21.1-Fabric-15.10.4.jar",
+      "url": "https://cdn.modrinth.com/data/nvQzSEkH/versions/anDPp1Qs/Jade-1.21.1-Fabric-15.10.4.jar",
+      "sha512": "c7d1b3244179b6e9f1057c151c1aeee2cfcb72b616421e9171ab7a216032f1632aaa2b6f41c47e6fc1548a9b45a8281b2dffe195d4d990528b177d59747df7e3",
+      "sha256": "c25135d7cf63d32b5a0618374f96630ec7ea97b10817869f47356f4583c88ed1",
+      "size": 738993,
+      "homepage": "https://modrinth.com/mod/jade",
+      "source_url": "https://modrinth.com/mod/jade",
+      "license": "CC-BY-NC-SA-4.0",
+      "artifact_license": "CC-BY-NC-SA-4.0",
+      "role": "requested_client_mod",
+      "project_runtime_provided": false,
+      "required_dependencies": [
+        {
+          "mod_id": "fabric-api",
+          "version_predicate": ">=0.99",
+          "project_slug": "fabric-api",
+          "project_id": "P7dR8mSH",
+          "provided_by": "locked_mod"
+        },
+        {
+          "mod_id": "minecraft",
+          "version_predicate": ">=1.21-",
+          "provided_by": "platform"
+        }
+      ],
+      "bundled_mods": [],
+      "incompatible_mod_versions": {},
+      "source_repository_url": "https://github.com/Snownee/Jade"
+    },
+    {
+      "slug": "xaeros-world-map",
+      "project_id": "NcUtCpym",
+      "version_id": "wB9wNHUk",
+      "version_number": "fabric-1.21.1-1.40.11",
+      "filename": "xaeroworldmap-fabric-1.21.1-1.40.11.jar",
+      "url": "https://cdn.modrinth.com/data/NcUtCpym/versions/wB9wNHUk/xaeroworldmap-fabric-1.21.1-1.40.11.jar",
+      "sha512": "a225d17b43d0aff03dacb0826c024aa8620afa45b43e63c8e9d5002c4dbced4afb0f2bc8c92508b60b967b6a0d78ab0f7af645a578f3632e151c0fd4f26ce89e",
+      "sha256": "57861a4496fd5c714cf67d53539c8612dbd88543605c7e4b9b23ecc819c0a601",
+      "size": 1413973,
+      "homepage": "https://modrinth.com/mod/xaeros-world-map",
+      "source_url": "https://modrinth.com/mod/xaeros-world-map",
+      "license": "LicenseRef-All-Rights-Reserved",
+      "artifact_license": "All Rights Reserved",
+      "role": "requested_client_mod",
+      "project_runtime_provided": false,
+      "required_dependencies": [
+        {
+          "mod_id": "fabricloader",
+          "version_predicate": ">=0.13.0",
+          "provided_by": "platform"
+        },
+        {
+          "mod_id": "fabric-api",
+          "version_predicate": ">=0.43.1",
+          "project_slug": "fabric-api",
+          "project_id": "P7dR8mSH",
+          "provided_by": "locked_mod"
+        },
+        {
+          "mod_id": "minecraft",
+          "version_predicate": ">1.20.6 <1.21.2",
+          "provided_by": "platform"
+        },
+        {
+          "mod_id": "xaerolib",
+          "version_predicate": ">=1.1.0",
+          "provided_by": "bundled",
+          "bundled_version": "1.1.0"
+        }
+      ],
+      "bundled_mods": [
+        {
+          "mod_id": "xaerolib",
+          "version": "1.1.0",
+          "license": "All Rights Reserved"
+        }
+      ],
+      "incompatible_mod_versions": {
+        "openpartiesandclaims": "<0.14.0",
+        "xaerominimap": "<25.3.2",
+        "xaerobetterpvp": "<25.3.2"
+      },
+      "source_repository_url": null
+    },
+    {
+      "slug": "xaeros-minimap",
+      "project_id": "1bokaNcj",
+      "version_id": "9kt7Yxig",
+      "version_number": "fabric-1.21.1-25.3.10",
+      "filename": "xaerominimap-fabric-1.21.1-25.3.10.jar",
+      "url": "https://cdn.modrinth.com/data/1bokaNcj/versions/9kt7Yxig/xaerominimap-fabric-1.21.1-25.3.10.jar",
+      "sha512": "2cabff39e66fdbe0b7ba514573bc743c40bc827d6edecbe59941cfb693f105340d11226fe06b5f5fff95fc8d63f42445d92d0f31eb34ffde540422271ceb823e",
+      "sha256": "51e52058f947323fcf2d6cd495dbdc42e9937beb916a1d976f78a702fb08aaef",
+      "size": 2177333,
+      "homepage": "https://modrinth.com/mod/xaeros-minimap",
+      "source_url": "https://modrinth.com/mod/xaeros-minimap",
+      "license": "LicenseRef-All-Rights-Reserved",
+      "artifact_license": "All Rights Reserved",
+      "role": "requested_client_mod",
+      "project_runtime_provided": false,
+      "required_dependencies": [
+        {
+          "mod_id": "fabricloader",
+          "version_predicate": ">=0.13.0",
+          "provided_by": "platform"
+        },
+        {
+          "mod_id": "fabric-api",
+          "version_predicate": ">=0.43.1",
+          "project_slug": "fabric-api",
+          "project_id": "P7dR8mSH",
+          "provided_by": "locked_mod"
+        },
+        {
+          "mod_id": "minecraft",
+          "version_predicate": "1.21.1",
+          "provided_by": "platform"
+        },
+        {
+          "mod_id": "xaerolib",
+          "version_predicate": ">=1.0.50",
+          "provided_by": "bundled",
+          "bundled_version": "1.1.0"
+        }
+      ],
+      "bundled_mods": [
+        {
+          "mod_id": "xaerolib",
+          "version": "1.1.0",
+          "license": "All Rights Reserved"
+        }
+      ],
+      "incompatible_mod_versions": {
+        "openpartiesandclaims": "<0.14.0",
+        "xaeroworldmap": "<1.40.2"
+      },
+      "source_repository_url": null
+    },
+    {
+      "slug": "justenoughcharacters",
+      "project_id": "I7k4B65h",
+      "version_id": "TFUj4JAg",
+      "version_number": "4.5.27",
+      "filename": "jecharacters-1.21.1-fabric-4.5.27.jar",
+      "url": "https://cdn.modrinth.com/data/I7k4B65h/versions/TFUj4JAg/jecharacters-1.21.1-fabric-4.5.27.jar",
+      "sha512": "4738d917d3dfca1e89077fb182e4d3a37bc9d90e29218e7c56f50a91647c85c498fc49140e31bb681b16d8b903b39923e0310f8ed0b9331f23cb4a6f21d58dd6",
+      "sha256": "e06a786b04b6519355661f4f78bc5057002ca579254aabbc490f4c9434b02d6e",
+      "size": 258564,
+      "homepage": "https://modrinth.com/mod/justenoughcharacters",
+      "source_url": "https://modrinth.com/mod/justenoughcharacters",
+      "license": "MIT",
+      "artifact_license": "MIT License",
+      "role": "requested_client_mod",
+      "project_runtime_provided": false,
+      "required_dependencies": [
+        {
+          "mod_id": "fabricloader",
+          "version_predicate": ">=0.14.6",
+          "provided_by": "platform"
+        },
+        {
+          "mod_id": "fabric",
+          "version_predicate": "*",
+          "project_slug": "fabric-api",
+          "project_id": "P7dR8mSH",
+          "provided_by": "locked_mod"
+        },
+        {
+          "mod_id": "minecraft",
+          "version_predicate": ">=1.16.5",
+          "provided_by": "platform"
+        },
+        {
+          "mod_id": "java",
+          "version_predicate": ">=8",
+          "provided_by": "platform"
+        }
+      ],
+      "bundled_mods": [
+        {
+          "mod_id": "com_github_towdium_pinin",
+          "version": "1.6.0",
+          "license": null
+        }
+      ],
+      "incompatible_mod_versions": {},
+      "source_repository_url": "https://github.com/Towdium/JustEnoughCharacters"
+    },
+    {
+      "slug": "sodium",
+      "project_id": "AANobbMI",
+      "version_id": "u1OEbNKx",
+      "version_number": "mc1.21.1-0.6.13-fabric",
+      "filename": "sodium-fabric-0.6.13+mc1.21.1.jar",
+      "url": "https://cdn.modrinth.com/data/AANobbMI/versions/u1OEbNKx/sodium-fabric-0.6.13%2Bmc1.21.1.jar",
+      "sha512": "13032e064c554fc8671573dadb07bc70e6ea2f68706c65c086c4feb1d2f664346a3414cbf9d1367b42b8d063a35e40f2f967ef9af31642e1f0093b852161fe91",
+      "sha256": "e04599514d88e41765f710eeba59e3814909833396bc11b977f48fc2e7e50353",
+      "size": 1297761,
+      "homepage": "https://modrinth.com/mod/sodium",
+      "source_url": "https://modrinth.com/mod/sodium",
+      "license": "LicenseRef-Polyform-Shield-1.0.0",
+      "artifact_license": "Polyform-Shield-1.0.0",
+      "role": "requested_client_mod",
+      "project_runtime_provided": false,
+      "required_dependencies": [
+        {
+          "mod_id": "minecraft",
+          "version_predicate": [
+            "1.21",
+            "1.21.1"
+          ],
+          "provided_by": "platform"
+        },
+        {
+          "mod_id": "fabricloader",
+          "version_predicate": ">=0.16.0",
+          "provided_by": "platform"
+        },
+        {
+          "mod_id": "fabric-block-view-api-v2",
+          "version_predicate": "*",
+          "provided_by": "bundled",
+          "bundled_version": "1.0.10+6573ed8c19",
+          "alternative_provider_slug": "fabric-api",
+          "alternative_provider_project_id": "P7dR8mSH"
+        },
+        {
+          "mod_id": "fabric-renderer-api-v1",
+          "version_predicate": "*",
+          "provided_by": "bundled",
+          "bundled_version": "3.4.0+c705a49c19",
+          "alternative_provider_slug": "fabric-api",
+          "alternative_provider_project_id": "P7dR8mSH"
+        },
+        {
+          "mod_id": "fabric-rendering-data-attachment-v1",
+          "version_predicate": "*",
+          "provided_by": "bundled",
+          "bundled_version": "0.3.48+73761d2e19",
+          "alternative_provider_slug": "fabric-api",
+          "alternative_provider_project_id": "P7dR8mSH"
+        },
+        {
+          "mod_id": "fabric-rendering-fluids-v1",
+          "version_predicate": ">=2.0.0",
+          "provided_by": "bundled",
+          "bundled_version": "3.1.6+1daea21519",
+          "alternative_provider_slug": "fabric-api",
+          "alternative_provider_project_id": "P7dR8mSH"
+        },
+        {
+          "mod_id": "fabric-resource-loader-v0",
+          "version_predicate": "*",
+          "provided_by": "bundled",
+          "bundled_version": "1.3.1+5b5275af19",
+          "alternative_provider_slug": "fabric-api",
+          "alternative_provider_project_id": "P7dR8mSH"
+        }
+      ],
+      "bundled_mods": [
+        {
+          "mod_id": "fabric-resource-loader-v0",
+          "version": "1.3.1+5b5275af19",
+          "license": "Apache-2.0"
+        },
+        {
+          "mod_id": "fabric-block-view-api-v2",
+          "version": "1.0.10+6573ed8c19",
+          "license": "Apache-2.0"
+        },
+        {
+          "mod_id": "fabric-rendering-data-attachment-v1",
+          "version": "0.3.48+73761d2e19",
+          "license": "Apache-2.0"
+        },
+        {
+          "mod_id": "fabric-rendering-fluids-v1",
+          "version": "3.1.6+1daea21519",
+          "license": "Apache-2.0"
+        },
+        {
+          "mod_id": "fabric-renderer-api-v1",
+          "version": "3.4.0+c705a49c19",
+          "license": "Apache-2.0"
+        },
+        {
+          "mod_id": "fabric-api-base",
+          "version": "0.4.42+6573ed8c19",
+          "license": "Apache-2.0"
+        }
+      ],
+      "incompatible_mod_versions": {
+        "embeddium": "*",
+        "optifabric": "*",
+        "canvas": "*",
+        "vulkanmod": "*",
+        "sodium-blendingregistry": "*",
+        "ocrenderfix_sodium": "*",
+        "betterfpsdist": "<=1.21-4.5",
+        "bobby": "<5.2.4",
+        "chunksfadein": "<2.0.2-1.21.2",
+        "cull-less-leaves": "<=1.3.0",
+        "cullleaves": "<=3.4.0-fabric",
+        "custom_hud": "<3.4.2",
+        "farsight": "<=1.21-4.3",
+        "iceberg": "<1.2.7",
+        "iris": "<1.8.7",
+        "movingelevators": "<=1.4.7",
+        "notenoughcrashes": "<4.4.8",
+        "noxesium": "<2.3.3",
+        "reeses-sodium-options": "<1.8.0",
+        "sodium-extra": "<0.6.0",
+        "sspb": "<4.0.0",
+        "moreculling": "<1.0.4",
+        "simply-no-shading": "<7.6.2",
+        "betterend": "<=21.0.11"
+      },
+      "source_repository_url": "https://github.com/CaffeineMC/sodium"
+    },
+    {
+      "slug": "iris",
+      "project_id": "YL57xq9U",
+      "version_id": "zsoi0dso",
+      "version_number": "1.8.8+1.21.1-fabric",
+      "filename": "iris-fabric-1.8.8+mc1.21.1.jar",
+      "url": "https://cdn.modrinth.com/data/YL57xq9U/versions/zsoi0dso/iris-fabric-1.8.8%2Bmc1.21.1.jar",
+      "sha512": "2e6ba2ffa1e1a6799288245a7e0ac68ee8df1d41b98362189df58f535cae34fa9277801e4136633467341b7dae5be0e5c698011b480b3d91b66d3dd4f7567aa6",
+      "sha256": "b5ad39a6cb113ca0a1765f06689f9f4b29ccd0c81247de90b06c42f5da1092f5",
+      "size": 2690177,
+      "homepage": "https://modrinth.com/mod/iris",
+      "source_url": "https://modrinth.com/mod/iris",
+      "license": "LGPL-3.0-only",
+      "artifact_license": "LGPL-3.0-only",
+      "role": "requested_client_mod",
+      "project_runtime_provided": false,
+      "required_dependencies": [
+        {
+          "mod_id": "fabricloader",
+          "version_predicate": ">=0.12.3",
+          "provided_by": "platform"
+        },
+        {
+          "mod_id": "minecraft",
+          "version_predicate": [
+            "1.21.x"
+          ],
+          "provided_by": "platform"
+        },
+        {
+          "mod_id": "sodium",
+          "version_predicate": [
+            "0.6.x"
+          ],
+          "project_slug": "sodium",
+          "project_id": "AANobbMI",
+          "provided_by": "locked_mod"
+        }
+      ],
+      "bundled_mods": [
+        {
+          "mod_id": "fabric-api-base",
+          "version": "0.4.42+6573ed8c19",
+          "license": "Apache-2.0"
+        },
+        {
+          "mod_id": "fabric-key-binding-api-v1",
+          "version": "1.0.47+0af3f5a719",
+          "license": "Apache-2.0"
+        },
+        {
+          "mod_id": "org_antlr_antlr4-runtime",
+          "version": "4.13.1",
+          "license": null
+        },
+        {
+          "mod_id": "io_github_douira_glsl-transformer",
+          "version": "2.0.1",
+          "license": null
+        },
+        {
+          "mod_id": "org_anarres_jcpp",
+          "version": "1.4.14",
+          "license": null
+        }
+      ],
+      "incompatible_mod_versions": {
+        "embeddium": "*",
+        "iris-explorer": "*",
+        "originsenhanced": "<=1.3.2",
+        "colormatic": "<=3.0.0",
+        "bedrockwaters": "<=1.6.0",
+        "batchedentityrendering": "*",
+        "canvas": "*",
+        "optifabric": "*",
+        "worldeditcui": "<1.18.1",
+        "physicsmod": "<=3.0.13",
+        "distanthorizons": "<=2.1.99",
+        "immersive_portals": "<=1.4.2"
+      },
+      "source_repository_url": "https://github.com/IrisShaders/Iris"
+    },
+    {
+      "slug": "fabric-api",
+      "project_id": "P7dR8mSH",
+      "version_id": "Mys3P7lK",
+      "version_number": "0.116.17+1.21.1",
+      "filename": "fabric-api-0.116.17+1.21.1.jar",
+      "url": "https://cdn.modrinth.com/data/P7dR8mSH/versions/Mys3P7lK/fabric-api-0.116.17%2B1.21.1.jar",
+      "sha512": "98c478217da19181f0e4df3ea6c2da6bdbda271c7544a4aea048513a49b444f1ff5b71dc0df6303017c48e8ff69b7bb6af6179bdf0d0e09ab3c1ee08411857a8",
+      "sha256": "79ac44b40780acbd884b34c50be1e39af682847e5f5cb3b1fddeeaa768dce800",
+      "size": 2452735,
+      "homepage": "https://modrinth.com/mod/fabric-api",
+      "source_url": "https://modrinth.com/mod/fabric-api",
+      "license": "Apache-2.0",
+      "artifact_license": "Apache-2.0",
+      "role": "required_dependency",
+      "project_runtime_provided": true,
+      "required_dependencies": [
+        {
+          "mod_id": "fabricloader",
+          "version_predicate": ">=0.15.11",
+          "provided_by": "platform"
+        },
+        {
+          "mod_id": "java",
+          "version_predicate": ">=21",
+          "provided_by": "platform"
+        },
+        {
+          "mod_id": "minecraft",
+          "version_predicate": ">=1.21- <1.21.2-",
+          "provided_by": "platform"
+        }
+      ],
+      "bundled_mods": [
+        {
+          "mod_id": "fabric-api-base",
+          "version": "0.4.42+6573ed8c19",
+          "license": "Apache-2.0"
+        },
+        {
+          "mod_id": "fabric-api-lookup-api-v1",
+          "version": "1.6.72+7b3d111d19",
+          "license": "Apache-2.0"
+        },
+        {
+          "mod_id": "fabric-biome-api-v1",
+          "version": "13.0.31+d527f9fd19",
+          "license": "Apache-2.0"
+        },
+        {
+          "mod_id": "fabric-block-api-v1",
+          "version": "1.1.0+0bc3503219",
+          "license": "Apache-2.0"
+        },
+        {
+          "mod_id": "fabric-block-view-api-v2",
+          "version": "1.0.11+ebb2264e19",
+          "license": "Apache-2.0"
+        },
+        {
+          "mod_id": "fabric-blockrenderlayer-v1",
+          "version": "1.1.52+0af3f5a719",
+          "license": "Apache-2.0"
+        },
+        {
+          "mod_id": "fabric-client-tags-api-v1",
+          "version": "1.2.0+1eb36c0719",
+          "license": "Apache-2.0"
+        },
+        {
+          "mod_id": "fabric-command-api-v2",
+          "version": "2.2.28+6ced4dd919",
+          "license": "Apache-2.0"
+        },
+        {
+          "mod_id": "fabric-content-registries-v0",
+          "version": "8.0.19+b559734419",
+          "license": "Apache-2.0"
+        },
+        {
+          "mod_id": "fabric-convention-tags-v2",
+          "version": "2.12.0+c3656daa19",
+          "license": "Apache-2.0"
+        },
+        {
+          "mod_id": "fabric-crash-report-info-v1",
+          "version": "0.2.29+0af3f5a719",
+          "license": "Apache-2.0"
+        },
+        {
+          "mod_id": "fabric-data-attachment-api-v1",
+          "version": "1.4.7+5b36e0f719",
+          "license": "Apache-2.0"
+        },
+        {
+          "mod_id": "fabric-data-generation-api-v1",
+          "version": "20.3.0+1eb36c0719",
+          "license": "Apache-2.0"
+        },
+        {
+          "mod_id": "fabric-dimensions-v1",
+          "version": "4.0.1+65213ef819",
+          "license": "Apache-2.0"
+        },
+        {
+          "mod_id": "fabric-entity-events-v1",
+          "version": "1.8.0+2b27e0a419",
+          "license": "Apache-2.0"
+        },
+        {
+          "mod_id": "fabric-events-interaction-v0",
+          "version": "0.7.14+ba9dae0619",
+          "license": "Apache-2.0"
+        },
+        {
+          "mod_id": "fabric-game-rule-api-v1",
+          "version": "1.0.53+6ced4dd919",
+          "license": "Apache-2.0"
+        },
+        {
+          "mod_id": "fabric-item-api-v1",
+          "version": "11.3.0+467044f319",
+          "license": "Apache-2.0"
+        },
+        {
+          "mod_id": "fabric-item-group-api-v1",
+          "version": "4.1.7+def88e3a19",
+          "license": "Apache-2.0"
+        },
+        {
+          "mod_id": "fabric-key-binding-api-v1",
+          "version": "1.0.47+0af3f5a719",
+          "license": "Apache-2.0"
+        },
+        {
+          "mod_id": "fabric-lifecycle-events-v1",
+          "version": "2.6.0+0865547519",
+          "license": "Apache-2.0"
+        },
+        {
+          "mod_id": "fabric-loot-api-v3",
+          "version": "1.0.3+3f89f5a519",
+          "license": "Apache-2.0"
+        },
+        {
+          "mod_id": "fabric-message-api-v1",
+          "version": "6.0.14+8aaf3aca19",
+          "license": "Apache-2.0"
+        },
+        {
+          "mod_id": "fabric-model-loading-api-v1",
+          "version": "2.1.0+b4d813fc19",
+          "license": "Apache-2.0"
+        },
+        {
+          "mod_id": "fabric-networking-api-v1",
+          "version": "4.3.1+d30f6a7919",
+          "license": "Apache-2.0"
+        },
+        {
+          "mod_id": "fabric-object-builder-api-v1",
+          "version": "15.2.1+40875a9319",
+          "license": "Apache-2.0"
+        },
+        {
+          "mod_id": "fabric-particles-v1",
+          "version": "4.0.2+6573ed8c19",
+          "license": "Apache-2.0"
+        },
+        {
+          "mod_id": "fabric-recipe-api-v1",
+          "version": "5.0.16+2475392c19",
+          "license": "Apache-2.0"
+        },
+        {
+          "mod_id": "fabric-registry-sync-v0",
+          "version": "5.3.2+e3eddc2119",
+          "license": "Apache-2.0"
+        },
+        {
+          "mod_id": "fabric-renderer-api-v1",
+          "version": "3.4.1+b4d813fc19",
+          "license": "Apache-2.0"
+        },
+        {
+          "mod_id": "fabric-renderer-indigo",
+          "version": "1.7.1+c705a49c19",
+          "license": "Apache-2.0"
+        },
+        {
+          "mod_id": "fabric-rendering-fluids-v1",
+          "version": "3.1.6+1daea21519",
+          "license": "Apache-2.0"
+        },
+        {
+          "mod_id": "fabric-rendering-v1",
+          "version": "5.2.1+f44c2eea19",
+          "license": "Apache-2.0"
+        },
+        {
+          "mod_id": "fabric-resource-conditions-api-v1",
+          "version": "4.3.0+8dc279b119",
+          "license": "Apache-2.0"
+        },
+        {
+          "mod_id": "fabric-resource-loader-v0",
+          "version": "1.3.1+5b5275af19",
+          "license": "Apache-2.0"
+        },
+        {
+          "mod_id": "fabric-screen-api-v1",
+          "version": "2.0.26+639b4c0719",
+          "license": "Apache-2.0"
+        },
+        {
+          "mod_id": "fabric-screen-handler-api-v1",
+          "version": "1.3.91+b559734419",
+          "license": "Apache-2.0"
+        },
+        {
+          "mod_id": "fabric-sound-api-v1",
+          "version": "1.0.23+6573ed8c19",
+          "license": "Apache-2.0"
+        },
+        {
+          "mod_id": "fabric-tag-api-v1",
+          "version": "1.3.0+1eb36c0719",
+          "license": "Apache-2.0"
+        },
+        {
+          "mod_id": "fabric-transfer-api-v1",
+          "version": "5.4.4+7b3d111d19",
+          "license": "Apache-2.0"
+        },
+        {
+          "mod_id": "fabric-transitive-access-wideners-v1",
+          "version": "6.2.0+45b9699719",
+          "license": "Apache-2.0"
+        },
+        {
+          "mod_id": "fabric-command-api-v1",
+          "version": "1.2.49+f71b366f19",
+          "license": "Apache-2.0"
+        },
+        {
+          "mod_id": "fabric-commands-v0",
+          "version": "0.2.66+df3654b319",
+          "license": "Apache-2.0"
+        },
+        {
+          "mod_id": "fabric-convention-tags-v1",
+          "version": "2.1.7+7f945d5b19",
+          "license": "Apache-2.0"
+        },
+        {
+          "mod_id": "fabric-keybindings-v0",
+          "version": "0.2.45+df3654b319",
+          "license": "Apache-2.0"
+        },
+        {
+          "mod_id": "fabric-loot-api-v2",
+          "version": "3.0.15+3f89f5a519",
+          "license": "Apache-2.0"
+        },
+        {
+          "mod_id": "fabric-renderer-registries-v1",
+          "version": "3.2.71+df3654b319",
+          "license": "Apache-2.0"
+        },
+        {
+          "mod_id": "fabric-rendering-data-attachment-v1",
+          "version": "0.3.49+73761d2e19",
+          "license": "Apache-2.0"
+        },
+        {
+          "mod_id": "fabric-rendering-v0",
+          "version": "1.1.74+df3654b319",
+          "license": "Apache-2.0"
+        }
+      ],
+      "incompatible_mod_versions": {},
+      "source_repository_url": "https://github.com/FabricMC/fabric-api"
+    }
+  ],
+  "compatibility": {
+    "iris_sodium": "Iris 1.8.8 requires Sodium 0.6.x; Sodium 0.6.13 rejects Iris <1.8.7. This exact pair satisfies both manifests.",
+    "xaero_pair": "World Map 1.40.11 requires Minimap >=25.3.2 if present; Minimap 25.3.10 requires World Map >=1.40.2 if present. Both embed the same XaeroLib 1.1.0.",
+    "jecharacters": "Official Towdium/JustEnoughCharacters project I7k4B65h; actual mod id jecharacters. No required cloth-config or architectury; PinIn 1.6.0 is embedded. Fabric API supplies the fabric alias.",
+    "fabric_api": "Already supplied by project modImplementation. Do not add its local artifact a second time.",
+    "source_integration_limit": "Current Fabric StardewCraftMixinPlugin admits TownDoorIris*/IrisMineLamp* only for Iris 1.8.12 (NeoForge version). The selected actual Fabric 1.8.8 leaves those hooks disabled until separately audited and adapted.",
+    "validation": "Official API metadata + downloaded real JAR SHA512/SHA256 + recursive FMJ inspection; no mod installed and no runtime launch by this research."
+  }
+}

@@ -1,0 +1,40 @@
+accessWidener v2 named
+
+# Porting Lib ElementsModel uses this same access at runtime; keep headless native baking consistent.
+accessible method net/minecraft/client/renderer/block/model/BlockModel bakeFace (Lnet/minecraft/client/renderer/block/model/BlockElement;Lnet/minecraft/client/renderer/block/model/BlockElementFace;Lnet/minecraft/client/renderer/texture/TextureAtlasSprite;Lnet/minecraft/core/Direction;Lnet/minecraft/client/resources/model/ModelState;)Lnet/minecraft/client/renderer/block/model/BakedQuad;
+
+# Equivalent to the two maintained NeoForge access-transformer entries.
+mutable field net/minecraft/world/inventory/Slot x I
+mutable field net/minecraft/world/inventory/Slot y I
+
+# Renderer feature layers were publicly exposed by NeoForge.
+accessible method net/minecraft/client/renderer/entity/LivingEntityRenderer addLayer (Lnet/minecraft/client/renderer/entity/layers/RenderLayer;)Z
+accessible field net/minecraft/world/item/AxeItem STRIPPABLES Ljava/util/Map;
+accessible field net/minecraft/world/item/ShovelItem FLATTENABLES Ljava/util/Map;
+
+# Existing seasonal and per-item models subclass the empty override resolver.
+accessible method net/minecraft/client/renderer/block/model/ItemOverrides <init> ()V
+
+# Native screen and item-render fields/methods exposed by the original loader API.
+accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen leftPos I
+accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen topPos I
+accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen imageWidth I
+accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen imageHeight I
+accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen hoveredSlot Lnet/minecraft/world/inventory/Slot;
+accessible method net/minecraft/client/renderer/entity/ItemRenderer renderModelLists (Lnet/minecraft/client/resources/model/BakedModel;Lnet/minecraft/world/item/ItemStack;IILcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;)V
+
+# Source-equivalent fields/constructor exposed by NeoForge for existing consumers.
+accessible method net/minecraft/world/damagesource/DamageSource <init> (Lnet/minecraft/core/Holder;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/phys/Vec3;)V
+accessible field net/minecraft/world/level/Level rainLevel F
+accessible field net/minecraft/world/level/Level oRainLevel F
+accessible field net/minecraft/world/level/Level thunderLevel F
+accessible field net/minecraft/world/level/Level oThunderLevel F
+accessible field net/minecraft/server/level/ServerChunkCache level Lnet/minecraft/server/level/ServerLevel;
+accessible field net/minecraft/world/entity/Mob goalSelector Lnet/minecraft/world/entity/ai/goal/GoalSelector;
+accessible field net/minecraft/world/item/BucketItem content Lnet/minecraft/world/level/material/Fluid;
+accessible field net/minecraft/world/level/block/FenceGateBlock type Lnet/minecraft/world/level/block/state/properties/WoodType;
+accessible field net/minecraft/world/level/block/DropExperienceBlock xpRange Lnet/minecraft/util/valueproviders/IntProvider;
+accessible field net/minecraft/world/level/block/SculkCatalystBlock xpRange Lnet/minecraft/util/valueproviders/IntProvider;
+accessible method net/minecraft/world/level/block/Block popExperience (Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/core/BlockPos;I)V
+accessible field net/minecraft/client/gui/screens/Screen renderables Ljava/util/List;
+accessible method net/minecraft/world/entity/LivingEntity getCurrentSwingDuration ()I

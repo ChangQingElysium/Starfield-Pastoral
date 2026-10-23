@@ -13,6 +13,7 @@ STATE_ROLES = {'appearance', 'interaction', 'progress', 'environment'}
 # merely because its current projection happens to fit a slot.
 NATIVE_ITEM_GROUPS = {
     'building_block': {
+        'ginger_south_palm',  # Hidden save compatibility; displayed geometry is now one native log.
         'ginger_field_office_canvas_floor', 'ginger_north_cliff_block',
         'ginger_north_cliff_inner_corner', 'ginger_north_cliff_outer_corner',
         'ginger_north_cliff_slab', 'ginger_north_cliff_stairs', 'ginger_farm_thatch_corner',
@@ -140,7 +141,8 @@ def write_manual_icon_audit(assets, entries):
         else:
             assert owner in native_groups, f'Inventory artwork/native disposition has not been reviewed: {owner}'
             mode = 'native_block'
-            reason = NATIVE_ITEM_REASONS[native_groups[owner]]
+            reason = ('Withdrawn whole-tree art; hidden save-only root uses the new native palm log.'
+                      if asset.get('retired') else NATIVE_ITEM_REASONS[native_groups[owner]])
         world_models = dict.fromkeys([asset['model'], *asset.get('state_models', {}).values(),
                                      *item_state_models(asset).values()])
         geometry = {model: reader.model(model)['geometry_bounds'] for model in world_models}
@@ -153,7 +155,7 @@ def write_manual_icon_audit(assets, entries):
             'reason': reason,
             'catalog_owner': asset.get('catalog_owner', owner),
             'canonical_state': asset.get('canonical_state', {}),
-            'visible_catalog_entry': 'catalog_owner' not in asset,
+            'visible_catalog_entry': 'catalog_owner' not in asset and not asset.get('retired', False),
             'state_role': asset.get('state_role'),
             'item_states': list(item_state_models(asset)),
             'world_dimensions_blocks': [round(value, 5) for value in dimensions],

@@ -316,6 +316,15 @@ public class MapDecorStaticBlock extends Block {
         return localOccupiedOffsets().size() > 1;
     }
 
+    @Override
+    protected boolean canBeReplaced(@Nonnull BlockState state, @Nonnull BlockPlaceContext context) {
+        // Older foliage reserved its whole crown. A root-only prop can no
+        // longer own any EXTENSION, so building over that legacy cell is safe
+        // without loading chunks, deleting its root or scanning on each tick.
+        return state.getValue(PART) == Part.EXTENSION && !hasExtensions()
+                || super.canBeReplaced(state, context);
+    }
+
     protected CellOffset findOffsetForExtension(BlockGetter level, BlockPos pos, BlockState extensionState) {
         Direction facing = extensionState.getValue(FACING);
         for (CellOffset offset : occupiedOffsets(facing)) {

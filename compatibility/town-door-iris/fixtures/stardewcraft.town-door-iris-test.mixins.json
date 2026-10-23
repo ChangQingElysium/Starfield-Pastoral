@@ -1,0 +1,22 @@
+{
+  "required": true,
+  "plugin": "com.stardew.craft.compat.TownDoorTestMixinPlugin",
+  "minVersion": "0.8",
+  "package": "com.stardew.craft.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "TownDoorCameraMixin",
+    "TownDoorFogAccessor",
+    "TownDoorLevelRendererMixin",
+    "TownDoorIrisVanillaPipelineMixin",
+    "TownDoorIrisPipelineManagerMixin",
+    "TownDoorIrisTransformMixin",
+    "TownDoorIrisShaderSynthesizerMixin",
+    "TownDoorIrisSodiumShaderMixin",
+    "TownDoorIrisExtendedShaderMixin",
+    "TownDoorIrisCommonUniformsMixin",
+    "TownDoorIrisBiomeUniformsMixin",
+    "TownDoorIrisShadowMixin"
+  ],
+  "injectors": { "defaultRequire": 1 }
+}

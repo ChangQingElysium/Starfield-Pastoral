@@ -7,7 +7,7 @@
 <p align="center">
   <strong>Farm, fish, raise animals, meet the villagers, and explore the mines in Minecraft 1.20.1 or 1.21.1.</strong>
   <br>
-  A non-commercial Forge / NeoForge fan project based on the farming, town life, and progression of Stardew Valley.
+  A non-commercial Forge / NeoForge / Fabric fan project based on the farming, town life, and progression of Stardew Valley.
 </p>
 
 <p align="center">
@@ -66,11 +66,13 @@ Current builds include farming, animals, fishing, NPC schedules, dialogue, mail,
 | Mod loader | Forge 47.4.10 | NeoForge 21.1.217 |
 | Java | 17 | 21 |
 | Environment | Client and server | Client and server |
-| Source version | 0.6.3fix1 | 0.6.3fix1 |
+| Source version | 0.6.3fix2 | 0.6.3fix2 |
 
 Download the matching JAR from [GitHub Releases](https://github.com/ChangQingElysium/Starfield-Pastoral/releases), [CurseForge](https://www.curseforge.com/minecraft/mc-mods/starfield-pastoral), or [Modrinth](https://modrinth.com/mod/starfield-pastoral). Do not install both packages together or downgrade a 1.21.1 save to 1.20.1.
 
-Source is maintained on `main` for NeoForge 1.21.1 and `mc1.20.1-forge` for Forge 1.20.1. Release tags freeze the corresponding source commits; fixes share gameplay behavior while retaining platform-specific APIs and resource formats. The Forge package keeps two documented exceptions: no FLOW / BOLT armor trims/templates, and no dripstone cauldron filling with Fish Pond Water.
+Fabric 1.21.1 is also available as an experimental alpha package, using Java 21, Fabric Loader 0.19.5, Fabric API and Forge Config API Port. See [Fabric installation](fabric/INSTALL.md) for exact dependencies and verification limits. Select only the package matching your loader.
+
+Source is maintained on `main` for NeoForge and Fabric 1.21.1 and `mc1.20.1-forge` for Forge 1.20.1. Release tags freeze the corresponding source commits; fixes share gameplay behavior while retaining platform-specific APIs and resource formats. The Forge package keeps two documented exceptions: no FLOW / BOLT armor trims/templates, and no dripstone cauldron filling with Fish Pond Water.
 
 JEI is optional and adds information for fishing and other content. Read the release notes before updating an existing world.
 
@@ -88,6 +90,7 @@ Data packs and NeoForge add-ons can use the 0.5 API to extend supported farm lay
 - Read the [0.5 add-on and data-pack API guide](https://github.com/ChangQingElysium/Starfield-Pastoral/blob/main/docs/0.5-addon-api.md).
 - Review the [example data pack](https://github.com/ChangQingElysium/Starfield-Pastoral/tree/main/examples/stardewcraft-data-pack) and [example NeoForge add-on](https://github.com/ChangQingElysium/Starfield-Pastoral/tree/main/examples/stardewcraft-addon).
 - Check player-facing changes in the [changelog](https://github.com/ChangQingElysium/Starfield-Pastoral/blob/main/CHANGELOG.md).
+- See [workspace and authoring-source rules](docs/workspace-layout.md) for source ownership, local archives, and Git inclusion boundaries.
 
 Common local validation commands:
 

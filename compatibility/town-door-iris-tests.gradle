@@ -1,0 +1,27 @@
+// Actual supported renderer binaries, fetched reproducibly; no run/mods or ignored test inputs.
+// ./gradlew -I compatibility/town-door-tests.gradle -I compatibility/town-door-iris-tests.gradle test --tests '*TownDoorIrisContractTest'
+allprojects {
+    afterEvaluate {
+        if (plugins.hasPlugin('java')) {
+            repositories.maven { url = 'https://api.modrinth.com/maven'; content { includeGroup 'maven.modrinth' } }
+            dependencies.add('testImplementation', 'maven.modrinth:iris:t3ruzodq') // Iris 1.8.12, NeoForge 1.21.1
+            dependencies.add('testImplementation', 'maven.modrinth:sodium:Pb3OXVqC') // Sodium 0.6.13
+            sourceSets.test.java.srcDir(project.layout.projectDirectory.dir('compatibility/town-door-iris'))
+            sourceSets.test.resources.srcDir(project.layout.projectDirectory.dir('compatibility/town-door-iris/fixtures'))
+            tasks.named('prepareNeoForgeTestFiles') {
+                programArguments.addAll('--mixin', 'stardewcraft.town-door-iris-test.mixins.json')
+                programArguments.addAll('--mixin', 'stardewcraft.town-door-iris-level-test.mixins.json')
+            }
+            tasks.register('townDoorIrisFallbackGpuCheck', JavaExec) {
+                dependsOn tasks.named('testClasses')
+                classpath = sourceSets.test.runtimeClasspath
+                mainClass = 'com.stardew.craft.client.interior.TownDoorIrisFallbackGpuCheck'
+                if (System.getProperty('os.name').toLowerCase().contains('mac')) jvmArgs '-XstartOnFirstThread'
+            }
+            tasks.named('test') {
+                reports.junitXml.outputLocation = layout.buildDirectory.dir('test-results/town-door-iris')
+                reports.html.outputLocation = layout.buildDirectory.dir('reports/tests/town-door-iris')
+            }
+        }
+    }
+}

@@ -1,0 +1,80 @@
+// This configuration deliberately does not extend Loom's remapped development
+// configurations. Both umbrella JARs already contain their runtime libraries.
+def candidateRuntimeMods = configurations.create('fabricCandidateRuntimeMods') {
+    canBeConsumed = false
+    canBeResolved = true
+    transitive = false
+}
+
+dependencies {
+    add(candidateRuntimeMods.name, "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}")
+    add(candidateRuntimeMods.name, "maven.modrinth:forge-config-api-port:${forge_config_api_port_version}")
+}
+
+// The main build supplies Loom's official task type through its plugin-aware classloader;
+// applied scripts must not load a second copy of Loom to resolve that type.
+// The isolated server console is managed through its native localhost RCON.
+tasks.register('runFabricCandidateServer', project.ext.fabricCandidateServerTaskType) {
+    group = 'verification'
+    description = 'Run the remapped candidate and original runtime mod JARs on an isolated production Fabric server.'
+    dependsOn tasks.named('remapJar')
+    // Replace the constructor's default mod collection: exactly three top-level
+    // production mods. Porting Lib and Maven are nested in the remapped candidate.
+    mods.setFrom(tasks.named('remapJar').flatMap { it.archiveFile }, candidateRuntimeMods)
+    loaderVersion.set(providers.gradleProperty('loader_version'))
+    minecraftVersion.set(providers.gradleProperty('minecraft_version'))
+    runDir.set(layout.projectDirectory.dir(providers.gradleProperty('fabricCandidateRunDir').getOrElse('run-candidate-server')))
+    // A second invocation must actually reopen the world, even when the JAR
+    // and launcher outputs are unchanged. This is a live server lifecycle.
+    outputs.upToDateWhen { false }
+    outputs.doNotCacheIf('Server lifecycle must execute on every invocation') { true }
+    jvmArgs.add('-Djava.awt.headless=true')
+    // ServerProductionRunTask already supplies nogui and the real Fabric
+    // Installer server launcher. It never uses the named development classpath.
+}
+
+def candidateManifest = layout.buildDirectory.file('reports/candidate-install-manifest.json')
+tasks.register('writeFabricCandidateManifest') {
+    dependsOn tasks.named('remapJar')
+    inputs.files(tasks.named('remapJar').flatMap { it.archiveFile }, candidateRuntimeMods)
+    inputs.property('minecraftVersion', minecraft_version)
+    inputs.property('loaderVersion', loader_version)
+    outputs.file(candidateManifest)
+    doLast {
+        def artifacts = ([tasks.named('remapJar').get().archiveFile.get().asFile] +
+                candidateRuntimeMods.files.toList()).sort { it.name }
+        if (artifacts.size() != 3 || artifacts.collect { it.name }.toSet().size() != 3) {
+            throw new GradleException('The candidate must contain exactly three distinct top-level mod JARs')
+        }
+        def entries = artifacts.collect { artifact ->
+            def digest = java.security.MessageDigest.getInstance('SHA-256')
+            artifact.withInputStream { stream ->
+                byte[] buffer = new byte[1024 * 1024]
+                int count
+                while ((count = stream.read(buffer)) != -1) digest.update(buffer, 0, count)
+            }
+            [path: "mods/${artifact.name}", bytes: artifact.length(),
+             sha256: digest.digest().encodeHex().toString()]
+        }
+        def manifest = [schemaVersion: 1, status: 'candidate', version: project.version.toString(),
+                        minecraft: minecraft_version, java: 21, fabricLoader: loader_version,
+                        artifacts: entries]
+        def output = candidateManifest.get().asFile
+        output.parentFile.mkdirs()
+        output.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(manifest)) + '\n'
+    }
+}
+
+tasks.register('packageFabricCandidate', Zip) {
+    group = 'distribution'
+    description = 'Package the candidate, two original runtime dependencies, installation guide and SHA-256 manifest.'
+    dependsOn tasks.named('writeFabricCandidateManifest')
+    archiveFileName.set("stardewcraft-fabric-${project.version}-candidate.zip")
+    destinationDirectory.set(layout.buildDirectory.dir('distributions'))
+    preserveFileTimestamps = false
+    reproducibleFileOrder = true
+    from(tasks.named('remapJar').flatMap { it.archiveFile }) { into 'mods' }
+    from(candidateRuntimeMods) { into 'mods' }
+    from('INSTALL.md') { rename { 'README-zh.md' } }
+    from(candidateManifest) { rename { 'SHA256-manifest.json' } }
+}

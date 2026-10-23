@@ -13033,5 +13033,16 @@
   "stardewcraft.gui.profile.birthday_order": "%2$s %1$s",
   "block.stardewcraft.ginger_music_crystal": "Cristal musical",
   "block.stardewcraft.sand_slab": "Dalle de sable",
-  "block.stardewcraft.sand_stairs": "Escalier de sable"
+  "block.stardewcraft.sand_stairs": "Escalier de sable",
+  "stardewcraft.ginger_island.state.walnut_present": "Avec noix dorée",
+  "stardewcraft.ginger_island.state.walnut_empty": "Sans noix dorée",
+  "block.stardewcraft.ginger_island_yellowgreen_leaf_clump": "Touffe tropicale à feuilles courtes",
+  "block.stardewcraft.ginger_island_blue_spiky_seedling": "Jeune pousse tropicale à feuilles pointues",
+  "block.stardewcraft.palm_log": "Bûche de palmier",
+  "block.stardewcraft.palm_leaves": "Feuilles de palmier",
+  "block.stardewcraft.palm_planks": "Planches de palmier",
+  "block.stardewcraft.palm_planks_stairs": "Escalier en palmier",
+  "block.stardewcraft.palm_planks_slab": "Dalle en palmier",
+  "block.stardewcraft.palm_trapdoor": "Trappe en palmier",
+  "block.stardewcraft.palm_coconut_block": "Bloc de noix de coco décoratif"
 }

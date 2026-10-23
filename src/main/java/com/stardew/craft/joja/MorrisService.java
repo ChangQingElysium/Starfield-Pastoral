@@ -2,6 +2,7 @@ package com.stardew.craft.joja;
 
 import com.stardew.craft.communitycenter.state.CCStoryFlags;
 import com.stardew.craft.entity.npc.StardewNpcEntity;
+import com.stardew.craft.network.ObjectDialogueService;
 import com.stardew.craft.network.payload.OpenNpcDialogueScreenPayload;
 import com.stardew.craft.player.PlayerStardewDataAPI;
 import com.stardew.craft.time.StardewTimeManager;
@@ -19,7 +20,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
  *     CC 已完成                           → greetingBase_CommunityCenterComplete
  *     其他                                → greetingBase_MembershipAvailable (Yes/No)
  *       Yes → signup_confirm (Yes/No)
- *         Yes → 扣 5000g + 设 JOJA_MEMBER → signed_up
+ *         Yes → 扣 5000g + 次日生效 JOJA_MEMBER → signed_up
  *   已入会：
  *     5 区域全买完（hasCompletedAllJojaAreas）→ no_more_cd
  *     其他                                → cd_form_offer (Yes/No)
@@ -108,6 +109,7 @@ public final class MorrisService {
                     com.stardew.craft.StardewCraft.LOGGER.info(
                         "[MORRIS] {} declined join (insufficient funds < {})",
                         player.getGameProfile().getName(), JojaConstants.JOJA_MEMBERSHIP_PRICE);
+                    ObjectDialogueService.show(player, "stardewcraft.uncertainty_statue.not_enough_money");
                     yield true;
                 }
                 com.stardew.craft.mail.MailService.addMailFlagForTomorrow(player, CCStoryFlags.JOJA_MEMBER);

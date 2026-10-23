@@ -54,19 +54,26 @@ public final class SpatialBlockModelRenderer {
                 : CACHE.computeIfAbsent(model, ignored -> new IdentityHashMap<>())
                     .computeIfAbsent(state, ignored -> partition(model, state, random, seed));
         if (cells.isEmpty()) return;
-        if (cells.size() == 1 && cells.getFirst().offset.equals(BlockPos.ZERO)) {
-            renderer.tesselateBlock(level, model, state, pos, pose, vertices, checkSides, random, seed, overlay, ModelData.EMPTY, null);
-            return;
-        }
-        for (CellModel cell : cells) {
-            pose.pushPose();
-            try {
-                pose.translate(cell.offset.getX(), cell.offset.getY(), cell.offset.getZ());
-                renderer.tesselateBlock(level, cell, state, pos.offset(cell.offset), pose, vertices,
-                        checkSides, random, seed, overlay, ModelData.EMPTY, null);
-            } finally {
-                pose.popPose();
+        // Match chunk compilation's native AO cache: the many faces of one moving
+        // machine share neighboring light samples. Never retain them across draws.
+        ModelBlockRenderer.enableCaching();
+        try {
+            if (cells.size() == 1 && cells.getFirst().offset.equals(BlockPos.ZERO)) {
+                renderer.tesselateBlock(level, model, state, pos, pose, vertices, checkSides, random, seed, overlay, ModelData.EMPTY, null);
+                return;
             }
+            for (CellModel cell : cells) {
+                pose.pushPose();
+                try {
+                    pose.translate(cell.offset.getX(), cell.offset.getY(), cell.offset.getZ());
+                    renderer.tesselateBlock(level, cell, state, pos.offset(cell.offset), pose, vertices,
+                            checkSides, random, seed, overlay, ModelData.EMPTY, null);
+                } finally {
+                    pose.popPose();
+                }
+            }
+        } finally {
+            ModelBlockRenderer.clearCache();
         }
     }
 
