@@ -48,6 +48,10 @@ The complete Forge suite ran 695 tests and rejected Auto-Grabber main/extension 
 
 The clean Forge candidate `a156034b3` failed `compileJava` because the bounded mine-cache fixture calls `GameTestHelper.getBounds()`, which is public in 1.21.1 but private in 1.20.1. The official 1.20.1 bytecode delegates this method through its test's structure block to `StructureUtils.getStructureBounds`. Add that exact public-API delegation to the existing `PortGameTests` helper, locating the structure block through `absolutePos(BlockPos.ZERO)`, and bridge only the test call. Keep the actual structure bounds, four-cell margin, replaceability checks, reward RNG and production mining code unchanged. Repeat the entire clean-checkout gate against the amended candidate.
 
+## 0.6.3fix2 Forge — truncated Maven artifact download (2026-10-23)
+
+GitHub Actions run [39983822108](https://github.com/ChangQingElysium/Starfield-Pastoral/actions/runs/39983822108) failed while configuring `_compileJava_1`, before source compilation or tests. Forge Maven returned an incomplete `io.netty:netty-codec:4.1.82.Final` JAR: `Premature end of Content-Length delimited message body (expected: 339,155; received: 294,912)` from `https://maven.minecraftforge.net/io/netty/netty-codec/4.1.82.Final/netty-codec-4.1.82.Final.jar`. The same tracked-only candidate already passed the complete local workflow, including 810 required GameTests and normal save/shutdown. This failure is a truncated external artifact transfer, not a source/test failure. Retry the remote workflow; do not change gameplay code or report the release successful until the new run completes.
+
 ## Recurring structural cause
 
 ### 0.6.3fix1 Forge candidate — remote livestock fixture neighborhood readiness (2026-10-05)
