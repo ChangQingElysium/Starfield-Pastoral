@@ -134,4 +134,6 @@ Starfield Pastoral has no affiliation with ConcernedApe, Mojang, or Microsoft.
 
 </details>
 
-Forge 0.6.3fix2 的同步范围、1.20.1 专属保留项及实际验证边界见 [同步记录](docs/porting/fix2-sync-audit.md)。
+Forge 同步及版本专属保留项见 [维护指南](docs/porting/bulk-port-guide.md)。
+
+Repository branches, shared fixes and public-file policy: [多版本维护与发布](docs/forge-1.20.1-migration-plan.md).

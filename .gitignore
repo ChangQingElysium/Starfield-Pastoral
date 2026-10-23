@@ -63,7 +63,7 @@ docs/*
 !docs/ci-release-postmortems.md
 !docs/forge-1.20.1-migration-plan.md
 !docs/porting/
-!docs/porting/*.md
+
 !docs/schemas/
 !docs/schemas/*.schema.json
 
@@ -492,3 +492,14 @@ run-data/
 !docs/mine-node-mining.md
 !docs/permissions/
 !docs/permissions/russian-localization-annel0.md
+
+# Public maintenance notes are explicit; run diaries remain local.
+/docs/porting/*
+!/docs/porting/bulk-port-guide.md
+!/docs/porting/bulk-port-gaps.md
+!/docs/porting/parity-approved.tsv
+
+# Compiler diagnostics, generated importer reports and unused binary copies.
+/javac.*.args
+/scripts/data/*_report.json
+/libs/*

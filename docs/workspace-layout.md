@@ -56,3 +56,5 @@ python3 scripts/check_authoring_sources.py --verify-exports
 
 美术交付与地表节点依据分别见 [作物模型制作与交付](crop-model-delivery.md)、[地表采掘节点](mine-node-mining.md)。
 授权记录见 [俄语翻译授权](permissions/russian-localization-annel0.md)；该记录不扩展到其他原版或第三方资产。
+
+多版本分支、同步和公开文件门禁统一见 [维护与发布](forge-1.20.1-migration-plan.md)。
