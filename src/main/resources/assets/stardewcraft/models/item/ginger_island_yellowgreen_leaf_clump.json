@@ -1,0 +1,16 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "stardewcraft:item/ginger_island/ginger_island_yellowgreen_leaf_clump",
+    "particle": "stardewcraft:block/ginger_island/island_yellowgreen_leaf_clump_particle"
+  },
+  "display": {
+    "gui": {
+      "scale": [
+        0.875,
+        0.875,
+        1
+      ]
+    }
+  }
+}

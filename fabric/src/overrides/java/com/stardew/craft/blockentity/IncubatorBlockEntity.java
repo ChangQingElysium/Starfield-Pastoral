@@ -1,0 +1,266 @@
+package com.stardew.craft.blockentity;
+
+// Upstream-SHA256: 3afd6199f26ec29b05b9dd165a8a09da6357352478ce6841f7939f60a273d090
+
+import com.stardew.craft.animal.runtime.*;
+import com.stardew.craft.building.runtime.*;
+import com.stardew.craft.block.utility.IncubatorBlock;
+import com.stardew.craft.gingerisland.OstrichIncubatorBlock;
+import com.stardew.craft.item.ModItems;
+import com.stardew.craft.player.PlayerDataManager;
+import com.stardew.craft.player.ProfessionType;
+import com.stardew.craft.time.StardewTimeManager;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.neoforged.neoforge.network.PacketDistributor;
+import java.util.UUID;
+
+/** New-home incubation. The egg's persisted receipt becomes the newborn's stable identity. */
+public class IncubatorBlockEntity extends TimedProductionBlockEntity
+        implements com.stardew.craft.platform.fabric.item.transfer.TransactionalMachineAccess {
+    private final net.fabricmc.fabric.api.transfer.v1.storage.Storage<net.fabricmc.fabric.api.transfer.v1.item.ItemVariant>
+            transactionalAutomation = createTransactionalAutomation(this::planTransactionalInsertion);
+    @Override public net.fabricmc.fabric.api.transfer.v1.storage.Storage<net.fabricmc.fabric.api.transfer.v1.item.ItemVariant>
+    stardewcraft$automationStorage() { return transactionalAutomation; }
+    private java.util.Optional<com.stardew.craft.platform.fabric.item.transfer.PlannedItemMachine.Insertion>
+    planTransactionalInsertion(ItemStack stack, boolean collectingOutput,
+            net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext transaction) {
+        if (!(level instanceof ServerLevel server) || stack.isEmpty() || !input.isEmpty()) return java.util.Optional.empty();
+        var building = home(server, stack);
+        if (building == null) return java.util.Optional.empty();
+        var farm = LivestockOutdoors.farm(server.getServer(), building);
+        if (farm == null) return java.util.Optional.empty();
+        UUID caretaker = farm.getOwnerUUID();
+        UUID farmId = farm.getInstanceId();
+        int duration = incubationMinutes(stack);
+        String animal = resolveAnimalTypeId(stack);
+        boolean coopmaster = PlayerDataManager.getPlayerData(caretaker).hasProfession(ProfessionType.COOPMASTER);
+        UUID oldReceipt = receipt, oldOwner = owner;
+        boolean oldClock = legacyClock, oldOvernight = overnightOnly;
+        String oldLegacyKey = legacyIncubationKey;
+        ItemStack offered = stack.copy();
+        return java.util.Optional.of(new com.stardew.craft.platform.fabric.item.transfer.PlannedItemMachine.Insertion(
+                stack.copyWithCount(1), 1, () -> {
+                    var currentHome = home(server, offered);
+                    var currentFarm = currentHome == null ? null : LivestockOutdoors.farm(server.getServer(), currentHome);
+                    return java.util.Objects.equals(building, currentHome) && currentFarm != null
+                            && farmId.equals(currentFarm.getInstanceId()) && caretaker.equals(currentFarm.getOwnerUUID())
+                            && duration == incubationMinutes(offered) && java.util.Objects.equals(animal, resolveAnimalTypeId(offered))
+                            && coopmaster == PlayerDataManager.getPlayerData(caretaker).hasProfession(ProfessionType.COOPMASTER)
+                            && java.util.Objects.equals(oldReceipt, receipt) && java.util.Objects.equals(oldOwner, owner)
+                            && oldClock == legacyClock && oldOvernight == overnightOnly && oldLegacyKey.equals(legacyIncubationKey);
+                }, () -> start(offered.copy(), caretaker)));
+    }
+
+    private UUID receipt, owner;
+    private boolean legacyClock;
+    /** Machines.json (BC)101/(BC)254 OnlyCompleteOvernight; false for incubations started before F-1. */
+    private boolean overnightOnly;
+    private String legacyIncubationKey = "";
+    public record RemainingTime(int days, int hours, int minutes) {}
+    public enum ClaimResult { SUCCESS, NOT_READY, NOT_IN_BUILDING, NOT_OWNER, INVALID_BUILDING, BUILDING_FULL, INVALID_EGG, NAME_DUPLICATE, FAILED }
+    public IncubatorBlockEntity(BlockPos pos, BlockState state) { super(ModBlockEntities.INCUBATOR.get(), pos, state); }
+    @Override protected boolean readyCheckRequiresProduct() { return false; }
+    public boolean isReady() { return ready; }
+    public boolean isWorking() { return !input.isEmpty() && !ready; }
+    public boolean hasInput() { return !input.isEmpty(); }
+    public ItemStack getInput() { return input; }
+    public String getReadyAnimalTypeId() { return ready ? resolveAnimalTypeId(input) : null; }
+    // ReadyAt has used the 1600-minute machine clock since before F-1; the old lowercase format is
+    // converted by migrateLegacyIncubation instead.
+    @Override protected boolean migratesLegacyMachineClock() { return false; }
+    private long readyAtOnMachineClock() { return legacyClock ? migrateLegacyAbsMinute(readyAtAbsMinute) : readyAtAbsMinute; }
+    private static long morningOf(long minute) { return Math.floorDiv(minute, EFFECTIVE_MINUTES_PER_DAY) * EFFECTIVE_MINUTES_PER_DAY; }
+    @Override public long getRemainingAbsMinutes() { return input.isEmpty() ? 0 : Math.max(0, readyAtOnMachineClock() - getCurrentAbsMinute()); }
+    @Override protected boolean computeReady() {
+        if (input.isEmpty() || readyAtAbsMinute < 0) return false;
+        long now = getCurrentAbsMinute();
+        // Object.minutesElapsed: an expired countdown only completes during the overnight update.
+        return (overnightOnly ? morningOf(now) : now) >= readyAtOnMachineClock();
+    }
+    @Override public void advanceDays(int days) {
+        if (days <= 0 || input.isEmpty()) return;
+        if (level instanceof ServerLevel server) migrateLegacyIncubation(server);
+        readyAtAbsMinute = Math.max(0, readyAtAbsMinute - days * (long) (legacyClock ? LEGACY_MINUTES_PER_DAY : EFFECTIVE_MINUTES_PER_DAY));
+        // Skipped days include their nights, so an expired countdown completes at the latest morning.
+        long now = getCurrentAbsMinute();
+        if (overnightOnly && readyAtAbsMinute <= now) readyAtAbsMinute = Math.min(readyAtAbsMinute, morningOf(now));
+        ready = computeReady(); setChanged(); syncToClient();
+    }
+    public RemainingTime getRemainingTime() { long n = getRemainingAbsMinutes(); return new RemainingTime((int)(n / EFFECTIVE_MINUTES_PER_DAY), (int)(n % EFFECTIVE_MINUTES_PER_DAY / 60), (int)(n % 60)); }
+    public static String resolveAnimalTypeId(ItemStack egg) {
+        if(egg.isEmpty())return null;
+        for(var definition:com.stardew.craft.animal.model.FarmAnimalDefinitions.all())
+            if(definition.eggItemIds().stream().anyMatch(id->egg.is(net.minecraft.core.registries.BuiltInRegistries.ITEM.get(id))))return definition.id();
+        return com.stardew.craft.api.v1.agriculture.StardewAnimalIncubation.resolve(egg);
+    }
+    private BuildingRecord home(ServerLevel level, ItemStack egg) {
+        var home = FarmFeed.home(level, worldPosition); var id = resolveAnimalTypeId(egg);
+        if (getBlockState().getBlock() instanceof OstrichIncubatorBlock
+                && (home == null || !home.family().equals(LivestockSpecies.OSTRICH.family()))) return null;
+        if (id == null || !LivestockProjection.supported(level,LivestockSpecies.parse(id)) || !LivestockHomes.accepts(level,home, LivestockSpecies.parse(id)) || !LivestockHomes.bounds(home).contains(worldPosition)) return null;
+        // The approved incubator model serves both houses; coop incubators start at tier two.
+        return home.family().equals(PrefabDefinitions.COOP) && home.tier() < 2 ? null : home;
+    }
+    public static void serverTick(Level world, BlockPos pos, BlockState state, IncubatorBlockEntity be) {
+        if (!(world instanceof ServerLevel level) || level.getGameTime() % 20 != 0) return;
+        be.migrateLegacyIncubation(level);
+        if (be.alreadyClaimed(level)) be.clearClaimed(level);
+        if (be.home(level, be.input) != null && !be.ready && be.refreshReady()) { be.ready = true; be.setChanged(); be.syncToClient(); }
+        boolean working = be.isWorking() && be.home(level, be.input) != null;
+        if (state.getValue(IncubatorBlock.WORKING) != working) {
+            level.setBlock(pos, state.setValue(IncubatorBlock.WORKING, working), 3);
+            var extension = pos.above(); var other = level.getBlockState(extension);
+            if (other.is(state.getBlock())) level.setBlock(extension, other.setValue(IncubatorBlock.WORKING, working), 3);
+        }
+        be.syncLoadedState();
+    }
+    public boolean tryInsert(ItemStack stack, Player player) { return tryInsertWithResult(stack, player).inserted(); }
+    public InsertResult tryInsertWithResult(ItemStack stack, Player player) {
+        if (!(level instanceof ServerLevel server) || !(player instanceof ServerPlayer actor) || !input.isEmpty()) return InsertResult.fail();
+        var home = home(server, stack);
+        if (home == null || incubationMinutes(stack)<=0 || !BuildingService.canManage(actor, home)) return InsertResult.fail();
+        start(stack, actor.getUUID()); if (!actor.isCreative()) stack.shrink(1); return InsertResult.success();
+    }
+    /** Detached compatibility view for the legacy builtin building enum. Mutating it does not change the ledger. */
+    @Deprecated
+    public com.stardew.craft.animal.model.AnimalBuildingRecord getContainingAnimalBuilding(ServerLevel server){
+        var home=getContainingRuntimeBuilding(server);if(home==null||!home.family().getNamespace().equals("stardewcraft"))return null;
+        com.stardew.craft.animal.model.AnimalBuildingType type;
+        try{type=com.stardew.craft.animal.model.AnimalBuildingType.of(home.family().getPath(),home.tier());}catch(IllegalArgumentException unavailable){return null;}
+        var bounds=LivestockHomes.bounds(home);var residents=LivestockWorldData.get(server.getServer());
+        var members=residents.all().stream().filter(a->a.home().equals(home.id())).map(a->-a.randomId()).collect(java.util.stream.Collectors.toSet());
+        var farm=LivestockOutdoors.farm(server.getServer(),home);
+        return new com.stardew.craft.animal.model.AnimalBuildingRecord(home.id().toString(),farm==null?"":farm.getOwnerUUID().toString(),type,home.displayName(),home.dimension().toString(),home.manager(),
+                Math.max(bounds.maxExclusive().getX()-bounds.min().getX(),bounds.maxExclusive().getZ()-bounds.min().getZ())/2,
+                bounds.min().getX(),bounds.min().getY(),bounds.min().getZ(),bounds.maxInclusive().getX(),bounds.maxInclusive().getY(),bounds.maxInclusive().getZ(),
+                LivestockHomes.capacity(server,home),0,LivestockHomes.accepts(home),residents.outdoorsAllowed(home.id()),java.util.Set.of(),java.util.Set.of(),members);
+    }
+    public BuildingRecord getContainingRuntimeBuilding(ServerLevel server){return FarmFeed.home(server,worldPosition);}
+    private int incubationMinutes(ItemStack egg){
+        var definition=com.stardew.craft.animal.model.FarmAnimalDefinitions.find(resolveAnimalTypeId(egg));
+        if (getBlockState().getBlock() instanceof OstrichIncubatorBlock)
+            return definition != null && definition.incubationTime() > 0 ? definition.incubationTime() : 9000;
+        var recipe=com.stardew.craft.item.artisan.ArtisanRecipeDataManager.getRecipe("incubator",egg);
+        int minutes=recipe.map(com.stardew.craft.item.artisan.ArtisanRecipeDataManager.Recipe::minutes).orElse(definition==null?-1:definition.incubationTime());
+        return minutes;
+    }
+    private void start(ItemStack egg, UUID owner) {
+        this.owner = owner; receipt = UUID.randomUUID(); input = egg.copyWithCount(1); product = ItemStack.EMPTY;
+        int minutes=incubationMinutes(egg);
+        if (PlayerDataManager.getPlayerData(owner).hasProfession(ProfessionType.COOPMASTER)) minutes /= 2;
+        readyAtAbsMinute = getCurrentAbsMinute() + minutes; ready = false; overnightOnly = true;
+        if (getBlockState().getBlock() instanceof OstrichIncubatorBlock)
+            readyAtAbsMinute = OstrichIncubatorBlock.completionMorning(getCurrentAbsMinute(), minutes);
+        setChanged(); syncToClient();
+        syncLoadedState();
+    }
+    public void open(ServerPlayer player) {
+        if (!(level instanceof ServerLevel server) || !ready) return;
+        var home = home(server, input);
+        if (home == null || !BuildingService.canManage(player, home)) { LivestockService.message(player, "permission"); return; }
+        var tag = new CompoundTag(); tag.putString("Kind", "incubator"); tag.putLong("Position", worldPosition.asLong());
+        com.stardew.craft.animal.runtime.LivestockUiData.describe(tag,LivestockSpecies.parse(resolveAnimalTypeId(input)));tag.putString("BuildingName",home.title().getString());
+        PacketDistributor.sendToPlayer(player, new LivestockShopPayload(tag));
+    }
+    public ClaimResult claimReadyAnimal(ServerPlayer player, String name) {
+        if (!(level instanceof ServerLevel server) || player.level() != level || player.distanceToSqr(worldPosition.getCenter()) > 64) return ClaimResult.NOT_OWNER;
+        LivestockService.recover(server.getServer());
+        migrateLegacyIncubation(server);
+        var data = LivestockWorldData.get(server.getServer());
+        if (alreadyClaimed(server)) { clearClaimed(server); return ClaimResult.SUCCESS; }
+        if (!ready || receipt == null) return ClaimResult.NOT_READY;
+        var home = home(server, input); if (home == null) return ClaimResult.INVALID_BUILDING;
+        if (!BuildingService.canManage(player, home)) return ClaimResult.NOT_OWNER;
+        if (data.occupancy(home.id()) >= LivestockHomes.capacity(server,home)) return ClaimResult.BUILDING_FULL;
+        name = name.strip();
+        if (name.isEmpty() || name.length() > 32 || name.codePoints().anyMatch(c -> Character.isISOControl(c) || c == 0xA7)) return ClaimResult.FAILED;
+        if (LivestockHomes.spawn(server, home, LivestockSpecies.parse(resolveAnimalTypeId(input)), true) == null) return ClaimResult.INVALID_BUILDING;
+        // Persist the input receipt before the record, then clear only after the record is durable.
+        server.getChunkSource().save(true);
+        var baby = new LivestockRecord(receipt, owner == null ? player.getUUID() : owner, home.farmId(), home.id(), name, data.allocateRandomId(), StardewTimeManager.get().getAbsoluteDay(), LivestockCare.purchased()).species(LivestockSpecies.parse(resolveAnimalTypeId(input)));
+        if (legacyIncubationKey.isEmpty()) data.put(baby);
+        else data.importLegacyAnimal(legacyIncubationKey, baby, false);
+        if (legacyIncubationKey.isEmpty()) server.getServer().overworld().getDataStorage().save();
+        else LegacyLivestockMigration.checkpointAnimals(server.getServer());
+        clear(); LivestockService.project(server.getServer()); return ClaimResult.SUCCESS;
+    }
+    private boolean alreadyClaimed(ServerLevel level) {
+        var data = LivestockWorldData.get(level.getServer());
+        return receipt != null && data.find(receipt) != null
+                || !legacyIncubationKey.isEmpty() && data.legacyImport(legacyIncubationKey) != null;
+    }
+    private void clearClaimed(ServerLevel level) {
+        // A prior claim may have installed its in-memory receipt before a failed disk write.
+        if (!legacyIncubationKey.isEmpty()) LegacyLivestockMigration.checkpointAnimals(level.getServer());
+        clear();
+    }
+    private void migrateLegacyIncubation(ServerLevel level) {
+        if (!legacyClock || input.isEmpty()) return;
+        var home = FarmFeed.home(level, worldPosition);
+        var farm = home == null ? FarmFeed.farm(level, worldPosition) : LivestockOutdoors.farm(level.getServer(), home);
+        if (farm == null) return;
+        // Farm slots can be reused. A previous farm's egg receipt must not consume this farm's input.
+        legacyIncubationKey = "incubation:" + farm.getInstanceId() + ":" + level.dimension().location() + ":" + worldPosition.asLong()
+                + ":" + readyAtAbsMinute + ":" + net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(input.getItem());
+        receipt = LegacyLivestockMigration.stableId(legacyIncubationKey);
+        // Same day and clock time on the 1600-minute machine clock; old eggs keep daytime completion.
+        long now = getCurrentAbsMinute();
+        readyAtAbsMinute = ready ? Math.min(now, migrateLegacyAbsMinute(readyAtAbsMinute)) : migrateLegacyAbsMinute(readyAtAbsMinute);
+        overnightOnly = false;
+        owner = farm.getOwnerUUID();
+        legacyClock = false; setChanged(); syncToClient();
+    }
+    private void clear() { input = ItemStack.EMPTY; product = ItemStack.EMPTY; ready = false; readyAtAbsMinute = -1; receipt = null; owner = null; legacyClock = false; overnightOnly = false; legacyIncubationKey = ""; setChanged(); syncToClient(); syncLoadedState(); }
+    private void syncLoadedState() {
+        if (!(level instanceof ServerLevel)) return;
+        var state = getBlockState();
+        if (!(state.getBlock() instanceof OstrichIncubatorBlock)) return;
+        if (state.getValue(OstrichIncubatorBlock.LOADED) != hasInput())
+            level.setBlock(worldPosition, state.setValue(OstrichIncubatorBlock.LOADED, hasInput()), 3);
+        var upper = worldPosition.above(); var other = level.getBlockState(upper);
+        if (other.is(state.getBlock()) && other.getValue(OstrichIncubatorBlock.LOADED) != hasInput())
+            level.setBlock(upper, other.setValue(OstrichIncubatorBlock.LOADED, hasInput()), 3);
+    }
+    @Override public ItemStack getAutomationInput() { return input; }
+    @Override public ItemStack getAutomationOutput() { return ItemStack.EMPTY; }
+    @Override public ItemStack extractAutomation(int amount, boolean simulate) { return ItemStack.EMPTY; }
+    @Override public ItemStack insertAutomation(ItemStack stack, boolean simulate) {
+        if (!(level instanceof ServerLevel server) || !input.isEmpty()) return stack;
+        var home = home(server, stack); if (home == null) return stack;
+        var farm = LivestockOutdoors.farm(server.getServer(), home); if (farm == null) return stack;
+        if (!simulate) start(stack, farm.getOwnerUUID());
+        return AutomationStackHelper.remainderAfterInsert(stack, 1);
+    }
+    @Override public ClientboundBlockEntityDataPacket getUpdatePacket() { return ClientboundBlockEntityDataPacket.create(this); }
+    @Override public CompoundTag getUpdateTag(HolderLookup.Provider registries) { return saveCustomOnly(registries); }
+    @Override protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.saveAdditional(tag, registries);
+        if (!input.isEmpty()) tag.put("Input", input.save(registries)); tag.putLong("ReadyAt", readyAtAbsMinute); tag.putBoolean("Ready", ready);
+        if (receipt != null) tag.putUUID("NewbornReceipt", receipt); if (owner != null) tag.putUUID("Caretaker", owner);
+        tag.putBoolean("LegacyClock", legacyClock); tag.putString("LegacyIncubationKey", legacyIncubationKey);
+        tag.putBoolean("OnlyCompleteOvernight", overnightOnly);
+    }
+    @Override protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.loadAdditional(tag, registries);
+        input = tag.contains("Input") ? ItemStack.parse(registries, tag.getCompound("Input")).orElse(ItemStack.EMPTY) : ItemStack.EMPTY;
+        readyAtAbsMinute = tag.contains("ReadyAt") ? tag.getLong("ReadyAt") : -1; ready = tag.getBoolean("Ready");
+        receipt = tag.hasUUID("NewbornReceipt") ? tag.getUUID("NewbornReceipt") : null;
+        owner = tag.hasUUID("Caretaker") ? tag.getUUID("Caretaker") : null;
+        legacyClock = tag.getBoolean("LegacyClock"); legacyIncubationKey = tag.getString("LegacyIncubationKey");
+        overnightOnly = tag.getBoolean("OnlyCompleteOvernight");
+        if (!tag.contains("ReadyAt") && tag.contains("input")) {
+            input = ItemStack.parse(registries, tag.getCompound("input")).orElse(ItemStack.EMPTY);
+            readyAtAbsMinute = tag.getLong("readyAtAbsMinute"); ready = tag.getBoolean("ready");
+            product = ItemStack.EMPTY; legacyClock = !input.isEmpty();
+        }
+    }
+}

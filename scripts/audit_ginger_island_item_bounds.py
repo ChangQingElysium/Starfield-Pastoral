@@ -26,6 +26,12 @@ VANILLA = {
     },
     "minecraft:item/generated": {"generated": True},
     "minecraft:builtin/generated": {"generated": True},
+    # cube_column -> cube -> block: end/side UVs do not change its native geometry.
+    "minecraft:block/cube_column": {
+        "parent": "minecraft:block/block",
+        "elements": [{"from": [0, 0, 0], "to": [16, 16, 16],
+                      "faces": {face: {} for face in ("north", "south", "east", "west", "up", "down")}}],
+    },
 }
 
 

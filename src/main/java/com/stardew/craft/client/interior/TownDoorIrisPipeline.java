@@ -1,26 +1,31 @@
 package com.stardew.craft.client.interior;
 
 /**
- * Keeps the optional Iris dependency behind reflection.  Iris' vanilla pipeline is deliberately
- * used for the nested door view: a shader-pack pipeline owns deferred framebuffers for the outer
- * frame and cannot be entered recursively without copying those buffers first.
+ * Captures the vanilla pipeline Iris already constructs during its normal lifecycle.
+ * Constructing another one while a pack is active resets WorldRenderingSettings (including
+ * Sodium's vertex format and the pack's water/material mappings) for the entire client.
  */
 public final class TownDoorIrisPipeline {
-    private static final String VANILLA_PIPELINE = "net.irisshaders.iris.pipeline.VanillaRenderingPipeline";
     private static Object vanilla;
-    private static boolean resolved;
+    private static Object nested;
 
     private TownDoorIrisPipeline() {}
 
     public static Object vanilla() {
-        if (resolved) return vanilla;
-        resolved = true;
-        try {
-            vanilla = Class.forName(VANILLA_PIPELINE, false,
-                    TownDoorIrisPipeline.class.getClassLoader()).getConstructor().newInstance();
-        } catch (Throwable ignored) {
-            vanilla = null;
-        }
         return vanilla;
+    }
+
+    public static Object nested() {
+        return nested != null ? nested : vanilla;
+    }
+
+    static Object exchangeNested(Object pipeline) {
+        Object previous = nested;
+        nested = pipeline;
+        return previous;
+    }
+
+    public static void captureVanilla(Object pipeline) {
+        vanilla = java.util.Objects.requireNonNull(pipeline);
     }
 }

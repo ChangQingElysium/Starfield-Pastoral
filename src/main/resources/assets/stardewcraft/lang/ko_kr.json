@@ -13033,5 +13033,16 @@
   "stardewcraft.gui.profile.birthday_order": "%2$s %1$s일",
   "block.stardewcraft.ginger_music_crystal": "음악 수정",
   "block.stardewcraft.sand_slab": "모래 반 블록",
-  "block.stardewcraft.sand_stairs": "모래 계단"
+  "block.stardewcraft.sand_stairs": "모래 계단",
+  "stardewcraft.ginger_island.state.walnut_present": "황금 호두 있음",
+  "stardewcraft.ginger_island.state.walnut_empty": "황금 호두 없음",
+  "block.stardewcraft.ginger_island_yellowgreen_leaf_clump": "열대 짧은잎 덤불",
+  "block.stardewcraft.ginger_island_blue_spiky_seedling": "열대 뾰족잎 새싹",
+  "block.stardewcraft.palm_log": "야자나무 원목",
+  "block.stardewcraft.palm_leaves": "야자나무 잎",
+  "block.stardewcraft.palm_planks": "야자나무 판자",
+  "block.stardewcraft.palm_planks_stairs": "야자나무 계단",
+  "block.stardewcraft.palm_planks_slab": "야자나무 반 블록",
+  "block.stardewcraft.palm_trapdoor": "야자나무 다락문",
+  "block.stardewcraft.palm_coconut_block": "장식용 코코넛 블록"
 }

@@ -3,5 +3,19 @@
   "textures": {
     "layer0": "stardewcraft:item/ginger_island/ginger_golden_walnut_bush_rework",
     "particle": "stardewcraft:block/ginger_island/golden_walnut_bush_rework_particle"
-  }
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "stardewcraft:ginger_island_variant": 0.0
+      },
+      "model": "stardewcraft:item/ginger_island/ginger_golden_walnut_bush_rework_0"
+    },
+    {
+      "predicate": {
+        "stardewcraft:ginger_island_variant": 1.0
+      },
+      "model": "stardewcraft:item/ginger_island/ginger_golden_walnut_bush_rework_1"
+    }
+  ]
 }

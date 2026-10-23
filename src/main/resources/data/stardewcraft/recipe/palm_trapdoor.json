@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "group": "wooden_trapdoor",
+  "pattern": [
+    "###",
+    "###"
+  ],
+  "key": {
+    "#": {
+      "item": "stardewcraft:palm_planks"
+    }
+  },
+  "result": {
+    "id": "stardewcraft:palm_trapdoor",
+    "count": 2
+  }
+}

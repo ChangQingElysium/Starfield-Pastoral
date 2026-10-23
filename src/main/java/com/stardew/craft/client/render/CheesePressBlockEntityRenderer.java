@@ -10,7 +10,6 @@ import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.resources.ResourceLocation;
@@ -24,13 +23,18 @@ import javax.annotation.Nonnull;
 /**
  * Cheese press rendering: working animation + ready bubble + product icon.
  */
-public class CheesePressBlockEntityRenderer implements BlockEntityRenderer<CheesePressBlockEntity> {
+public class CheesePressBlockEntityRenderer implements ProductionMachineBlockEntityRenderer<CheesePressBlockEntity> {
 	private static final ResourceLocation BUBBLE_TEX = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/bubble.png");
 	private static final float PX = 1.0f / 32.0f;
 
     @Override
     public net.minecraft.world.phys.AABB getRenderBoundingBox(CheesePressBlockEntity be) {
         return new net.minecraft.world.phys.AABB(be.getBlockPos()).inflate(0.25, 1.25, 0.25);
+    }
+
+    @Override
+    public boolean isReadyForBubble(CheesePressBlockEntity blockEntity) {
+        return blockEntity.isReady();
     }
 
 	public CheesePressBlockEntityRenderer(BlockEntityRendererProvider.Context context) {

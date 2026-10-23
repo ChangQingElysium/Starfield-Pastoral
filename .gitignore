@@ -121,6 +121,8 @@ scripts/*
 !scripts/import_block_model.py
 !scripts/register_ginger_island_assets.py
 !scripts/ginger_island_placement.py
+!scripts/ginger_island_vegetation.py
+!scripts/ginger_island_boat_geometry.py
 !scripts/audit_ginger_island_bindings.py
 !scripts/check_ginger_island_assets.py
 !scripts/ginger_island_item_icons.py
@@ -201,6 +203,17 @@ CLAUDE.md
 # macOS
 .DS_Store
 **/.DS_Store
+
+# Fabric port tooling (generated sources/reports stay under fabric/build).
+!scripts/port/
+scripts/port/*
+!scripts/port/prepare_fabric_sources.py
+!scripts/port/fabric_inventory.py
+!scripts/port/fabric_gametest_index.py
+/fabric/run-client/
+/fabric/run-server/
+/fabric/run-candidate-server/
+/fabric/.local/
 
 !scripts/generate_fertilized_farmland.py
 
@@ -472,3 +485,35 @@ tools/npc/*
 !/assets-src/furniture/guild_monster_board/guild_monster_board.bbmodel
 !/assets-src/furniture/guild_monster_board/guild_monster_board.png
 !/assets-src/furniture/guild_monster_board/README.md
+
+# Local recovery data is not a remote backup or a release input.
+/本地资料/
+
+# Reviewed maintenance documentation; other research stays local by default.
+!/docs/workspace-layout.md
+!/docs/crop-model-delivery.md
+!/docs/mine-node-mining.md
+!/docs/permissions/
+/docs/permissions/*
+!/docs/permissions/russian-localization-annel0.md
+
+# Explicit editable decoration sources, not the entire authoring workspace.
+!/assets-src/authoring.json
+!/assets-src/decor/
+!/assets-src/decor/joja_parcel/
+!/assets-src/decor/joja_parcel/joja_parcel.bbmodel
+!/assets-src/decor/joja_parcel/joja_parcel.png
+!/assets-src/decor/joja_parcel/joja_parcel_particle.png
+!/assets-src/decor/joja_parcel/README.md
+!/assets-src/decor/shopping_basket/
+!/assets-src/decor/shopping_basket/shopping_basket.bbmodel
+!/assets-src/decor/shopping_basket/joja_shopping_basket.png
+!/assets-src/decor/shopping_basket/joja_shopping_basket_particle.png
+!/assets-src/decor/shopping_basket/README.md
+!/tools/art/export_joja_parcel.py
+!/tools/art/export_joja_shopping_basket.py
+!/scripts/check_authoring_sources.py
+
+# Native caches and the maintained palm catalog importer.
+/.lwjgl/
+!/scripts/import_palm_building_assets.py

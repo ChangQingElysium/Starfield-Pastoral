@@ -2,6 +2,22 @@
 
 This file is the durable record for release-related CI failures. A release is not considered complete until the exact candidate commit passes the full GitHub workflow from a clean, tracked-only checkout and the pushed GitHub Actions run finishes successfully.
 
+## 0.6.3fix2 candidate — retired palm fixtures and Fabric model enumeration (2026-10-23)
+
+The shared Ginger Island fixtures still required the retired whole-tree palm to be placeable and counted it as a live model owner. Forge's full default suite had already established the intended retirement contract. Port only those fixture changes back to 1.21.1: reject new placement, migrate legacy MAIN/EXT cells, preserve neighbors and later player replacements, and retain the remaining ground-variant tests. Do not reinstate the withdrawn model to satisfy old assertions.
+
+The Fabric platform suite initially ran 804 tests with one failure: `ModelTransformationDeserializerTest` expected 54 array-transform model files, but the updated resources contain 46 (43 Ginger Island files). Eight whole-tree palm model bindings no longer contain those composite transforms. Update the reviewed root inventory and replace the old approximate `>1700` child threshold with exact recursive counts from every current authored model; continue to reproduce the original Gson failure and exercise the actual native/Porting Lib deserializers for every input. This is a stale resource fixture, not a reason to relax model parsing.
+
+The new Fabric production smoke initially exited before startup because its run-directory configuration was absent at server launch. Install the isolated configuration in the Gradle task action after output preparation. The persistence probe now writes and reads vanilla command storage directly, avoiding an unloaded-chunk placement and a chat broadcast as a success signal. Both create/save/stop and reopen/read/save/stop subsequently passed using the remapped artifact. The smoke still rejects early process exit, missing shutdown/save markers and ABI failures.
+
+## 0.6.3fix2 NeoForge — unrelated Maven timeout while resolving the tracked Jade API (2026-10-23)
+
+The push run [39983823580](https://github.com/ChangQingElysium/Starfield-Pastoral/actions/runs/39983823580) failed before compilation while resolving `snownee.jade:Jade-1.21.1-NeoForge:15.10.4`: the POM request to `maven.ryanliptak.com` (the AppleSkin repository) timed out. The simultaneous PR run [39983832777](https://github.com/ChangQingElysium/Starfield-Pastoral/actions/runs/39983832777) passed both complete NeoForge and Fabric jobs. Gradle's module notation still searches remote metadata despite the tracked Jade JAR and flatDir declaration. Use an explicit compile-only file dependency on the existing tracked `libs/Jade-1.21.1-NeoForge-15.10.4.jar`; this preserves the exact API binary and avoids irrelevant network lookup. Repeat the exact-candidate clean gate and remote CI before publishing.
+
+## 0.6.3fix2 NeoForge — entity-ready migration fixture lacks its FULL neighborhood (2026-10-23)
+
+Push run [39986160234](https://github.com/ChangQingElysium/Starfield-Pastoral/actions/runs/39986160234) completed 771 GameTests with one failure: `liveProjectionRejectsStaleEntitiesAndReplayedFloorProducts` exhausted the original 100-tick wait for four entity-ready farm chunks. The simultaneous PR run passed. The Forge branch already contains the verified shared prerequisite repair described below in its own postmortem: `ChunkMap.prepareEntityTickingChunk` requires radius-two FULL neighbors, while the Neo fixture loaded only its home before spending the bounded wait on asynchronous preparation. Port that existing fixture repair back to the shared 1.21.1 source: synchronously prepare the deduplicated FULL neighborhood, retain the fixture-owned home tickets, both entity-loaded/entity-ticking predicates, the original 100/200-tick bounds and all migration/replay/persistence assertions. Include the same per-chunk loaded/ticking/forced timeout diagnostics. No production migration, chunk loading or livestock projection behavior changes; Fabric receives the shared fixture automatically and Forge retains its existing fix.
+
 ## Recurring structural cause
 
 ### 0.6.3fix1 candidate — joint classification and stale gameplay fixtures (2026-10-05)

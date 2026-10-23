@@ -1,73 +1,24 @@
 {
-  "parent": "minecraft:block/block",
-  "loader": "neoforge:composite",
+  "parent": "stardewcraft:block/wood/palm_log",
   "textures": {
-    "particle": "stardewcraft:block/ginger_island/south_palm_ground_particle"
-  },
-  "children": {
-    "0": {
-      "parent": "stardewcraft:block/ginger_island/south_palm_ground",
-      "transform": {
-        "translation": [
-          0.0,
-          0.0,
-          0.0
-        ]
-      }
-    }
+    "particle": "stardewcraft:block/wood/palm_log"
   },
   "stardewcraft:collision": {
     "mode": "custom",
+    "policy": "retired_palm_root",
     "boxes": [
       {
         "from": [
-          2.0,
-          0.0,
-          2.0
+          0,
+          0,
+          0
         ],
         "to": [
-          14.0,
-          8.0,
-          14.0
-        ]
-      },
-      {
-        "from": [
-          3.0,
-          7.0,
-          3.0
-        ],
-        "to": [
-          13.0,
-          27.0,
-          13.0
-        ]
-      },
-      {
-        "from": [
-          3.0,
-          26.0,
-          3.0
-        ],
-        "to": [
-          13.0,
-          48.0,
-          13.0
-        ]
-      },
-      {
-        "from": [
-          3.0,
-          47.0,
-          3.0
-        ],
-        "to": [
-          13.0,
-          67.0,
-          13.0
+          16,
+          16,
+          16
         ]
       }
-    ],
-    "policy": "compound_palm_trunk"
+    ]
   }
 }

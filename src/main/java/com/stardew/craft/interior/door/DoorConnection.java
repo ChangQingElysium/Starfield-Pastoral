@@ -10,6 +10,10 @@ import org.jetbrains.annotations.Nullable;
 public record DoorConnection(Vec3 outside, Vec3 inside, double width,
                              int outsideDirectionZ, int insideDirectionZ) {
     public DoorConnection {
+        if (outside == null || inside == null || !finite(outside) || !finite(inside)
+                || !Double.isFinite(width) || width <= 0) {
+            throw new IllegalArgumentException("Door apertures must be finite and have positive width");
+        }
         if ((outsideDirectionZ != -1 && outsideDirectionZ != 1)
                 || (insideDirectionZ != -1 && insideDirectionZ != 1)) {
             throw new IllegalArgumentException("Door directions must be -1 or 1");
@@ -20,11 +24,12 @@ public record DoorConnection(Vec3 outside, Vec3 inside, double width,
     public Vec3 destination(boolean entering) { return entering ? inside : outside; }
     public Vec3 translation(boolean entering) { return destination(entering).subtract(origin(entering)); }
 
-    /** Maps a body to the destination threshold without carrying a source stair/slab height across. */
+    /** Preserve jumping/falling height, while lifting a body approaching below the threshold floor. */
     public Vec3 movementDestinationBase(Vec3 source, boolean entering) {
         Vec3 from = origin(entering);
         Vec3 to = destination(entering);
-        return new Vec3(source.x + to.x - from.x, to.y - 1, source.z + to.z - from.z);
+        return new Vec3(source.x + to.x - from.x, Math.max(to.y - 1, source.y + to.y - from.y),
+                source.z + to.z - from.z);
     }
 
     /** Finds the first clear threshold height, accounting for carpet and other thin floor shapes. */
@@ -32,6 +37,10 @@ public record DoorConnection(Vec3 outside, Vec3 inside, double width,
     public Vec3 movementDestination(Level level, Entity entity, Vec3 source, boolean entering) {
         Vec3 base = movementDestinationBase(source, entering);
         AABB baseBox = entity.getBoundingBox().move(base.subtract(entity.position()));
+        // noCollision may inspect neighboring chunks. Never predict into unloaded data or load
+        // destination terrain synchronously on the server while processing a movement packet.
+        if (!level.hasChunksAt(net.minecraft.core.BlockPos.containing(baseBox.minX, baseBox.minY, baseBox.minZ),
+                net.minecraft.core.BlockPos.containing(baseBox.maxX, baseBox.maxY + .75, baseBox.maxZ))) return null;
         for (int step = 0; step <= 12; step++) {
             double offset = step / 16.0;
             if (level.noCollision(entity, baseBox.move(0, offset, 0))) return base.add(0, offset, 0);

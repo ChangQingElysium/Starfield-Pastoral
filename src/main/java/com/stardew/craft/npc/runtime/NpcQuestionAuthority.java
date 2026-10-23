@@ -58,6 +58,10 @@ public final class NpcQuestionAuthority {
         PENDING.remove(player.getUUID());
         if (!choices.isEmpty()) PENDING.put(player.getUUID(),new Pending(npc,player.getServer().getTickCount()+12000,List.copyOf(choices)));
     }
+    static boolean hasPending(ServerPlayer player,String npc) {
+        Pending pending=PENDING.get(player.getUUID());
+        return pending!=null && pending.npc().equals(npc) && player.getServer().getTickCount()<pending.expires();
+    }
     public static Answer consume(ServerPlayer player,String npc,String id,int points,String next) {
         Pending pending=PENDING.get(player.getUUID());
         if (pending==null || !pending.npc().equals(npc) || player.getServer().getTickCount()>=pending.expires()) return null;

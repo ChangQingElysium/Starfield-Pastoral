@@ -490,21 +490,6 @@
         "1": "stardewcraft:item/ginger_island/ginger_resort_umbrella_mint"
       }
     },
-    "ginger_south_palm": {
-      "default": "stardewcraft:item/ginger_island/ginger_south_palm_ground",
-      "states": [
-        "0",
-        "1",
-        "2",
-        "3"
-      ],
-      "variants": {
-        "0": "stardewcraft:item/ginger_island/ginger_south_palm_ground",
-        "1": "stardewcraft:item/ginger_island/ginger_south_palm_cliff",
-        "2": "stardewcraft:item/ginger_island/ginger_south_palm_coconut",
-        "3": "stardewcraft:item/ginger_island/ginger_south_palm_young"
-      }
-    },
     "ginger_dig_site_bridge": {
       "default": "stardewcraft:item/ginger_island/ginger_dig_site_bridge_broken",
       "states": [],
@@ -858,13 +843,70 @@
     },
     "ginger_golden_walnut_bush_rework": {
       "default": "stardewcraft:item/ginger_island/ginger_golden_walnut_bush_rework",
-      "states": [],
+      "states": [
+        "0",
+        "1"
+      ],
       "variants": {}
     },
     "ginger_island_arrival_totem": {
       "default": "stardewcraft:item/ginger_island/ginger_island_arrival_totem",
       "states": [],
       "variants": {}
+    },
+    "ginger_island_yellowgreen_leaf_clump": {
+      "default": "stardewcraft:item/ginger_island/ginger_island_yellowgreen_leaf_clump",
+      "states": [],
+      "variants": {},
+      "artwork": "original",
+      "source_scene": "island_yellowgreen_leaf_clump",
+      "texture_size": [
+        32,
+        32
+      ],
+      "original": {
+        "sheet": "Maps/island_tilesheet_1.png",
+        "rect": [
+          208,
+          128,
+          32,
+          32
+        ],
+        "pixel_sha256": "adbd28fd6973afe42726ff3cdde0fba369e7e1e44db933bc259a20a6bd8029e0"
+      },
+      "gui_scale": [
+        0.875,
+        0.875,
+        1
+      ],
+      "source_kind": "scene_sprite"
+    },
+    "ginger_island_blue_spiky_seedling": {
+      "default": "stardewcraft:item/ginger_island/ginger_island_blue_spiky_seedling",
+      "states": [],
+      "variants": {},
+      "artwork": "original",
+      "source_scene": "island_blue_spiky_seedling",
+      "texture_size": [
+        32,
+        32
+      ],
+      "original": {
+        "sheet": "Maps/island_tilesheet_1.png",
+        "rect": [
+          272,
+          176,
+          32,
+          32
+        ],
+        "pixel_sha256": "addd5744936292a068eb7c180d7186e9f6a0e65d30e727143a704be3ba5273f7"
+      },
+      "gui_scale": [
+        0.875,
+        0.875,
+        1
+      ],
+      "source_kind": "scene_sprite"
     },
     "ginger_island_flute_block": {
       "default": "stardewcraft:item/ginger_island/original_o_464",

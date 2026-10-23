@@ -8,7 +8,6 @@ import com.stardew.craft.blockentity.MushroomBoxBlockEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
@@ -16,9 +15,14 @@ import net.minecraft.world.item.ItemStack;
 /**
  * 蘑菇培养盆就绪时显示气泡（与 Utility 设施一致）。
  */
-public class MushroomBoxBlockEntityRenderer implements BlockEntityRenderer<MushroomBoxBlockEntity> {
+public class MushroomBoxBlockEntityRenderer implements ProductionMachineBlockEntityRenderer<MushroomBoxBlockEntity> {
     private static final ResourceLocation BUBBLE_TEX = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/bubble.png");
     private static final float PX = 1.0f / 32.0f;
+
+    @Override
+    public boolean isReadyForBubble(MushroomBoxBlockEntity blockEntity) {
+        return blockEntity.isReady();
+    }
 
     public MushroomBoxBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
     }

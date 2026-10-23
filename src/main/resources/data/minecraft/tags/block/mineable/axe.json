@@ -294,6 +294,12 @@
     "stardewcraft:blacksmith_door",
     "stardewcraft:purple_panel_door",
     "stardewcraft:library_book_sign",
-    "stardewcraft:timber_awning"
+    "stardewcraft:timber_awning",
+    "stardewcraft:palm_log",
+    "stardewcraft:palm_planks",
+    "stardewcraft:palm_planks_stairs",
+    "stardewcraft:palm_planks_slab",
+    "stardewcraft:palm_trapdoor",
+    "stardewcraft:palm_coconut_block"
   ]
 }

@@ -42,7 +42,12 @@ public final class TownDoorVanillaVisibility {
         var position = camera.getPosition();
         frustum.prepare(position.x, position.y, position.z);
 
-        enqueue(cameraX, cameraY, cameraZ);
+        // Like Sodium, start in the destination aperture. The translated camera is behind the
+        // front clip plane and can be an entire section away; a walk from it gets clipped before
+        // ever reaching the room, making an open doorway empty at medium viewing distances.
+        SectionPos start = TownDoorRenderContext.discoveryOrigin();
+        if (start == null) start = SectionPos.of(cameraBlock);
+        enqueue(start.x(), start.y(), start.z());
         while (!QUEUE.isEmpty()) {
             long packed = QUEUE.dequeueLong();
             int sectionX = SectionPos.x(packed);
@@ -58,8 +63,8 @@ public final class TownDoorVanillaVisibility {
             SectionRenderDispatcher.RenderSection section =
                     ((TownDoorViewAreaAccessor) viewArea).stardewcraft$getRenderSectionAt(origin);
             if (section == null || !section.getOrigin().equals(origin)) continue;
-            boolean cameraSection = sectionX == cameraX && sectionY == cameraY && sectionZ == cameraZ;
-            if (!cameraSection && !frustum.isVisible(section.getBoundingBox())) continue;
+            boolean startSection = sectionX == start.x() && sectionY == start.y() && sectionZ == start.z();
+            if (!startSection && !frustum.isVisible(section.getBoundingBox())) continue;
 
             result.add(section);
             enqueue(sectionX + 1, sectionY, sectionZ);

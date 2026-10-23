@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "id": "stardewcraft",
+  "version": "${version}",
+  "name": "${mod_name} (Fabric)",
+  "license": "${mod_license}",
+  "icon": "assets/stardewcraft/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": ["com.stardew.craft.fabric.StardewCraftFabric"],
+    "client": ["com.stardew.craft.fabric.StardewCraftFabricClient"],
+    "fabric-gametest": ["com.stardew.craft.platform.fabric.gametest.StardewGameTests"],
+    "jade": [
+      "com.stardew.craft.integration.JadePlugin",
+      "com.stardew.craft.integration.jade.AnimalUtilityJadePlugin",
+      "com.stardew.craft.integration.jade.BaitMakerJadePlugin",
+      "com.stardew.craft.integration.jade.BeeHouseJadePlugin",
+      "com.stardew.craft.integration.jade.CaskJadePlugin",
+      "com.stardew.craft.integration.jade.CharcoalKilnJadePlugin",
+      "com.stardew.craft.integration.jade.CheesePressJadePlugin",
+      "com.stardew.craft.integration.jade.CoopAnimalJadePlugin",
+      "com.stardew.craft.integration.jade.CrabPotJadePlugin",
+      "com.stardew.craft.integration.jade.CrystalariumJadePlugin",
+      "com.stardew.craft.integration.jade.DehydratorJadePlugin",
+      "com.stardew.craft.integration.jade.FishSmokerJadePlugin",
+      "com.stardew.craft.integration.jade.FruitTreeJadePlugin",
+      "com.stardew.craft.integration.jade.FurnaceJadePlugin",
+      "com.stardew.craft.integration.jade.GenericUtilityMachineJadePlugin",
+      "com.stardew.craft.integration.jade.HayHopperJadePlugin",
+      "com.stardew.craft.integration.jade.IncubatorJadePlugin",
+      "com.stardew.craft.integration.jade.KegJadePlugin",
+      "com.stardew.craft.integration.jade.LightningRodJadePlugin",
+      "com.stardew.craft.integration.jade.LoomJadePlugin",
+      "com.stardew.craft.integration.jade.MailboxJadePlugin",
+      "com.stardew.craft.integration.jade.MasteryStatueJadePlugin",
+      "com.stardew.craft.integration.jade.MayonnaiseMachineJadePlugin",
+      "com.stardew.craft.integration.jade.OilMakerJadePlugin",
+      "com.stardew.craft.integration.jade.PortalTriggerJadePlugin",
+      "com.stardew.craft.integration.jade.PreservesJarJadePlugin",
+      "com.stardew.craft.integration.jade.ReclamationMachineJadePlugin",
+      "com.stardew.craft.integration.jade.RecyclingMachineJadePlugin",
+      "com.stardew.craft.integration.jade.RockCrabJadePlugin",
+      "com.stardew.craft.integration.jade.SeasonalJadeThemePlugin",
+      "com.stardew.craft.integration.jade.SeedMakerJadePlugin",
+      "com.stardew.craft.integration.jade.SolarPanelJadePlugin",
+      "com.stardew.craft.integration.jade.StardewNpcJadePlugin",
+      "com.stardew.craft.integration.jade.TapperJadePlugin",
+      "com.stardew.craft.integration.jade.TravelingCartJadePlugin",
+      "com.stardew.craft.integration.jade.WormBinJadePlugin"
+    ],
+    "jei_mod_plugin": ["com.stardew.craft.integration.jei.StardewJeiPlugin"]
+  },
+  "mixins": [
+    "stardewcraft.fabric.mixins.json",
+    "stardewcraft.mixins.json"
+  ],
+  "accessWidener": "stardewcraft.accesswidener",
+  "depends": {
+    "minecraft": "1.21.1",
+    "java": ">=21",
+    "fabricloader": ">=0.19.5",
+    "fabric-api": ">=0.116.17+1.21.1",
+    "forgeconfigapiport": ">=21.1.6",
+    "porting_lib_model_loader": ">=3.1.0-beta.91+1.21.1",
+    "porting_lib_model_data": ">=3.1.0-beta.91+1.21.1"
+  },
+  "suggests": {
+    "jade": "*",
+    "jei": "*",
+    "appleskin": "*"
+  }
+}

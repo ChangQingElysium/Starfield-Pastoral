@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/outer_stairs",
+  "textures": {
+    "bottom": "stardewcraft:block/wood/palm_planks",
+    "side": "stardewcraft:block/wood/palm_planks",
+    "top": "stardewcraft:block/wood/palm_planks",
+    "particle": "stardewcraft:block/wood/palm_planks"
+  }
+}

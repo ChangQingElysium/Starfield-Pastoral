@@ -126,7 +126,7 @@ public final class GingerIslandManualBuildGameTests {
     }
 
     @GameTest(templateNamespace = NS, template = "large_empty", timeoutTicks = 100)
-    public static void all12SingleCellBuildersUseRegisteredHandItemsAndRemoveCleanly(GameTestHelper h) {
+    public static void all13SingleCellBuildersUseRegisteredHandItemsAndRemoveCleanly(GameTestHelper h) {
         clearWithFoundation(h);
         var level = h.getLevel();
         BlockPos pos = h.absolutePos(new BlockPos(40, 4, 40));
@@ -156,7 +156,7 @@ public final class GingerIslandManualBuildGameTests {
                         && level.getBlockState(pos.below()).is(Blocks.STONE), "Single-cell removal left state or damaged the support");
             }
         }
-        h.assertTrue(owners == 12, "Single-cell audit omitted a builder: " + owners);
+        h.assertTrue(owners == 13, "Single-cell audit omitted a builder: " + owners);
         h.succeed();
     }
 

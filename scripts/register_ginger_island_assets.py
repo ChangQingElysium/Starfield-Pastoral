@@ -37,6 +37,7 @@ KINDS = {
     'stove_fireplace': ('fireplace', 'furniture'),
     'island_torch_unlit': ('altar_torch', 'furniture'),
     'volcano_floor_switch': ('volcano_switch', 'building'),
+    'field_office_canvas_floor': ('cube', 'building'),
 }
 STATE_BINDINGS = {
     'ostrich_incubator_loaded': {'block': 'stardewcraft:ginger_ostrich_incubator_empty', 'state': {'loaded': 'true'}},
@@ -52,6 +53,9 @@ REUSES = {
 
 # These files are explicitly superseded or are material/assembly experiments.
 EXCLUDED = {
+    **dict.fromkeys(['south_palm_ground.bbmodel', 'south_palm_cliff.bbmodel',
+                     'coconut_palm.bbmodel', 'resort_young_palm.bbmodel'],
+                    'User withdrew whole-tree palms on 2026-10-23; use palm building kit'),
     'golden_walnut_bush.bbmodel': 'superseded by golden_walnut_bush_rework',
     'golden_walnut_bush_white.bbmodel': 'untextured work stage',
     'material-sample.bbmodel': 'material study',
@@ -250,7 +254,9 @@ def simplified_collision(path, project, model):
         return [box([min(p[a] for p in points) for a in range(3)],
                     [max(p[a] for p in points) for a in range(3)])], 'aabb'
     if name in ('willy_boat_damaged', 'willy_boat_repaired'):
-        return willy_boat_collision(project, name.endswith('_damaged')), 'compound_willy_boat_entry'
+        from ginger_island_boat_geometry import willy_collision_source, willy_collision_boxes
+        canonical, reflected = willy_collision_source(project)
+        return willy_collision_boxes(willy_boat_collision(canonical, name.endswith('_damaged')), reflected), 'compound_willy_boat_entry'
     if name in ('south_palm_ground', 'south_palm_cliff', 'coconut_palm', 'resort_young_palm'):
         # The saved/reloaded root and functional regions come from the author's
         # technical record, not the full visual envelope or a foliage voxel map.
@@ -329,6 +335,13 @@ def simplified_collision(path, project, model):
     if parts is None: parts = model.get('stardewcraft:collision', {}).get('boxes', [])
     bounds = [b for part in parts if (b := part_bounds(part)) is not None]
     if not bounds: raise ValueError('No positive collision bounds')
+    if name in ('dig_ammonite_relief', 'dig_fossil_fragments'):
+        # The carving surrounds X16, but only its central mounting column
+        # reserves wall cells. Arms and chips can overlap neighboring wall
+        # blocks visually. Placement normalization centers X16 on MAIN's X8.
+        region = envelope(bounds)
+        region['from'][0], region['to'][0] = 12, 20
+        return [region], 'wall_mount_column'
     if name in ('island_hint_white_flowers', 'island_hint_yellow_flowers'):
         # A rotated flower tip extends less than one pixel beneath its root.
         # Keep that visual overlap with soil, without making the plant own and
@@ -375,7 +388,8 @@ def simplified_collision(path, project, model):
         if threshold is None: raise ValueError('Ship has no authored entrance')
         # Source doorway: x=-138..-105, z=-50..-24. Its parent transform is
         # inherited from the unrotated threshold, including the hull's tilt.
-        entry = part_bounds({**threshold, 'from': [-160, 8, -49.5], 'to': [-90, 47, -24.5]})
+        from ginger_island_boat_geometry import shipwreck_entry_part
+        entry = part_bounds(shipwreck_entry_part(project, threshold))
         result = [piece for items in regions.values() for piece in subtract_box(envelope(items), entry)]
         return result, 'compound_ship_entry'
     return [envelope(bounds)], 'aabb'
@@ -585,6 +599,8 @@ def export_static(path, project, identifier):
     for child in model.get('children', {}).values():
         if isinstance(child, dict):
             child.setdefault('textures', {})['particle'] = particle_id
+    from ginger_island_vegetation import normalize_static_model
+    model = normalize_static_model(path.stem, model)
     return model, files
 
 
@@ -670,6 +686,14 @@ def write_registration(definition, exported_model, export):
     runtime = definition['id']
     empty = 'stardewcraft:block/ginger_island/' + name + '_extension'
     particle = exported_model['textures']['particle']
+    if definition['kind'] == 'cube':
+        write_json(ASSETS / 'blockstates' / (runtime + '.json'), {'variants': {'': {'model': identifier}}})
+        write_item_model(runtime, identifier, definition)
+        write_json(ROOT / 'src/main/resources/data/stardewcraft/loot_table/blocks' / (runtime + '.json'),
+                   {'type': 'minecraft:block', 'pools': [{'rolls': 1,
+                    'conditions': [{'condition': 'minecraft:survives_explosion'}],
+                    'entries': [{'type': 'minecraft:item', 'name': 'stardewcraft:' + runtime}]}]})
+        return
     write_json(output_path(empty, 'models'), {'textures': {'particle': particle}, 'elements': []})
     variants = {}
     prop = definition.get('state_property')
@@ -691,7 +715,7 @@ def write_registration(definition, exported_model, export):
         if STATE_ROLES[owner_name] == 'appearance':
             loot_item['functions'] = [{'function': 'minecraft:set_components',
                                       'components': {'minecraft:block_state': definition['canonical_state']}}]
-    if prop == 'variant' and name in ('resort_roof', 'resort_umbrella_coral', 'south_palm'):
+    if prop == 'variant' and name in ('resort_roof', 'resort_umbrella_coral', 'south_palm', 'golden_walnut_bush_rework'):
         # A shared owner must not turn a 7x4 roof into 6x4, or mint into coral,
         # when broken and placed again. 1.21 stores this in BLOCK_STATE data.
         loot_item['functions'] = [{'function': 'minecraft:copy_state', 'block': 'stardewcraft:' + runtime,
@@ -1083,14 +1107,26 @@ def export_terrain(export):
 
     sides = ('north', 'east', 'south', 'west', 'up', 'down')
     tex_id = lambda family, name: 'stardewcraft:block/ginger_island/' + family + '/' + name
-    block('volcano_floor', 'volcano', {**dict.fromkeys(sides, 'volcano_wall'), 'up': 'volcano_floor'},
+    # Ground and cliff are separate 2D drawing roles. A ground block's exposed
+    # section keeps its own grain/palette instead of inheriting the large cliff.
+    block('volcano_floor', 'volcano', dict.fromkeys(sides, 'volcano_floor'),
           tex_id('volcano', 'volcano_floor_particle'), 'volcano_floor',
           ['volcano_floor', 'volcano_floor_pit_a', 'volcano_floor_pit_b', 'volcano_floor_vent', 'volcano_floor_cracks', 'volcano_floor_lava'])
     block('volcano_wall', 'volcano', dict.fromkeys(sides, 'volcano_wall'), tex_id('volcano', 'volcano_wall_particle'))
+    if export:
+        write_json(output_path('stardewcraft:block/ginger_island/volcano_wall_phases', 'models'),
+                   {'parent': 'minecraft:block/cube_all', 'textures': {
+                       'all': tex_id('volcano', 'volcano_wall_phases'),
+                       'particle': tex_id('volcano', 'volcano_wall_particle')}})
     block('volcano_mud', 'volcano', dict.fromkeys(sides, 'volcano_mud'), tex_id('volcano', 'volcano_mud_particle'))
     block('caldera_floor', 'caldera', {**dict.fromkeys(sides, 'caldera_floor_side'), 'up': 'caldera_floor'},
           tex_id('caldera', 'caldera_floor_particle'), 'caldera_floor', ['caldera_floor', 'caldera_floor_crack', 'caldera_floor_ember'])
     block('caldera_wall', 'caldera', dict.fromkeys(sides, 'caldera_wall_0'), tex_id('caldera', 'caldera_wall_particle'))
+    if export:
+        write_json(output_path('stardewcraft:block/ginger_island/caldera_wall_phases', 'models'),
+                   {'parent': 'minecraft:block/cube_all', 'textures': {
+                       'all': tex_id('caldera', 'caldera_wall_phases'),
+                       'particle': tex_id('caldera', 'caldera_wall_particle')}})
     for name in ('dwarf_brick', 'dwarf_capstone'):
         faces = dict.fromkeys(sides, name)
         if name == 'dwarf_brick':
@@ -1267,6 +1303,12 @@ def main():
         entries.append({**entry, 'status': 'exported' if args.export else 'export_validated', 'model': identifier,
                         'collision': {'policy': model['stardewcraft:collision']['policy'],
                                       'regions': len(model['stardewcraft:collision']['boxes'])}})
+    from ginger_island_vegetation import walnut_empty_model
+    exported['golden_walnut_bush_empty'] = walnut_empty_model(exported['golden_walnut_bush_rework'],
+        json.loads((SOURCE / '03_east/walnut_bush/golden_walnut_bush_rework.bbmodel').read_text()))
+    if args.export:
+        write_json(output_path('stardewcraft:block/ginger_island/golden_walnut_bush_empty', 'models'),
+                   exported['golden_walnut_bush_empty'])
     terrain_definitions, terrain_entries = export_terrain(args.export)
     definitions.extend(terrain_definitions); entries.extend(terrain_entries)
     assembled = assemble_models(exported, args.export)
@@ -1282,6 +1324,8 @@ def main():
         definition['type'] = item_type(name, definition['kind'])
         if name in PASSABLE_PLANTS:
             definition['passable'] = True
+        if name == 'field_office_canvas_floor':
+            write_registration(definition, exported[name], args.export)
         prop, choices = state_models(name, assembled.get(name, {}))
         if prop:
             definition.update(kind='state_decor', state_property=prop, state_models=choices,
@@ -1290,9 +1334,17 @@ def main():
             source_model = exported[name] if name in exported else exported[
                 assembly_components(ASSEMBLIES[name], next(iter(ASSEMBLIES[name]['states'])))[0][0]]
             write_registration(definition, source_model, args.export)
+    # Retain only the save-compatible identity; never resurrect withdrawn palm art.
+    from import_palm_building_assets import legacy_definition
+    definitions.append(legacy_definition())
     # Fail closed: every visible identity needs an explicitly reviewed localized name.
     from ginger_island_names import localizations
     localized = localizations(definitions)
+    # A full export cannot erase the disposition of sources moved to the history archive.
+    if LEDGER.exists():
+        entries.extend(e for e in json.loads(LEDGER.read_text())['entries']
+                       if e.get('status') == 'retired_by_user'
+                       and not any(current['source'] == e['source'] for current in entries))
     write_json(LEDGER, {'version': 1, 'entries': entries})
     if args.export:
         write_json(ROOT / 'src/main/resources/data/stardewcraft/ginger_island/assets.json',
@@ -1319,3 +1371,5 @@ if __name__ == '__main__':
         # export; source art remains unchanged and transforms are idempotent.
         from ginger_island_placement import apply
         apply()
+        from import_palm_building_assets import write_legacy_bindings
+        write_legacy_bindings()

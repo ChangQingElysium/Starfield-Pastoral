@@ -28,6 +28,7 @@ public final class GingerIslandBlocks {
 
     private static Block create(GingerIslandAssets.BlockAsset asset) {
         var props = Block.Properties.of().mapColor(MapColor.COLOR_BROWN).strength(1.5F).sound(SoundType.WOOD);
+        if (asset.id().equals("ginger_south_palm")) return new RetiredPalmBlock(props);
         if (asset.passable()) props.noCollission();
         if (asset.type().equals("natural_rock")) {
             props.mapColor(MapColor.STONE).strength(3F).sound(SoundType.STONE);
@@ -43,7 +44,8 @@ public final class GingerIslandBlocks {
         return switch (asset.kind()) {
             case "volcano_floor" -> new GingerIslandSurfaceBlock(props.sound(SoundType.STONE).strength(3F), asset.variant_count(), 75);
             case "caldera_floor" -> new GingerIslandSurfaceBlock(props.sound(SoundType.STONE).strength(3F), asset.variant_count(), 80);
-            case "cube" -> new Block(asset.type().equals("natural_ground")
+            case "cube" -> new Block(asset.id().equals("ginger_field_office_canvas_floor")
+                    ? props.sound(SoundType.WOOL).strength(.8F) : asset.type().equals("natural_ground")
                     ? props : props.sound(SoundType.STONE).strength(3F));
             case "cooled_lava" -> new CooledLavaBlock(props.sound(SoundType.STONE).strength(-1F, 3600000F).noOcclusion().noLootTable());
             case "volcano_switch" -> new VolcanoFloorSwitchBlock(props.sound(SoundType.METAL).strength(-1F, 3600000F).noOcclusion());

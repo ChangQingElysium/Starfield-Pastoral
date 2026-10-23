@@ -20,18 +20,22 @@ import com.stardew.craft.blockentity.DeluxeWormBinBlockEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
-public class DeluxeWormBinBlockEntityRenderer implements BlockEntityRenderer<DeluxeWormBinBlockEntity> {
+public class DeluxeWormBinBlockEntityRenderer implements ProductionMachineBlockEntityRenderer<DeluxeWormBinBlockEntity> {
     private static final ResourceLocation BUBBLE_TEX = ResourceLocation.fromNamespaceAndPath(StardewCraft.MODID, "textures/gui/bubble.png");
     private static final float PX = 1.0f / 32.0f;
 
     @Override
     public net.minecraft.world.phys.AABB getRenderBoundingBox(DeluxeWormBinBlockEntity be) {
         return new net.minecraft.world.phys.AABB(be.getBlockPos()).inflate(0.25, 1.25, 0.25);
+    }
+
+    @Override
+    public boolean isReadyForBubble(DeluxeWormBinBlockEntity blockEntity) {
+        return blockEntity.isReady();
     }
 
     public DeluxeWormBinBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
